@@ -1,10 +1,18 @@
 package ch.qscqlmpa.wingtracker.gear.wing
 
+import ch.qscqlmpa.wingtracker.attachments.Attachment
+import ch.qscqlmpa.wingtracker.attachments.AttachmentId
 import ch.qscqlmpa.wingtracker.gear.Acquisition
 import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.CurrencyCode
 import ch.qscqlmpa.wingtracker.gear.GearStatus
 import ch.qscqlmpa.wingtracker.gear.Price
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.CheckId
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceCheck
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceInterval
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.PlannedCheck
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.PlannedCheckId
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.WingCheckType
 import kotlinx.datetime.LocalDate
 import kotlin.time.Duration
 
@@ -19,6 +27,7 @@ fun aWingDetails(
     acquisition: Acquisition = aNewAcquisition(),
     inServiceDate: LocalDate = LocalDate(2023, 5, 1),
     hoursBeforeTracking: Duration = Duration.ZERO,
+    maintenanceInterval: MaintenanceInterval? = null,
 ) = WingDetails(
     name = name,
     manufacturer = manufacturer,
@@ -29,6 +38,7 @@ fun aWingDetails(
     acquisition = acquisition,
     inServiceDate = inServiceDate,
     hoursBeforeTracking = hoursBeforeTracking,
+    maintenanceInterval = maintenanceInterval,
 )
 
 fun aNewAcquisition() =
@@ -42,4 +52,27 @@ fun aWing(
     id: WingId = WingId("3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47"),
     details: WingDetails = aWingDetails(),
     status: GearStatus = GearStatus.Active,
-) = Wing(id = id, details = details, status = status)
+    checks: List<MaintenanceCheck> = emptyList(),
+    plannedChecks: List<PlannedCheck> = emptyList(),
+) = Wing(id = id, details = details, status = status, checks = checks, plannedChecks = plannedChecks)
+
+fun aCheck(
+    id: String = "check-1",
+    date: LocalDate = LocalDate(2025, 4, 10),
+    type: WingCheckType = WingCheckType.Full,
+    restartsInterval: Boolean = type != WingCheckType.Other,
+) = MaintenanceCheck(
+    id = CheckId(id),
+    date = date,
+    type = type,
+    company = "Swiss Paragliding Service",
+    notes = "Lines within tolerance",
+    restartsInterval = restartsInterval,
+    reports = listOf(Attachment(AttachmentId("report-1"), "check-report-2025.pdf")),
+)
+
+fun aPlannedCheck(
+    id: String = "plan-1",
+    date: LocalDate = LocalDate(2026, 12, 1),
+    type: WingCheckType = WingCheckType.Partial,
+) = PlannedCheck(PlannedCheckId(id), date, type, company = "Swiss Paragliding Service")

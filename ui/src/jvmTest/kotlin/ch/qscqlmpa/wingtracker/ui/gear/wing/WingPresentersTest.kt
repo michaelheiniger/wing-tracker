@@ -1,5 +1,7 @@
 package ch.qscqlmpa.wingtracker.ui.gear.wing
 
+import ch.qscqlmpa.wingtracker.AppClock
+import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.gear.Acquisition
 import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.GearStatus
@@ -12,6 +14,7 @@ import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.GetMaintenanceStatuses
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
@@ -48,6 +51,7 @@ private fun aWing(
 @OptIn(ExperimentalCoroutinesApi::class)
 class WingPresentersTest {
     private val wings = mockk<WingRepository>(relaxUnitFun = true)
+    private val flights = mockk<FlightRepository>().also { coEvery { it.findAll() } returns LoadResult(emptyList()) }
     private val today = LocalDate(2026, 10, 11)
 
     private var hasFlights = false
@@ -58,6 +62,7 @@ class WingPresentersTest {
             listWings = ListWings(wings),
             retireWing = RetireWing(wings),
             deleteWing = DeleteWing(wings) { hasFlights },
+            getMaintenanceStatuses = GetMaintenanceStatuses(wings, flights, AppClock()),
             today = { today },
         )
 

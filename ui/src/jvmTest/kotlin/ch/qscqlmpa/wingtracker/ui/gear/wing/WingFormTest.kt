@@ -188,6 +188,91 @@ class WingFormTest {
     }
 
     @Nested
+    inner class MaintenanceInterval {
+        @Test
+        fun `has no interval when both fields are empty`() {
+            // given
+            val input = aFormInput().copy(intervalMonths = "", intervalHours = "")
+
+            // when
+            val details = (input.validate() as WingFormResult.Valid).details
+
+            // then
+            assertThat(details.maintenanceInterval).isNull()
+        }
+
+        @Test
+        fun `reads months and hours`() {
+            // given
+            val input = aFormInput().copy(intervalMonths = "12", intervalHours = "100")
+
+            // when
+            val interval = (input.validate() as WingFormResult.Valid).details.maintenanceInterval
+
+            // then
+            assertThat(interval?.months).isEqualTo(12)
+            assertThat(interval?.hours).isEqualTo(100.hours)
+        }
+
+        @Test
+        fun `reads months only`() {
+            // given
+            val input = aFormInput().copy(intervalMonths = "24", intervalHours = "")
+
+            // when
+            val interval = (input.validate() as WingFormResult.Valid).details.maintenanceInterval
+
+            // then
+            assertThat(interval?.months).isEqualTo(24)
+            assertThat(interval?.hours).isNull()
+        }
+
+        @Test
+        fun `rejects months that are not a positive whole number`() {
+            // given
+            val input = aFormInput().copy(intervalMonths = "0")
+
+            // when
+            val errors = errorsOf(input)
+
+            // then
+            assertThat(errors).containsEntry(WingFormField.IntervalMonths, WingFormError.InvalidMonths)
+        }
+
+        @Test
+        fun `rejects hours that are not hours and minutes`() {
+            // given
+            val input = aFormInput().copy(intervalHours = "often")
+
+            // when
+            val errors = errorsOf(input)
+
+            // then
+            assertThat(errors).containsEntry(WingFormField.IntervalHours, WingFormError.InvalidHours)
+        }
+
+        @Test
+        fun `round-trips the interval through the form`() {
+            // given
+            val details =
+                (
+                    aFormInput()
+                        .copy(
+                            intervalMonths = "12",
+                            intervalHours = "100",
+                        ).validate() as WingFormResult.Valid
+                ).details
+            val wing = Wing(WingId("3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47"), details)
+
+            // when
+            val result = WingFormInput.from(wing).validate()
+
+            // then
+            assertThat(result).usingRecursiveComparison().isEqualTo(WingFormResult.Valid(details))
+        }
+    }
+
+    @Nested
     inner class From {
         @Test
         fun `round-trips an existing wing through the form`() {

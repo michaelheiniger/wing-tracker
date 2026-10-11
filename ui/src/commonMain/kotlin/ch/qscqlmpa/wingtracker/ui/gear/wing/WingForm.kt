@@ -7,6 +7,7 @@ import ch.qscqlmpa.wingtracker.gear.Price
 import ch.qscqlmpa.wingtracker.gear.wing.CertificationClass
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceInterval
 import ch.qscqlmpa.wingtracker.ui.formatHoursAndMinutes
 import ch.qscqlmpa.wingtracker.ui.parseHoursAndMinutes
 import kotlinx.datetime.LocalDate
@@ -29,6 +30,8 @@ data class WingFormInput(
     val priceCurrency: String = DEFAULT_CURRENCY,
     val inServiceDate: LocalDate? = null,
     val hoursBeforeTracking: String = "",
+    val intervalMonths: String = "",
+    val intervalHours: String = "",
 ) {
     companion object {
         fun from(wing: Wing): WingFormInput {
@@ -47,6 +50,16 @@ data class WingFormInput(
                 priceCurrency = price?.currency?.value ?: DEFAULT_CURRENCY,
                 inServiceDate = details.inServiceDate,
                 hoursBeforeTracking = formatHoursAndMinutes(details.hoursBeforeTracking.inWholeMinutes),
+                intervalMonths =
+                    details.maintenanceInterval
+                        ?.months
+                        ?.toString()
+                        .orEmpty(),
+                intervalHours =
+                    details.maintenanceInterval
+                        ?.hours
+                        ?.let { formatHoursAndMinutes(it.inWholeMinutes) }
+                        .orEmpty(),
             )
         }
     }
@@ -60,6 +73,8 @@ enum class WingFormField {
     PriceAmount,
     PriceCurrency,
     HoursBeforeTracking,
+    IntervalMonths,
+    IntervalHours,
 }
 
 /** Error kinds rather than text, so the screen can show them in the user's language. */
@@ -68,6 +83,7 @@ enum class WingFormError {
     InvalidAmount,
     InvalidCurrency,
     InvalidHours,
+    InvalidMonths,
 }
 
 sealed interface WingFormResult {
@@ -90,6 +106,7 @@ fun WingFormInput.validate(): WingFormResult {
 
     val price = parsePrice(errors)
     val hours = parseHours(errors)
+    val interval = parseInterval(errors)
 
     if (errors.isNotEmpty() || inServiceDate == null || hours == null) return WingFormResult.Invalid(errors)
 
@@ -104,6 +121,7 @@ fun WingFormInput.validate(): WingFormResult {
             acquisition = Acquisition(condition, purchaseDate, price),
             inServiceDate = inServiceDate,
             hoursBeforeTracking = hours,
+            maintenanceInterval = interval,
         ),
     )
 }
@@ -131,6 +149,29 @@ private fun WingFormInput.parseHours(errors: MutableMap<WingFormField, WingFormE
     val hours = parseHoursAndMinutes(hoursBeforeTracking)
     if (hours == null) errors[WingFormField.HoursBeforeTracking] = WingFormError.InvalidHours
     return hours
+}
+
+private val MONTHS = Regex("""\d{1,3}""")
+
+// Both limits are optional, but at least one is needed for a rule; with neither there is no rule.
+private fun WingFormInput.parseInterval(errors: MutableMap<WingFormField, WingFormError>): MaintenanceInterval? {
+    val months =
+        intervalMonths.trim().takeIf { it.isNotEmpty() }?.let { text ->
+            text.takeIf { MONTHS.matches(it) }?.toInt()?.takeIf { it > 0 }
+                ?: run {
+                    errors[WingFormField.IntervalMonths] = WingFormError.InvalidMonths
+                    null
+                }
+        }
+    val hours =
+        intervalHours.trim().takeIf { it.isNotEmpty() }?.let { text ->
+            parseHoursAndMinutes(text)?.takeIf { it.isPositive() }
+                ?: run {
+                    errors[WingFormField.IntervalHours] = WingFormError.InvalidHours
+                    null
+                }
+        }
+    return if (months == null && hours == null) null else MaintenanceInterval(months, hours)
 }
 
 private fun formatAmount(minorUnits: Long): String {

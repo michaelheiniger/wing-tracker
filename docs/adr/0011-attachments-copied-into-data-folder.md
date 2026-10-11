@@ -17,3 +17,5 @@ Attached files are copied into the app's data folder and referenced from aggrega
 ## Consequences
 
 The data folder is self-contained, easy to back up and move. Files are duplicated on disk. Deleting a record must also delete or orphan-clean its attachments.
+- 2026-10-11: A check can have several attached files. Attachments are stored through the `AttachmentStore` port and referenced by id. A file is stored before the aggregate is saved and removed again if saving fails; files removed from a check are deleted only after the aggregate was saved.
+

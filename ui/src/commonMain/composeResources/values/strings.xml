@@ -11,7 +11,7 @@
     <string name="wings_show_retired">Show retired (%1$d)</string>
 
     <string name="wing_in_service_since">In service since %1$s</string>
-    <string name="wing_hours_before_tracking">%1$d h %2$d min before tracking</string>
+    <string name="wing_hours_before_tracking">%1$s before tracking</string>
     <string name="wing_certification">EN/LTF %1$s</string>
     <string name="wing_status_active">In service</string>
     <string name="wing_status_retired">Retired %1$s</string>
@@ -24,7 +24,7 @@
     <string name="retire_body">It leaves your active list and reminders, but its flights and history are kept.</string>
     <string name="retire_reason_label">Reason (optional), e.g. sold</string>
     <string name="delete_title">Delete %1$s?</string>
-    <string name="delete_body">Use this for a wing entered by mistake. It is removed for good. A wing that has flights can only be retired.</string>
+    <string name="delete_body">Use this for a wing entered by mistake. It is removed for good. A wing that has flights or maintenance history can only be retired.</string>
     <string name="delete_confirm">Delete</string>
 
     <string name="form_title_add">Add wing</string>
@@ -62,7 +62,7 @@
     <string name="failure_save">The wing could not be saved: %1$s</string>
     <string name="failure_retire">The wing could not be retired: %1$s</string>
     <string name="failure_delete">The wing could not be deleted: %1$s</string>
-    <string name="failure_delete_in_use">This wing has flights, so it cannot be deleted. Retire it instead.</string>
+    <string name="failure_delete_in_use">This wing has flights or maintenance history, so it cannot be deleted. Retire it instead.</string>
 
     <string name="unreadable_quarantined">The file %1$s could not be read and was moved to the quarantine folder in your data folder. Its wing is not shown until the file is repaired and moved back.</string>
     <string name="unreadable_kept">The file %1$s was written by a newer version of the application and is not shown. It has been left untouched.</string>
@@ -103,6 +103,7 @@
         <item>November</item>
         <item>December</item>
     </string-array>
+    <string name="duration_hours">%1$d h</string>
     <string name="duration_hours_minutes">%1$d h %2$d min</string>
     <string name="wing_hours_total">%1$s · %2$s</string>
 
@@ -151,4 +152,71 @@
     <string name="series_other">Other wings (%1$d)</string>
     <string name="chart_axis_hours">%1$s h</string>
     <string name="failure_load_statistics">The statistics could not be loaded: %1$s</string>
+
+    <string name="section_maintenance">Maintenance interval</string>
+    <string name="field_interval_months">Check every (months)</string>
+    <string name="field_interval_hours">or every (flight hours)</string>
+    <string name="interval_hint">Whichever comes first. Leave both empty for no reminder.</string>
+    <string name="error_months">Use a whole number of months, e.g. 12</string>
+
+    <string name="wing_open_maintenance">Maintenance</string>
+    <string name="maintenance_due">Check due</string>
+    <string name="maintenance_next_by">Next check by %1$s</string>
+    <string name="maintenance_hours_left">%1$s left</string>
+    <string name="maintenance_planned_on">Planned %1$s</string>
+
+    <string name="maintenance_back">Back to wings</string>
+    <string name="maintenance_total_hours">%1$s flown in total</string>
+    <string name="maintenance_no_interval">No interval set. Edit the wing to add one.</string>
+    <string name="maintenance_interval_months">Every %1$d months</string>
+    <string name="maintenance_interval_hours">Every %1$s</string>
+    <string name="maintenance_interval_both">Every %1$d months or %2$s, whichever comes first</string>
+    <string name="maintenance_since">Counting from %1$s · %2$s flown since</string>
+    <string name="maintenance_record_check">Record check</string>
+    <string name="maintenance_plan_check">Plan check</string>
+    <string name="maintenance_planned_title">Planned checks</string>
+    <string name="maintenance_planned_empty">No planned checks.</string>
+    <string name="maintenance_history_title">History</string>
+    <string name="maintenance_history_empty">No checks recorded yet.</string>
+    <string name="maintenance_complete">Complete</string>
+    <string name="maintenance_cancel_plan">Cancel plan</string>
+    <string name="maintenance_edit_check">Edit check</string>
+    <string name="maintenance_delete_check">Delete check</string>
+    <string name="maintenance_open_report">Open %1$s</string>
+    <string name="maintenance_restarts">Restarts the interval</string>
+
+    <string name="check_type_partial">Partial (trim)</string>
+    <string name="check_type_full">Full</string>
+    <string name="check_type_other">Other</string>
+
+    <string name="check_form_title_record">Record check</string>
+    <string name="check_form_title_edit">Edit check</string>
+    <string name="check_form_title_complete">Complete planned check</string>
+    <string name="plan_form_title_add">Plan check</string>
+    <string name="plan_form_title_edit">Edit planned check</string>
+    <string name="field_check_date">Date *</string>
+    <string name="field_plan_date">Planned date *</string>
+    <string name="field_check_type">Type</string>
+    <string name="field_company">Company</string>
+    <string name="field_check_notes">Notes</string>
+    <string name="field_check_comment">Comment</string>
+    <string name="check_restarts_interval">Counts as the periodic check (restarts the interval)</string>
+    <string name="check_reports">Reports</string>
+    <string name="check_add_reports">Add PDF</string>
+    <string name="check_pick_title">Choose the report</string>
+    <string name="check_no_reports">No files attached</string>
+    <string name="check_remove_file">Remove %1$s</string>
+
+    <string name="check_delete_title">Delete this check?</string>
+    <string name="check_delete_body">The %1$s check on %2$s and its attached files are removed for good.</string>
+
+    <string name="error_check_date_future">A performed check cannot be dated in the future</string>
+    <string name="error_plan_date_past">A planned check cannot be dated in the past</string>
+
+    <string name="failure_load_maintenance">The maintenance data could not be loaded: %1$s</string>
+    <string name="failure_save_check">The check could not be saved: %1$s</string>
+    <string name="failure_delete_check">The check could not be deleted: %1$s</string>
+    <string name="failure_open_report">The report could not be opened: %1$s</string>
+    <string name="failure_save_plan">The planned check could not be saved: %1$s</string>
+    <string name="failure_cancel_plan">The planned check could not be cancelled: %1$s</string>
 </resources>

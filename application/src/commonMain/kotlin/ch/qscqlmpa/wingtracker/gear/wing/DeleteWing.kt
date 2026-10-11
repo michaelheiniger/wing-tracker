@@ -9,14 +9,14 @@ class WingInUseException(
     id: WingId,
 ) : IllegalStateException("Wing ${id.value} has flights and can only be retired")
 
-/** Deleting is for wings entered by mistake; a wing with flights is retired so the logbook stays intact. */
+/** Deleting is for wings entered by mistake; a wing with flights or checks is retired so history stays intact. */
 class DeleteWing(
     private val wings: WingRepository,
     private val flights: WingFlightLookup,
 ) {
     suspend operator fun invoke(id: WingId) {
-        if (wings.findById(id) == null) throw WingNotFoundException(id)
-        if (flights.hasFlights(id)) throw WingInUseException(id)
+        val wing = wings.findById(id) ?: throw WingNotFoundException(id)
+        if (wing.checks.isNotEmpty() || flights.hasFlights(id)) throw WingInUseException(id)
         wings.delete(id)
     }
 }

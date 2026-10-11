@@ -10,6 +10,12 @@ enum class FailureKind {
     SaveFlight,
     DeleteFlight,
     LoadStatistics,
+    LoadMaintenance,
+    SaveCheck,
+    DeleteCheck,
+    OpenReport,
+    SavePlan,
+    CancelPlan,
 }
 
 /** A technical [detail] travels with the kind; the screen wraps it in a message in the user's language. */

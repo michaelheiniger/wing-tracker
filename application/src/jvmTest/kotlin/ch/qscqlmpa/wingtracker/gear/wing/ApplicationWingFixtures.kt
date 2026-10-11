@@ -5,6 +5,9 @@ import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.CurrencyCode
 import ch.qscqlmpa.wingtracker.gear.GearStatus
 import ch.qscqlmpa.wingtracker.gear.Price
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceCheck
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceInterval
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.PlannedCheck
 import kotlinx.datetime.LocalDate
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
@@ -13,6 +16,7 @@ import kotlin.time.Duration.Companion.hours
 fun aWingDetails(
     name: String = "Sky Dancer",
     hoursBeforeTracking: Duration = 42.hours,
+    maintenanceInterval: MaintenanceInterval? = null,
 ) = WingDetails(
     name = name,
     manufacturer = "Advance",
@@ -28,10 +32,13 @@ fun aWingDetails(
         ),
     inServiceDate = LocalDate(2024, 3, 9),
     hoursBeforeTracking = hoursBeforeTracking,
+    maintenanceInterval = maintenanceInterval,
 )
 
 fun aWing(
     id: String = "3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47",
     details: WingDetails = aWingDetails(),
     status: GearStatus = GearStatus.Active,
-) = Wing(id = WingId(id), details = details, status = status)
+    checks: List<MaintenanceCheck> = emptyList(),
+    plannedChecks: List<PlannedCheck> = emptyList(),
+) = Wing(id = WingId(id), details = details, status = status, checks = checks, plannedChecks = plannedChecks)

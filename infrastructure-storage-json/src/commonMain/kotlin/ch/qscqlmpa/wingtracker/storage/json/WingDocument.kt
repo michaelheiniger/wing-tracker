@@ -9,6 +9,7 @@ import ch.qscqlmpa.wingtracker.gear.wing.CertificationClass
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceInterval
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration.Companion.minutes
@@ -35,6 +36,11 @@ internal data class WingDocument(
     val hoursBeforeTrackingMinutes: Long = 0,
     val retiredOn: LocalDate? = null,
     val retirementReason: String? = null,
+    // Added in schema 2; files written before it simply have none.
+    val maintenanceIntervalMonths: Int? = null,
+    val maintenanceIntervalHoursMinutes: Long? = null,
+    val checks: List<CheckDocument> = emptyList(),
+    val plannedChecks: List<PlannedCheckDocument> = emptyList(),
 ) {
     fun toDomain(): Wing {
         if (schemaVersion > CURRENT_SCHEMA_VERSION) {
@@ -59,13 +65,24 @@ internal data class WingDocument(
                     acquisition = Acquisition(AcquisitionCondition.valueOf(acquisitionCondition), purchaseDate, price),
                     inServiceDate = inServiceDate,
                     hoursBeforeTracking = hoursBeforeTrackingMinutes.minutes,
+                    maintenanceInterval = interval(),
                 ),
             status = retiredOn?.let { GearStatus.Retired(it, retirementReason) } ?: GearStatus.Active,
+            checks = checks.map { it.toDomain() },
+            plannedChecks = plannedChecks.map { it.toDomain() },
         )
     }
 
+    private fun interval(): MaintenanceInterval? =
+        if (maintenanceIntervalMonths == null && maintenanceIntervalHoursMinutes == null) {
+            null
+        } else {
+            MaintenanceInterval(maintenanceIntervalMonths, maintenanceIntervalHoursMinutes?.minutes)
+        }
+
     companion object {
-        const val CURRENT_SCHEMA_VERSION = 1
+        // Version 2 added maintenance. Older application versions treat it as newer data and leave it untouched.
+        const val CURRENT_SCHEMA_VERSION = 2
 
         fun from(wing: Wing): WingDocument {
             val details = wing.details
@@ -89,6 +106,10 @@ internal data class WingDocument(
                 hoursBeforeTrackingMinutes = details.hoursBeforeTracking.inWholeMinutes,
                 retiredOn = retired?.on,
                 retirementReason = retired?.reason,
+                maintenanceIntervalMonths = details.maintenanceInterval?.months,
+                maintenanceIntervalHoursMinutes = details.maintenanceInterval?.hours?.inWholeMinutes,
+                checks = wing.checks.map { CheckDocument.from(it) },
+                plannedChecks = wing.plannedChecks.map { PlannedCheckDocument.from(it) },
             )
         }
     }

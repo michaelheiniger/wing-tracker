@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.gear.wing
 
 import ch.qscqlmpa.wingtracker.gear.GearStatus
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.aStoredCheck
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import io.mockk.coEvery
@@ -121,6 +122,21 @@ class WingUseCasesTest {
 
                 // when
                 val failure = runCatching { DeleteWing(wings) { true }(existing.id) }.exceptionOrNull()
+
+                // then
+                assertThat(failure).isInstanceOf(WingInUseException::class.java)
+                coVerify(exactly = 0) { wings.delete(any()) }
+            }
+
+        @Test
+        fun `refuses to delete a wing that has maintenance history`() =
+            runTest {
+                // given
+                val existing = aWing(checks = listOf(aStoredCheck()))
+                coEvery { wings.findById(existing.id) } returns existing
+
+                // when
+                val failure = runCatching { DeleteWing(wings) { false }(existing.id) }.exceptionOrNull()
 
                 // then
                 assertThat(failure).isInstanceOf(WingInUseException::class.java)

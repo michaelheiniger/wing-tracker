@@ -11,7 +11,7 @@
     <string name="wings_show_retired">Ausgemusterte anzeigen (%1$d)</string>
 
     <string name="wing_in_service_since">In Betrieb seit %1$s</string>
-    <string name="wing_hours_before_tracking">%1$d h %2$d min vor der Erfassung</string>
+    <string name="wing_hours_before_tracking">%1$s vor der Erfassung</string>
     <string name="wing_certification">EN/LTF %1$s</string>
     <string name="wing_status_active">In Betrieb</string>
     <string name="wing_status_retired">Ausgemustert %1$s</string>
@@ -24,7 +24,7 @@
     <string name="retire_body">Der Gleitschirm verschwindet aus deiner aktiven Liste und den Erinnerungen, seine Flüge und seine Historie bleiben erhalten.</string>
     <string name="retire_reason_label">Grund (optional), z. B. verkauft</string>
     <string name="delete_title">%1$s löschen?</string>
-    <string name="delete_body">Für einen irrtümlich erfassten Gleitschirm. Er wird endgültig entfernt. Ein Gleitschirm mit Flügen kann nur ausgemustert werden.</string>
+    <string name="delete_body">Für einen irrtümlich erfassten Gleitschirm. Er wird endgültig entfernt. Ein Gleitschirm mit Flügen oder Wartungsverlauf kann nur ausgemustert werden.</string>
     <string name="delete_confirm">Löschen</string>
 
     <string name="form_title_add">Gleitschirm hinzufügen</string>
@@ -62,7 +62,7 @@
     <string name="failure_save">Der Gleitschirm konnte nicht gespeichert werden: %1$s</string>
     <string name="failure_retire">Der Gleitschirm konnte nicht ausgemustert werden: %1$s</string>
     <string name="failure_delete">Der Gleitschirm konnte nicht gelöscht werden: %1$s</string>
-    <string name="failure_delete_in_use">Dieser Gleitschirm hat Flüge und kann deshalb nicht gelöscht werden. Mustere ihn stattdessen aus.</string>
+    <string name="failure_delete_in_use">Dieser Gleitschirm hat Flüge oder einen Wartungsverlauf und kann deshalb nicht gelöscht werden. Mustere ihn stattdessen aus.</string>
 
     <string name="unreadable_quarantined">Die Datei %1$s konnte nicht gelesen werden und wurde in den Quarantäne-Ordner deines Datenordners verschoben. Der zugehörige Gleitschirm wird nicht angezeigt, bis die Datei repariert und zurückgelegt wurde.</string>
     <string name="unreadable_kept">Die Datei %1$s stammt von einer neueren Version der Anwendung und wird nicht angezeigt. Sie wurde nicht verändert.</string>
@@ -103,6 +103,7 @@
         <item>November</item>
         <item>Dezember</item>
     </string-array>
+    <string name="duration_hours">%1$d h</string>
     <string name="duration_hours_minutes">%1$d h %2$d min</string>
     <string name="wing_hours_total">%1$s · %2$s</string>
 
@@ -151,4 +152,71 @@
     <string name="series_other">Übrige Gleitschirme (%1$d)</string>
     <string name="chart_axis_hours">%1$s h</string>
     <string name="failure_load_statistics">Die Statistik konnte nicht geladen werden: %1$s</string>
+
+    <string name="section_maintenance">Kontrollintervall</string>
+    <string name="field_interval_months">Kontrolle alle (Monate)</string>
+    <string name="field_interval_hours">oder alle (Flugstunden)</string>
+    <string name="interval_hint">Was zuerst eintritt. Beide leer lassen für keine Erinnerung.</string>
+    <string name="error_months">Eine ganze Zahl von Monaten verwenden, z. B. 12</string>
+
+    <string name="wing_open_maintenance">Wartung</string>
+    <string name="maintenance_due">Kontrolle fällig</string>
+    <string name="maintenance_next_by">Nächste Kontrolle bis %1$s</string>
+    <string name="maintenance_hours_left">noch %1$s</string>
+    <string name="maintenance_planned_on">Geplant am %1$s</string>
+
+    <string name="maintenance_back">Zurück zu den Gleitschirmen</string>
+    <string name="maintenance_total_hours">%1$s insgesamt geflogen</string>
+    <string name="maintenance_no_interval">Kein Intervall festgelegt. Bearbeite den Gleitschirm, um eines hinzuzufügen.</string>
+    <string name="maintenance_interval_months">Alle %1$d Monate</string>
+    <string name="maintenance_interval_hours">Alle %1$s</string>
+    <string name="maintenance_interval_both">Alle %1$d Monate oder %2$s, je nachdem was zuerst eintritt</string>
+    <string name="maintenance_since">Ab %1$s gerechnet · seither %2$s geflogen</string>
+    <string name="maintenance_record_check">Kontrolle erfassen</string>
+    <string name="maintenance_plan_check">Kontrolle planen</string>
+    <string name="maintenance_planned_title">Geplante Kontrollen</string>
+    <string name="maintenance_planned_empty">Keine geplanten Kontrollen.</string>
+    <string name="maintenance_history_title">Verlauf</string>
+    <string name="maintenance_history_empty">Noch keine Kontrolle erfasst.</string>
+    <string name="maintenance_complete">Abschliessen</string>
+    <string name="maintenance_cancel_plan">Plan abbrechen</string>
+    <string name="maintenance_edit_check">Kontrolle bearbeiten</string>
+    <string name="maintenance_delete_check">Kontrolle löschen</string>
+    <string name="maintenance_open_report">%1$s öffnen</string>
+    <string name="maintenance_restarts">Startet das Intervall neu</string>
+
+    <string name="check_type_partial">Teilkontrolle (Trimm)</string>
+    <string name="check_type_full">Vollständig</string>
+    <string name="check_type_other">Andere</string>
+
+    <string name="check_form_title_record">Kontrolle erfassen</string>
+    <string name="check_form_title_edit">Kontrolle bearbeiten</string>
+    <string name="check_form_title_complete">Geplante Kontrolle abschliessen</string>
+    <string name="plan_form_title_add">Kontrolle planen</string>
+    <string name="plan_form_title_edit">Geplante Kontrolle bearbeiten</string>
+    <string name="field_check_date">Datum *</string>
+    <string name="field_plan_date">Geplantes Datum *</string>
+    <string name="field_check_type">Art</string>
+    <string name="field_company">Firma</string>
+    <string name="field_check_notes">Notizen</string>
+    <string name="field_check_comment">Kommentar</string>
+    <string name="check_restarts_interval">Gilt als periodische Kontrolle (startet das Intervall neu)</string>
+    <string name="check_reports">Berichte</string>
+    <string name="check_add_reports">PDF hinzufügen</string>
+    <string name="check_pick_title">Bericht auswählen</string>
+    <string name="check_no_reports">Keine Dateien angehängt</string>
+    <string name="check_remove_file">%1$s entfernen</string>
+
+    <string name="check_delete_title">Diese Kontrolle löschen?</string>
+    <string name="check_delete_body">Die Kontrolle (%1$s) vom %2$s und ihre angehängten Dateien werden endgültig entfernt.</string>
+
+    <string name="error_check_date_future">Eine durchgeführte Kontrolle kann nicht in der Zukunft liegen</string>
+    <string name="error_plan_date_past">Eine geplante Kontrolle kann nicht in der Vergangenheit liegen</string>
+
+    <string name="failure_load_maintenance">Die Wartungsdaten konnten nicht geladen werden: %1$s</string>
+    <string name="failure_save_check">Die Kontrolle konnte nicht gespeichert werden: %1$s</string>
+    <string name="failure_delete_check">Die Kontrolle konnte nicht gelöscht werden: %1$s</string>
+    <string name="failure_open_report">Der Bericht konnte nicht geöffnet werden: %1$s</string>
+    <string name="failure_save_plan">Die geplante Kontrolle konnte nicht gespeichert werden: %1$s</string>
+    <string name="failure_cancel_plan">Die geplante Kontrolle konnte nicht abgebrochen werden: %1$s</string>
 </resources>

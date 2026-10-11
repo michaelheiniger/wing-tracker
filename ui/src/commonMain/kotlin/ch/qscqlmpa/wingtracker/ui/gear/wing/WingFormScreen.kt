@@ -31,6 +31,8 @@ import ch.qscqlmpa.wingtracker.ui.resources.certification_unknown
 import ch.qscqlmpa.wingtracker.ui.resources.field_currency
 import ch.qscqlmpa.wingtracker.ui.resources.field_hours_before_tracking
 import ch.qscqlmpa.wingtracker.ui.resources.field_in_service_date
+import ch.qscqlmpa.wingtracker.ui.resources.field_interval_hours
+import ch.qscqlmpa.wingtracker.ui.resources.field_interval_months
 import ch.qscqlmpa.wingtracker.ui.resources.field_manufacturer
 import ch.qscqlmpa.wingtracker.ui.resources.field_model
 import ch.qscqlmpa.wingtracker.ui.resources.field_name
@@ -40,8 +42,10 @@ import ch.qscqlmpa.wingtracker.ui.resources.field_serial_number
 import ch.qscqlmpa.wingtracker.ui.resources.field_size
 import ch.qscqlmpa.wingtracker.ui.resources.form_title_add
 import ch.qscqlmpa.wingtracker.ui.resources.form_title_edit
+import ch.qscqlmpa.wingtracker.ui.resources.interval_hint
 import ch.qscqlmpa.wingtracker.ui.resources.section_acquisition
 import ch.qscqlmpa.wingtracker.ui.resources.section_certification
+import ch.qscqlmpa.wingtracker.ui.resources.section_maintenance
 import ch.qscqlmpa.wingtracker.ui.resources.section_usage
 import org.jetbrains.compose.resources.stringResource
 
@@ -181,6 +185,31 @@ fun WingFormScreen(
             input.hoursBeforeTracking,
             WingFormField.HoursBeforeTracking,
         ) { v -> presenter.change { it.copy(hoursBeforeTracking = v) } }
+
+        Text(
+            stringResource(Res.string.section_maintenance),
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(top = 8.dp),
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+            Field(
+                stringResource(Res.string.field_interval_months),
+                input.intervalMonths,
+                WingFormField.IntervalMonths,
+                Modifier.weight(1f),
+            ) { v -> presenter.change { it.copy(intervalMonths = v) } }
+            Field(
+                stringResource(Res.string.field_interval_hours),
+                input.intervalHours,
+                WingFormField.IntervalHours,
+                Modifier.weight(1f),
+            ) { v -> presenter.change { it.copy(intervalHours = v) } }
+        }
+        Text(
+            stringResource(Res.string.interval_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
 
         presenter.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
         Row(

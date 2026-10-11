@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.gear.wing
 
 import ch.qscqlmpa.wingtracker.gear.Acquisition
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceInterval
 import kotlinx.datetime.LocalDate
 import kotlin.time.Duration
 
@@ -16,6 +17,8 @@ data class WingDetails(
     val inServiceDate: LocalDate,
     // Hours flown before tracking started; keeps hour-based due rules right for used wings.
     val hoursBeforeTracking: Duration = Duration.ZERO,
+    // Null means no rule yet, so the wing is never reported as due.
+    val maintenanceInterval: MaintenanceInterval? = null,
 ) {
     init {
         require(name.isNotBlank()) { "A wing needs a name" }

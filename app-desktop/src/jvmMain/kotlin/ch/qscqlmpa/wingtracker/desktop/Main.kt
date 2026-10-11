@@ -12,6 +12,8 @@ import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.GearUseCases
+import ch.qscqlmpa.wingtracker.ui.gear.wing.maintenance.MaintenanceUseCases
+import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.shell.AppShell
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import ch.qscqlmpa.wingtracker.ui.theme.WingTrackerTheme
@@ -44,6 +46,8 @@ fun main() {
                     logbookUseCases = koin.get<LogbookUseCases>(),
                     getStatistics = koin.get<GetStatistics>(),
                     gearUseCases = koin.get<GearUseCases>(),
+                    maintenanceUseCases = koin.get<MaintenanceUseCases>(),
+                    platform = koin.get<PlatformServices>(),
                     themePreference = themePreference,
                 )
             }

@@ -3,6 +3,8 @@ package ch.qscqlmpa.wingtracker.desktop
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.GearUseCases
+import ch.qscqlmpa.wingtracker.ui.gear.wing.maintenance.MaintenanceUseCases
+import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -24,6 +26,8 @@ class AppModuleTest {
         assertThat(koin.get<GearUseCases>()).isNotNull()
         assertThat(koin.get<LogbookUseCases>()).isNotNull()
         assertThat(koin.get<GetStatistics>()).isNotNull()
+        assertThat(koin.get<MaintenanceUseCases>()).isNotNull()
+        assertThat(koin.get<PlatformServices>()).isNotNull()
         assertThat(koin.get<ThemePreference>()).isNotNull()
     }
 }

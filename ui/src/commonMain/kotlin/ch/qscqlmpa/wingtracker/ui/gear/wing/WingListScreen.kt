@@ -37,7 +37,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.gear.GearStatus
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceStatus
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
+import ch.qscqlmpa.wingtracker.ui.formatDuration
+import ch.qscqlmpa.wingtracker.ui.gear.wing.maintenance.chipText
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
@@ -45,6 +48,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.action_dismiss
 import ch.qscqlmpa.wingtracker.ui.resources.delete_body
 import ch.qscqlmpa.wingtracker.ui.resources.delete_confirm
 import ch.qscqlmpa.wingtracker.ui.resources.delete_title
+import ch.qscqlmpa.wingtracker.ui.resources.maintenance_planned_on
 import ch.qscqlmpa.wingtracker.ui.resources.retire_body
 import ch.qscqlmpa.wingtracker.ui.resources.retire_reason_label
 import ch.qscqlmpa.wingtracker.ui.resources.retire_title
@@ -55,6 +59,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.wing_delete
 import ch.qscqlmpa.wingtracker.ui.resources.wing_edit
 import ch.qscqlmpa.wingtracker.ui.resources.wing_hours_before_tracking
 import ch.qscqlmpa.wingtracker.ui.resources.wing_in_service_since
+import ch.qscqlmpa.wingtracker.ui.resources.wing_open_maintenance
 import ch.qscqlmpa.wingtracker.ui.resources.wing_retire
 import ch.qscqlmpa.wingtracker.ui.resources.wing_status_active
 import ch.qscqlmpa.wingtracker.ui.resources.wing_status_retired
@@ -68,13 +73,12 @@ import ch.qscqlmpa.wingtracker.ui.resources.wings_title
 import ch.qscqlmpa.wingtracker.ui.toDisplay
 import org.jetbrains.compose.resources.stringResource
 
-private const val MINUTES_PER_HOUR = 60
-
 @Composable
 fun WingListScreen(
     presenter: WingListPresenter,
     onAdd: () -> Unit,
     onEdit: (Wing) -> Unit,
+    onOpenMaintenance: (Wing) -> Unit,
 ) {
     val state = presenter.state
     var wingToRetire by remember { mutableStateOf<Wing?>(null) }
@@ -128,7 +132,9 @@ fun WingListScreen(
                         items(state.visibleWings, key = { it.id.value }) { wing ->
                             WingCard(
                                 wing = wing,
+                                status = state.statuses[wing.id],
                                 onEdit = { onEdit(wing) },
+                                onOpenMaintenance = { onOpenMaintenance(wing) },
                                 onRetire = { wingToRetire = wing },
                                 onDelete = { wingToDelete = wing },
                             )
@@ -203,7 +209,9 @@ private fun EmptyWings(onAdd: () -> Unit) {
 @Composable
 private fun WingCard(
     wing: Wing,
+    status: MaintenanceStatus?,
     onEdit: () -> Unit,
+    onOpenMaintenance: () -> Unit,
     onRetire: () -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -229,22 +237,19 @@ private fun WingCard(
                         details.certificationClass?.let { stringResource(Res.string.wing_certification, it.name) },
                     ).joinToString(" · ")
                 Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                val minutes = details.hoursBeforeTracking.inWholeMinutes
                 val since = stringResource(Res.string.wing_in_service_since, details.inServiceDate.toDisplay())
                 val before =
-                    stringResource(
-                        Res.string.wing_hours_before_tracking,
-                        minutes / MINUTES_PER_HOUR,
-                        minutes % MINUTES_PER_HOUR,
-                    )
+                    stringResource(Res.string.wing_hours_before_tracking, formatDuration(details.hoursBeforeTracking))
                 Text(
                     "$since · $before",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                MaintenanceLine(wing, status)
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AssistChip(onClick = {}, label = { Text(statusLabel(wing.status)) })
+                TextButton(onClick = onOpenMaintenance) { Text(stringResource(Res.string.wing_open_maintenance)) }
                 IconButton(onClick = onEdit) {
                     Icon(Icons.Default.Edit, contentDescription = stringResource(Res.string.wing_edit, details.name))
                 }
@@ -317,4 +322,32 @@ private fun DeleteDialog(
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_cancel)) } },
     )
+}
+
+/** Shows when a check is due, or the next planned one, so the list answers "does this wing need attention?". */
+@Composable
+private fun MaintenanceLine(
+    wing: Wing,
+    status: MaintenanceStatus?,
+) {
+    val planned = wing.nextPlannedCheck
+    if (status == null && planned == null) return
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (status != null) {
+            val color =
+                if (status.isDue) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            Text(status.chipText(), style = MaterialTheme.typography.labelLarge, color = color)
+        }
+        if (planned != null) {
+            Text(
+                stringResource(Res.string.maintenance_planned_on, planned.date.toDisplay()),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
 }

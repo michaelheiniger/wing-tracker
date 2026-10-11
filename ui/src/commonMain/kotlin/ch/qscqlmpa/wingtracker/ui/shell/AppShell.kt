@@ -23,7 +23,9 @@ import ch.qscqlmpa.wingtracker.ui.flights.LogbookRoute
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.GearRoute
 import ch.qscqlmpa.wingtracker.ui.gear.GearUseCases
+import ch.qscqlmpa.wingtracker.ui.gear.wing.maintenance.MaintenanceUseCases
 import ch.qscqlmpa.wingtracker.ui.icons.BarChartIcon
+import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.nav_gear
 import ch.qscqlmpa.wingtracker.ui.resources.nav_logbook
@@ -51,6 +53,8 @@ fun AppShell(
     logbookUseCases: LogbookUseCases,
     getStatistics: GetStatistics,
     gearUseCases: GearUseCases,
+    maintenanceUseCases: MaintenanceUseCases,
+    platform: PlatformServices,
     themePreference: ThemePreference,
 ) {
     var destination by rememberSaveable { mutableStateOf(Destination.Logbook.name) }
@@ -78,7 +82,7 @@ fun AppShell(
                 }
 
                 Destination.Gear -> {
-                    GearRoute(gearUseCases)
+                    GearRoute(gearUseCases, maintenanceUseCases, platform)
                 }
 
                 Destination.Settings -> {

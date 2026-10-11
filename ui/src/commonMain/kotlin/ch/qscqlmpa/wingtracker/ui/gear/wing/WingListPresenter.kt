@@ -9,6 +9,8 @@ import ch.qscqlmpa.wingtracker.gear.wing.RetireWing
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.WingInUseException
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.GetMaintenanceStatuses
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceStatus
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
@@ -20,6 +22,7 @@ import kotlinx.datetime.LocalDate
 data class WingListState(
     val wings: List<Wing> = emptyList(),
     val unreadable: List<UnreadableRecord> = emptyList(),
+    val statuses: Map<WingId, MaintenanceStatus?> = emptyMap(),
     val loading: Boolean = true,
     // Retired wings stay out of the way by default but remain reachable, so history is never hidden for good.
     val showRetired: Boolean = false,
@@ -34,6 +37,7 @@ class WingListPresenter(
     private val listWings: ListWings,
     private val retireWing: RetireWing,
     private val deleteWing: DeleteWing,
+    private val getMaintenanceStatuses: GetMaintenanceStatuses,
     private val today: () -> LocalDate,
 ) {
     var state by mutableStateOf(WingListState())
@@ -67,6 +71,7 @@ class WingListPresenter(
         val loaded = listWings()
         return state.copy(
             wings = loaded.items,
+            statuses = getMaintenanceStatuses(),
             // A later reload must not re-announce a quarantined file that was already reported.
             unreadable = (state.unreadable + loaded.unreadable).distinct(),
             loading = false,

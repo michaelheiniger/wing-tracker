@@ -7,7 +7,7 @@ Kotlin Multiplatform app to track paragliding gear (wings, harnesses, reserve pa
 - **Do not assume or make judgment calls: ask.** When several solutions have trade-offs, explain them and ask for a decision. No shortcuts.
 - **ADRs in `docs/adr/` are binding.** Check a request against them before implementing. If it contradicts an Accepted ADR, do not comply silently: name the ADR, explain the trade-off it protects, ask the user to reconsider or consciously supersede it. Amend vs supersede rules are in `docs/adr/README.md`. Suggest a new or amended ADR whenever a change is architecturally relevant.
 - UI/UX matters a lot: suggest ideas with each feature and challenge the status quo; redesigning for better UX is encouraged.
-- Commit only when asked.
+- Commit each feature slice separately, once it is finished and `./gradlew check` passes. Do not commit half-done work or mix slices in one commit.
 - Release notes: every user-facing change adds a line under `Unreleased` in `CHANGELOG.md`.
 
 ## Comments and docs

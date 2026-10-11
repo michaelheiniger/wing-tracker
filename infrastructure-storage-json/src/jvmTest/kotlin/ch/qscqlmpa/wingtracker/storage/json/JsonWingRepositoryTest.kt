@@ -4,8 +4,14 @@ import ch.qscqlmpa.wingtracker.gear.Acquisition
 import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.GearStatus
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceInterval
+import ch.qscqlmpa.wingtracker.gear.wing.maintenance.WingCheckType
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -15,6 +21,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
+import kotlin.time.Duration.Companion.hours
 
 class JsonWingRepositoryTest {
     @TempDir
@@ -30,6 +37,52 @@ class JsonWingRepositoryTest {
                 // given
                 val wing = aStoredWing()
                 repository.save(wing)
+
+                // when
+                val found = repository.findById(wing.id)
+
+                // then
+                assertThat(found).usingRecursiveComparison().isEqualTo(wing)
+            }
+
+        @Test
+        fun `restores the interval, the check history with its reports and the planned checks`() =
+            runTest {
+                // given
+                val wing =
+                    aStoredWing(
+                        interval = MaintenanceInterval(months = 24, hours = 100.hours),
+                        checks =
+                            listOf(
+                                aStoredCheck("check-2", WingCheckType.Other, restartsInterval = true),
+                                aStoredCheck("check-1", WingCheckType.Full),
+                            ),
+                        plannedChecks = listOf(aStoredPlannedCheck()),
+                    )
+                repository.save(wing)
+
+                // when
+                val found = repository.findById(wing.id)
+
+                // then
+                assertThat(found).usingRecursiveComparison().isEqualTo(wing)
+            }
+
+        @Test
+        fun `reads a wing written before maintenance existed`() =
+            runTest {
+                // given
+                val wing = aStoredWing()
+                repository.save(wing)
+                val file = dataDirectory.resolve("wings/${wing.id.value}.json")
+                val newerKeys =
+                    setOf("maintenanceIntervalMonths", "maintenanceIntervalHoursMinutes", "checks", "plannedChecks")
+                val document = Json.parseToJsonElement(file.readText()).jsonObject
+                val legacy =
+                    JsonObject(
+                        document.filterKeys { it !in newerKeys } + ("schemaVersion" to JsonPrimitive(1)),
+                    ).toString()
+                file.writeText(legacy)
 
                 // when
                 val found = repository.findById(wing.id)
@@ -120,7 +173,7 @@ class JsonWingRepositoryTest {
                 // given
                 repository.save(aStoredWing())
                 val file = dataDirectory.resolve("wings/3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47.json")
-                file.writeText(file.readText().replace("\"schemaVersion\": 1", "\"schemaVersion\": 999"))
+                file.writeText(file.readText().replace("\"schemaVersion\": 2", "\"schemaVersion\": 999"))
 
                 // when
                 val failure = runCatching { repository.findById(WingId("3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47")) }
@@ -216,7 +269,7 @@ class JsonWingRepositoryTest {
                 // given
                 repository.save(aStoredWing(id = "wing-1"))
                 val file = dataDirectory.resolve("wings/wing-1.json")
-                file.writeText(file.readText().replace("\"schemaVersion\": 1", "\"schemaVersion\": 999"))
+                file.writeText(file.readText().replace("\"schemaVersion\": 2", "\"schemaVersion\": 999"))
 
                 // when
                 val result = repository.findAll()

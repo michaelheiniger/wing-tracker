@@ -11,7 +11,7 @@
     <string name="wings_show_retired">Afficher les voiles retirées (%1$d)</string>
 
     <string name="wing_in_service_since">En service depuis le %1$s</string>
-    <string name="wing_hours_before_tracking">%1$d h %2$d min avant le suivi</string>
+    <string name="wing_hours_before_tracking">%1$s avant le suivi</string>
     <string name="wing_certification">EN/LTF %1$s</string>
     <string name="wing_status_active">En service</string>
     <string name="wing_status_retired">Retirée le %1$s</string>
@@ -24,7 +24,7 @@
     <string name="retire_body">La voile quitte ta liste active et les rappels, mais ses vols et son historique sont conservés.</string>
     <string name="retire_reason_label">Motif (facultatif), p. ex. vendue</string>
     <string name="delete_title">Supprimer %1$s ?</string>
-    <string name="delete_body">À utiliser pour une voile saisie par erreur. Elle est supprimée définitivement. Une voile qui a des vols ne peut être que retirée.</string>
+    <string name="delete_body">À utiliser pour une voile saisie par erreur. Elle est supprimée définitivement. Une voile qui a des vols ou un historique d\'entretien ne peut être que retirée.</string>
     <string name="delete_confirm">Supprimer</string>
 
     <string name="form_title_add">Ajouter une voile</string>
@@ -62,7 +62,7 @@
     <string name="failure_save">La voile n\'a pas pu être enregistrée : %1$s</string>
     <string name="failure_retire">La voile n\'a pas pu être retirée : %1$s</string>
     <string name="failure_delete">La voile n\'a pas pu être supprimée : %1$s</string>
-    <string name="failure_delete_in_use">Cette voile a des vols, elle ne peut donc pas être supprimée. Retire-la plutôt.</string>
+    <string name="failure_delete_in_use">Cette voile a des vols ou un historique d\'entretien, elle ne peut donc pas être supprimée. Retire-la plutôt.</string>
 
     <string name="unreadable_quarantined">Le fichier %1$s n\'a pas pu être lu et a été déplacé dans le dossier de quarantaine de ton dossier de données. Sa voile n\'est pas affichée tant que le fichier n\'est pas réparé et remis en place.</string>
     <string name="unreadable_kept">Le fichier %1$s a été écrit par une version plus récente de l\'application et n\'est pas affiché. Il n\'a pas été modifié.</string>
@@ -103,6 +103,7 @@
         <item>Novembre</item>
         <item>Décembre</item>
     </string-array>
+    <string name="duration_hours">%1$d h</string>
     <string name="duration_hours_minutes">%1$d h %2$d min</string>
     <string name="wing_hours_total">%1$s · %2$s</string>
 
@@ -151,4 +152,71 @@
     <string name="series_other">Autres voiles (%1$d)</string>
     <string name="chart_axis_hours">%1$s h</string>
     <string name="failure_load_statistics">Les statistiques n\'ont pas pu être chargées : %1$s</string>
+
+    <string name="section_maintenance">Intervalle de contrôle</string>
+    <string name="field_interval_months">Contrôle tous les (mois)</string>
+    <string name="field_interval_hours">ou toutes les (heures de vol)</string>
+    <string name="interval_hint">Selon ce qui arrive en premier. Laisser les deux vides pour aucun rappel.</string>
+    <string name="error_months">Utiliser un nombre entier de mois, p. ex. 12</string>
+
+    <string name="wing_open_maintenance">Entretien</string>
+    <string name="maintenance_due">Contrôle dû</string>
+    <string name="maintenance_next_by">Prochain contrôle avant le %1$s</string>
+    <string name="maintenance_hours_left">encore %1$s</string>
+    <string name="maintenance_planned_on">Prévu le %1$s</string>
+
+    <string name="maintenance_back">Retour aux voiles</string>
+    <string name="maintenance_total_hours">%1$s de vol au total</string>
+    <string name="maintenance_no_interval">Aucun intervalle défini. Modifie la voile pour en ajouter un.</string>
+    <string name="maintenance_interval_months">Tous les %1$d mois</string>
+    <string name="maintenance_interval_hours">Toutes les %1$s</string>
+    <string name="maintenance_interval_both">Tous les %1$d mois ou toutes les %2$s, selon ce qui arrive en premier</string>
+    <string name="maintenance_since">Compté depuis le %1$s · %2$s de vol depuis</string>
+    <string name="maintenance_record_check">Saisir un contrôle</string>
+    <string name="maintenance_plan_check">Planifier un contrôle</string>
+    <string name="maintenance_planned_title">Contrôles planifiés</string>
+    <string name="maintenance_planned_empty">Aucun contrôle planifié.</string>
+    <string name="maintenance_history_title">Historique</string>
+    <string name="maintenance_history_empty">Aucun contrôle saisi pour l\'instant.</string>
+    <string name="maintenance_complete">Terminer</string>
+    <string name="maintenance_cancel_plan">Annuler la planification</string>
+    <string name="maintenance_edit_check">Modifier le contrôle</string>
+    <string name="maintenance_delete_check">Supprimer le contrôle</string>
+    <string name="maintenance_open_report">Ouvrir %1$s</string>
+    <string name="maintenance_restarts">Relance l\'intervalle</string>
+
+    <string name="check_type_partial">Partiel (calage)</string>
+    <string name="check_type_full">Complet</string>
+    <string name="check_type_other">Autre</string>
+
+    <string name="check_form_title_record">Saisir un contrôle</string>
+    <string name="check_form_title_edit">Modifier le contrôle</string>
+    <string name="check_form_title_complete">Terminer le contrôle planifié</string>
+    <string name="plan_form_title_add">Planifier un contrôle</string>
+    <string name="plan_form_title_edit">Modifier le contrôle planifié</string>
+    <string name="field_check_date">Date *</string>
+    <string name="field_plan_date">Date prévue *</string>
+    <string name="field_check_type">Type</string>
+    <string name="field_company">Entreprise</string>
+    <string name="field_check_notes">Notes</string>
+    <string name="field_check_comment">Commentaire</string>
+    <string name="check_restarts_interval">Compte comme contrôle périodique (relance l\'intervalle)</string>
+    <string name="check_reports">Rapports</string>
+    <string name="check_add_reports">Ajouter un PDF</string>
+    <string name="check_pick_title">Choisir le rapport</string>
+    <string name="check_no_reports">Aucun fichier joint</string>
+    <string name="check_remove_file">Retirer %1$s</string>
+
+    <string name="check_delete_title">Supprimer ce contrôle ?</string>
+    <string name="check_delete_body">Le contrôle (%1$s) du %2$s et ses fichiers joints sont supprimés définitivement.</string>
+
+    <string name="error_check_date_future">Un contrôle effectué ne peut pas être daté dans le futur</string>
+    <string name="error_plan_date_past">Un contrôle planifié ne peut pas être daté dans le passé</string>
+
+    <string name="failure_load_maintenance">Les données d\'entretien n\'ont pas pu être chargées : %1$s</string>
+    <string name="failure_save_check">Le contrôle n\'a pas pu être enregistré : %1$s</string>
+    <string name="failure_delete_check">Le contrôle n\'a pas pu être supprimé : %1$s</string>
+    <string name="failure_open_report">Le rapport n\'a pas pu être ouvert : %1$s</string>
+    <string name="failure_save_plan">Le contrôle planifié n\'a pas pu être enregistré : %1$s</string>
+    <string name="failure_cancel_plan">Le contrôle planifié n\'a pas pu être annulé : %1$s</string>
 </resources>

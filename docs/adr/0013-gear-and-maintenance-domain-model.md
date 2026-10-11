@@ -21,3 +21,5 @@ Rules match how manufacturers specify checks and need no built-in model catalogu
 ## Amendments
 
 - 2026-10-11: A flight records only a date and a duration plus optional sites and notes, and is ordered within a day by when it was logged. It cannot be dated in the future or before its wing entered service, and its duration must be positive. Wings may be deleted only while they have no flights; otherwise they are retired.
+- 2026-10-11: Maintenance lives inside the Wing aggregate. A wing has at most one interval rule (months, hours, or both, whichever comes first) that governs any periodic check. Partial and full checks restart the interval clock; an "other" check does so only when the pilot marks it. The clock starts at the in-service date when no check exists. Hours count tracked flights since the clock started, without the hours flown before tracking. A planned check is separate from history and is completed into a performed check in one save. A wing with maintenance history can only be retired, like one with flights.
+
