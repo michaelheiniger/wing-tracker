@@ -14,6 +14,15 @@ import ch.qscqlmpa.wingtracker.ui.platform.FileDrop
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
 import ch.qscqlmpa.wingtracker.ui.platform.FilePicker
 import ch.qscqlmpa.wingtracker.ui.platform.FileSaver
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
+import io.github.vinceglb.filekit.dialogs.FileKitMode
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.openFilePicker
+import io.github.vinceglb.filekit.dialogs.openFileSaver
+import io.github.vinceglb.filekit.name
+import io.github.vinceglb.filekit.readBytes
+import io.github.vinceglb.filekit.write
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.swing.Swing
@@ -27,22 +36,19 @@ import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.writeBytes
 
-/** The operating system's own file dialog, so it looks and behaves like every other desktop application. */
+/** FileKit's native file dialog: the desktop portal on Linux, the system dialog on Windows and macOS. */
 class DesktopFilePicker : FilePicker {
     override suspend fun pick(
         title: String,
         extension: String,
     ): List<NewAttachment> {
-        // AWT dialogs belong on the UI thread; the files are then read off it.
         val files =
-            withContext(Dispatchers.Swing) {
-                val dialog = FileDialog(null as Frame?, title, FileDialog.LOAD)
-                dialog.isMultipleMode = true
-                dialog.setFilenameFilter { _, name -> name.endsWith(".$extension", ignoreCase = true) }
-                dialog.isVisible = true
-                dialog.files.toList()
-            }
-        return withContext(Dispatchers.IO) { files.map { NewAttachment(it.name, it.readBytes()) } }
+            FileKit.openFilePicker(
+                type = FileKitType.File(extensions = setOf(extension)),
+                mode = FileKitMode.Multiple(),
+                dialogSettings = FileKitDialogSettings(title = title),
+            ) ?: return emptyList()
+        return files.map { NewAttachment(it.name, it.readBytes()) }
     }
 }
 
@@ -66,21 +72,21 @@ class DesktopFileOpener : FileOpener {
     }
 }
 
-/** The operating system's own save dialog. */
+/** FileKit's native save dialog. */
 class DesktopFileSaver : FileSaver {
     override suspend fun save(
         title: String,
         suggestedName: String,
         bytes: ByteArray,
     ): String? {
+        val extension = suggestedName.substringAfterLast('.', "")
         val chosen =
-            withContext(Dispatchers.Swing) {
-                val dialog = FileDialog(null as Frame?, title, FileDialog.SAVE)
-                dialog.file = suggestedName
-                dialog.isVisible = true
-                dialog.files.firstOrNull()
-            } ?: return null
-        withContext(Dispatchers.IO) { chosen.writeBytes(bytes) }
+            FileKit.openFileSaver(
+                suggestedName = suggestedName.removeSuffix(".$extension").removeSuffix("."),
+                defaultExtension = extension,
+                dialogSettings = FileKitDialogSettings(title = title),
+            ) ?: return null
+        chosen.write(bytes)
         return chosen.name
     }
 }

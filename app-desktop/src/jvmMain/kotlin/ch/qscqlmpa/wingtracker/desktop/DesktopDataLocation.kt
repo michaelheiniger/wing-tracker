@@ -2,6 +2,11 @@ package ch.qscqlmpa.wingtracker.desktop
 
 import ch.qscqlmpa.wingtracker.ui.platform.DataLocation
 import ch.qscqlmpa.wingtracker.ui.platform.FolderCheck
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
+import io.github.vinceglb.filekit.dialogs.openDirectoryPicker
+import io.github.vinceglb.filekit.path
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.swing.Swing
 import kotlinx.coroutines.withContext
@@ -10,7 +15,6 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
-import javax.swing.JFileChooser
 import kotlin.io.path.Path
 import kotlin.io.path.copyTo
 import kotlin.io.path.createDirectories
@@ -40,15 +44,11 @@ class DesktopDataLocation(
     override val isDefault: Boolean get() = current.normalize() == default.normalize()
 
     override suspend fun chooseFolder(title: String): String? =
-        withContext(Dispatchers.Swing) {
-            // AWT's native dialog cannot choose folders on every system, Swing's can.
-            val chooser =
-                JFileChooser(current.parent?.toFile()).apply {
-                    dialogTitle = title
-                    fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-                }
-            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) chooser.selectedFile.toString() else null
-        }
+        FileKit
+            .openDirectoryPicker(
+                directory = PlatformFile(current.parent?.toFile() ?: current.toFile()),
+                dialogSettings = FileKitDialogSettings(title = title),
+            )?.path
 
     override suspend fun inspect(folder: String): FolderCheck =
         withContext(Dispatchers.IO) {

@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Fixed
+- File, folder and save dialogs now look like the rest of your desktop (they use the system's own chooser, including on KDE Plasma).
 - The dark appearance of KDE Plasma (and other desktops that report it) is now detected, and followed while the app runs.
 - The interface is no longer too small on screens with display scaling: it follows the desktop's scale automatically, and Settings has an Interface size choice.
 - French text no longer shows stray backslashes before apostrophes.

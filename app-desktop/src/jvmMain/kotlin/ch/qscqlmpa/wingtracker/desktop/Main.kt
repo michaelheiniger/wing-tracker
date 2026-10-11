@@ -32,6 +32,7 @@ import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import ch.qscqlmpa.wingtracker.ui.theme.WingTrackerTheme
 import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
+import io.github.vinceglb.filekit.FileKit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
@@ -43,10 +44,13 @@ import java.awt.HeadlessException
 import javax.imageio.ImageIO
 
 private const val SYSTEM_THEME_POLL_MILLIS = 5_000L
+private const val APP_ID = "ch.qscqlmpa.wingtracker"
 private const val WINDOW_WIDTH = 1100
 private const val WINDOW_HEIGHT = 950
 
 fun main() {
+    // The application id names FileKit's own per-user folders and identifies the dialogs to the desktop portal.
+    FileKit.init(appId = APP_ID)
     val devMode = System.getProperty("wingtracker.dev").toBoolean()
     val koin = startKoin { modules(appModules(DataDirectory.configured(devMode), devMode)) }.koin
 
