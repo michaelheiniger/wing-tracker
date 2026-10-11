@@ -1,8 +1,13 @@
 package ch.qscqlmpa.wingtracker.desktop
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
@@ -26,13 +31,17 @@ import ch.qscqlmpa.wingtracker.ui.shell.AppShell
 import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import ch.qscqlmpa.wingtracker.ui.theme.WingTrackerTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.koin.core.context.startKoin
 import java.awt.GraphicsEnvironment
 import java.awt.HeadlessException
 import javax.imageio.ImageIO
 
+private const val SYSTEM_THEME_POLL_MILLIS = 5_000L
 private const val WINDOW_WIDTH = 1100
 private const val WINDOW_HEIGHT = 950
 
@@ -50,7 +59,18 @@ fun main() {
     val jvmScale = jvmScale()
     val initialFactor = DesktopScale.factor(scalePreference.percent, detectedScale, jvmScale)
 
+    val systemTheme = SystemTheme()
+    val initialSystemDark = systemTheme.isDark()
+
     application {
+        // Followed live, so switching the desktop between light and dark needs no restart.
+        var systemDark by remember { mutableStateOf(initialSystemDark) }
+        LaunchedEffect(Unit) {
+            while (true) {
+                delay(SYSTEM_THEME_POLL_MILLIS)
+                systemDark = withContext(Dispatchers.IO) { systemTheme.isDark() }
+            }
+        }
         LaunchedEffect(themePreference) {
             snapshotFlow { themePreference.mode }.drop(1).collect { saveThemeMode(it) }
         }
@@ -69,7 +89,7 @@ fun main() {
             icon = applicationIcon(),
         ) {
             WithInterfaceScale(DesktopScale.factor(scalePreference.percent, detectedScale, jvmScale)) {
-                WingTrackerTheme(themePreference.mode) {
+                WingTrackerTheme(themePreference.mode, systemDark ?: isSystemInDarkTheme()) {
                     AppShell(
                         logbookUseCases = koin.get<LogbookUseCases>(),
                         getStatistics = koin.get<GetStatistics>(),

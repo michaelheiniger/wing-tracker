@@ -22,9 +22,11 @@ val MaterialTheme.extraColors: ExtraColors
 @Composable
 fun WingTrackerTheme(
     mode: ThemeMode,
+    // The platform may know better than the toolkit, e.g. KDE Plasma on desktop Linux.
+    systemDark: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    val dark = mode.isDark(isSystemInDarkTheme())
+    val dark = mode.isDark(systemDark)
     CompositionLocalProvider(
         LocalDarkTheme provides dark,
         LocalExtraColors provides if (dark) DarkExtraColors else LightExtraColors,
