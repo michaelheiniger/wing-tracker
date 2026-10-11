@@ -60,6 +60,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.maintenance_planned_on
 import ch.qscqlmpa.wingtracker.ui.resources.retire_body
 import ch.qscqlmpa.wingtracker.ui.resources.retire_reason_label
 import ch.qscqlmpa.wingtracker.ui.resources.retire_title
+import ch.qscqlmpa.wingtracker.ui.resources.undo_item_deleted
 import ch.qscqlmpa.wingtracker.ui.resources.unreadable_kept
 import ch.qscqlmpa.wingtracker.ui.resources.unreadable_quarantined
 import ch.qscqlmpa.wingtracker.ui.resources.wing_certification
@@ -80,6 +81,8 @@ import ch.qscqlmpa.wingtracker.ui.resources.wings_show_retired
 import ch.qscqlmpa.wingtracker.ui.resources.wings_title
 import ch.qscqlmpa.wingtracker.ui.theme.extraColors
 import ch.qscqlmpa.wingtracker.ui.toDisplay
+import ch.qscqlmpa.wingtracker.ui.undo.LocalUndo
+import ch.qscqlmpa.wingtracker.ui.undo.undoText
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -167,10 +170,12 @@ fun WingListScreen(
         )
     }
     wingToDelete?.let { wing ->
+        val undo = LocalUndo.current
+        val undoText = undoText(Res.string.undo_item_deleted, wing.details.name)
         DeleteDialog(
             name = wing.details.name,
             onConfirm = {
-                presenter.delete(wing.id)
+                presenter.delete(wing.id, undo, undoText)
                 wingToDelete = null
             },
             onDismiss = { wingToDelete = null },

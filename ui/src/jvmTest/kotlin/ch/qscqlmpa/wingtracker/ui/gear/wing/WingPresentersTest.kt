@@ -22,6 +22,9 @@ import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
+import ch.qscqlmpa.wingtracker.ui.undo.TEXT
+import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
+import ch.qscqlmpa.wingtracker.ui.undo.expire
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -171,7 +174,9 @@ class WingPresentersTest {
                 val presenter = listPresenter()
 
                 // when
-                presenter.delete(wing.id)
+                val undo = UndoCoordinator()
+                presenter.delete(wing.id, undo, TEXT)
+                undo.expire()
 
                 // then
                 coVerify(exactly = 1) { wings.delete(wing.id) }
@@ -189,7 +194,9 @@ class WingPresentersTest {
                 val presenter = listPresenter()
 
                 // when
-                presenter.delete(wing.id)
+                val undo = UndoCoordinator()
+                presenter.delete(wing.id, undo, TEXT)
+                undo.expire()
 
                 // then
                 assertThat(presenter.state.failure?.kind).isEqualTo(FailureKind.DeleteInUse)

@@ -75,11 +75,14 @@ import ch.qscqlmpa.wingtracker.ui.resources.logbook_no_wings_body
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_no_wings_title
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_title
 import ch.qscqlmpa.wingtracker.ui.resources.month_names
+import ch.qscqlmpa.wingtracker.ui.resources.undo_flight_deleted
 import ch.qscqlmpa.wingtracker.ui.resources.unreadable_kept
 import ch.qscqlmpa.wingtracker.ui.resources.unreadable_quarantined
 import ch.qscqlmpa.wingtracker.ui.resources.wing_hours_total
 import ch.qscqlmpa.wingtracker.ui.theme.extraColors
 import ch.qscqlmpa.wingtracker.ui.toDisplay
+import ch.qscqlmpa.wingtracker.ui.undo.LocalUndo
+import ch.qscqlmpa.wingtracker.ui.undo.undoText
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
@@ -97,7 +100,7 @@ fun LogbookScreen(
     onGoToGear: () -> Unit,
 ) {
     val state = presenter.state
-    val logbook = state.logbook
+    val logbook = state.shown
     var flightToDelete by remember { mutableStateOf<Flight?>(null) }
 
     Scaffold(
@@ -144,6 +147,8 @@ fun LogbookScreen(
     }
 
     flightToDelete?.let { flight ->
+        val undo = LocalUndo.current
+        val undoText = undoText(Res.string.undo_flight_deleted)
         val wingName =
             logbook
                 ?.wings
@@ -158,7 +163,7 @@ fun LogbookScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        presenter.delete(flight.id)
+                        presenter.delete(flight.id, undo, undoText)
                         flightToDelete = null
                     },
                 ) { Text(stringResource(Res.string.delete_confirm)) }

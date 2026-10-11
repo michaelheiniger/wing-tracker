@@ -16,6 +16,9 @@ import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
+import ch.qscqlmpa.wingtracker.ui.undo.TEXT
+import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
+import ch.qscqlmpa.wingtracker.ui.undo.expire
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -111,7 +114,9 @@ class SimpleGearPresentersTest {
                 val presenter = listPresenter()
 
                 // when
-                presenter.delete(GearRef(GearKind.Harness, "h-1"))
+                val undo = UndoCoordinator()
+                presenter.delete(GearRef(GearKind.Harness, "h-1"), undo, TEXT)
+                undo.expire()
 
                 // then
                 assertThat(presenter.state.failure?.kind).isEqualTo(FailureKind.DeleteInUse)

@@ -68,7 +68,11 @@ import ch.qscqlmpa.wingtracker.ui.resources.maintenance_record_check
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_restarts
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_since
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_total_hours
+import ch.qscqlmpa.wingtracker.ui.resources.undo_check_deleted
+import ch.qscqlmpa.wingtracker.ui.resources.undo_plan_cancelled
 import ch.qscqlmpa.wingtracker.ui.toDisplay
+import ch.qscqlmpa.wingtracker.ui.undo.LocalUndo
+import ch.qscqlmpa.wingtracker.ui.undo.undoText
 import org.jetbrains.compose.resources.stringResource
 
 private sealed interface MaintenanceDialog {
@@ -106,7 +110,7 @@ fun GearMaintenanceScreen(
     onBack: () -> Unit,
 ) {
     val state = presenter.state
-    val data = state.data
+    val data = state.shown
     var dialog by remember { mutableStateOf<MaintenanceDialog?>(null) }
 
     Column(
@@ -154,10 +158,12 @@ fun GearMaintenanceScreen(
             }
 
             is MaintenanceDialog.DeleteCheck -> {
+                val undo = LocalUndo.current
+                val undoText = undoText(Res.string.undo_check_deleted)
                 DeleteCheckDialog(
                     check = current.check,
                     onConfirm = {
-                        presenter.deleteCheck(current.check.id)
+                        presenter.deleteCheck(current.check.id, undo, undoText)
                         dialog = null
                     },
                     onDismiss = { dialog = null },
@@ -197,6 +203,8 @@ private fun MaintenanceContent(
     onDialog: (MaintenanceDialog) -> Unit,
 ) {
     val history = data.gear.history
+    val undo = LocalUndo.current
+    val planCancelledText = undoText(Res.string.undo_plan_cancelled)
     Text(data.gear.displayName, style = MaterialTheme.typography.headlineMedium)
     SummaryCard(data)
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -217,7 +225,7 @@ private fun MaintenanceContent(
             planned,
             onComplete = { onDialog(MaintenanceDialog.CompletePlan(planned)) },
             onEdit = { onDialog(MaintenanceDialog.EditPlan(planned)) },
-            onCancel = { presenter.cancelPlan(planned.id) },
+            onCancel = { presenter.cancelPlan(planned.id, undo, planCancelledText) },
         )
     }
 

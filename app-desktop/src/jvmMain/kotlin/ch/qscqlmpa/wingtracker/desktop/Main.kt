@@ -31,6 +31,7 @@ import ch.qscqlmpa.wingtracker.ui.shell.AppShell
 import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import ch.qscqlmpa.wingtracker.ui.theme.WingTrackerTheme
+import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
@@ -79,7 +80,11 @@ fun main() {
         }
         LaunchedEffect(Unit) { koin.get<StartupReminder>()() }
         Window(
-            onCloseRequest = ::exitApplication,
+            onCloseRequest = {
+                // A delete the pilot could still have undone must not be lost when the window closes.
+                runBlocking { koin.get<UndoCoordinator>().flush() }
+                exitApplication()
+            },
             title = if (devMode) "Wing Tracker (dev)" else "Wing Tracker",
             // The window is sized in the JVM's own units, so it grows with the interface.
             state =
@@ -99,6 +104,7 @@ fun main() {
                         platform = koin.get<PlatformServices>(),
                         themePreference = themePreference,
                         scalePreference = scalePreference,
+                        undo = koin.get<UndoCoordinator>(),
                     )
                 }
             }

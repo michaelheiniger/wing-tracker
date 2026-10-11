@@ -25,11 +25,18 @@ import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.igc_drop_hint
 import ch.qscqlmpa.wingtracker.ui.resources.igc_pick_title
+import ch.qscqlmpa.wingtracker.ui.resources.undo_flight_discarded
 import ch.qscqlmpa.wingtracker.ui.today
+import ch.qscqlmpa.wingtracker.ui.undo.LocalUndo
+import ch.qscqlmpa.wingtracker.ui.undo.undoText
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 private sealed interface LogbookDialog {
-    data object New : LogbookDialog
+    // [restored] holds what the pilot had typed when they discarded the dialog and then took it back.
+    data class New(
+        val restored: FlightFormInput? = null,
+    ) : LogbookDialog
 
     data class Edit(
         val flight: Flight,
@@ -76,14 +83,14 @@ fun LogbookRoute(
             },
         )
     val wings =
-        presenter.state.logbook
+        presenter.state.shown
             ?.wings
             .orEmpty()
     Box(modifier = Modifier.fillMaxSize().then(dropTarget)) {
         LogbookScreen(
             presenter = presenter,
             importFailure = importer.failure,
-            onLogFlight = { dialog = LogbookDialog.New },
+            onLogFlight = { dialog = LogbookDialog.New() },
             onEditFlight = { dialog = LogbookDialog.Edit(it) },
             onImportIgc = { importer.choose { files -> dialog = LogbookDialog.Import(files) } },
             attention = attention,
@@ -93,6 +100,8 @@ fun LogbookRoute(
         if (dropHover) DropOverlay()
     }
 
+    val undo = LocalUndo.current
+    val discardedText = undoText(Res.string.undo_flight_discarded)
     val closeDialog = {
         dialog = null
         presenter.refresh()
@@ -119,15 +128,29 @@ fun LogbookRoute(
                 remember(current) {
                     val fresh = presenter.state.newFlightInput(today())
                     val editing = (current as? LogbookDialog.Edit)?.flight
+                    val start = (current as? LogbookDialog.New)?.restored ?: fresh
                     FlightFormPresenter(
                         scope = scope,
                         logFlight = useCases.logFlight,
                         updateFlight = useCases.updateFlight,
-                        initial = editing?.let { FlightFormInput.from(it) } ?: fresh,
+                        initial = editing?.let { FlightFormInput.from(it) } ?: start,
                         editing = editing,
                     )
                 }
-            FlightDialog(presenter = formPresenter, wings = wings, onClose = closeDialog)
+            FlightDialog(
+                presenter = formPresenter,
+                wings = wings,
+                onClose = {
+                    closeDialog()
+                    // Only typed-in input is worth taking back; an untouched dialog closes silently.
+                    if (current is LogbookDialog.New && formPresenter.hasUnsavedInput) {
+                        val typed = formPresenter.input
+                        scope.launch {
+                            undo.offer(discardedText, onUndo = { dialog = LogbookDialog.New(typed) }, onExpire = {})
+                        }
+                    }
+                },
+            )
         }
     }
 }

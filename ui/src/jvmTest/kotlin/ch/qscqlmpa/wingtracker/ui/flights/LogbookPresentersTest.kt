@@ -23,6 +23,10 @@ import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
+import ch.qscqlmpa.wingtracker.ui.undo.TEXT
+import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
+import ch.qscqlmpa.wingtracker.ui.undo.expire
+import ch.qscqlmpa.wingtracker.ui.undo.pressUndo
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -145,7 +149,9 @@ class LogbookPresentersTest {
                 val presenter = logbookPresenter()
 
                 // when
-                presenter.delete(flight.id)
+                val undo = UndoCoordinator()
+                presenter.delete(flight.id, undo, TEXT)
+                undo.expire()
 
                 // then
                 coVerify(exactly = 1) { flights.delete(flight.id) }
@@ -226,6 +232,123 @@ class LogbookPresentersTest {
 
                 // then
                 assertThat(input.wingId).isEqualTo(cloudSurfer.id)
+            }
+    }
+
+    @Nested
+    inner class UndoingADelete {
+        @Test
+        fun `hides the flight at once but keeps it stored`() =
+            runTest {
+                // given
+                val flight = aFlight("f-1", "wing-1")
+                givenStored(listOf(flight))
+                val presenter = logbookPresenter()
+                presenter.refresh()
+
+                // when
+                presenter.delete(flight.id, UndoCoordinator(), TEXT)
+
+                // then
+                assertThat(presenter.state.shown?.months).isEmpty()
+                coVerify(exactly = 0) { flights.delete(any()) }
+            }
+
+        @Test
+        fun `shows the flight again and never deletes it when undone`() =
+            runTest {
+                // given
+                val flight = aFlight("f-1", "wing-1")
+                givenStored(listOf(flight))
+                val presenter = logbookPresenter()
+                presenter.refresh()
+                val undo = UndoCoordinator()
+                presenter.delete(flight.id, undo, TEXT)
+
+                // when
+                undo.pressUndo()
+
+                // then
+                assertThat(
+                    presenter.state.shown
+                        ?.months
+                        ?.flatMap { it.flights },
+                ).containsExactly(flight)
+                coVerify(exactly = 0) { flights.delete(any()) }
+            }
+
+        @Test
+        fun `takes the hidden flight out of the hours of its wing`() =
+            runTest {
+                // given
+                val flight = aFlight("f-1", "wing-1")
+                givenStored(listOf(flight))
+                val presenter = logbookPresenter()
+                presenter.refresh()
+                val before =
+                    presenter.state.shown
+                        ?.hoursByWing
+                        ?.get(WingId("wing-1"))
+
+                // when
+                presenter.delete(flight.id, UndoCoordinator(), TEXT)
+
+                // then
+                val after =
+                    presenter.state.shown
+                        ?.hoursByWing
+                        ?.get(WingId("wing-1"))
+                assertThat(after).isEqualTo(before?.minus(flight.details.duration))
+            }
+    }
+
+    @Nested
+    inner class DiscardingANewFlight {
+        private fun TestScope.formPresenter(initial: FlightFormInput) =
+            FlightFormPresenter(
+                scope = TestScope(UnconfinedTestDispatcher(testScheduler)),
+                logFlight = LogFlight(flights, wings, clock),
+                updateFlight = UpdateFlight(flights, wings, clock),
+                initial = initial,
+            )
+
+        private val fresh = FlightFormInput(date = LocalDate(2026, 10, 11), wingId = WingId("wing-1"))
+
+        @Test
+        fun `has nothing to take back while the form is untouched`() =
+            runTest {
+                // given / when
+                val presenter = formPresenter(fresh)
+
+                // then
+                assertThat(presenter.hasUnsavedInput).isFalse()
+            }
+
+        @Test
+        fun `has something to take back once the pilot typed`() =
+            runTest {
+                // given
+                val presenter = formPresenter(fresh)
+
+                // when
+                presenter.change { it.copy(duration = "1:35") }
+
+                // then
+                assertThat(presenter.hasUnsavedInput).isTrue()
+            }
+
+        @Test
+        fun `has nothing to take back after saving`() =
+            runTest {
+                // given
+                coEvery { wings.findById(skyDancer.id) } returns skyDancer
+                val presenter = formPresenter(fresh.copy(duration = "1:35"))
+
+                // when
+                presenter.submit {}
+
+                // then
+                assertThat(presenter.hasUnsavedInput).isFalse()
             }
     }
 

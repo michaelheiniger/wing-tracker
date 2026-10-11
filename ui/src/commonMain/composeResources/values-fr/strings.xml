@@ -309,4 +309,10 @@
     <string name="settings_scale_title">Taille de l'interface</string>
     <string name="settings_scale_hint">Automatique suit la mise à l'échelle de ton bureau. Un changement s'applique immédiatement.</string>
     <string name="scale_automatic">Automatique</string>
+    <string name="undo_action">Annuler</string>
+    <string name="undo_flight_deleted">Vol supprimé</string>
+    <string name="undo_item_deleted">%1$s supprimé</string>
+    <string name="undo_check_deleted">Contrôle supprimé</string>
+    <string name="undo_plan_cancelled">Contrôle planifié annulé</string>
+    <string name="undo_flight_discarded">Vol abandonné</string>
 </resources>

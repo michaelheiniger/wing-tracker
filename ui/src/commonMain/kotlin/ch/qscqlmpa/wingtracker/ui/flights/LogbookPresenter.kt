@@ -13,17 +13,25 @@ import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
+import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
+import ch.qscqlmpa.wingtracker.ui.undo.UndoText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+import kotlin.time.Duration
 
 data class LogbookState(
     val logbook: Logbook? = null,
     val unreadable: List<UnreadableRecord> = emptyList(),
     val failure: Failure? = null,
+    // Deleted flights wait here until the pilot can no longer undo, so Undo only has to show them again.
+    val hiddenFlights: Set<FlightId> = emptySet(),
 ) {
     val loading: Boolean get() = logbook == null && failure == null
+
+    /** The logbook as the pilot should see it: without the flights that are about to be deleted. */
+    val shown: Logbook? get() = logbook?.without(hiddenFlights)
 
     /**
      * Date defaults to today and the wing to the one flown last, because a pilot usually logs a flight
@@ -32,7 +40,7 @@ data class LogbookState(
     fun newFlightInput(today: LocalDate): FlightFormInput {
         val wings = logbook?.wings.orEmpty()
         val lastFlown =
-            logbook
+            shown
                 ?.months
                 ?.flatMap { it.flights }
                 ?.maxByOrNull { it.loggedAt }
@@ -58,7 +66,28 @@ class LogbookPresenter(
 
     fun refresh() = run(FailureKind.LoadLogbook) { }
 
-    fun delete(id: FlightId) = run(FailureKind.DeleteFlight) { deleteFlight(id) }
+    /** Hides the flight at once and deletes it for real only when the pilot can no longer undo. */
+    fun delete(
+        id: FlightId,
+        undo: UndoCoordinator,
+        text: UndoText,
+    ) {
+        state = state.copy(hiddenFlights = state.hiddenFlights + id)
+        scope.launch {
+            undo.offer(
+                text,
+                onUndo = { unhide(id) },
+                onExpire = {
+                    perform(FailureKind.DeleteFlight) { deleteFlight(id) }
+                    unhide(id)
+                },
+            )
+        }
+    }
+
+    private fun unhide(id: FlightId) {
+        state = state.copy(hiddenFlights = state.hiddenFlights - id)
+    }
 
     /** Opens the imported track in whatever program the system associates with it. */
     fun openTrack(flight: Flight) {
@@ -85,25 +114,55 @@ class LogbookPresenter(
         kind: FailureKind,
         action: suspend () -> Unit,
     ) {
-        scope.launch {
-            state =
-                try {
-                    action()
-                    val logbook = getLogbook()
-                    state.copy(
-                        logbook = logbook,
-                        // A later reload must not re-announce a quarantined file that was already reported.
-                        unreadable = (state.unreadable + logbook.unreadable).distinct(),
-                        failure = null,
-                    )
-                } catch (e: CancellationException) {
-                    throw e
-                    // Any storage failure must reach the user as a message; it must never crash the window.
-                } catch (
-                    @Suppress("TooGenericExceptionCaught") e: Exception,
-                ) {
-                    state.copy(failure = Failure(kind, e.message))
-                }
-        }
+        scope.launch { perform(kind, action) }
     }
+
+    private suspend fun perform(
+        kind: FailureKind,
+        action: suspend () -> Unit,
+    ) {
+        state =
+            try {
+                action()
+                val logbook = getLogbook()
+                state.copy(
+                    logbook = logbook,
+                    // A later reload must not re-announce a quarantined file that was already reported.
+                    unreadable = (state.unreadable + logbook.unreadable).distinct(),
+                    failure = null,
+                )
+            } catch (e: CancellationException) {
+                throw e
+                // Any storage failure must reach the user as a message; it must never crash the window.
+            } catch (
+                @Suppress("TooGenericExceptionCaught") e: Exception,
+            ) {
+                state.copy(failure = Failure(kind, e.message))
+            }
+    }
+}
+
+private fun Logbook.without(hidden: Set<FlightId>): Logbook {
+    if (hidden.isEmpty()) return this
+    val removed = months.flatMap { it.flights }.filter { it.id in hidden }
+    return copy(
+        months =
+            months
+                .map {
+                    it.copy(
+                        flights =
+                            it.flights.filter { flight ->
+                                flight.id !in hidden
+                            },
+                    )
+                }.filter { it.flights.isNotEmpty() },
+        hoursByWing =
+            hoursByWing.mapValues { (wingId, hours) ->
+                hours -
+                    removed.filter { it.details.wingId == wingId }.fold(Duration.ZERO) { sum, f ->
+                        sum +
+                            f.details.duration
+                    }
+            },
+    )
 }

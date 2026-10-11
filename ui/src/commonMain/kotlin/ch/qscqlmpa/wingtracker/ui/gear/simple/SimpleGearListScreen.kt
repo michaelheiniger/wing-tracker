@@ -47,6 +47,7 @@ import ch.qscqlmpa.wingtracker.ui.gear.maintenance.chipText
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_planned_on
+import ch.qscqlmpa.wingtracker.ui.resources.undo_item_deleted
 import ch.qscqlmpa.wingtracker.ui.resources.wing_delete
 import ch.qscqlmpa.wingtracker.ui.resources.wing_edit
 import ch.qscqlmpa.wingtracker.ui.resources.wing_in_service_since
@@ -58,6 +59,8 @@ import ch.qscqlmpa.wingtracker.ui.resources.wing_status_retired_reason
 import ch.qscqlmpa.wingtracker.ui.resources.wings_show_retired
 import ch.qscqlmpa.wingtracker.ui.theme.extraColors
 import ch.qscqlmpa.wingtracker.ui.toDisplay
+import ch.qscqlmpa.wingtracker.ui.undo.LocalUndo
+import ch.qscqlmpa.wingtracker.ui.undo.undoText
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -146,10 +149,12 @@ fun SimpleGearListScreen(
         )
     }
     toDelete?.let { item ->
+        val undo = LocalUndo.current
+        val undoText = undoText(Res.string.undo_item_deleted, item.details.name)
         DeleteDialog(
             name = item.details.name,
             onConfirm = {
-                presenter.delete(item.ref)
+                presenter.delete(item.ref, undo, undoText)
                 toDelete = null
             },
             onDismiss = { toDelete = null },

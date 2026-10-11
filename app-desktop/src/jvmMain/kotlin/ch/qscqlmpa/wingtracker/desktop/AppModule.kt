@@ -66,6 +66,7 @@ import ch.qscqlmpa.wingtracker.ui.gear.simple.ReserveOps
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.reminders.RemindersUseCases
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
+import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import java.nio.file.Path
@@ -170,4 +171,5 @@ private fun uiModule() =
     module {
         single { PlatformServices(DesktopFilePicker(), DesktopFileOpener(), DesktopFileSaver(), DesktopFileDrop()) }
         single { ThemePreference() }
+        single { UndoCoordinator() }
     }

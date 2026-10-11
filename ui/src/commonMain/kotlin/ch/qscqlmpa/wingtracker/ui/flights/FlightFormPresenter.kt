@@ -20,7 +20,7 @@ class FlightFormPresenter(
     private val scope: CoroutineScope,
     private val logFlight: LogFlight,
     private val updateFlight: UpdateFlight,
-    initial: FlightFormInput,
+    private val initial: FlightFormInput,
     val editing: Flight? = null,
 ) {
     var input by mutableStateOf(initial)
@@ -31,6 +31,11 @@ class FlightFormPresenter(
         private set
     var saving by mutableStateOf(false)
         private set
+
+    private var saved = false
+
+    /** True when the pilot typed something that closing the dialog would now throw away. */
+    val hasUnsavedInput: Boolean get() = !saved && input != initial
 
     fun change(update: (FlightFormInput) -> FlightFormInput) {
         input = update(input)
@@ -49,6 +54,7 @@ class FlightFormPresenter(
                     try {
                         save(result.details)
                         failure = null
+                        saved = true
                         onSaved()
                     } catch (e: CancellationException) {
                         throw e

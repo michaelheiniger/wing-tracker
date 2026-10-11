@@ -11,6 +11,8 @@ import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.gear.wing.FormError
+import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
+import ch.qscqlmpa.wingtracker.ui.undo.UndoText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -24,8 +26,11 @@ data class SimpleGearListState(
     // Retired items stay out of the way by default but remain reachable, so history is never hidden for good.
     val showRetired: Boolean = false,
     val failure: Failure? = null,
+    // Deleted items wait here until the pilot can no longer undo, so Undo only has to show them again.
+    val hidden: Set<GearRef> = emptySet(),
 ) {
-    val visibleItems: List<SimpleGearItem> get() = if (showRetired) items else items.filter { it.isActive }
+    val visibleItems: List<SimpleGearItem>
+        get() = (if (showRetired) items else items.filter { it.isActive }).filter { it.ref !in hidden }
     val retiredCount: Int get() = items.count { !it.isActive }
 }
 
@@ -52,11 +57,31 @@ class SimpleGearListPresenter(
         reload()
     }
 
-    fun delete(ref: GearRef) =
-        run(FailureKind.Delete) {
-            ops.delete(ref)
-            reload()
+    /** Hides the item at once and deletes it for real only when the pilot can no longer undo. */
+    fun delete(
+        ref: GearRef,
+        undo: UndoCoordinator,
+        text: UndoText,
+    ) {
+        state = state.copy(hidden = state.hidden + ref)
+        scope.launch {
+            undo.offer(
+                text,
+                onUndo = { unhide(ref) },
+                onExpire = {
+                    perform(FailureKind.Delete) {
+                        ops.delete(ref)
+                        reload()
+                    }
+                    unhide(ref)
+                },
+            )
         }
+    }
+
+    private fun unhide(ref: GearRef) {
+        state = state.copy(hidden = state.hidden - ref)
+    }
 
     fun dismissUnreadable() {
         state = state.copy(unreadable = emptyList())
@@ -78,21 +103,26 @@ class SimpleGearListPresenter(
         kind: FailureKind,
         block: suspend () -> SimpleGearListState,
     ) {
-        scope.launch {
-            state =
-                try {
-                    block()
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (_: GearInUseException) {
-                    state.copy(loading = false, failure = Failure(FailureKind.DeleteInUse))
-                    // Any storage failure must reach the user as a message; it must never crash the window.
-                } catch (
-                    @Suppress("TooGenericExceptionCaught") e: Exception,
-                ) {
-                    state.copy(loading = false, failure = Failure(kind, e.message))
-                }
-        }
+        scope.launch { perform(kind, block) }
+    }
+
+    private suspend fun perform(
+        kind: FailureKind,
+        block: suspend () -> SimpleGearListState,
+    ) {
+        state =
+            try {
+                block()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: GearInUseException) {
+                state.copy(loading = false, failure = Failure(FailureKind.DeleteInUse))
+                // Any storage failure must reach the user as a message; it must never crash the window.
+            } catch (
+                @Suppress("TooGenericExceptionCaught") e: Exception,
+            ) {
+                state.copy(loading = false, failure = Failure(kind, e.message))
+            }
     }
 }
 

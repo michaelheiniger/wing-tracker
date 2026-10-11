@@ -32,6 +32,9 @@ import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
 import ch.qscqlmpa.wingtracker.ui.platform.FilePicker
+import ch.qscqlmpa.wingtracker.ui.undo.TEXT
+import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
+import ch.qscqlmpa.wingtracker.ui.undo.expire
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -152,7 +155,9 @@ class MaintenancePresentersTest {
                 val presenter = GearMaintenancePresenter(scope(), WING_ID, useCases(), opener)
 
                 // when
-                presenter.deleteCheck(CheckId("check-1"))
+                val undo = UndoCoordinator()
+                presenter.deleteCheck(CheckId("check-1"), undo, TEXT)
+                undo.expire()
 
                 // then
                 coVerify(exactly = 1) { wings.save(match { it.history.checks.isEmpty() }) }
