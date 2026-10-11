@@ -1,8 +1,11 @@
 package ch.qscqlmpa.wingtracker.storage.json
 
+import ch.qscqlmpa.wingtracker.attachments.Attachment
+import ch.qscqlmpa.wingtracker.attachments.AttachmentId
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.FlightId
+import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
@@ -22,6 +25,10 @@ internal data class FlightDocument(
     val notes: String? = null,
     // ISO-8601 text keeps the file readable and independent of the serialization library's Instant support.
     val loggedAt: String,
+    // Added in schema 2: the original track a flight was imported from.
+    val igcAttachmentId: String? = null,
+    val igcFileName: String? = null,
+    val igcChecksum: String? = null,
 ) {
     fun toDomain(): Flight {
         if (schemaVersion > CURRENT_SCHEMA_VERSION) {
@@ -39,11 +46,18 @@ internal data class FlightDocument(
                     notes = notes,
                 ),
             loggedAt = Instant.parse(loggedAt),
+            igcFile = igcFile(),
         )
     }
 
+    private fun igcFile(): IgcFile? {
+        if (igcAttachmentId == null || igcFileName == null || igcChecksum == null) return null
+        return IgcFile(Attachment(AttachmentId(igcAttachmentId), igcFileName), igcChecksum)
+    }
+
     companion object {
-        const val CURRENT_SCHEMA_VERSION = 1
+        // Version 2 added the imported track. Older application versions treat it as newer data and leave it untouched.
+        const val CURRENT_SCHEMA_VERSION = 2
 
         fun from(flight: Flight) =
             FlightDocument(
@@ -55,6 +69,13 @@ internal data class FlightDocument(
                 landingSite = flight.details.landingSite,
                 notes = flight.details.notes,
                 loggedAt = flight.loggedAt.toString(),
+                igcAttachmentId =
+                    flight.igcFile
+                        ?.attachment
+                        ?.id
+                        ?.value,
+                igcFileName = flight.igcFile?.attachment?.fileName,
+                igcChecksum = flight.igcFile?.checksum,
             )
     }
 }

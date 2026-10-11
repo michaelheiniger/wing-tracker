@@ -1,7 +1,14 @@
 package ch.qscqlmpa.wingtracker.storage.json
 
+import ch.qscqlmpa.wingtracker.attachments.Attachment
+import ch.qscqlmpa.wingtracker.attachments.AttachmentId
 import ch.qscqlmpa.wingtracker.flights.FlightId
+import ch.qscqlmpa.wingtracker.flights.IgcFile
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -50,6 +57,50 @@ class JsonFlightRepositoryTest {
 
                 // then
                 assertThat(found).usingRecursiveComparison().isEqualTo(flight)
+            }
+
+        @Test
+        fun `restores the imported track with its checksum`() =
+            runTest {
+                // given
+                val imported =
+                    aStoredFlight().copy(
+                        igcFile =
+                            IgcFile(
+                                Attachment(AttachmentId("igc-1"), "2026-09-20-niederhorn.igc"),
+                                "3b7e72f0c1d9",
+                            ),
+                    )
+                repository.save(imported)
+
+                // when
+                val found = repository.findById(imported.id)
+
+                // then
+                assertThat(found).usingRecursiveComparison().isEqualTo(imported)
+            }
+
+        @Test
+        fun `reads a flight written before tracks could be imported`() =
+            runTest {
+                // given
+                val flight = aStoredFlight()
+                repository.save(flight)
+                val file = dataDirectory.resolve("flights/${flight.id.value}.json")
+                val newerKeys = setOf("igcAttachmentId", "igcFileName", "igcChecksum")
+                val document = Json.parseToJsonElement(file.readText()).jsonObject
+                file.writeText(
+                    JsonObject(
+                        document.filterKeys { it !in newerKeys } + ("schemaVersion" to JsonPrimitive(1)),
+                    ).toString(),
+                )
+
+                // when
+                val found = repository.findById(flight.id)
+
+                // then
+                assertThat(found).usingRecursiveComparison().isEqualTo(flight)
+                assertThat(found?.igcFile).isNull()
             }
 
         @Test
@@ -136,7 +187,7 @@ class JsonFlightRepositoryTest {
                 // given
                 repository.save(aStoredFlight(id = "flight-1"))
                 val file = dataDirectory.resolve("flights/flight-1.json")
-                file.writeText(file.readText().replace("\"schemaVersion\": 1", "\"schemaVersion\": 999"))
+                file.writeText(file.readText().replace("\"schemaVersion\": 2", "\"schemaVersion\": 999"))
 
                 // when
                 val result = repository.findAll()

@@ -73,4 +73,18 @@ class LayerDependencyTest {
             assertNoImportStartsWith("infrastructure-storage-json", "$base.ui", "$base.desktop", "androidx.compose")
         }
     }
+
+    @Nested
+    inner class InfrastructureIgc {
+        @Test
+        fun `does not depend on ui, storage or the composition root`() {
+            assertNoImportStartsWith(
+                "infrastructure-igc",
+                "$base.ui",
+                "$base.desktop",
+                "$base.storage",
+                "androidx.compose",
+            )
+        }
+    }
 }

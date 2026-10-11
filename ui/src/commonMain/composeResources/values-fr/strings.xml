@@ -281,4 +281,17 @@
     <string name="calendar_due_description">L\'intervalle de contrôle de %1$s se termine aujourd\'hui.</string>
     <string name="calendar_planned">%1$s : %2$s</string>
     <string name="calendar_calendar_name">Wing Tracker</string>
+
+    <string name="igc_import">Importer un IGC</string>
+    <string name="igc_pick_title">Choisir une trace de vol</string>
+    <string name="igc_dialog_title">Importer une trace de vol</string>
+    <string name="igc_file">Fichier : %1$s</string>
+    <string name="igc_detected">Trouvé dans la trace : décollage %1$s, atterrissage %2$s (UTC)</string>
+    <string name="igc_none_detected">Aucun vol n\'a été trouvé dans cette trace. Saisis la durée toi-même.</string>
+    <string name="igc_duplicate">Ce fichier a déjà été importé comme le vol du %1$s avec %2$s.</string>
+    <string name="igc_duplicate_confirm">L\'importer quand même</string>
+    <string name="igc_track_chip">Trace</string>
+    <string name="igc_open_track">Ouvrir la trace de ce vol</string>
+    <string name="failure_import_igc">La trace n\'a pas pu être lue : %1$s</string>
+    <string name="failure_open_track">La trace n\'a pas pu être ouverte : %1$s</string>
 </resources>

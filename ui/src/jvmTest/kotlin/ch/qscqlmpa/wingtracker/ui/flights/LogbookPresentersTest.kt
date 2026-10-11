@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.ui.flights
 
 import ch.qscqlmpa.wingtracker.AppClock
+import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
 import ch.qscqlmpa.wingtracker.flights.DeleteFlight
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
@@ -9,9 +10,11 @@ import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.GetLogbook
 import ch.qscqlmpa.wingtracker.flights.LogFlight
 import ch.qscqlmpa.wingtracker.flights.UpdateFlight
+import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
 import ch.qscqlmpa.wingtracker.gear.Acquisition
 import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.GearStatus
+import ch.qscqlmpa.wingtracker.gear.maintenance.ReadAttachment
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
@@ -20,6 +23,7 @@ import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
+import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -70,6 +74,8 @@ private fun aFlight(
 class LogbookPresentersTest {
     private val flights = mockk<FlightRepository>(relaxUnitFun = true)
     private val wings = mockk<WingRepository>()
+    private val attachments = mockk<AttachmentStore>(relaxUnitFun = true)
+    private val opener = mockk<FileOpener>(relaxUnitFun = true)
     private val clock =
         AppClock(
             clock =
@@ -93,7 +99,9 @@ class LogbookPresentersTest {
         LogbookPresenter(
             scope = TestScope(UnconfinedTestDispatcher(testScheduler)),
             getLogbook = GetLogbook(flights, wings),
-            deleteFlight = DeleteFlight(flights),
+            deleteFlight = DeleteFlight(flights, attachments),
+            readAttachment = ReadAttachment(attachments),
+            fileOpener = opener,
         )
 
     @Nested
@@ -227,11 +235,14 @@ class LogbookPresentersTest {
         private fun TestScope.formPresenter(
             initial: FlightFormInput,
             editing: Flight? = null,
+            igc: PreparedIgc? = null,
         ) = FlightFormPresenter(
             scope = TestScope(UnconfinedTestDispatcher(testScheduler)),
             logFlight = LogFlight(flights, wings, clock) { FlightId("new-flight") },
             updateFlight = UpdateFlight(flights, wings, clock),
+            importIgcFlight = ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported-flight") },
             initial = initial,
+            igc = igc,
             editing = editing,
         )
 

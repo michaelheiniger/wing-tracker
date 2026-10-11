@@ -6,10 +6,14 @@ plugins {
 
 kotlin {
     sourceSets {
+        jvmTest.dependencies {
+            implementation(libs.kotlinx.coroutines.test)
+        }
         jvmMain.dependencies {
             implementation(project(":ui"))
             implementation(project(":application"))
             implementation(project(":infrastructure-storage-json"))
+            implementation(project(":infrastructure-igc"))
             implementation(libs.compose.material3)
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)

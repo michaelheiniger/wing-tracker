@@ -24,6 +24,7 @@ ADRs capture **why** wing-tracker is built the way it is. They use the
 | [0015](0015-unreadable-stored-data-is-quarantined.md) | Unreadable stored data is quarantined, never deleted | Accepted |
 | [0016](0016-statistics-charts-drawn-with-compose-canvas.md) | Statistics charts are drawn with Compose Canvas | Accepted |
 | [0017](0017-platform-capabilities-behind-ports.md) | Platform capabilities sit behind ports | Accepted |
+| [0018](0018-igc-import-through-a-port.md) | IGC import goes through a port | Accepted |
 
 ## Rules
 

@@ -15,6 +15,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_delete_check
 import ch.qscqlmpa.wingtracker.ui.resources.failure_delete_flight
 import ch.qscqlmpa.wingtracker.ui.resources.failure_delete_in_use
 import ch.qscqlmpa.wingtracker.ui.resources.failure_export_calendar
+import ch.qscqlmpa.wingtracker.ui.resources.failure_import_igc
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_attention
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_logbook
@@ -22,6 +23,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_load_maintenance
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_settings
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_statistics
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_report
+import ch.qscqlmpa.wingtracker.ui.resources.failure_open_track
 import ch.qscqlmpa.wingtracker.ui.resources.failure_retire
 import ch.qscqlmpa.wingtracker.ui.resources.failure_save
 import ch.qscqlmpa.wingtracker.ui.resources.failure_save_check
@@ -36,6 +38,8 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
     mapOf(
         FailureKind.LoadAttention to Res.string.failure_load_attention,
         FailureKind.ExportCalendar to Res.string.failure_export_calendar,
+        FailureKind.ImportIgc to Res.string.failure_import_igc,
+        FailureKind.OpenTrack to Res.string.failure_open_track,
         FailureKind.SaveSettings to Res.string.failure_save_settings,
         FailureKind.LoadSettings to Res.string.failure_load_settings,
         FailureKind.Load to Res.string.failure_load,

@@ -218,7 +218,7 @@ class MaintenancePresentersTest {
             runTest {
                 // given
                 givenStored()
-                coEvery { picker.pickPdfs("Choose") } returns listOf(NewAttachment("a.pdf", byteArrayOf(1)))
+                coEvery { picker.pick("Choose", "pdf") } returns listOf(NewAttachment("a.pdf", byteArrayOf(1)))
                 val presenter = presenter(CheckFormMode.Record, CheckFormInput(date = LocalDate(2026, 4, 10)))
                 presenter.addReports()
                 var saved = false

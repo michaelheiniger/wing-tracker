@@ -8,6 +8,9 @@ import ch.qscqlmpa.wingtracker.flights.FlightsOfWing
 import ch.qscqlmpa.wingtracker.flights.GetLogbook
 import ch.qscqlmpa.wingtracker.flights.LogFlight
 import ch.qscqlmpa.wingtracker.flights.UpdateFlight
+import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
+import ch.qscqlmpa.wingtracker.flights.igc.PrepareIgcImport
+import ch.qscqlmpa.wingtracker.flights.igc.TrackReader
 import ch.qscqlmpa.wingtracker.gear.harness.DeleteHarness
 import ch.qscqlmpa.wingtracker.gear.harness.HarnessRepository
 import ch.qscqlmpa.wingtracker.gear.harness.ListHarnesses
@@ -38,6 +41,7 @@ import ch.qscqlmpa.wingtracker.gear.wing.RetireWing
 import ch.qscqlmpa.wingtracker.gear.wing.UpdateWingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingFlightLookup
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
+import ch.qscqlmpa.wingtracker.igc.Igc4jTrackReader
 import ch.qscqlmpa.wingtracker.reminders.GetAttention
 import ch.qscqlmpa.wingtracker.reminders.GetCalendarEntries
 import ch.qscqlmpa.wingtracker.reminders.GetStartNotification
@@ -82,6 +86,7 @@ fun appModules(dataDirectory: Path): List<Module> =
 private fun storageModule(dataDirectory: Path) =
     module {
         single { AppClock() }
+        single<TrackReader> { Igc4jTrackReader() }
         single<WingRepository> { JsonWingRepository(dataDirectory) }
         single<HarnessRepository> { JsonHarnessRepository(dataDirectory) }
         single<ReserveRepository> { JsonReserveRepository(dataDirectory) }
@@ -124,9 +129,11 @@ private fun flightsModule() =
     module {
         factory { LogFlight(get(), get(), get()) }
         factory { UpdateFlight(get(), get(), get()) }
-        factory { DeleteFlight(get()) }
+        factory { DeleteFlight(get(), get()) }
+        factory { PrepareIgcImport(get(), get()) }
+        factory { ImportIgcFlight(get(), get(), get(), get()) }
         factory { GetLogbook(get(), get()) }
-        single { LogbookUseCases(get(), get(), get(), get()) }
+        single { LogbookUseCases(get(), get(), get(), get(), get(), get(), get()) }
         factory { GetStatistics(get(), get(), get()) }
     }
 

@@ -22,6 +22,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -32,6 +33,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.Logbook
@@ -39,6 +42,7 @@ import ch.qscqlmpa.wingtracker.flights.LogbookMonth
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.reminders.Attention
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
+import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.components.UnreadableBanner
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.message
@@ -54,6 +58,9 @@ import ch.qscqlmpa.wingtracker.ui.resources.flight_edit
 import ch.qscqlmpa.wingtracker.ui.resources.flight_sites
 import ch.qscqlmpa.wingtracker.ui.resources.flight_unknown_wing
 import ch.qscqlmpa.wingtracker.ui.resources.flights_count
+import ch.qscqlmpa.wingtracker.ui.resources.igc_import
+import ch.qscqlmpa.wingtracker.ui.resources.igc_open_track
+import ch.qscqlmpa.wingtracker.ui.resources.igc_track_chip
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_empty_action
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_empty_body
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_empty_title
@@ -77,8 +84,10 @@ import kotlin.time.Duration
 @Composable
 fun LogbookScreen(
     presenter: LogbookPresenter,
+    importFailure: Failure?,
     onLogFlight: () -> Unit,
     onEditFlight: (Flight) -> Unit,
+    onImportIgc: () -> Unit,
     attention: Attention,
     onOpenAttention: (GearRef) -> Unit,
     onGoToGear: () -> Unit,
@@ -102,14 +111,28 @@ fun LogbookScreen(
             modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text(stringResource(Res.string.logbook_title), style = MaterialTheme.typography.headlineMedium)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(stringResource(Res.string.logbook_title), style = MaterialTheme.typography.headlineMedium)
+                // Importing needs a wing to log the flight on, like logging by hand.
+                if (logbook != null && logbook.wings.isNotEmpty()) {
+                    OutlinedButton(onClick = onImportIgc) { Text(stringResource(Res.string.igc_import)) }
+                }
+            }
+            importFailure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
             AttentionPanel(attention, onOpenAttention)
             state.unreadable.forEach { UnreadableBanner(it, onDismiss = presenter::dismissUnreadable) }
             state.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
             if (state.loading) {
                 CircularProgressIndicator(modifier = Modifier.padding(24.dp))
             } else if (logbook != null) {
-                LogbookBody(logbook, onLogFlight, onEditFlight, onGoToGear, onDelete = { flightToDelete = it })
+                LogbookBody(logbook, onLogFlight, onEditFlight, presenter::openTrack, onGoToGear, onDelete = {
+                    flightToDelete =
+                        it
+                })
             }
         }
     }
@@ -146,6 +169,7 @@ private fun LogbookBody(
     logbook: Logbook,
     onLogFlight: () -> Unit,
     onEdit: (Flight) -> Unit,
+    onOpenTrack: (Flight) -> Unit,
     onGoToGear: () -> Unit,
     onDelete: (Flight) -> Unit,
 ) {
@@ -169,7 +193,7 @@ private fun LogbookBody(
         }
 
         else -> {
-            LogbookContent(logbook, onEdit, onDelete)
+            LogbookContent(logbook, onEdit, onOpenTrack, onDelete)
         }
     }
 }
@@ -178,6 +202,7 @@ private fun LogbookBody(
 private fun LogbookContent(
     logbook: Logbook,
     onEdit: (Flight) -> Unit,
+    onOpenTrack: (Flight) -> Unit,
     onDelete: (Flight) -> Unit,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -199,7 +224,9 @@ private fun LogbookContent(
                         ?.details
                         ?.name
                         ?: stringResource(Res.string.flight_unknown_wing)
-                FlightCard(flight, wingName, onEdit = { onEdit(flight) }, onDelete = { onDelete(flight) })
+                FlightCard(flight, wingName, onEdit = {
+                    onEdit(flight)
+                }, onOpenTrack = { onOpenTrack(flight) }, onDelete = { onDelete(flight) })
             }
         }
     }
@@ -234,9 +261,11 @@ private fun FlightCard(
     flight: Flight,
     wingName: String,
     onEdit: () -> Unit,
+    onOpenTrack: () -> Unit,
     onDelete: () -> Unit,
 ) {
     val details = flight.details
+    val openTrackDescription = stringResource(Res.string.igc_open_track)
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -265,6 +294,13 @@ private fun FlightCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+            }
+            if (flight.igcFile != null) {
+                AssistChip(
+                    onClick = onOpenTrack,
+                    label = { Text(stringResource(Res.string.igc_track_chip)) },
+                    modifier = Modifier.semantics { contentDescription = openTrackDescription },
+                )
             }
             Text(formatDuration(details.duration), style = MaterialTheme.typography.titleMedium)
             IconButton(onClick = onEdit) {

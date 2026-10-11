@@ -16,13 +16,16 @@ import kotlin.io.path.writeBytes
 
 /** The operating system's own file dialog, so it looks and behaves like every other desktop application. */
 class DesktopFilePicker : FilePicker {
-    override suspend fun pickPdfs(title: String): List<NewAttachment> {
+    override suspend fun pick(
+        title: String,
+        extension: String,
+    ): List<NewAttachment> {
         // AWT dialogs belong on the UI thread; the files are then read off it.
         val files =
             withContext(Dispatchers.Swing) {
                 val dialog = FileDialog(null as Frame?, title, FileDialog.LOAD)
                 dialog.isMultipleMode = true
-                dialog.setFilenameFilter { _, name -> name.endsWith(".pdf", ignoreCase = true) }
+                dialog.setFilenameFilter { _, name -> name.endsWith(".$extension", ignoreCase = true) }
                 dialog.isVisible = true
                 dialog.files.toList()
             }

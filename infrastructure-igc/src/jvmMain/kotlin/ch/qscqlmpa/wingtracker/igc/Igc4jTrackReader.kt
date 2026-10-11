@@ -1,0 +1,84 @@
+package ch.qscqlmpa.wingtracker.igc
+
+import ch.qscqlmpa.wingtracker.flights.igc.FlightTrack
+import ch.qscqlmpa.wingtracker.flights.igc.InvalidTrackException
+import ch.qscqlmpa.wingtracker.flights.igc.ReadTrack
+import ch.qscqlmpa.wingtracker.flights.igc.TrackFix
+import ch.qscqlmpa.wingtracker.flights.igc.TrackReader
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.plus
+import ru.paragliding.igc4j.parser.IGCParser
+import ru.paragliding.igc4j.parser.InvalidIGCFormatException
+import java.io.ByteArrayInputStream
+import java.security.MessageDigest
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Instant
+
+private const val MILLENNIUM = 2000
+
+// The header writes the date as day, month and two-digit year.
+private val DATE_FORMAT = Regex("""(\d{2})(\d{2})(\d{2})""")
+
+/**
+ * Reads IGC files with igc4j. The library gives the header date and each fix's time as milliseconds since the start
+ * of the day; turning those into points in time, including a flight that crosses midnight UTC, is done here.
+ */
+class Igc4jTrackReader : TrackReader {
+    override fun read(bytes: ByteArray): ReadTrack {
+        val parsed =
+            try {
+                IGCParser.parse(ByteArrayInputStream(bytes))
+            } catch (e: InvalidIGCFormatException) {
+                throw InvalidTrackException("The file is not a valid IGC track: ${e.message}", e)
+            }
+        val date = parseDate(parsed.metadata?.date)
+        if (parsed.points.isEmpty()) throw InvalidTrackException("The file contains no position fixes")
+        return ReadTrack(
+            FlightTrack(
+                date,
+                fixesOf(
+                    date,
+                    parsed.points.map {
+                        Triple(it.timestamp, it.lat, it.lon)
+                    },
+                ),
+            ),
+            sha256(bytes),
+        )
+    }
+
+    private fun fixesOf(
+        startDate: LocalDate,
+        points: List<Triple<Long, Double, Double>>,
+    ): List<TrackFix> {
+        var dayOffset = 0
+        var previous = -1L
+        return points.map { (millisOfDay, latitude, longitude) ->
+            // Times only count up within a day; a smaller time than before means midnight UTC has passed.
+            if (millisOfDay < previous) dayOffset++
+            previous = millisOfDay
+            val day = startDate.plus(dayOffset, DateTimeUnit.DAY)
+            TrackFix(day.atStartOfDayIn(TimeZone.UTC) + millisOfDay.milliseconds, latitude, longitude)
+        }
+    }
+
+    private fun parseDate(text: String?): LocalDate {
+        val match =
+            text?.let { DATE_FORMAT.matchEntire(it) }
+                ?: throw InvalidTrackException("The file has no valid flight date")
+        val (day, month, year) = match.destructured
+        return try {
+            LocalDate(MILLENNIUM + year.toInt(), month.toInt(), day.toInt())
+        } catch (e: IllegalArgumentException) {
+            throw InvalidTrackException("The flight date '$text' is not a valid date", e)
+        }
+    }
+
+    private fun sha256(bytes: ByteArray): String =
+        MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") {
+            "%02x".format(it)
+        }
+}

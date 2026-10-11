@@ -1,10 +1,12 @@
 package ch.qscqlmpa.wingtracker.flights
 
+import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.WingNotFoundException
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test
 class FlightUseCasesTest {
     private val flights = mockk<FlightRepository>(relaxUnitFun = true)
     private val wings = mockk<WingRepository>()
+    private val attachments = mockk<AttachmentStore>(relaxUnitFun = true)
     private val wing = aWingInService()
 
     private fun givenTheWingExists() {
@@ -183,7 +186,7 @@ class FlightUseCasesTest {
                 coEvery { flights.findById(existing.id) } returns existing
 
                 // when
-                DeleteFlight(flights)(existing.id)
+                DeleteFlight(flights, attachments)(existing.id)
 
                 // then
                 coVerify(exactly = 1) { flights.delete(existing.id) }
@@ -197,10 +200,50 @@ class FlightUseCasesTest {
                 coEvery { flights.findById(id) } returns null
 
                 // when
-                val failure = runCatching { DeleteFlight(flights)(id) }.exceptionOrNull()
+                val failure = runCatching { DeleteFlight(flights, attachments)(id) }.exceptionOrNull()
 
                 // then
                 assertThat(failure).isInstanceOf(FlightNotFoundException::class.java)
+            }
+    }
+
+    @Nested
+    inner class DeleteImportedFlight {
+        @Test
+        fun `deletes the stored track together with the flight`() =
+            runTest {
+                // given
+                val attachment =
+                    ch.qscqlmpa.wingtracker.attachments.Attachment(
+                        ch.qscqlmpa.wingtracker.attachments
+                            .AttachmentId("igc-1"),
+                        "flight.igc",
+                    )
+                val imported = aFlight().copy(igcFile = IgcFile(attachment, "3b7e72f0c1d9"))
+                coEvery { flights.findById(imported.id) } returns imported
+
+                // when
+                DeleteFlight(flights, attachments)(imported.id)
+
+                // then
+                coVerifyOrder {
+                    flights.delete(imported.id)
+                    attachments.delete(attachment.id)
+                }
+            }
+
+        @Test
+        fun `deletes no file for a flight that was entered by hand`() =
+            runTest {
+                // given
+                val manual = aFlight()
+                coEvery { flights.findById(manual.id) } returns manual
+
+                // when
+                DeleteFlight(flights, attachments)(manual.id)
+
+                // then
+                coVerify(exactly = 0) { attachments.delete(any()) }
             }
     }
 

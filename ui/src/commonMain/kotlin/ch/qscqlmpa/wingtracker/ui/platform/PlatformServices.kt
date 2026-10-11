@@ -4,8 +4,11 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 
 /** Lets the user choose files; each platform has its own picker, so the shared UI only sees this port. */
 interface FilePicker {
-    /** Returns the chosen PDFs, or an empty list when the dialog was cancelled. */
-    suspend fun pickPdfs(title: String): List<NewAttachment>
+    /** Returns the chosen files with the given [extension] (without the dot), or none when the dialog was cancelled. */
+    suspend fun pick(
+        title: String,
+        extension: String,
+    ): List<NewAttachment>
 }
 
 /** Opens a file in the platform's default viewer. */

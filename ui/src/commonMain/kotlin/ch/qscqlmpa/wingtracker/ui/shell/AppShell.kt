@@ -106,6 +106,7 @@ fun AppShell(
                 Destination.Logbook -> {
                     LogbookRoute(
                         useCases = logbookUseCases,
+                        platform = platform,
                         attention = attentionPresenter.state.attention,
                         onOpenGear = { ref ->
                             pendingGear = ref

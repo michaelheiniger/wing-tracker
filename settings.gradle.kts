@@ -13,6 +13,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // igc4j is only published through JitPack. The repository is restricted to its one group, so nothing else
+        // can ever be resolved from it (ADR 0018).
+        exclusiveContent {
+            forRepository { maven("https://jitpack.io") }
+            filter { includeGroup("com.github.smirnovegorv") }
+        }
     }
 }
 
@@ -21,6 +27,7 @@ include(
     ":domain",
     ":application",
     ":infrastructure-storage-json",
+    ":infrastructure-igc",
     ":ui",
     ":app-desktop",
     ":architecture-test",
