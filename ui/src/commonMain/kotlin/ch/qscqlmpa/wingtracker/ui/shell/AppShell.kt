@@ -23,7 +23,7 @@ import ch.qscqlmpa.wingtracker.ui.flights.LogbookRoute
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.GearRoute
 import ch.qscqlmpa.wingtracker.ui.gear.GearUseCases
-import ch.qscqlmpa.wingtracker.ui.gear.wing.maintenance.MaintenanceUseCases
+import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
 import ch.qscqlmpa.wingtracker.ui.icons.BarChartIcon
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.resources.Res

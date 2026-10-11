@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.statistics.Series
 import ch.qscqlmpa.wingtracker.statistics.SeriesKey
 import ch.qscqlmpa.wingtracker.statistics.Statistics
+import ch.qscqlmpa.wingtracker.ui.components.UnreadableBanner
 import ch.qscqlmpa.wingtracker.ui.formatHoursAndMinutes
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
@@ -263,29 +264,6 @@ private fun EmptyStatistics(onGoToLogbook: () -> Unit) {
         Text(stringResource(Res.string.statistics_empty_title), style = MaterialTheme.typography.titleLarge)
         Text(stringResource(Res.string.statistics_empty_body), color = MaterialTheme.colorScheme.onSurfaceVariant)
         Button(onClick = onGoToLogbook) { Text(stringResource(Res.string.statistics_empty_action)) }
-    }
-}
-
-@Composable
-private fun UnreadableBanner(
-    record: ch.qscqlmpa.wingtracker.shared.UnreadableRecord,
-    onDismiss: () -> Unit,
-) {
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
-        Row(
-            modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            val message =
-                if (record.quarantined) {
-                    stringResource(Res.string.unreadable_quarantined, record.name)
-                } else {
-                    stringResource(Res.string.unreadable_kept, record.name)
-                }
-            Text(message, color = MaterialTheme.colorScheme.onErrorContainer, modifier = Modifier.weight(1f))
-            TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_dismiss)) }
-        }
     }
 }
 

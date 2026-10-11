@@ -2,19 +2,19 @@ package ch.qscqlmpa.wingtracker.ui.gear.wing
 
 import ch.qscqlmpa.wingtracker.gear.Acquisition
 import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
-import ch.qscqlmpa.wingtracker.gear.CurrencyCode
 import ch.qscqlmpa.wingtracker.gear.Price
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceInterval
 import ch.qscqlmpa.wingtracker.gear.wing.CertificationClass
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceInterval
 import ch.qscqlmpa.wingtracker.ui.formatHoursAndMinutes
+import ch.qscqlmpa.wingtracker.ui.gear.DEFAULT_CURRENCY
+import ch.qscqlmpa.wingtracker.ui.gear.PriceParse
+import ch.qscqlmpa.wingtracker.ui.gear.formatAmount
+import ch.qscqlmpa.wingtracker.ui.gear.parsePrice
 import ch.qscqlmpa.wingtracker.ui.parseHoursAndMinutes
 import kotlinx.datetime.LocalDate
 import kotlin.time.Duration
-
-/** Pre-filled because the pilot buys in Swiss francs most of the time; it stays editable per wing. */
-const val DEFAULT_CURRENCY = "CHF"
 
 /** What the pilot typed or picked; parsing lives in [validate] so it is testable without any UI. */
 data class WingFormInput(
@@ -78,7 +78,7 @@ enum class WingFormField {
 }
 
 /** Error kinds rather than text, so the screen can show them in the user's language. */
-enum class WingFormError {
+enum class FormError {
     Required,
     InvalidAmount,
     InvalidCurrency,
@@ -92,17 +92,17 @@ sealed interface WingFormResult {
     ) : WingFormResult
 
     data class Invalid(
-        val errors: Map<WingFormField, WingFormError>,
+        val errors: Map<WingFormField, FormError>,
     ) : WingFormResult
 }
 
 fun WingFormInput.validate(): WingFormResult {
-    val errors = linkedMapOf<WingFormField, WingFormError>()
+    val errors = linkedMapOf<WingFormField, FormError>()
 
-    if (name.isBlank()) errors[WingFormField.Name] = WingFormError.Required
-    if (manufacturer.isBlank()) errors[WingFormField.Manufacturer] = WingFormError.Required
-    if (model.isBlank()) errors[WingFormField.Model] = WingFormError.Required
-    if (inServiceDate == null) errors[WingFormField.InServiceDate] = WingFormError.Required
+    if (name.isBlank()) errors[WingFormField.Name] = FormError.Required
+    if (manufacturer.isBlank()) errors[WingFormField.Manufacturer] = FormError.Required
+    if (model.isBlank()) errors[WingFormField.Model] = FormError.Required
+    if (inServiceDate == null) errors[WingFormField.InServiceDate] = FormError.Required
 
     val price = parsePrice(errors)
     val hours = parseHours(errors)
@@ -126,40 +126,35 @@ fun WingFormInput.validate(): WingFormResult {
     )
 }
 
-private val AMOUNT = Regex("""(\d+)(?:[.,](\d{1,2}))?""")
-private val CURRENCY = Regex("[A-Z]{3}")
-private const val MINOR_UNITS_PER_MAJOR = 100
+private fun WingFormInput.parsePrice(errors: MutableMap<WingFormField, FormError>): Price? =
+    when (val parsed = parsePrice(priceAmount, priceCurrency)) {
+        is PriceParse.Parsed -> {
+            parsed.price
+        }
 
-// The currency is only looked at when an amount is given, because it is pre-filled and so never "empty".
-private fun WingFormInput.parsePrice(errors: MutableMap<WingFormField, WingFormError>): Price? {
-    if (priceAmount.isBlank()) return null
-    val match = AMOUNT.matchEntire(priceAmount.trim())
-    val currency = priceCurrency.trim().uppercase()
-    if (match == null) errors[WingFormField.PriceAmount] = WingFormError.InvalidAmount
-    if (!CURRENCY.matches(currency)) errors[WingFormField.PriceCurrency] = WingFormError.InvalidCurrency
-    if (match == null || !CURRENCY.matches(currency)) return null
+        is PriceParse.Invalid -> {
+            if (parsed.amountInvalid) errors[WingFormField.PriceAmount] = FormError.InvalidAmount
+            if (parsed.currencyInvalid) errors[WingFormField.PriceCurrency] = FormError.InvalidCurrency
+            null
+        }
+    }
 
-    val (whole, cents) = match.destructured
-    val minorUnits = whole.toLong() * MINOR_UNITS_PER_MAJOR + cents.padEnd(2, '0').toLong()
-    return Price(minorUnits, CurrencyCode(currency))
-}
-
-private fun WingFormInput.parseHours(errors: MutableMap<WingFormField, WingFormError>): Duration? {
+private fun WingFormInput.parseHours(errors: MutableMap<WingFormField, FormError>): Duration? {
     if (hoursBeforeTracking.isBlank()) return Duration.ZERO
     val hours = parseHoursAndMinutes(hoursBeforeTracking)
-    if (hours == null) errors[WingFormField.HoursBeforeTracking] = WingFormError.InvalidHours
+    if (hours == null) errors[WingFormField.HoursBeforeTracking] = FormError.InvalidHours
     return hours
 }
 
 private val MONTHS = Regex("""\d{1,3}""")
 
 // Both limits are optional, but at least one is needed for a rule; with neither there is no rule.
-private fun WingFormInput.parseInterval(errors: MutableMap<WingFormField, WingFormError>): MaintenanceInterval? {
+private fun WingFormInput.parseInterval(errors: MutableMap<WingFormField, FormError>): MaintenanceInterval? {
     val months =
         intervalMonths.trim().takeIf { it.isNotEmpty() }?.let { text ->
             text.takeIf { MONTHS.matches(it) }?.toInt()?.takeIf { it > 0 }
                 ?: run {
-                    errors[WingFormField.IntervalMonths] = WingFormError.InvalidMonths
+                    errors[WingFormField.IntervalMonths] = FormError.InvalidMonths
                     null
                 }
         }
@@ -167,14 +162,9 @@ private fun WingFormInput.parseInterval(errors: MutableMap<WingFormField, WingFo
         intervalHours.trim().takeIf { it.isNotEmpty() }?.let { text ->
             parseHoursAndMinutes(text)?.takeIf { it.isPositive() }
                 ?: run {
-                    errors[WingFormField.IntervalHours] = WingFormError.InvalidHours
+                    errors[WingFormField.IntervalHours] = FormError.InvalidHours
                     null
                 }
         }
     return if (months == null && hours == null) null else MaintenanceInterval(months, hours)
-}
-
-private fun formatAmount(minorUnits: Long): String {
-    val cents = (minorUnits % MINOR_UNITS_PER_MAJOR).toString().padStart(2, '0')
-    return "${minorUnits / MINOR_UNITS_PER_MAJOR}.$cents"
 }

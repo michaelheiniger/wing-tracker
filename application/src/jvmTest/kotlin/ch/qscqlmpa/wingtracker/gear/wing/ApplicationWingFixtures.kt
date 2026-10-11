@@ -5,9 +5,9 @@ import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.CurrencyCode
 import ch.qscqlmpa.wingtracker.gear.GearStatus
 import ch.qscqlmpa.wingtracker.gear.Price
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceCheck
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceInterval
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.PlannedCheck
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceCheck
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceInterval
+import ch.qscqlmpa.wingtracker.gear.maintenance.PlannedCheck
 import kotlinx.datetime.LocalDate
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours

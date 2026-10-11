@@ -3,14 +3,15 @@ package ch.qscqlmpa.wingtracker.ui.gear.wing
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
+import ch.qscqlmpa.wingtracker.gear.maintenance.GetMaintenanceStatuses
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceStatus
 import ch.qscqlmpa.wingtracker.gear.wing.DeleteWing
 import ch.qscqlmpa.wingtracker.gear.wing.ListWings
 import ch.qscqlmpa.wingtracker.gear.wing.RetireWing
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.WingInUseException
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.GetMaintenanceStatuses
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceStatus
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
@@ -22,7 +23,7 @@ import kotlinx.datetime.LocalDate
 data class WingListState(
     val wings: List<Wing> = emptyList(),
     val unreadable: List<UnreadableRecord> = emptyList(),
-    val statuses: Map<WingId, MaintenanceStatus?> = emptyMap(),
+    val statuses: Map<GearRef, MaintenanceStatus?> = emptyMap(),
     val loading: Boolean = true,
     // Retired wings stay out of the way by default but remain reachable, so history is never hidden for good.
     val showRetired: Boolean = false,

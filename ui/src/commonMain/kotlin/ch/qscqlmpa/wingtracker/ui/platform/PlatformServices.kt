@@ -1,6 +1,6 @@
 package ch.qscqlmpa.wingtracker.ui.platform
 
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.NewAttachment
+import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 
 /** Lets the user choose files; each platform has its own picker, so the shared UI only sees this port. */
 interface FilePicker {

@@ -24,7 +24,7 @@
     <string name="retire_body">It leaves your active list and reminders, but its flights and history are kept.</string>
     <string name="retire_reason_label">Reason (optional), e.g. sold</string>
     <string name="delete_title">Delete %1$s?</string>
-    <string name="delete_body">Use this for a wing entered by mistake. It is removed for good. A wing that has flights or maintenance history can only be retired.</string>
+    <string name="delete_body">Use this for an item entered by mistake. It is removed for good. Anything with flights or maintenance history can only be retired.</string>
     <string name="delete_confirm">Delete</string>
 
     <string name="form_title_add">Add wing</string>
@@ -58,11 +58,11 @@
     <string name="error_currency">Use a 3-letter code such as CHF</string>
     <string name="error_hours">Use hours or hours:minutes, e.g. 42 or 42:30</string>
 
-    <string name="failure_load">The wings could not be loaded: %1$s</string>
-    <string name="failure_save">The wing could not be saved: %1$s</string>
-    <string name="failure_retire">The wing could not be retired: %1$s</string>
-    <string name="failure_delete">The wing could not be deleted: %1$s</string>
-    <string name="failure_delete_in_use">This wing has flights or maintenance history, so it cannot be deleted. Retire it instead.</string>
+    <string name="failure_load">The gear could not be loaded: %1$s</string>
+    <string name="failure_save">The item could not be saved: %1$s</string>
+    <string name="failure_retire">The item could not be retired: %1$s</string>
+    <string name="failure_delete">The item could not be deleted: %1$s</string>
+    <string name="failure_delete_in_use">This item has flights or maintenance history, so it cannot be deleted. Retire it instead.</string>
 
     <string name="unreadable_quarantined">The file %1$s could not be read and was moved to the quarantine folder in your data folder. Its wing is not shown until the file is repaired and moved back.</string>
     <string name="unreadable_kept">The file %1$s was written by a newer version of the application and is not shown. It has been left untouched.</string>
@@ -219,4 +219,32 @@
     <string name="failure_open_report">The report could not be opened: %1$s</string>
     <string name="failure_save_plan">The planned check could not be saved: %1$s</string>
     <string name="failure_cancel_plan">The planned check could not be cancelled: %1$s</string>
+
+    <string name="check_type_check">Check</string>
+    <string name="check_type_repack">Repack</string>
+
+    <string name="tab_wings">Wings</string>
+    <string name="tab_harnesses">Harnesses</string>
+    <string name="tab_reserves">Reserves</string>
+
+    <string name="harness_title">Harnesses</string>
+    <string name="harness_add">Add harness</string>
+    <string name="harness_empty_title">No harnesses yet</string>
+    <string name="harness_empty_body">Add your harness to keep track of its checks.</string>
+    <string name="harness_empty_action">Add your first harness</string>
+    <string name="harness_form_title_add">Add harness</string>
+    <string name="harness_form_title_edit">Edit %1$s</string>
+
+    <string name="reserve_title">Reserve parachutes</string>
+    <string name="reserve_add">Add reserve</string>
+    <string name="reserve_empty_title">No reserve parachutes yet</string>
+    <string name="reserve_empty_body">Add your reserve to keep track of its repacks.</string>
+    <string name="reserve_empty_action">Add your first reserve</string>
+    <string name="reserve_form_title_add">Add reserve</string>
+    <string name="reserve_form_title_edit">Edit %1$s</string>
+
+    <string name="field_manufacture_date">Date of manufacture</string>
+    <string name="field_harness_interval_months">Check every (months)</string>
+    <string name="field_reserve_interval_months">Repack every (months)</string>
+    <string name="interval_hint_months">Leave empty for no reminder.</string>
 </resources>

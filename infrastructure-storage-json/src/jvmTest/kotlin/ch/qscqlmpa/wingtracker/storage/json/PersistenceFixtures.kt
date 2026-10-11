@@ -10,16 +10,16 @@ import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.CurrencyCode
 import ch.qscqlmpa.wingtracker.gear.GearStatus
 import ch.qscqlmpa.wingtracker.gear.Price
+import ch.qscqlmpa.wingtracker.gear.maintenance.CheckId
+import ch.qscqlmpa.wingtracker.gear.maintenance.CheckType
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceCheck
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceInterval
+import ch.qscqlmpa.wingtracker.gear.maintenance.PlannedCheck
+import ch.qscqlmpa.wingtracker.gear.maintenance.PlannedCheckId
 import ch.qscqlmpa.wingtracker.gear.wing.CertificationClass
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.CheckId
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceCheck
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceInterval
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.PlannedCheck
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.PlannedCheckId
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.WingCheckType
 import kotlinx.datetime.LocalDate
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -78,8 +78,8 @@ fun aStoredFlight(
 
 fun aStoredCheck(
     id: String = "check-1",
-    type: WingCheckType = WingCheckType.Full,
-    restartsInterval: Boolean = type != WingCheckType.Other,
+    type: CheckType = CheckType.Full,
+    restartsInterval: Boolean = type != CheckType.Other,
 ) = MaintenanceCheck(
     id = CheckId(id),
     date = LocalDate(2025, 4, 10),
@@ -94,7 +94,59 @@ fun aStoredPlannedCheck() =
     PlannedCheck(
         PlannedCheckId("plan-1"),
         LocalDate(2026, 12, 1),
-        WingCheckType.Partial,
+        CheckType.Partial,
         "Swiss Paragliding Service",
         "Trim check",
     )
+
+fun aStoredHarness(
+    id: String = "harness-1",
+    status: GearStatus = GearStatus.Active,
+    checks: List<MaintenanceCheck> = emptyList(),
+) = ch.qscqlmpa.wingtracker.gear.harness.Harness(
+    id =
+        ch.qscqlmpa.wingtracker.gear.harness
+            .HarnessId(id),
+    details =
+        ch.qscqlmpa.wingtracker.gear.harness.HarnessDetails(
+            name = "Cockpit",
+            manufacturer = "Advance",
+            model = "Impress 4",
+            size = "M",
+            serialNumber = "ADV-H-20491",
+            acquisition =
+                Acquisition(
+                    AcquisitionCondition.New,
+                    LocalDate(2024, 2, 20),
+                    Price(89_000, CurrencyCode("CHF")),
+                ),
+            inServiceDate = LocalDate(2024, 3, 1),
+            maintenanceInterval = MaintenanceInterval(months = 24),
+        ),
+    status = status,
+    checks = checks,
+)
+
+fun aStoredReserve(
+    id: String = "reserve-1",
+    status: GearStatus = GearStatus.Active,
+    checks: List<MaintenanceCheck> = emptyList(),
+) = ch.qscqlmpa.wingtracker.gear.reserve.Reserve(
+    id =
+        ch.qscqlmpa.wingtracker.gear.reserve
+            .ReserveId(id),
+    details =
+        ch.qscqlmpa.wingtracker.gear.reserve.ReserveDetails(
+            name = "Rescue",
+            manufacturer = "Gin",
+            model = "Yeti Cross",
+            size = "XL",
+            serialNumber = "GIN-R-7731",
+            manufactureDate = LocalDate(2023, 11, 5),
+            acquisition = Acquisition(AcquisitionCondition.SecondHand, LocalDate(2024, 2, 20)),
+            inServiceDate = LocalDate(2024, 3, 1),
+            maintenanceInterval = MaintenanceInterval(months = 12),
+        ),
+    status = status,
+    checks = checks,
+)

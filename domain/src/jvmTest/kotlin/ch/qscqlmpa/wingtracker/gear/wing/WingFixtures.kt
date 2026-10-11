@@ -7,12 +7,12 @@ import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.CurrencyCode
 import ch.qscqlmpa.wingtracker.gear.GearStatus
 import ch.qscqlmpa.wingtracker.gear.Price
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.CheckId
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceCheck
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceInterval
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.PlannedCheck
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.PlannedCheckId
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.WingCheckType
+import ch.qscqlmpa.wingtracker.gear.maintenance.CheckId
+import ch.qscqlmpa.wingtracker.gear.maintenance.CheckType
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceCheck
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceInterval
+import ch.qscqlmpa.wingtracker.gear.maintenance.PlannedCheck
+import ch.qscqlmpa.wingtracker.gear.maintenance.PlannedCheckId
 import kotlinx.datetime.LocalDate
 import kotlin.time.Duration
 
@@ -59,8 +59,8 @@ fun aWing(
 fun aCheck(
     id: String = "check-1",
     date: LocalDate = LocalDate(2025, 4, 10),
-    type: WingCheckType = WingCheckType.Full,
-    restartsInterval: Boolean = type != WingCheckType.Other,
+    type: CheckType = CheckType.Full,
+    restartsInterval: Boolean = type != CheckType.Other,
 ) = MaintenanceCheck(
     id = CheckId(id),
     date = date,
@@ -74,5 +74,5 @@ fun aCheck(
 fun aPlannedCheck(
     id: String = "plan-1",
     date: LocalDate = LocalDate(2026, 12, 1),
-    type: WingCheckType = WingCheckType.Partial,
+    type: CheckType = CheckType.Partial,
 ) = PlannedCheck(PlannedCheckId(id), date, type, company = "Swiss Paragliding Service")

@@ -5,11 +5,11 @@ import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.CurrencyCode
 import ch.qscqlmpa.wingtracker.gear.GearStatus
 import ch.qscqlmpa.wingtracker.gear.Price
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceInterval
 import ch.qscqlmpa.wingtracker.gear.wing.CertificationClass
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceInterval
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration.Companion.minutes
@@ -46,12 +46,6 @@ internal data class WingDocument(
         if (schemaVersion > CURRENT_SCHEMA_VERSION) {
             throw UnsupportedSchemaException("Wing $id was written by a newer version of the application")
         }
-        val price =
-            if (priceMinorUnits != null && priceCurrency != null) {
-                Price(priceMinorUnits, CurrencyCode(priceCurrency))
-            } else {
-                null
-            }
         return Wing(
             id = WingId(id),
             details =
@@ -62,7 +56,7 @@ internal data class WingDocument(
                     size = size,
                     serialNumber = serialNumber,
                     certificationClass = certificationClass?.let { CertificationClass.valueOf(it) },
-                    acquisition = Acquisition(AcquisitionCondition.valueOf(acquisitionCondition), purchaseDate, price),
+                    acquisition = acquisition(acquisitionCondition, purchaseDate, priceMinorUnits, priceCurrency),
                     inServiceDate = inServiceDate,
                     hoursBeforeTracking = hoursBeforeTrackingMinutes.minutes,
                     maintenanceInterval = interval(),

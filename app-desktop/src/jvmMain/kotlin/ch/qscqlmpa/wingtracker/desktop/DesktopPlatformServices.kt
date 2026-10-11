@@ -1,6 +1,6 @@
 package ch.qscqlmpa.wingtracker.desktop
 
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.NewAttachment
+import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
 import ch.qscqlmpa.wingtracker.ui.platform.FilePicker
 import kotlinx.coroutines.Dispatchers

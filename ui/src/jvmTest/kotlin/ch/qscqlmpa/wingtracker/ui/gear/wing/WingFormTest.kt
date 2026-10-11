@@ -147,7 +147,7 @@ class WingFormTest {
                 WingFormField.Model,
                 WingFormField.InServiceDate,
             )
-            assertThat(errors.values).containsOnly(WingFormError.Required)
+            assertThat(errors.values).containsOnly(FormError.Required)
         }
 
         @Test
@@ -159,7 +159,7 @@ class WingFormTest {
             val errors = errorsOf(input)
 
             // then
-            assertThat(errors).containsEntry(WingFormField.HoursBeforeTracking, WingFormError.InvalidHours)
+            assertThat(errors).containsEntry(WingFormField.HoursBeforeTracking, FormError.InvalidHours)
         }
 
         @Test
@@ -171,7 +171,7 @@ class WingFormTest {
             val errors = errorsOf(input)
 
             // then
-            assertThat(errors).containsEntry(WingFormField.PriceCurrency, WingFormError.InvalidCurrency)
+            assertThat(errors).containsEntry(WingFormField.PriceCurrency, FormError.InvalidCurrency)
         }
 
         @Test
@@ -183,7 +183,7 @@ class WingFormTest {
             val errors = errorsOf(input)
 
             // then
-            assertThat(errors).containsEntry(WingFormField.PriceAmount, WingFormError.InvalidAmount)
+            assertThat(errors).containsEntry(WingFormField.PriceAmount, FormError.InvalidAmount)
         }
     }
 
@@ -236,7 +236,7 @@ class WingFormTest {
             val errors = errorsOf(input)
 
             // then
-            assertThat(errors).containsEntry(WingFormField.IntervalMonths, WingFormError.InvalidMonths)
+            assertThat(errors).containsEntry(WingFormField.IntervalMonths, FormError.InvalidMonths)
         }
 
         @Test
@@ -248,7 +248,7 @@ class WingFormTest {
             val errors = errorsOf(input)
 
             // then
-            assertThat(errors).containsEntry(WingFormField.IntervalHours, WingFormError.InvalidHours)
+            assertThat(errors).containsEntry(WingFormField.IntervalHours, FormError.InvalidHours)
         }
 
         @Test

@@ -2,11 +2,11 @@ package ch.qscqlmpa.wingtracker.storage.json
 
 import ch.qscqlmpa.wingtracker.attachments.Attachment
 import ch.qscqlmpa.wingtracker.attachments.AttachmentId
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.CheckId
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceCheck
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.PlannedCheck
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.PlannedCheckId
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.WingCheckType
+import ch.qscqlmpa.wingtracker.gear.maintenance.CheckId
+import ch.qscqlmpa.wingtracker.gear.maintenance.CheckType
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceCheck
+import ch.qscqlmpa.wingtracker.gear.maintenance.PlannedCheck
+import ch.qscqlmpa.wingtracker.gear.maintenance.PlannedCheckId
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 
@@ -31,7 +31,7 @@ internal data class CheckDocument(
         MaintenanceCheck(
             id = CheckId(id),
             date = date,
-            type = WingCheckType.valueOf(type),
+            type = CheckType.valueOf(type),
             company = company,
             notes = notes,
             restartsInterval = restartsInterval,
@@ -60,7 +60,7 @@ internal data class PlannedCheckDocument(
     val company: String? = null,
     val notes: String? = null,
 ) {
-    fun toDomain() = PlannedCheck(PlannedCheckId(id), date, WingCheckType.valueOf(type), company, notes)
+    fun toDomain() = PlannedCheck(PlannedCheckId(id), date, CheckType.valueOf(type), company, notes)
 
     companion object {
         fun from(planned: PlannedCheck) =

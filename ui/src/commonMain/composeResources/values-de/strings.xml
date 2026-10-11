@@ -24,7 +24,7 @@
     <string name="retire_body">Der Gleitschirm verschwindet aus deiner aktiven Liste und den Erinnerungen, seine Flüge und seine Historie bleiben erhalten.</string>
     <string name="retire_reason_label">Grund (optional), z. B. verkauft</string>
     <string name="delete_title">%1$s löschen?</string>
-    <string name="delete_body">Für einen irrtümlich erfassten Gleitschirm. Er wird endgültig entfernt. Ein Gleitschirm mit Flügen oder Wartungsverlauf kann nur ausgemustert werden.</string>
+    <string name="delete_body">Für einen irrtümlich erfassten Eintrag. Er wird endgültig entfernt. Alles mit Flügen oder Wartungsverlauf kann nur ausgemustert werden.</string>
     <string name="delete_confirm">Löschen</string>
 
     <string name="form_title_add">Gleitschirm hinzufügen</string>
@@ -58,11 +58,11 @@
     <string name="error_currency">Einen 3-stelligen Code wie CHF verwenden</string>
     <string name="error_hours">Stunden oder Stunden:Minuten verwenden, z. B. 42 oder 42:30</string>
 
-    <string name="failure_load">Die Gleitschirme konnten nicht geladen werden: %1$s</string>
-    <string name="failure_save">Der Gleitschirm konnte nicht gespeichert werden: %1$s</string>
-    <string name="failure_retire">Der Gleitschirm konnte nicht ausgemustert werden: %1$s</string>
-    <string name="failure_delete">Der Gleitschirm konnte nicht gelöscht werden: %1$s</string>
-    <string name="failure_delete_in_use">Dieser Gleitschirm hat Flüge oder einen Wartungsverlauf und kann deshalb nicht gelöscht werden. Mustere ihn stattdessen aus.</string>
+    <string name="failure_load">Die Ausrüstung konnte nicht geladen werden: %1$s</string>
+    <string name="failure_save">Der Eintrag konnte nicht gespeichert werden: %1$s</string>
+    <string name="failure_retire">Der Eintrag konnte nicht ausgemustert werden: %1$s</string>
+    <string name="failure_delete">Der Eintrag konnte nicht gelöscht werden: %1$s</string>
+    <string name="failure_delete_in_use">Dieser Eintrag hat Flüge oder einen Wartungsverlauf und kann deshalb nicht gelöscht werden. Mustere ihn stattdessen aus.</string>
 
     <string name="unreadable_quarantined">Die Datei %1$s konnte nicht gelesen werden und wurde in den Quarantäne-Ordner deines Datenordners verschoben. Der zugehörige Gleitschirm wird nicht angezeigt, bis die Datei repariert und zurückgelegt wurde.</string>
     <string name="unreadable_kept">Die Datei %1$s stammt von einer neueren Version der Anwendung und wird nicht angezeigt. Sie wurde nicht verändert.</string>
@@ -219,4 +219,32 @@
     <string name="failure_open_report">Der Bericht konnte nicht geöffnet werden: %1$s</string>
     <string name="failure_save_plan">Die geplante Kontrolle konnte nicht gespeichert werden: %1$s</string>
     <string name="failure_cancel_plan">Die geplante Kontrolle konnte nicht abgebrochen werden: %1$s</string>
+
+    <string name="check_type_check">Kontrolle</string>
+    <string name="check_type_repack">Neu packen</string>
+
+    <string name="tab_wings">Gleitschirme</string>
+    <string name="tab_harnesses">Gurtzeuge</string>
+    <string name="tab_reserves">Rettungsgeräte</string>
+
+    <string name="harness_title">Gurtzeuge</string>
+    <string name="harness_add">Gurtzeug hinzufügen</string>
+    <string name="harness_empty_title">Noch keine Gurtzeuge</string>
+    <string name="harness_empty_body">Füge dein Gurtzeug hinzu, um seine Kontrollen im Blick zu behalten.</string>
+    <string name="harness_empty_action">Erstes Gurtzeug hinzufügen</string>
+    <string name="harness_form_title_add">Gurtzeug hinzufügen</string>
+    <string name="harness_form_title_edit">%1$s bearbeiten</string>
+
+    <string name="reserve_title">Rettungsgeräte</string>
+    <string name="reserve_add">Rettungsgerät hinzufügen</string>
+    <string name="reserve_empty_title">Noch keine Rettungsgeräte</string>
+    <string name="reserve_empty_body">Füge dein Rettungsgerät hinzu, um seine Packintervalle im Blick zu behalten.</string>
+    <string name="reserve_empty_action">Erstes Rettungsgerät hinzufügen</string>
+    <string name="reserve_form_title_add">Rettungsgerät hinzufügen</string>
+    <string name="reserve_form_title_edit">%1$s bearbeiten</string>
+
+    <string name="field_manufacture_date">Herstelldatum</string>
+    <string name="field_harness_interval_months">Kontrolle alle (Monate)</string>
+    <string name="field_reserve_interval_months">Neu packen alle (Monate)</string>
+    <string name="interval_hint_months">Leer lassen für keine Erinnerung.</string>
 </resources>

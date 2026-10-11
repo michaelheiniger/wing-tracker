@@ -19,7 +19,7 @@ Modules by layer (ADR 0004); dependencies point inwards:
 - `domain`: pure Kotlin, no framework. Aggregates, value objects, domain services, repository ports.
 - `application`: use cases orchestrating the domain.
 - `infrastructure-*`: adapters (e.g. `infrastructure-storage-json`). Storage is swappable (JSON files now; cloud/DB later).
-- `ui`: shared Compose Multiplatform UI and theme.
+- `ui`: shared Compose Multiplatform UI and theme. Gear is split into tabs per kind; maintenance screens are generic over `GearKind`.
 - `app-desktop`: composition root (Koin wiring) and desktop entry point. The only module that sees everything.
 - `architecture-test`: Konsist rules enforcing the layering.
 

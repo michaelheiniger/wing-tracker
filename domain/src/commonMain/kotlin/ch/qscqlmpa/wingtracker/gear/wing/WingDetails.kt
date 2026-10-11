@@ -1,7 +1,7 @@
 package ch.qscqlmpa.wingtracker.gear.wing
 
 import ch.qscqlmpa.wingtracker.gear.Acquisition
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceInterval
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceInterval
 import kotlinx.datetime.LocalDate
 import kotlin.time.Duration
 

@@ -1,7 +1,7 @@
 package ch.qscqlmpa.wingtracker.ui
 
 import androidx.compose.runtime.Composable
-import ch.qscqlmpa.wingtracker.ui.gear.wing.WingFormError
+import ch.qscqlmpa.wingtracker.ui.gear.wing.FormError
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.error_amount
 import ch.qscqlmpa.wingtracker.ui.resources.error_currency
@@ -55,11 +55,11 @@ fun Failure.message(): String =
     }
 
 @Composable
-fun WingFormError.message(): String =
+fun FormError.message(): String =
     when (this) {
-        WingFormError.Required -> stringResource(Res.string.error_required)
-        WingFormError.InvalidAmount -> stringResource(Res.string.error_amount)
-        WingFormError.InvalidCurrency -> stringResource(Res.string.error_currency)
-        WingFormError.InvalidHours -> stringResource(Res.string.error_hours)
-        WingFormError.InvalidMonths -> stringResource(Res.string.error_months)
+        FormError.Required -> stringResource(Res.string.error_required)
+        FormError.InvalidAmount -> stringResource(Res.string.error_amount)
+        FormError.InvalidCurrency -> stringResource(Res.string.error_currency)
+        FormError.InvalidHours -> stringResource(Res.string.error_hours)
+        FormError.InvalidMonths -> stringResource(Res.string.error_months)
     }

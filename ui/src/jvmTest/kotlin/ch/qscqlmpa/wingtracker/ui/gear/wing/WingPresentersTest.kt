@@ -5,6 +5,8 @@ import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.gear.Acquisition
 import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.GearStatus
+import ch.qscqlmpa.wingtracker.gear.maintenance.CompositeMaintainedGearRepository
+import ch.qscqlmpa.wingtracker.gear.maintenance.GetMaintenanceStatuses
 import ch.qscqlmpa.wingtracker.gear.wing.DeleteWing
 import ch.qscqlmpa.wingtracker.gear.wing.ListWings
 import ch.qscqlmpa.wingtracker.gear.wing.RegisterWing
@@ -14,7 +16,6 @@ import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.GetMaintenanceStatuses
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
@@ -62,7 +63,12 @@ class WingPresentersTest {
             listWings = ListWings(wings),
             retireWing = RetireWing(wings),
             deleteWing = DeleteWing(wings) { hasFlights },
-            getMaintenanceStatuses = GetMaintenanceStatuses(wings, flights, AppClock()),
+            getMaintenanceStatuses =
+                GetMaintenanceStatuses(
+                    CompositeMaintainedGearRepository(wings, mockk(relaxed = true), mockk(relaxed = true)),
+                    flights,
+                    AppClock(),
+                ),
             today = { today },
         )
 

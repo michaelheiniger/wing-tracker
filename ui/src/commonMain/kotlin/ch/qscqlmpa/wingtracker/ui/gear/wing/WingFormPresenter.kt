@@ -22,7 +22,7 @@ class WingFormPresenter(
 ) {
     var input by mutableStateOf(editing?.let { WingFormInput.from(it) } ?: WingFormInput())
         private set
-    var errors by mutableStateOf<Map<WingFormField, WingFormError>>(emptyMap())
+    var errors by mutableStateOf<Map<WingFormField, FormError>>(emptyMap())
         private set
     var failure by mutableStateOf<Failure?>(null)
         private set

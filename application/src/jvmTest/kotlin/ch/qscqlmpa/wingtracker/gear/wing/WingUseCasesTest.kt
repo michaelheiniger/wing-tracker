@@ -1,7 +1,7 @@
 package ch.qscqlmpa.wingtracker.gear.wing
 
 import ch.qscqlmpa.wingtracker.gear.GearStatus
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.aStoredCheck
+import ch.qscqlmpa.wingtracker.gear.maintenance.aStoredCheck
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import io.mockk.coEvery

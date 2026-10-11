@@ -24,7 +24,7 @@
     <string name="retire_body">La voile quitte ta liste active et les rappels, mais ses vols et son historique sont conservés.</string>
     <string name="retire_reason_label">Motif (facultatif), p. ex. vendue</string>
     <string name="delete_title">Supprimer %1$s ?</string>
-    <string name="delete_body">À utiliser pour une voile saisie par erreur. Elle est supprimée définitivement. Une voile qui a des vols ou un historique d\'entretien ne peut être que retirée.</string>
+    <string name="delete_body">À utiliser pour un élément saisi par erreur. Il est supprimé définitivement. Tout ce qui a des vols ou un historique d\'entretien ne peut être que retiré.</string>
     <string name="delete_confirm">Supprimer</string>
 
     <string name="form_title_add">Ajouter une voile</string>
@@ -58,11 +58,11 @@
     <string name="error_currency">Utiliser un code à 3 lettres comme CHF</string>
     <string name="error_hours">Utiliser des heures ou heures:minutes, p. ex. 42 ou 42:30</string>
 
-    <string name="failure_load">Les voiles n\'ont pas pu être chargées : %1$s</string>
-    <string name="failure_save">La voile n\'a pas pu être enregistrée : %1$s</string>
-    <string name="failure_retire">La voile n\'a pas pu être retirée : %1$s</string>
-    <string name="failure_delete">La voile n\'a pas pu être supprimée : %1$s</string>
-    <string name="failure_delete_in_use">Cette voile a des vols ou un historique d\'entretien, elle ne peut donc pas être supprimée. Retire-la plutôt.</string>
+    <string name="failure_load">Le matériel n\'a pas pu être chargé : %1$s</string>
+    <string name="failure_save">L\'élément n\'a pas pu être enregistré : %1$s</string>
+    <string name="failure_retire">L\'élément n\'a pas pu être retiré : %1$s</string>
+    <string name="failure_delete">L\'élément n\'a pas pu être supprimé : %1$s</string>
+    <string name="failure_delete_in_use">Cet élément a des vols ou un historique d\'entretien, il ne peut donc pas être supprimé. Retire-le plutôt.</string>
 
     <string name="unreadable_quarantined">Le fichier %1$s n\'a pas pu être lu et a été déplacé dans le dossier de quarantaine de ton dossier de données. Sa voile n\'est pas affichée tant que le fichier n\'est pas réparé et remis en place.</string>
     <string name="unreadable_kept">Le fichier %1$s a été écrit par une version plus récente de l\'application et n\'est pas affiché. Il n\'a pas été modifié.</string>
@@ -219,4 +219,32 @@
     <string name="failure_open_report">Le rapport n\'a pas pu être ouvert : %1$s</string>
     <string name="failure_save_plan">Le contrôle planifié n\'a pas pu être enregistré : %1$s</string>
     <string name="failure_cancel_plan">Le contrôle planifié n\'a pas pu être annulé : %1$s</string>
+
+    <string name="check_type_check">Contrôle</string>
+    <string name="check_type_repack">Repliage</string>
+
+    <string name="tab_wings">Voiles</string>
+    <string name="tab_harnesses">Sellettes</string>
+    <string name="tab_reserves">Secours</string>
+
+    <string name="harness_title">Sellettes</string>
+    <string name="harness_add">Ajouter une sellette</string>
+    <string name="harness_empty_title">Aucune sellette pour l\'instant</string>
+    <string name="harness_empty_body">Ajoute ta sellette pour suivre ses contrôles.</string>
+    <string name="harness_empty_action">Ajouter ma première sellette</string>
+    <string name="harness_form_title_add">Ajouter une sellette</string>
+    <string name="harness_form_title_edit">Modifier %1$s</string>
+
+    <string name="reserve_title">Parachutes de secours</string>
+    <string name="reserve_add">Ajouter un secours</string>
+    <string name="reserve_empty_title">Aucun parachute de secours pour l\'instant</string>
+    <string name="reserve_empty_body">Ajoute ton secours pour suivre ses repliages.</string>
+    <string name="reserve_empty_action">Ajouter mon premier secours</string>
+    <string name="reserve_form_title_add">Ajouter un secours</string>
+    <string name="reserve_form_title_edit">Modifier %1$s</string>
+
+    <string name="field_manufacture_date">Date de fabrication</string>
+    <string name="field_harness_interval_months">Contrôle tous les (mois)</string>
+    <string name="field_reserve_interval_months">Repliage tous les (mois)</string>
+    <string name="interval_hint_months">Laisser vide pour aucun rappel.</string>
 </resources>

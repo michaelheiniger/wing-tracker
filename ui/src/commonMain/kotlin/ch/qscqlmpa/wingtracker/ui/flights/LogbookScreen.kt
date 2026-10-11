@@ -37,6 +37,7 @@ import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.Logbook
 import ch.qscqlmpa.wingtracker.flights.LogbookMonth
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
+import ch.qscqlmpa.wingtracker.ui.components.UnreadableBanner
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
@@ -285,28 +286,5 @@ private fun EmptyState(
         Text(title, style = MaterialTheme.typography.titleLarge)
         Text(body, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Button(onClick = onAction) { Text(action) }
-    }
-}
-
-@Composable
-private fun UnreadableBanner(
-    record: UnreadableRecord,
-    onDismiss: () -> Unit,
-) {
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
-        Row(
-            modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            val message =
-                if (record.quarantined) {
-                    stringResource(Res.string.unreadable_quarantined, record.name)
-                } else {
-                    stringResource(Res.string.unreadable_kept, record.name)
-                }
-            Text(message, color = MaterialTheme.colorScheme.onErrorContainer, modifier = Modifier.weight(1f))
-            TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_dismiss)) }
-        }
     }
 }

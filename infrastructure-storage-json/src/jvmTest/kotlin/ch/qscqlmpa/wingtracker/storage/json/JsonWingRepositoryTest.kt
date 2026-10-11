@@ -3,9 +3,9 @@ package ch.qscqlmpa.wingtracker.storage.json
 import ch.qscqlmpa.wingtracker.gear.Acquisition
 import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.GearStatus
+import ch.qscqlmpa.wingtracker.gear.maintenance.CheckType
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceInterval
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceInterval
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.WingCheckType
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
@@ -54,8 +54,8 @@ class JsonWingRepositoryTest {
                         interval = MaintenanceInterval(months = 24, hours = 100.hours),
                         checks =
                             listOf(
-                                aStoredCheck("check-2", WingCheckType.Other, restartsInterval = true),
-                                aStoredCheck("check-1", WingCheckType.Full),
+                                aStoredCheck("check-2", CheckType.Other, restartsInterval = true),
+                                aStoredCheck("check-1", CheckType.Full),
                             ),
                         plannedChecks = listOf(aStoredPlannedCheck()),
                     )

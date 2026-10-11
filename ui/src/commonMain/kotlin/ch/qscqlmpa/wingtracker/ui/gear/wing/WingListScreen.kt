@@ -36,11 +36,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.gear.GearStatus
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceStatus
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
-import ch.qscqlmpa.wingtracker.gear.wing.maintenance.MaintenanceStatus
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
+import ch.qscqlmpa.wingtracker.ui.components.UnreadableBanner
 import ch.qscqlmpa.wingtracker.ui.formatDuration
-import ch.qscqlmpa.wingtracker.ui.gear.wing.maintenance.chipText
+import ch.qscqlmpa.wingtracker.ui.gear.DeleteDialog
+import ch.qscqlmpa.wingtracker.ui.gear.RetireDialog
+import ch.qscqlmpa.wingtracker.ui.gear.maintenance.chipText
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
@@ -132,7 +135,7 @@ fun WingListScreen(
                         items(state.visibleWings, key = { it.id.value }) { wing ->
                             WingCard(
                                 wing = wing,
-                                status = state.statuses[wing.id],
+                                status = state.statuses[wing.ref],
                                 onEdit = { onEdit(wing) },
                                 onOpenMaintenance = { onOpenMaintenance(wing) },
                                 onRetire = { wingToRetire = wing },
@@ -147,7 +150,7 @@ fun WingListScreen(
 
     wingToRetire?.let { wing ->
         RetireDialog(
-            wing = wing,
+            name = wing.details.name,
             onConfirm = { reason ->
                 presenter.retire(wing.id, reason)
                 wingToRetire = null
@@ -157,36 +160,13 @@ fun WingListScreen(
     }
     wingToDelete?.let { wing ->
         DeleteDialog(
-            wing = wing,
+            name = wing.details.name,
             onConfirm = {
                 presenter.delete(wing.id)
                 wingToDelete = null
             },
             onDismiss = { wingToDelete = null },
         )
-    }
-}
-
-@Composable
-private fun UnreadableBanner(
-    record: UnreadableRecord,
-    onDismiss: () -> Unit,
-) {
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
-        Row(
-            modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            val message =
-                if (record.quarantined) {
-                    stringResource(Res.string.unreadable_quarantined, record.name)
-                } else {
-                    stringResource(Res.string.unreadable_kept, record.name)
-                }
-            Text(message, color = MaterialTheme.colorScheme.onErrorContainer, modifier = Modifier.weight(1f))
-            TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_dismiss)) }
-        }
     }
 }
 
@@ -280,49 +260,6 @@ private fun statusLabel(status: GearStatus): String =
             }
         }
     }
-
-@Composable
-private fun RetireDialog(
-    wing: Wing,
-    onConfirm: (String?) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var reason by remember { mutableStateOf("") }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.retire_title, wing.details.name)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(stringResource(Res.string.retire_body))
-                OutlinedTextField(
-                    value = reason,
-                    onValueChange = { reason = it },
-                    label = { Text(stringResource(Res.string.retire_reason_label)) },
-                    singleLine = true,
-                )
-            }
-        },
-        confirmButton = { Button(onClick = { onConfirm(reason) }) { Text(stringResource(Res.string.wing_retire)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_cancel)) } },
-    )
-}
-
-@Composable
-private fun DeleteDialog(
-    wing: Wing,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.delete_title, wing.details.name)) },
-        text = { Text(stringResource(Res.string.delete_body)) },
-        confirmButton = {
-            Button(onClick = onConfirm) { Text(stringResource(Res.string.delete_confirm)) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_cancel)) } },
-    )
-}
 
 /** Shows when a check is due, or the next planned one, so the list answers "does this wing need attention?". */
 @Composable
