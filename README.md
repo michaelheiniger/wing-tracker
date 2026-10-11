@@ -54,4 +54,6 @@ Versions follow Semantic Versioning (`MAJOR.MINOR.PATCH`); a hotfix is a patch r
    ```
 4. The `Release` GitHub workflow builds the Linux package and publishes a GitHub Release with that version's changelog section. It fails if the section is missing.
 
+To rehearse a release without tagging, run the **Release** workflow by hand from the Actions tab (or `gh workflow run release.yml -f version=0.0.1`). It builds the package and uploads it as a workflow artifact, and publishes nothing.
+
 To build a package locally: `./gradlew :app-desktop:packageDeb -PappVersion=X.Y.Z`; the result is under `app-desktop/build/compose/binaries`.

@@ -1,28 +1,50 @@
 name: Release
 
-# Releasing = pushing a vMAJOR.MINOR.PATCH tag (ADR 0009).
+# Releasing = pushing a vMAJOR.MINOR.PATCH tag (ADR 0009). Running the workflow by hand is a dry run: it builds and
+# uploads the package as an artifact but publishes nothing.
 on:
   push:
     tags: ['v[0-9]+.[0-9]+.[0-9]+']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to build the package with (dry run, nothing is published)
+        required: true
+        default: 0.0.1
 
 permissions:
   contents: write
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    env:
+      PUBLISH: ${{ startsWith(github.ref, 'refs/tags/v') }}
+      VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
+          # Must match the jvmToolchain declared in build-logic.
           java-version: 21
       - uses: gradle/actions/setup-gradle@v6
+      - name: Install packaging tools
+        # jpackage builds the .deb with these; installing them keeps the build independent of the runner image.
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fakeroot dpkg-dev
       - name: Build and verify
-        run: ./gradlew check :app-desktop:packageDeb -PappVersion="${GITHUB_REF_NAME#v}"
+        run: ./gradlew check :app-desktop:packageDeb -PappVersion="${VERSION#v}"
+      - name: Upload the package
+        uses: actions/upload-artifact@v7
+        with:
+          name: wing-tracker-${{ env.VERSION }}-deb
+          path: app-desktop/build/compose/binaries/main/deb/*.deb
+          if-no-files-found: error
       - name: Extract release notes for this version
-        run: scripts/changelog-section.sh "${GITHUB_REF_NAME#v}" > release-notes.md
+        if: env.PUBLISH == 'true'
+        run: scripts/changelog-section.sh "${VERSION#v}" > release-notes.md
       - name: Publish GitHub Release
+        if: env.PUBLISH == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

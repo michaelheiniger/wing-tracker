@@ -17,3 +17,5 @@ Versions follow strict Semantic Versioning (MAJOR.MINOR.PATCH); a hotfix is a pa
 ## Consequences
 
 Releasing is a tag push. Every release needs a hand-written changelog entry. Other OS packages and auto-update are deferred decisions.
+- 2026-10-11: The release workflow can also be started by hand as a dry run: it builds the package and uploads it as an artifact, and publishes nothing. Both workflows run on a pinned runner version, so a new default image cannot change the build unnoticed.
+
