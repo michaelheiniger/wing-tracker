@@ -32,6 +32,7 @@ Build logic lives in `build-logic` convention plugins (`wingtracker.kmp-module`,
 - All tests and checks: `./gradlew check`
 - Fix formatting: `./gradlew spotlessApply`
 - Run (dev): `./gradlew :app-desktop:run -Pwingtracker.dev=true`
+- Fill the dev folder with sample data: `./gradlew seedDevData` (resets it first; code in `app-desktop/src/jvmDev`, never shipped)
 - One class: `./gradlew :<module>:jvmTest --tests '<fully.qualified.ClassName>'`
 - One case: `./gradlew :<module>:jvmTest --tests '<fully.qualified.ClassName>.<method name>'`
 - Package: `./gradlew :app-desktop:packageDeb`

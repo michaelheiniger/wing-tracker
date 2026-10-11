@@ -5,6 +5,19 @@ plugins {
 }
 
 kotlin {
+    jvm {
+        val main = compilations.getByName("main")
+        // Sample-data tooling for development lives in its own compilation, so it is never part of the shipped app.
+        val dev = compilations.create("dev") { associateWith(main) }
+        compilations.getByName("test").associateWith(dev)
+
+        tasks.register<JavaExec>("seedDevData") {
+            group = "development"
+            description = "Resets the development data folder and fills it with realistic sample data."
+            classpath(dev.output.allOutputs, main.output.allOutputs, dev.runtimeDependencyFiles)
+            mainClass.set("ch.qscqlmpa.wingtracker.desktop.dev.DevDataSeederKt")
+        }
+    }
     sourceSets {
         jvmTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)

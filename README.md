@@ -23,6 +23,12 @@ Open the project in IntelliJ IDEA. The shared run configuration **wing-tracker (
 ./gradlew :app-desktop:run -Pwingtracker.dev=true
 ```
 
+## Sample data for development
+```bash
+./gradlew seedDevData
+```
+Deletes the development data folder (the one the dev run above uses, never your real data) and fills it with a realistic pilot history: several wings (one retired), a harness, reserves, check reports, planned checks, gear in every reminder state and a few imported tracks. Dates are relative to today, so the reminders look right whenever you run it. The code lives in `app-desktop/src/jvmDev` and is not part of the shipped application. The shared run configuration **seed dev data** does the same from IntelliJ.
+
 ## Tests and checks
 ```bash
 ./gradlew check            # tests, ktlint (Spotless), detekt, Kover, architecture tests
