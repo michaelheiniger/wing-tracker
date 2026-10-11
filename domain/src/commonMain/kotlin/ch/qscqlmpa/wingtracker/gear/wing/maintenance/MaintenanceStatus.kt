@@ -35,8 +35,8 @@ fun Wing.maintenanceStatus(
     val interval = details.maintenanceInterval ?: return null
     val lastPeriodic = lastPeriodicCheck
     val since = lastPeriodic?.date ?: details.inServiceDate
-    // Hours count from the clock start: flights on the day of a check happened before it and do not count.
-    val hoursSince = flown.filter { it.date > since }.fold(Duration.ZERO) { sum, f -> sum + f.duration }
+    // Hours count from the start of the clock day: a flight on the day of a check happened after the check.
+    val hoursSince = flown.filter { it.date >= since }.fold(Duration.ZERO) { sum, f -> sum + f.duration }
     val dueDate = interval.months?.let { since.plus(it, DateTimeUnit.MONTH) }
     val dueByDate = dueDate != null && today >= dueDate
     val dueByHours = interval.hours != null && hoursSince >= interval.hours

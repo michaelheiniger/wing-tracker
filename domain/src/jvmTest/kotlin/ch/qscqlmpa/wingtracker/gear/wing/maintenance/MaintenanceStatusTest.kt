@@ -172,7 +172,32 @@ class MaintenanceStatusTest {
         }
 
         @Test
-        fun `only counts flights after the last periodic check`() {
+        fun `counts flights on the day of the last periodic check as flown after it`() {
+            // given
+            val checked = aWingWith(MaintenanceInterval(hours = 100.hours), aCheck(date = LocalDate(2025, 4, 10)))
+            val flights = listOf(flown(LocalDate(2025, 4, 10), 5.hours))
+
+            // when
+            val status = checked.maintenanceStatus(flights, LocalDate(2025, 6, 1))!!
+
+            // then
+            assertThat(status.hoursSince).isEqualTo(5.hours)
+        }
+
+        @Test
+        fun `counts flights on the in-service date when no check was recorded`() {
+            // given
+            val flights = listOf(flown(IN_SERVICE, 3.hours))
+
+            // when
+            val status = wing.maintenanceStatus(flights, LocalDate(2024, 7, 1))!!
+
+            // then
+            assertThat(status.hoursSince).isEqualTo(3.hours)
+        }
+
+        @Test
+        fun `only counts flights from the day of the last periodic check onwards`() {
             // given
             val checked = aWingWith(MaintenanceInterval(hours = 100.hours), aCheck(date = LocalDate(2025, 4, 10)))
             val flights =
@@ -186,7 +211,7 @@ class MaintenanceStatusTest {
             val status = checked.maintenanceStatus(flights, LocalDate(2025, 6, 1))!!
 
             // then
-            assertThat(status.hoursSince).isEqualTo(10.hours + 30.minutes)
+            assertThat(status.hoursSince).isEqualTo(15.hours + 30.minutes)
         }
     }
 
