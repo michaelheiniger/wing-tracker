@@ -39,6 +39,9 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.CheckType
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearMaintenance
 import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceCheck
 import ch.qscqlmpa.wingtracker.gear.maintenance.PlannedCheck
+import ch.qscqlmpa.wingtracker.ui.components.AppCard
+import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
+import ch.qscqlmpa.wingtracker.ui.components.severity
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
@@ -235,7 +238,7 @@ private fun MaintenanceContent(
 @Composable
 private fun SummaryCard(data: GearMaintenance) {
     val interval = data.gear.maintenanceInterval
-    Card(modifier = Modifier.fillMaxWidth()) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             // Only wings fly in the logbook, so only they have hours on the clock.
             data.totalHours?.let { total ->
@@ -273,13 +276,7 @@ private fun SummaryCard(data: GearMaintenance) {
                 )
             }
             data.status?.let { status ->
-                val colors =
-                    if (status.isDue) {
-                        AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.errorContainer)
-                    } else {
-                        AssistChipDefaults.assistChipColors()
-                    }
-                AssistChip(onClick = {}, label = { Text(status.chipText()) }, colors = colors)
+                StatusBadge(status.chipText(), status.state.severity())
                 Text(
                     stringResource(
                         Res.string.maintenance_since,
@@ -301,7 +298,7 @@ private fun PlannedCard(
     onEdit: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -335,7 +332,7 @@ private fun CheckCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors()) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,

@@ -34,8 +34,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.gear.GearStatus
+import ch.qscqlmpa.wingtracker.gear.maintenance.DueState
 import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceStatus
+import ch.qscqlmpa.wingtracker.ui.components.AppCard
+import ch.qscqlmpa.wingtracker.ui.components.Severity
+import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.components.UnreadableBanner
+import ch.qscqlmpa.wingtracker.ui.components.severity
 import ch.qscqlmpa.wingtracker.ui.gear.DeleteDialog
 import ch.qscqlmpa.wingtracker.ui.gear.RetireDialog
 import ch.qscqlmpa.wingtracker.ui.gear.maintenance.chipText
@@ -51,6 +56,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.wing_status_active
 import ch.qscqlmpa.wingtracker.ui.resources.wing_status_retired
 import ch.qscqlmpa.wingtracker.ui.resources.wing_status_retired_reason
 import ch.qscqlmpa.wingtracker.ui.resources.wings_show_retired
+import ch.qscqlmpa.wingtracker.ui.theme.extraColors
 import ch.qscqlmpa.wingtracker.ui.toDisplay
 import org.jetbrains.compose.resources.stringResource
 
@@ -70,6 +76,8 @@ fun SimpleGearListScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onAdd,
+                containerColor = MaterialTheme.extraColors.accent,
+                contentColor = MaterialTheme.extraColors.onAccent,
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
                 text = { Text(stringResource(texts.add)) },
             )
@@ -175,9 +183,14 @@ private fun ItemCard(
     onDelete: () -> Unit,
 ) {
     val details = item.details
+    // Retired gear sits back on a quieter surface; active gear uses the standard card.
     val containerColor =
-        if (item.isActive) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surfaceContainerLow
-    Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = containerColor)) {
+        if (item.isActive) {
+            MaterialTheme.colorScheme.surfaceContainerLow
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerLowest
+        }
+    AppCard(modifier = Modifier.fillMaxWidth(), containerColor = containerColor) {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -199,7 +212,7 @@ private fun ItemCard(
                 MaintenanceLine(item, status)
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                AssistChip(onClick = {}, label = { Text(statusLabel(item.status)) })
+                StatusBadge(statusLabel(item.status), if (item.isActive) Severity.Success else Severity.Neutral)
                 TextButton(onClick = onOpenMaintenance) { Text(stringResource(Res.string.wing_open_maintenance)) }
                 IconButton(onClick = onEdit) {
                     Icon(Icons.Default.Edit, contentDescription = stringResource(Res.string.wing_edit, details.name))
@@ -225,9 +238,15 @@ private fun MaintenanceLine(
     if (status == null && planned == null) return
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
         if (status != null) {
-            val color =
-                if (status.isDue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
-            Text(status.chipText(), style = MaterialTheme.typography.labelLarge, color = color)
+            if (status.state == DueState.Ok) {
+                Text(
+                    status.chipText(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                StatusBadge(status.chipText(), status.state.severity())
+            }
         }
         if (planned != null) {
             Text(

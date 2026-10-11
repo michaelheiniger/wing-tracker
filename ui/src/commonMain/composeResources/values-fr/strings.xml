@@ -5,7 +5,7 @@
 
     <string name="wings_title">Voiles</string>
     <string name="wings_add">Ajouter une voile</string>
-    <string name="wings_empty_title">Aucune voile pour l\'instant</string>
+    <string name="wings_empty_title">Aucune voile pour l'instant</string>
     <string name="wings_empty_body">Ajoute ta première voile pour suivre ses heures de vol et son entretien.</string>
     <string name="wings_empty_action">Ajouter ma première voile</string>
     <string name="wings_show_retired">Afficher les voiles retirées (%1$d)</string>
@@ -24,7 +24,7 @@
     <string name="retire_body">La voile quitte ta liste active et les rappels, mais ses vols et son historique sont conservés.</string>
     <string name="retire_reason_label">Motif (facultatif), p. ex. vendue</string>
     <string name="delete_title">Supprimer %1$s ?</string>
-    <string name="delete_body">À utiliser pour un élément saisi par erreur. Il est supprimé définitivement. Tout ce qui a des vols ou un historique d\'entretien ne peut être que retiré.</string>
+    <string name="delete_body">À utiliser pour un élément saisi par erreur. Il est supprimé définitivement. Tout ce qui a des vols ou un historique d'entretien ne peut être que retiré.</string>
     <string name="delete_confirm">Supprimer</string>
 
     <string name="form_title_add">Ajouter une voile</string>
@@ -34,12 +34,12 @@
     <string name="field_model">Modèle *</string>
     <string name="field_size">Taille</string>
     <string name="field_serial_number">Numéro de série</string>
-    <string name="section_certification">Classe d\'homologation</string>
+    <string name="section_certification">Classe d'homologation</string>
     <string name="certification_unknown">Inconnue</string>
     <string name="section_acquisition">Acquisition</string>
     <string name="acquisition_new">Neuve</string>
-    <string name="acquisition_second_hand">D\'occasion</string>
-    <string name="field_purchase_date">Date d\'achat</string>
+    <string name="acquisition_second_hand">D'occasion</string>
+    <string name="field_purchase_date">Date d'achat</string>
     <string name="field_price">Prix</string>
     <string name="field_currency">Devise</string>
     <string name="section_usage">Utilisation</string>
@@ -58,14 +58,14 @@
     <string name="error_currency">Utiliser un code à 3 lettres comme CHF</string>
     <string name="error_hours">Utiliser des heures ou heures:minutes, p. ex. 42 ou 42:30</string>
 
-    <string name="failure_load">Le matériel n\'a pas pu être chargé : %1$s</string>
-    <string name="failure_save">L\'élément n\'a pas pu être enregistré : %1$s</string>
-    <string name="failure_retire">L\'élément n\'a pas pu être retiré : %1$s</string>
-    <string name="failure_delete">L\'élément n\'a pas pu être supprimé : %1$s</string>
-    <string name="failure_delete_in_use">Cet élément a des vols ou un historique d\'entretien, il ne peut donc pas être supprimé. Retire-le plutôt.</string>
+    <string name="failure_load">Le matériel n'a pas pu être chargé : %1$s</string>
+    <string name="failure_save">L'élément n'a pas pu être enregistré : %1$s</string>
+    <string name="failure_retire">L'élément n'a pas pu être retiré : %1$s</string>
+    <string name="failure_delete">L'élément n'a pas pu être supprimé : %1$s</string>
+    <string name="failure_delete_in_use">Cet élément a des vols ou un historique d'entretien, il ne peut donc pas être supprimé. Retire-le plutôt.</string>
 
-    <string name="unreadable_quarantined">Le fichier %1$s n\'a pas pu être lu et a été déplacé dans le dossier de quarantaine de ton dossier de données. Sa voile n\'est pas affichée tant que le fichier n\'est pas réparé et remis en place.</string>
-    <string name="unreadable_kept">Le fichier %1$s a été écrit par une version plus récente de l\'application et n\'est pas affiché. Il n\'a pas été modifié.</string>
+    <string name="unreadable_quarantined">Le fichier %1$s n'a pas pu être lu et a été déplacé dans le dossier de quarantaine de ton dossier de données. Sa voile n'est pas affichée tant que le fichier n'est pas réparé et remis en place.</string>
+    <string name="unreadable_kept">Le fichier %1$s a été écrit par une version plus récente de l'application et n'est pas affiché. Il n'a pas été modifié.</string>
 
     <string name="settings_title">Réglages</string>
     <string name="settings_theme">Thème</string>
@@ -77,11 +77,11 @@
 
     <string name="logbook_title">Carnet de vol</string>
     <string name="logbook_log_flight">Saisir un vol</string>
-    <string name="logbook_no_wings_title">Ajoute d\'abord une voile</string>
+    <string name="logbook_no_wings_title">Ajoute d'abord une voile</string>
     <string name="logbook_no_wings_body">Chaque vol est saisi sur une voile : ajoute ta voile pour commencer ton carnet de vol.</string>
     <string name="logbook_no_wings_action">Ajouter une voile</string>
-    <string name="logbook_empty_title">Aucun vol pour l\'instant</string>
-    <string name="logbook_empty_body">Saisis un vol juste après l\'atterrissage. Tes heures par voile s\'additionnent ici.</string>
+    <string name="logbook_empty_title">Aucun vol pour l'instant</string>
+    <string name="logbook_empty_body">Saisis un vol juste après l'atterrissage. Tes heures par voile s'additionnent ici.</string>
     <string name="logbook_empty_action">Saisir mon premier vol</string>
     <string name="logbook_month_header">%1$s %2$d</string>
     <string name="logbook_month_summary">%1$s · %2$s</string>
@@ -124,17 +124,17 @@
     <string name="field_notes">Notes</string>
     <string name="flight_wing_retired">%1$s (retirée)</string>
 
-    <string name="error_duration">Utiliser des heures:minutes d\'au moins une minute, p. ex. 1:35</string>
-    <string name="error_date_future">Ce jour n\'est pas encore arrivé</string>
-    <string name="error_date_before_service">La voile n\'était pas encore en service ce jour-là</string>
+    <string name="error_duration">Utiliser des heures:minutes d'au moins une minute, p. ex. 1:35</string>
+    <string name="error_date_future">Ce jour n'est pas encore arrivé</string>
+    <string name="error_date_before_service">La voile n'était pas encore en service ce jour-là</string>
 
-    <string name="failure_load_logbook">Le carnet de vol n\'a pas pu être chargé : %1$s</string>
-    <string name="failure_save_flight">Le vol n\'a pas pu être enregistré : %1$s</string>
-    <string name="failure_delete_flight">Le vol n\'a pas pu être supprimé : %1$s</string>
+    <string name="failure_load_logbook">Le carnet de vol n'a pas pu être chargé : %1$s</string>
+    <string name="failure_save_flight">Le vol n'a pas pu être enregistré : %1$s</string>
+    <string name="failure_delete_flight">Le vol n'a pas pu être supprimé : %1$s</string>
 
     <string name="nav_statistics">Statistiques</string>
     <string name="statistics_title">Statistiques</string>
-    <string name="statistics_legend_hint">Clique sur une voile pour l\'afficher ou la masquer</string>
+    <string name="statistics_legend_hint">Clique sur une voile pour l'afficher ou la masquer</string>
     <string name="statistics_yearly_title">Heures par année</string>
     <string name="statistics_yearly_note">Vols saisis uniquement</string>
     <string name="statistics_cumulative_title">Heures cumulées</string>
@@ -142,16 +142,16 @@
     <string name="statistics_show_table">Afficher en tableau</string>
     <string name="statistics_show_charts">Afficher en graphiques</string>
     <string name="statistics_all_hidden">Toutes les voiles sont masquées. Clique sur une voile ci-dessus pour la réafficher.</string>
-    <string name="statistics_empty_title">Rien à représenter pour l\'instant</string>
+    <string name="statistics_empty_title">Rien à représenter pour l'instant</string>
     <string name="statistics_empty_body">Les graphiques apparaissent dès que tu as saisi un vol.</string>
     <string name="statistics_empty_action">Aller au carnet de vol</string>
     <string name="statistics_table_year">Année</string>
     <string name="statistics_table_yearly_title">Heures par année (h:mm)</string>
-    <string name="statistics_table_cumulative_title">Heures cumulées à la fin de l\'année (h:mm)</string>
+    <string name="statistics_table_cumulative_title">Heures cumulées à la fin de l'année (h:mm)</string>
     <string name="statistics_total">Total</string>
     <string name="series_other">Autres voiles (%1$d)</string>
     <string name="chart_axis_hours">%1$s h</string>
-    <string name="failure_load_statistics">Les statistiques n\'ont pas pu être chargées : %1$s</string>
+    <string name="failure_load_statistics">Les statistiques n'ont pas pu être chargées : %1$s</string>
 
     <string name="section_maintenance">Intervalle de contrôle</string>
     <string name="field_interval_months">Contrôle tous les (mois)</string>
@@ -177,13 +177,13 @@
     <string name="maintenance_planned_title">Contrôles planifiés</string>
     <string name="maintenance_planned_empty">Aucun contrôle planifié.</string>
     <string name="maintenance_history_title">Historique</string>
-    <string name="maintenance_history_empty">Aucun contrôle saisi pour l\'instant.</string>
+    <string name="maintenance_history_empty">Aucun contrôle saisi pour l'instant.</string>
     <string name="maintenance_complete">Terminer</string>
     <string name="maintenance_cancel_plan">Annuler la planification</string>
     <string name="maintenance_edit_check">Modifier le contrôle</string>
     <string name="maintenance_delete_check">Supprimer le contrôle</string>
     <string name="maintenance_open_report">Ouvrir %1$s</string>
-    <string name="maintenance_restarts">Relance l\'intervalle</string>
+    <string name="maintenance_restarts">Relance l'intervalle</string>
 
     <string name="check_type_partial">Partiel (calage)</string>
     <string name="check_type_full">Complet</string>
@@ -200,7 +200,7 @@
     <string name="field_company">Entreprise</string>
     <string name="field_check_notes">Notes</string>
     <string name="field_check_comment">Commentaire</string>
-    <string name="check_restarts_interval">Compte comme contrôle périodique (relance l\'intervalle)</string>
+    <string name="check_restarts_interval">Compte comme contrôle périodique (relance l'intervalle)</string>
     <string name="check_reports">Rapports</string>
     <string name="check_add_reports">Ajouter un PDF</string>
     <string name="check_pick_title">Choisir le rapport</string>
@@ -213,12 +213,12 @@
     <string name="error_check_date_future">Un contrôle effectué ne peut pas être daté dans le futur</string>
     <string name="error_plan_date_past">Un contrôle planifié ne peut pas être daté dans le passé</string>
 
-    <string name="failure_load_maintenance">Les données d\'entretien n\'ont pas pu être chargées : %1$s</string>
-    <string name="failure_save_check">Le contrôle n\'a pas pu être enregistré : %1$s</string>
-    <string name="failure_delete_check">Le contrôle n\'a pas pu être supprimé : %1$s</string>
-    <string name="failure_open_report">Le rapport n\'a pas pu être ouvert : %1$s</string>
-    <string name="failure_save_plan">Le contrôle planifié n\'a pas pu être enregistré : %1$s</string>
-    <string name="failure_cancel_plan">Le contrôle planifié n\'a pas pu être annulé : %1$s</string>
+    <string name="failure_load_maintenance">Les données d'entretien n'ont pas pu être chargées : %1$s</string>
+    <string name="failure_save_check">Le contrôle n'a pas pu être enregistré : %1$s</string>
+    <string name="failure_delete_check">Le contrôle n'a pas pu être supprimé : %1$s</string>
+    <string name="failure_open_report">Le rapport n'a pas pu être ouvert : %1$s</string>
+    <string name="failure_save_plan">Le contrôle planifié n'a pas pu être enregistré : %1$s</string>
+    <string name="failure_cancel_plan">Le contrôle planifié n'a pas pu être annulé : %1$s</string>
 
     <string name="check_type_check">Contrôle</string>
     <string name="check_type_repack">Repliage</string>
@@ -229,7 +229,7 @@
 
     <string name="harness_title">Sellettes</string>
     <string name="harness_add">Ajouter une sellette</string>
-    <string name="harness_empty_title">Aucune sellette pour l\'instant</string>
+    <string name="harness_empty_title">Aucune sellette pour l'instant</string>
     <string name="harness_empty_body">Ajoute ta sellette pour suivre ses contrôles.</string>
     <string name="harness_empty_action">Ajouter ma première sellette</string>
     <string name="harness_form_title_add">Ajouter une sellette</string>
@@ -237,7 +237,7 @@
 
     <string name="reserve_title">Parachutes de secours</string>
     <string name="reserve_add">Ajouter un secours</string>
-    <string name="reserve_empty_title">Aucun parachute de secours pour l\'instant</string>
+    <string name="reserve_empty_title">Aucun parachute de secours pour l'instant</string>
     <string name="reserve_empty_body">Ajoute ton secours pour suivre ses repliages.</string>
     <string name="reserve_empty_action">Ajouter mon premier secours</string>
     <string name="reserve_form_title_add">Ajouter un secours</string>
@@ -248,15 +248,15 @@
     <string name="field_reserve_interval_months">Repliage tous les (mois)</string>
     <string name="interval_hint_months">Laisser vide pour aucun rappel.</string>
 
-    <string name="attention_title">Demande de l\'attention</string>
+    <string name="attention_title">Demande de l'attention</string>
     <string name="attention_open">Ouvrir</string>
     <string name="attention_due_soon">Contrôle bientôt dû</string>
-    <string name="attention_badge">%1$d demandent de l\'attention</string>
+    <string name="attention_badge">%1$d demandent de l'attention</string>
 
     <string name="settings_reminders_title">Rappels</string>
-    <string name="settings_reminders_hint">Un contrôle est considéré comme bientôt dû aussi longtemps avant son échéance. La limite qui arrive en premier s\'applique.</string>
+    <string name="settings_reminders_hint">Un contrôle est considéré comme bientôt dû aussi longtemps avant son échéance. La limite qui arrive en premier s'applique.</string>
     <string name="field_lead_days">Bientôt dû, jours avant la date</string>
-    <string name="field_lead_hours">Bientôt dû, heures de vol avant la limite d\'une voile</string>
+    <string name="field_lead_hours">Bientôt dû, heures de vol avant la limite d'une voile</string>
     <string name="error_days">Utiliser un nombre entier de jours, p. ex. 30</string>
     <string name="settings_save">Enregistrer</string>
     <string name="settings_saved">Enregistré</string>
@@ -265,11 +265,11 @@
     <string name="settings_calendar_export">Exporter le calendrier</string>
     <string name="settings_calendar_pick_title">Enregistrer le calendrier</string>
     <string name="settings_calendar_exported">Calendrier enregistré sous %1$s</string>
-    <string name="settings_calendar_empty">Il n\'y a encore rien à exporter : aucun contrôle planifié ni échéance à venir.</string>
-    <string name="failure_export_calendar">Le calendrier n\'a pas pu être exporté : %1$s</string>
-    <string name="failure_save_settings">Les réglages n\'ont pas pu être enregistrés : %1$s</string>
-    <string name="failure_load_settings">Les réglages n\'ont pas pu être chargés : %1$s</string>
-    <string name="failure_load_attention">Les rappels n\'ont pas pu être chargés : %1$s</string>
+    <string name="settings_calendar_empty">Il n'y a encore rien à exporter : aucun contrôle planifié ni échéance à venir.</string>
+    <string name="failure_export_calendar">Le calendrier n'a pas pu être exporté : %1$s</string>
+    <string name="failure_save_settings">Les réglages n'ont pas pu être enregistrés : %1$s</string>
+    <string name="failure_load_settings">Les réglages n'ont pas pu être chargés : %1$s</string>
+    <string name="failure_load_attention">Les rappels n'ont pas pu être chargés : %1$s</string>
 
     <string name="notification_title">Wing Tracker</string>
     <string name="notification_due">%1$d dû(s)</string>
@@ -278,7 +278,7 @@
     <string name="notification_message">%1$s : %2$s</string>
 
     <string name="calendar_due">%1$s : contrôle dû</string>
-    <string name="calendar_due_description">L\'intervalle de contrôle de %1$s se termine aujourd\'hui.</string>
+    <string name="calendar_due_description">L'intervalle de contrôle de %1$s se termine aujourd'hui.</string>
     <string name="calendar_planned">%1$s : %2$s</string>
     <string name="calendar_calendar_name">Wing Tracker</string>
 
@@ -287,11 +287,11 @@
     <string name="igc_dialog_title">Importer une trace de vol</string>
     <string name="igc_file">Fichier : %1$s</string>
     <string name="igc_detected">Trouvé dans la trace : décollage %1$s, atterrissage %2$s (UTC)</string>
-    <string name="igc_none_detected">Aucun vol n\'a été trouvé dans cette trace. Saisis la durée toi-même.</string>
+    <string name="igc_none_detected">Aucun vol n'a été trouvé dans cette trace. Saisis la durée toi-même.</string>
     <string name="igc_duplicate">Ce fichier a déjà été importé comme le vol du %1$s avec %2$s.</string>
-    <string name="igc_duplicate_confirm">L\'importer quand même</string>
+    <string name="igc_duplicate_confirm">L'importer quand même</string>
     <string name="igc_track_chip">Trace</string>
     <string name="igc_open_track">Ouvrir la trace de ce vol</string>
-    <string name="failure_import_igc">La trace n\'a pas pu être lue : %1$s</string>
-    <string name="failure_open_track">La trace n\'a pas pu être ouverte : %1$s</string>
+    <string name="failure_import_igc">La trace n'a pas pu être lue : %1$s</string>
+    <string name="failure_open_track">La trace n'a pas pu être ouverte : %1$s</string>
 </resources>

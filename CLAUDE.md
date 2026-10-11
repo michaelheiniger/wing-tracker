@@ -47,6 +47,7 @@ Test pyramid: many fast unit tests (domain, application), fewer integration test
 
 ## Conventions
 - `allWarningsAsErrors` is on; fix warnings, don't suppress them.
+- Colours come from the theme (`MaterialTheme.colorScheme` and `MaterialTheme.extraColors`), never literals in screens (ADR 0019). State is shown with a badge that has an icon and text, not colour alone.
 - Composable functions are PascalCase (ktlint and detekt are configured for it).
 - Semantic Versioning, strictly x.y.z (ADR 0009).
 - No user-visible text in code: strings live in Compose resources with one folder per locale (ADR 0014). Logic reports error kinds (enums, typed failures); only composables turn them into text.

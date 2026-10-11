@@ -256,7 +256,7 @@
     <string name="settings_reminders_title">Reminders</string>
     <string name="settings_reminders_hint">A check counts as due soon this long before it is due. Whichever limit comes first applies.</string>
     <string name="field_lead_days">Due soon, days before the date</string>
-    <string name="field_lead_hours">Due soon, flight hours before a wing\'s limit</string>
+    <string name="field_lead_hours">Due soon, flight hours before a wing's limit</string>
     <string name="error_days">Use a whole number of days, e.g. 30</string>
     <string name="settings_save">Save</string>
     <string name="settings_saved">Saved</string>

@@ -9,8 +9,10 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -92,12 +94,18 @@ fun AppShell(
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Row {
-            NavigationRail {
+            NavigationRail(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
                 Destination.entries.forEach { item ->
                     NavigationRailItem(
                         selected = item == current,
                         onClick = { destination = item.name },
                         icon = { RailIcon(item, attentionPresenter.state.attention.count) },
+                        colors =
+                            NavigationRailItemDefaults.colors(
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                            ),
                         label = { Text(stringResource(item.label)) },
                     )
                 }

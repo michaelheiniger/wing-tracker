@@ -1,31 +1,51 @@
 package ch.qscqlmpa.wingtracker.ui.reminders
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.gear.maintenance.DueState
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.reminders.Attention
 import ch.qscqlmpa.wingtracker.reminders.AttentionItem
+import ch.qscqlmpa.wingtracker.ui.components.icon
+import ch.qscqlmpa.wingtracker.ui.components.severity
 import ch.qscqlmpa.wingtracker.ui.gear.maintenance.chipText
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.attention_due_soon
 import ch.qscqlmpa.wingtracker.ui.resources.attention_open
 import ch.qscqlmpa.wingtracker.ui.resources.attention_title
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_planned_on
+import ch.qscqlmpa.wingtracker.ui.theme.extraColors
 import ch.qscqlmpa.wingtracker.ui.toDisplay
 import org.jetbrains.compose.resources.stringResource
+
+/** The panel's border takes the colour of the most urgent thing in it, so its importance shows before it is read. */
+@Composable
+private fun panelAccent(attention: Attention): Color {
+    val scheme = MaterialTheme.colorScheme
+    return when {
+        attention.dueCount > 0 -> scheme.error
+        attention.dueSoonCount > 0 -> MaterialTheme.extraColors.warning
+        else -> scheme.primary
+    }
+}
 
 /** Sits above the logbook only while something needs attention, so the logbook stays the home screen. */
 @Composable
@@ -36,14 +56,25 @@ fun AttentionPanel(
     if (attention.isEmpty) return
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        border = BorderStroke(PANEL_BORDER, panelAccent(attention)),
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(Res.string.attention_title), style = MaterialTheme.typography.titleMedium)
             attention.items.forEach { AttentionRow(it, onOpen = { onOpen(it.ref) }) }
         }
     }
 }
+
+private val PANEL_BORDER = 1.5.dp
+
+@Composable
+private fun stateColor(state: DueState): Color =
+    when (state) {
+        DueState.Due -> MaterialTheme.colorScheme.error
+        DueState.DueSoon -> MaterialTheme.extraColors.warning
+        DueState.Ok -> MaterialTheme.colorScheme.primary
+    }
 
 @Composable
 private fun AttentionRow(
@@ -53,8 +84,18 @@ private fun AttentionRow(
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        // The icon repeats the meaning of the colour, so it never depends on colour alone.
+        val icon = if (item.state == DueState.Ok) Icons.Default.DateRange else item.state.severity().icon()
+        icon?.let {
+            Icon(
+                it,
+                contentDescription = null,
+                tint = stateColor(item.state),
+                modifier = Modifier.size(20.dp),
+            )
+        }
         Column(modifier = Modifier.weight(1f)) {
             Text(item.name, style = MaterialTheme.typography.titleSmall)
             val detail = item.status?.takeIf { item.state != DueState.Ok }?.chipText()
@@ -72,17 +113,8 @@ private fun AttentionRow(
                         it.date.toDisplay(),
                     )
                 }
-            // Words come from the shared status text so the panel, the lists and the screen always agree.
             listOfNotNull(statusText, plannedText).joinToString(" · ").takeIf { it.isNotEmpty() }?.let {
-                val color =
-                    if (item.state ==
-                        DueState.Due
-                    ) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSecondaryContainer
-                    }
-                Text(it, style = MaterialTheme.typography.bodySmall, color = color)
+                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         TextButton(onClick = onOpen) { Text(stringResource(Res.string.attention_open)) }

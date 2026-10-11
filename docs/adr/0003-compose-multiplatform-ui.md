@@ -17,3 +17,5 @@ We use Compose Multiplatform with Material 3 for one declarative UI codebase acr
 ## Consequences
 
 Less UI code to maintain. The iOS and web targets are less mature than desktop and Android, and the desktop look is less native. Platform-specific needs go behind interfaces.
+- 2026-10-11: The Material 3 theme is customised with the application's own colours, shapes and type weights (see [ADR 0019](0019-theme-and-status-colors.md)).
+

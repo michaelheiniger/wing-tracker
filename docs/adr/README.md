@@ -25,6 +25,7 @@ ADRs capture **why** wing-tracker is built the way it is. They use the
 | [0016](0016-statistics-charts-drawn-with-compose-canvas.md) | Statistics charts are drawn with Compose Canvas | Accepted |
 | [0017](0017-platform-capabilities-behind-ports.md) | Platform capabilities sit behind ports | Accepted |
 | [0018](0018-igc-import-through-a-port.md) | IGC import goes through a port | Accepted |
+| [0019](0019-theme-and-status-colors.md) | A brand theme with checked contrast and status colours | Accepted |
 
 ## Rules
 

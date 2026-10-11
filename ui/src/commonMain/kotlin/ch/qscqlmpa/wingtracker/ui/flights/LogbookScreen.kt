@@ -43,6 +43,9 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.reminders.Attention
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
+import ch.qscqlmpa.wingtracker.ui.components.AppCard
+import ch.qscqlmpa.wingtracker.ui.components.Severity
+import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.components.UnreadableBanner
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.message
@@ -75,6 +78,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.month_names
 import ch.qscqlmpa.wingtracker.ui.resources.unreadable_kept
 import ch.qscqlmpa.wingtracker.ui.resources.unreadable_quarantined
 import ch.qscqlmpa.wingtracker.ui.resources.wing_hours_total
+import ch.qscqlmpa.wingtracker.ui.theme.extraColors
 import ch.qscqlmpa.wingtracker.ui.toDisplay
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringArrayResource
@@ -101,6 +105,8 @@ fun LogbookScreen(
             if (logbook != null && logbook.wings.isNotEmpty()) {
                 ExtendedFloatingActionButton(
                     onClick = onLogFlight,
+                    containerColor = MaterialTheme.extraColors.accent,
+                    contentColor = MaterialTheme.extraColors.onAccent,
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
                     text = { Text(stringResource(Res.string.logbook_log_flight)) },
                 )
@@ -208,9 +214,9 @@ private fun LogbookContent(
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         logbook.wings.filter { it.isActive }.forEach { wing ->
             val total = logbook.hoursByWing[wing.id] ?: Duration.ZERO
-            AssistChip(
-                onClick = {},
-                label = { Text(stringResource(Res.string.wing_hours_total, wing.details.name, formatDuration(total))) },
+            StatusBadge(
+                stringResource(Res.string.wing_hours_total, wing.details.name, formatDuration(total)),
+                Severity.Neutral,
             )
         }
     }
@@ -244,6 +250,7 @@ private fun MonthHeader(month: LogbookMonth) {
         Text(
             stringResource(Res.string.logbook_month_header, name, month.month.year),
             style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
         )
         Text(
             stringResource(
@@ -266,7 +273,7 @@ private fun FlightCard(
 ) {
     val details = flight.details
     val openTrackDescription = stringResource(Res.string.igc_open_track)
-    Card(modifier = Modifier.fillMaxWidth()) {
+    AppCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
