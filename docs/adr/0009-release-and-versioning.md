@@ -19,3 +19,4 @@ Versions follow strict Semantic Versioning (MAJOR.MINOR.PATCH); a hotfix is a pa
 Releasing is a tag push. Every release needs a hand-written changelog entry. Other OS packages and auto-update are deferred decisions.
 - 2026-10-11: The release workflow can also be started by hand as a dry run: it builds the package and uploads it as an artifact, and publishes nothing. Both workflows run on a pinned runner version, so a new default image cannot change the build unnoticed.
 
+- 2026-10-11: A release is started by running the release workflow by hand with the version, instead of by pushing a tag. The workflow itself dates the `Unreleased` changelog section, builds and checks the package, and only then commits the changelog to `main`, creates the tag and publishes the release, so the changelog, tag and package cannot disagree. A dry run option builds without changing anything. Pushing a tag by hand no longer starts a release.

@@ -1,28 +1,56 @@
 name: Release
 
-# Releasing = pushing a vMAJOR.MINOR.PATCH tag (ADR 0009). Running the workflow by hand is a dry run: it builds and
-# uploads the package as an artifact but publishes nothing.
+# Releasing = running this workflow by hand with the version (ADR 0009). It dates the Unreleased section of
+# CHANGELOG.md, builds and checks the package, and only then commits the changelog, tags and publishes.
+# A dry run does everything up to the build and uploads the package as an artifact, but changes nothing.
 on:
-  push:
-    tags: ['v[0-9]+.[0-9]+.[0-9]+']
   workflow_dispatch:
     inputs:
       version:
-        description: Version to build the package with (dry run, nothing is published)
+        description: Version to release, as MAJOR.MINOR.PATCH without a leading v
         required: true
-        default: 0.0.1
+      dry_run:
+        description: Dry run (build and upload the package only; no commit, tag or release)
+        type: boolean
+        default: false
 
 permissions:
   contents: write
+
+# Two releases at once would race on the changelog and the tag.
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   release:
     runs-on: ubuntu-24.04
     env:
-      PUBLISH: ${{ startsWith(github.ref, 'refs/tags/v') }}
-      VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
+      VERSION: ${{ inputs.version }}
+      DRY_RUN: ${{ inputs.dry_run }}
     steps:
+      - name: Check the request
+        run: |
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "Releases are made from main, not from $GITHUB_REF" >&2
+            exit 1
+          fi
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "The version must look like 1.2.3 (ADR 0009), got '$VERSION'" >&2
+            exit 1
+          fi
       - uses: actions/checkout@v7
+        with:
+          # The whole history, so an existing tag of this version is found.
+          fetch-depth: 0
+      - name: Check that the version is new
+        run: |
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
+            echo "The tag v$VERSION already exists" >&2
+            exit 1
+          fi
+      - name: Date the Unreleased changelog section
+        run: scripts/changelog-release.sh "$VERSION"
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
@@ -33,22 +61,30 @@ jobs:
         # jpackage builds the .deb with these; installing them keeps the build independent of the runner image.
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fakeroot dpkg-dev
       - name: Build and verify
-        run: ./gradlew check :app-desktop:packageDeb -PappVersion="${VERSION#v}"
+        run: ./gradlew check :app-desktop:packageDeb -PappVersion="$VERSION"
       - name: Upload the package
         uses: actions/upload-artifact@v7
         with:
           name: wing-tracker-${{ env.VERSION }}-deb
           path: app-desktop/build/compose/binaries/main/deb/*.deb
           if-no-files-found: error
-      - name: Extract release notes for this version
-        if: env.PUBLISH == 'true'
-        run: scripts/changelog-section.sh "${VERSION#v}" > release-notes.md
+      - name: Commit the changelog and tag the release
+        if: env.DRY_RUN != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "Release $VERSION"
+          git tag "v$VERSION"
+          # One push, so the commit and the tag arrive together or not at all (e.g. when main moved meanwhile).
+          git push --atomic origin HEAD:main "v$VERSION"
       - name: Publish GitHub Release
-        if: env.PUBLISH == 'true'
+        if: env.DRY_RUN != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" \
-            --title "$GITHUB_REF_NAME" \
+          scripts/changelog-section.sh "$VERSION" > release-notes.md
+          gh release create "v$VERSION" \
+            --title "v$VERSION" \
             --notes-file release-notes.md \
             app-desktop/build/compose/binaries/main/deb/*.deb

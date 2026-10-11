@@ -51,16 +51,11 @@ Replace `:ui` with the module that owns the test (`:domain`, `:application`, ...
 ## Release
 Versions follow Semantic Versioning (`MAJOR.MINOR.PATCH`); a hotfix is a patch release.
 
-1. In `CHANGELOG.md`, rename `Unreleased` to the new version and date it (format: `## [x.y.z] - YYYY-MM-DD`), then add a fresh empty `Unreleased` section.
-2. Make sure `./gradlew check` passes on `main`.
-3. Tag and push:
-   ```bash
-   git tag vX.Y.Z
-   git push origin vX.Y.Z
-   ```
-4. The `Release` GitHub workflow builds the Linux package and publishes a GitHub Release with that version's changelog section. It fails if the section is missing.
+1. Make sure the user-facing changes are listed under `Unreleased` in `CHANGELOG.md` and that `./gradlew check` passes on `main`.
+2. Run the **Release** workflow from the Actions tab on `main` and enter the version (or `gh workflow run release.yml -f version=X.Y.Z`).
+3. The workflow dates the `Unreleased` section as the new version and starts a fresh one, builds and checks the Linux package, and only then commits the changelog, creates the `vX.Y.Z` tag and publishes a GitHub Release with that version's changelog section. It fails, changing nothing, when `Unreleased` is empty, the version already exists, or the build fails.
 
-To rehearse a release without tagging, run the **Release** workflow by hand from the Actions tab (or `gh workflow run release.yml -f version=0.0.1`). It builds the package and uploads it as a workflow artifact, and publishes nothing.
+To rehearse a release, tick **dry run** (`-f dry_run=true`): the package is built and uploaded as a workflow artifact, and nothing is committed, tagged or published.
 
 To build a package locally: `./gradlew :app-desktop:packageDeb -PappVersion=X.Y.Z`; the result is under `app-desktop/build/compose/binaries`.
 
