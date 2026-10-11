@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.0.1] - 2026-10-11
+
 ### Fixed
 - File, folder and save dialogs now look like the rest of your desktop (they use the system's own chooser, including on KDE Plasma).
 - The dark appearance of KDE Plasma (and other desktops that report it) is now detected, and followed while the app runs.
