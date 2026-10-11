@@ -8,6 +8,8 @@ import ch.qscqlmpa.wingtracker.flights.aFixedClock
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.aWing
 import ch.qscqlmpa.wingtracker.gear.wing.aWingDetails
+import ch.qscqlmpa.wingtracker.settings.AppSettings
+import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -32,6 +34,7 @@ private fun aFlightOn(
 class MaintenanceQueriesTest {
     private val gear = mockk<MaintainedGearRepository>()
     private val flights = mockk<FlightRepository>()
+    private val settings = mockk<SettingsRepository>().also { coEvery { it.load() } returns AppSettings() }
     private val interval = MaintenanceInterval(months = 12, hours = 100.hours)
     private val skyDancer =
         aWing(
@@ -65,7 +68,7 @@ class MaintenanceQueriesTest {
                 )
 
                 // when
-                val result = GetGearMaintenance(gear, flights, aFixedClock())(skyDancer.ref)
+                val result = GetGearMaintenance(gear, flights, settings, aFixedClock())(skyDancer.ref)
 
                 // then
                 assertThat(result.totalHours).isEqualTo(72.hours)
@@ -81,7 +84,7 @@ class MaintenanceQueriesTest {
                 givenStored(aFlightOn("wing-1", LocalDate(2025, 6, 1), 20), all = listOf(skyDancer, harness))
 
                 // when
-                val result = GetGearMaintenance(gear, flights, aFixedClock())(harness.ref)
+                val result = GetGearMaintenance(gear, flights, settings, aFixedClock())(harness.ref)
 
                 // then
                 assertThat(result.totalHours).isNull()
@@ -106,7 +109,7 @@ class MaintenanceQueriesTest {
                 givenStored(all = listOf(skyDancer, many, harness))
 
                 // when
-                val result = GetGearMaintenance(gear, flights, aFixedClock())(skyDancer.ref)
+                val result = GetGearMaintenance(gear, flights, settings, aFixedClock())(skyDancer.ref)
 
                 // then
                 assertThat(result.knownCompanies).containsExactly("Alpine Wing Service", "Swiss Paragliding Service")
@@ -120,7 +123,15 @@ class MaintenanceQueriesTest {
                 coEvery { gear.find(ref) } returns null
 
                 // when
-                val failure = runCatching { GetGearMaintenance(gear, flights, aFixedClock())(ref) }.exceptionOrNull()
+                val failure =
+                    runCatching {
+                        GetGearMaintenance(
+                            gear,
+                            flights,
+                            settings,
+                            aFixedClock(),
+                        )(ref)
+                    }.exceptionOrNull()
 
                 // then
                 assertThat(failure).isInstanceOf(GearNotFoundException::class.java)
@@ -139,7 +150,7 @@ class MaintenanceQueriesTest {
                 )
 
                 // when
-                val result = GetMaintenanceStatuses(gear, flights, aFixedClock())()
+                val result = GetMaintenanceStatuses(gear, flights, settings, aFixedClock())()
 
                 // then
                 assertThat(result[skyDancer.ref]?.hoursSince).isEqualTo(20.hours)

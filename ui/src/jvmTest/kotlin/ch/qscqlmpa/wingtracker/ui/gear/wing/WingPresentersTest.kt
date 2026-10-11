@@ -16,6 +16,8 @@ import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
+import ch.qscqlmpa.wingtracker.settings.AppSettings
+import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
@@ -56,6 +58,7 @@ class WingPresentersTest {
     private val today = LocalDate(2026, 10, 11)
 
     private var hasFlights = false
+    private val settings = mockk<SettingsRepository>().also { coEvery { it.load() } returns AppSettings() }
 
     private fun TestScope.listPresenter() =
         WingListPresenter(
@@ -67,6 +70,7 @@ class WingPresentersTest {
                 GetMaintenanceStatuses(
                     CompositeMaintainedGearRepository(wings, mockk(relaxed = true), mockk(relaxed = true)),
                     flights,
+                    settings,
                     AppClock(),
                 ),
             today = { today },

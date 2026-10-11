@@ -5,6 +5,7 @@ import ch.qscqlmpa.wingtracker.ui.gear.wing.FormError
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.error_amount
 import ch.qscqlmpa.wingtracker.ui.resources.error_currency
+import ch.qscqlmpa.wingtracker.ui.resources.error_days
 import ch.qscqlmpa.wingtracker.ui.resources.error_hours
 import ch.qscqlmpa.wingtracker.ui.resources.error_months
 import ch.qscqlmpa.wingtracker.ui.resources.error_required
@@ -13,9 +14,12 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_delete
 import ch.qscqlmpa.wingtracker.ui.resources.failure_delete_check
 import ch.qscqlmpa.wingtracker.ui.resources.failure_delete_flight
 import ch.qscqlmpa.wingtracker.ui.resources.failure_delete_in_use
+import ch.qscqlmpa.wingtracker.ui.resources.failure_export_calendar
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load
+import ch.qscqlmpa.wingtracker.ui.resources.failure_load_attention
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_logbook
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_maintenance
+import ch.qscqlmpa.wingtracker.ui.resources.failure_load_settings
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_statistics
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_report
 import ch.qscqlmpa.wingtracker.ui.resources.failure_retire
@@ -23,12 +27,17 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_save
 import ch.qscqlmpa.wingtracker.ui.resources.failure_save_check
 import ch.qscqlmpa.wingtracker.ui.resources.failure_save_flight
 import ch.qscqlmpa.wingtracker.ui.resources.failure_save_plan
+import ch.qscqlmpa.wingtracker.ui.resources.failure_save_settings
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 // A table rather than a long `when`: the kinds only differ by which text they use.
 private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
     mapOf(
+        FailureKind.LoadAttention to Res.string.failure_load_attention,
+        FailureKind.ExportCalendar to Res.string.failure_export_calendar,
+        FailureKind.SaveSettings to Res.string.failure_save_settings,
+        FailureKind.LoadSettings to Res.string.failure_load_settings,
         FailureKind.Load to Res.string.failure_load,
         FailureKind.Save to Res.string.failure_save,
         FailureKind.Retire to Res.string.failure_retire,
@@ -62,4 +71,5 @@ fun FormError.message(): String =
         FormError.InvalidCurrency -> stringResource(Res.string.error_currency)
         FormError.InvalidHours -> stringResource(Res.string.error_hours)
         FormError.InvalidMonths -> stringResource(Res.string.error_months)
+        FormError.InvalidDays -> stringResource(Res.string.error_days)
     }

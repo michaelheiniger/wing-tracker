@@ -36,10 +36,13 @@ import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.Logbook
 import ch.qscqlmpa.wingtracker.flights.LogbookMonth
+import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
+import ch.qscqlmpa.wingtracker.reminders.Attention
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.components.UnreadableBanner
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.message
+import ch.qscqlmpa.wingtracker.ui.reminders.AttentionPanel
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.action_dismiss
@@ -76,6 +79,8 @@ fun LogbookScreen(
     presenter: LogbookPresenter,
     onLogFlight: () -> Unit,
     onEditFlight: (Flight) -> Unit,
+    attention: Attention,
+    onOpenAttention: (GearRef) -> Unit,
     onGoToGear: () -> Unit,
 ) {
     val state = presenter.state
@@ -98,6 +103,7 @@ fun LogbookScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(stringResource(Res.string.logbook_title), style = MaterialTheme.typography.headlineMedium)
+            AttentionPanel(attention, onOpenAttention)
             state.unreadable.forEach { UnreadableBanner(it, onDismiss = presenter::dismissUnreadable) }
             state.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
             if (state.loading) {

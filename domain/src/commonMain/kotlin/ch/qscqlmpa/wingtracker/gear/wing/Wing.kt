@@ -25,7 +25,7 @@ data class Wing(
         history
     }
 
-    val isActive: Boolean get() = status == GearStatus.Active
+    override val isActive: Boolean get() = status == GearStatus.Active
 
     override val ref: GearRef get() = GearRef(GearKind.Wing, id.value)
     override val displayName: String get() = details.name

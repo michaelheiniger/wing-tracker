@@ -3,6 +3,7 @@ package ch.qscqlmpa.wingtracker.desktop
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
 import ch.qscqlmpa.wingtracker.ui.platform.FilePicker
+import ch.qscqlmpa.wingtracker.ui.platform.FileSaver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.swing.Swing
 import kotlinx.coroutines.withContext
@@ -46,5 +47,24 @@ class DesktopFileOpener : FileOpener {
         file.writeBytes(bytes)
         file.toFile().deleteOnExit()
         Desktop.getDesktop().open(file.toFile())
+    }
+}
+
+/** The operating system's own save dialog. */
+class DesktopFileSaver : FileSaver {
+    override suspend fun save(
+        title: String,
+        suggestedName: String,
+        bytes: ByteArray,
+    ): String? {
+        val chosen =
+            withContext(Dispatchers.Swing) {
+                val dialog = FileDialog(null as Frame?, title, FileDialog.SAVE)
+                dialog.file = suggestedName
+                dialog.isVisible = true
+                dialog.files.firstOrNull()
+            } ?: return null
+        withContext(Dispatchers.IO) { chosen.writeBytes(bytes) }
+        return chosen.name
     }
 }

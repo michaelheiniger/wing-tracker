@@ -316,4 +316,114 @@ class MaintenanceStatusTest {
             assertThat(status).isNull()
         }
     }
+
+    @Nested
+    inner class DueSoon {
+        private val leadTimes = ReminderLeadTimes(days = 30, hours = 10.hours)
+
+        @Test
+        fun `is due soon when the due date is within the lead time`() {
+            // given
+            val wing = aWingWith(MaintenanceInterval(months = 12))
+
+            // when
+            val status = wing.maintenanceStatus(emptyList(), LocalDate(2025, 2, 20), leadTimes)!!
+
+            // then
+            assertThat(status.state).isEqualTo(DueState.DueSoon)
+            assertThat(status.isDue).isFalse()
+            assertThat(status.isDueSoon).isTrue()
+        }
+
+        @Test
+        fun `is due soon on the first day of the lead time`() {
+            // given
+            val wing = aWingWith(MaintenanceInterval(months = 12))
+
+            // when
+            val status = wing.maintenanceStatus(emptyList(), LocalDate(2025, 2, 7), leadTimes)!!
+
+            // then
+            assertThat(status.state).isEqualTo(DueState.DueSoon)
+        }
+
+        @Test
+        fun `is not due soon the day before the lead time starts`() {
+            // given
+            val wing = aWingWith(MaintenanceInterval(months = 12))
+
+            // when
+            val status = wing.maintenanceStatus(emptyList(), LocalDate(2025, 2, 6), leadTimes)!!
+
+            // then
+            assertThat(status.state).isEqualTo(DueState.Ok)
+        }
+
+        @Test
+        fun `is due, not just due soon, once the due date is reached`() {
+            // given
+            val wing = aWingWith(MaintenanceInterval(months = 12))
+
+            // when
+            val status = wing.maintenanceStatus(emptyList(), LocalDate(2025, 3, 9), leadTimes)!!
+
+            // then
+            assertThat(status.state).isEqualTo(DueState.Due)
+        }
+
+        @Test
+        fun `is due soon when the remaining hours are within the lead time`() {
+            // given
+            val wing = aWingWith(MaintenanceInterval(hours = 100.hours))
+            val flights = listOf(flown(LocalDate(2024, 5, 1), 92.hours))
+
+            // when
+            val status = wing.maintenanceStatus(flights, LocalDate(2024, 7, 1), leadTimes)!!
+
+            // then
+            assertThat(status.state).isEqualTo(DueState.DueSoon)
+        }
+
+        @Test
+        fun `is ok when both the date and the hours are far enough away`() {
+            // given
+            val wing = aWingWith(MaintenanceInterval(months = 24, hours = 100.hours))
+            val flights = listOf(flown(LocalDate(2024, 5, 1), 40.hours))
+
+            // when
+            val status = wing.maintenanceStatus(flights, LocalDate(2024, 7, 1), leadTimes)!!
+
+            // then
+            assertThat(status.state).isEqualTo(DueState.Ok)
+        }
+
+        @Test
+        fun `uses the default lead times when none are given`() {
+            // given
+            val wing = aWingWith(MaintenanceInterval(months = 12))
+
+            // when
+            val status = wing.maintenanceStatus(emptyList(), LocalDate(2025, 3, 8))!!
+
+            // then
+            assertThat(status.state).isEqualTo(DueState.DueSoon)
+        }
+    }
+
+    @Nested
+    inner class LeadTimeCreation {
+        @Test
+        fun `rejects zero days`() {
+            org.assertj.core.api.Assertions
+                .assertThatThrownBy { ReminderLeadTimes(days = 0, hours = 10.hours) }
+                .isInstanceOf(IllegalArgumentException::class.java)
+        }
+
+        @Test
+        fun `rejects zero hours`() {
+            org.assertj.core.api.Assertions
+                .assertThatThrownBy { ReminderLeadTimes(days = 30, hours = Duration.ZERO) }
+                .isInstanceOf(IllegalArgumentException::class.java)
+        }
+    }
 }

@@ -247,4 +247,38 @@
     <string name="field_harness_interval_months">Check every (months)</string>
     <string name="field_reserve_interval_months">Repack every (months)</string>
     <string name="interval_hint_months">Leave empty for no reminder.</string>
+
+    <string name="attention_title">Needs attention</string>
+    <string name="attention_open">Open</string>
+    <string name="attention_due_soon">Check due soon</string>
+    <string name="attention_badge">%1$d need attention</string>
+
+    <string name="settings_reminders_title">Reminders</string>
+    <string name="settings_reminders_hint">A check counts as due soon this long before it is due. Whichever limit comes first applies.</string>
+    <string name="field_lead_days">Due soon, days before the date</string>
+    <string name="field_lead_hours">Due soon, flight hours before a wing\'s limit</string>
+    <string name="error_days">Use a whole number of days, e.g. 30</string>
+    <string name="settings_save">Save</string>
+    <string name="settings_saved">Saved</string>
+    <string name="settings_calendar_title">Calendar</string>
+    <string name="settings_calendar_hint">Export planned checks and the upcoming due dates as a calendar file that your calendar app can import.</string>
+    <string name="settings_calendar_export">Export calendar</string>
+    <string name="settings_calendar_pick_title">Save calendar</string>
+    <string name="settings_calendar_exported">Calendar saved as %1$s</string>
+    <string name="settings_calendar_empty">There is nothing to export yet: no planned checks and no upcoming due dates.</string>
+    <string name="failure_export_calendar">The calendar could not be exported: %1$s</string>
+    <string name="failure_save_settings">The settings could not be saved: %1$s</string>
+    <string name="failure_load_settings">The settings could not be loaded: %1$s</string>
+    <string name="failure_load_attention">The reminders could not be loaded: %1$s</string>
+
+    <string name="notification_title">Wing Tracker</string>
+    <string name="notification_due">%1$d due</string>
+    <string name="notification_due_soon">%1$d due soon</string>
+    <string name="notification_planned">%1$d planned</string>
+    <string name="notification_message">%1$s: %2$s</string>
+
+    <string name="calendar_due">%1$s: check due</string>
+    <string name="calendar_due_description">The check interval of %1$s ends today.</string>
+    <string name="calendar_planned">%1$s: %2$s</string>
+    <string name="calendar_calendar_name">Wing Tracker</string>
 </resources>

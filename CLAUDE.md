@@ -50,4 +50,5 @@ Test pyramid: many fast unit tests (domain, application), fewer integration test
 - Semantic Versioning, strictly x.y.z (ADR 0009).
 - No user-visible text in code: strings live in Compose resources with one folder per locale (ADR 0014). Logic reports error kinds (enums, typed failures); only composables turn them into text.
 - Unreadable stored data is quarantined, never deleted (ADR 0015). Repositories return `LoadResult`.
+- Reminders are computed on demand from stored data; there is no background service (ADR 0012). Lead times live in the settings.
 - Cross-aggregate rules (e.g. flight date versus wing service date) live in application use cases, not in aggregates.

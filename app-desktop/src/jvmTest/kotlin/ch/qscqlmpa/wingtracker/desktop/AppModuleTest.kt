@@ -5,6 +5,7 @@ import ch.qscqlmpa.wingtracker.ui.flights.LogbookUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.GearUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
+import ch.qscqlmpa.wingtracker.ui.reminders.RemindersUseCases
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -20,7 +21,7 @@ class AppModuleTest {
     @Test
     fun `every binding needed to start the application can be resolved`() {
         // given
-        val koin = koinApplication { modules(appModule(dataDirectory)) }.koin
+        val koin = koinApplication { modules(appModules(dataDirectory)) }.koin
 
         // when / then
         assertThat(koin.get<GearUseCases>()).isNotNull()
@@ -28,6 +29,8 @@ class AppModuleTest {
         assertThat(koin.get<GetStatistics>()).isNotNull()
         assertThat(koin.get<MaintenanceUseCases>()).isNotNull()
         assertThat(koin.get<PlatformServices>()).isNotNull()
+        assertThat(koin.get<RemindersUseCases>()).isNotNull()
+        assertThat(koin.get<StartupReminder>()).isNotNull()
         assertThat(koin.get<ThemePreference>()).isNotNull()
     }
 }

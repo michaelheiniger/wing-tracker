@@ -57,7 +57,7 @@ data class Harness(
         history
     }
 
-    val isActive: Boolean get() = status == GearStatus.Active
+    override val isActive: Boolean get() = status == GearStatus.Active
 
     override val ref: GearRef get() = GearRef(GearKind.Harness, id.value)
     override val displayName: String get() = details.name

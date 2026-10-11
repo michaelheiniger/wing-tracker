@@ -8,6 +8,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import ch.qscqlmpa.wingtracker.flights.Flight
+import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
+import ch.qscqlmpa.wingtracker.reminders.Attention
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
@@ -23,6 +25,8 @@ private sealed interface LogbookDialog {
 @Composable
 fun LogbookRoute(
     useCases: LogbookUseCases,
+    attention: Attention,
+    onOpenGear: (GearRef) -> Unit,
     onGoToGear: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -35,6 +39,8 @@ fun LogbookRoute(
         presenter = presenter,
         onLogFlight = { dialog = LogbookDialog.New },
         onEditFlight = { dialog = LogbookDialog.Edit(it) },
+        attention = attention,
+        onOpenAttention = onOpenGear,
         onGoToGear = onGoToGear,
     )
 

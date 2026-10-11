@@ -17,3 +17,5 @@ Capabilities that only a platform can provide, such as picking and opening files
 ## Consequences
 
 Presenters stay testable with mocks, and a new target only needs its own implementations. Each new capability needs a port, and the platform implementations are not unit-tested and are checked by hand.
+- 2026-10-11: Saving a file where the user chooses (`FileSaver`) is a platform port like picking and opening. The system tray notification is not a port of the shared UI: it is started by the desktop composition root, which asks the shared layers only for the text.
+

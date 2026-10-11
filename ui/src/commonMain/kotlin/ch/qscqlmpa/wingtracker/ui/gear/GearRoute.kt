@@ -56,6 +56,9 @@ fun GearRoute(
     useCases: GearUseCases,
     maintenanceUseCases: MaintenanceUseCases,
     platform: PlatformServices,
+    // Opens straight on this item's maintenance, e.g. when coming from the attention panel.
+    initialRef: GearRef? = null,
+    onInitialConsumed: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val wingList =
@@ -73,8 +76,10 @@ fun GearRoute(
         remember { SimpleGearListPresenter(scope, useCases.harnesses, useCases.getMaintenanceStatuses, ::today) }
     val reserveList =
         remember { SimpleGearListPresenter(scope, useCases.reserves, useCases.getMaintenanceStatuses, ::today) }
-    var tab by remember { mutableStateOf(GearKind.Wing) }
-    var screen by remember { mutableStateOf<GearScreen>(GearScreen.List) }
+    var tab by remember { mutableStateOf(initialRef?.kind ?: GearKind.Wing) }
+    var screen by remember {
+        mutableStateOf<GearScreen>(initialRef?.let { GearScreen.Maintenance(it) } ?: GearScreen.List)
+    }
     val backToList = {
         wingList.refresh()
         harnessList.refresh()
@@ -82,7 +87,12 @@ fun GearRoute(
         screen = GearScreen.List
     }
 
-    LaunchedEffect(Unit) { backToList() }
+    LaunchedEffect(Unit) {
+        wingList.refresh()
+        harnessList.refresh()
+        reserveList.refresh()
+        if (initialRef != null) onInitialConsumed()
+    }
 
     when (val current = screen) {
         GearScreen.List -> {

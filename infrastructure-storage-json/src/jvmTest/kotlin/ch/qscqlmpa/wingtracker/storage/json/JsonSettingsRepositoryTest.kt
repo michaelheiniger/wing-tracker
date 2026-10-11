@@ -1,8 +1,10 @@
 package ch.qscqlmpa.wingtracker.storage.json
 
+import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
 import ch.qscqlmpa.wingtracker.settings.AppSettings
 import ch.qscqlmpa.wingtracker.settings.ThemeMode
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDate
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -10,6 +12,8 @@ import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.writeText
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 class JsonSettingsRepositoryTest {
     @TempDir
@@ -42,6 +46,52 @@ class JsonSettingsRepositoryTest {
 
                 // then
                 assertThat(settings).isEqualTo(AppSettings(themeMode = ThemeMode.System))
+            }
+
+        @Test
+        fun `restores the reminder settings and the last notification day`() =
+            runTest {
+                // given
+                val saved =
+                    AppSettings(
+                        themeMode = ThemeMode.Light,
+                        reminderLeadTimes = ReminderLeadTimes(days = 14, hours = 5.hours + 30.minutes),
+                        lastReminderNotificationOn = LocalDate(2026, 10, 10),
+                    )
+                repository.save(saved)
+
+                // when
+                val settings = repository.load()
+
+                // then
+                assertThat(settings).usingRecursiveComparison().isEqualTo(saved)
+            }
+
+        @Test
+        fun `reads a settings file written before reminders existed`() =
+            runTest {
+                // given
+                dataDirectory.resolve("settings.json").writeText("""{"schemaVersion": 1, "themeMode": "Dark"}""")
+
+                // when
+                val settings = repository.load()
+
+                // then
+                assertThat(settings).isEqualTo(AppSettings(themeMode = ThemeMode.Dark))
+            }
+
+        @Test
+        fun `quarantines a settings file with a lead time the domain rejects`() =
+            runTest {
+                // given
+                dataDirectory.resolve("settings.json").writeText("""{"schemaVersion": 2, "reminderLeadDays": 0}""")
+
+                // when
+                val settings = repository.load()
+
+                // then
+                assertThat(settings).isEqualTo(AppSettings())
+                assertThat(dataDirectory.resolve("quarantine/settings.json").exists()).isTrue()
             }
 
         @Test

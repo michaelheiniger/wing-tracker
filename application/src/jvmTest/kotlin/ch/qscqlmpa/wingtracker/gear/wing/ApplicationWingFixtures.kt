@@ -17,6 +17,7 @@ fun aWingDetails(
     name: String = "Sky Dancer",
     hoursBeforeTracking: Duration = 42.hours,
     maintenanceInterval: MaintenanceInterval? = null,
+    inServiceDate: LocalDate = LocalDate(2024, 3, 9),
 ) = WingDetails(
     name = name,
     manufacturer = "Advance",
@@ -30,7 +31,7 @@ fun aWingDetails(
             purchaseDate = LocalDate(2024, 3, 2),
             price = Price(minorUnits = 215_000, currency = CurrencyCode("CHF")),
         ),
-    inServiceDate = LocalDate(2024, 3, 9),
+    inServiceDate = inServiceDate,
     hoursBeforeTracking = hoursBeforeTracking,
     maintenanceInterval = maintenanceInterval,
 )

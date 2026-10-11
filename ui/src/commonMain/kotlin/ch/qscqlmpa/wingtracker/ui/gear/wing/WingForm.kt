@@ -84,6 +84,7 @@ enum class FormError {
     InvalidCurrency,
     InvalidHours,
     InvalidMonths,
+    InvalidDays,
 }
 
 sealed interface WingFormResult {

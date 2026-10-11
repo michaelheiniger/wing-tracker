@@ -16,6 +16,10 @@ enum class FailureKind {
     OpenReport,
     SavePlan,
     CancelPlan,
+    LoadAttention,
+    LoadSettings,
+    SaveSettings,
+    ExportCalendar,
 }
 
 /** A technical [detail] travels with the kind; the screen wraps it in a message in the user's language. */

@@ -247,4 +247,38 @@
     <string name="field_harness_interval_months">Kontrolle alle (Monate)</string>
     <string name="field_reserve_interval_months">Neu packen alle (Monate)</string>
     <string name="interval_hint_months">Leer lassen für keine Erinnerung.</string>
+
+    <string name="attention_title">Braucht Aufmerksamkeit</string>
+    <string name="attention_open">Öffnen</string>
+    <string name="attention_due_soon">Kontrolle bald fällig</string>
+    <string name="attention_badge">%1$d brauchen Aufmerksamkeit</string>
+
+    <string name="settings_reminders_title">Erinnerungen</string>
+    <string name="settings_reminders_hint">Eine Kontrolle gilt so lange vor ihrer Fälligkeit als bald fällig. Es gilt, was zuerst eintritt.</string>
+    <string name="field_lead_days">Bald fällig, Tage vor dem Datum</string>
+    <string name="field_lead_hours">Bald fällig, Flugstunden vor der Grenze eines Gleitschirms</string>
+    <string name="error_days">Eine ganze Zahl von Tagen verwenden, z. B. 30</string>
+    <string name="settings_save">Speichern</string>
+    <string name="settings_saved">Gespeichert</string>
+    <string name="settings_calendar_title">Kalender</string>
+    <string name="settings_calendar_hint">Geplante Kontrollen und die kommenden Fälligkeiten als Kalenderdatei exportieren, die deine Kalender-App importieren kann.</string>
+    <string name="settings_calendar_export">Kalender exportieren</string>
+    <string name="settings_calendar_pick_title">Kalender speichern</string>
+    <string name="settings_calendar_exported">Kalender gespeichert als %1$s</string>
+    <string name="settings_calendar_empty">Es gibt noch nichts zu exportieren: keine geplanten Kontrollen und keine kommenden Fälligkeiten.</string>
+    <string name="failure_export_calendar">Der Kalender konnte nicht exportiert werden: %1$s</string>
+    <string name="failure_save_settings">Die Einstellungen konnten nicht gespeichert werden: %1$s</string>
+    <string name="failure_load_settings">Die Einstellungen konnten nicht geladen werden: %1$s</string>
+    <string name="failure_load_attention">Die Erinnerungen konnten nicht geladen werden: %1$s</string>
+
+    <string name="notification_title">Wing Tracker</string>
+    <string name="notification_due">%1$d fällig</string>
+    <string name="notification_due_soon">%1$d bald fällig</string>
+    <string name="notification_planned">%1$d geplant</string>
+    <string name="notification_message">%1$s: %2$s</string>
+
+    <string name="calendar_due">%1$s: Kontrolle fällig</string>
+    <string name="calendar_due_description">Das Kontrollintervall von %1$s endet heute.</string>
+    <string name="calendar_planned">%1$s: %2$s</string>
+    <string name="calendar_calendar_name">Wing Tracker</string>
 </resources>

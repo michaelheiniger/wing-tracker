@@ -7,6 +7,9 @@ interface MaintainedGear {
     val ref: GearRef
     val displayName: String
     val inServiceDate: LocalDate
+
+    // Retired gear leaves reminders, but keeps its history.
+    val isActive: Boolean
     val maintenanceInterval: MaintenanceInterval?
     val history: MaintenanceHistory
 

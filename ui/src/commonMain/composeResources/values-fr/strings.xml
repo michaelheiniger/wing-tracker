@@ -247,4 +247,38 @@
     <string name="field_harness_interval_months">Contrôle tous les (mois)</string>
     <string name="field_reserve_interval_months">Repliage tous les (mois)</string>
     <string name="interval_hint_months">Laisser vide pour aucun rappel.</string>
+
+    <string name="attention_title">Demande de l\'attention</string>
+    <string name="attention_open">Ouvrir</string>
+    <string name="attention_due_soon">Contrôle bientôt dû</string>
+    <string name="attention_badge">%1$d demandent de l\'attention</string>
+
+    <string name="settings_reminders_title">Rappels</string>
+    <string name="settings_reminders_hint">Un contrôle est considéré comme bientôt dû aussi longtemps avant son échéance. La limite qui arrive en premier s\'applique.</string>
+    <string name="field_lead_days">Bientôt dû, jours avant la date</string>
+    <string name="field_lead_hours">Bientôt dû, heures de vol avant la limite d\'une voile</string>
+    <string name="error_days">Utiliser un nombre entier de jours, p. ex. 30</string>
+    <string name="settings_save">Enregistrer</string>
+    <string name="settings_saved">Enregistré</string>
+    <string name="settings_calendar_title">Calendrier</string>
+    <string name="settings_calendar_hint">Exporter les contrôles planifiés et les prochaines échéances dans un fichier de calendrier que ton application de calendrier peut importer.</string>
+    <string name="settings_calendar_export">Exporter le calendrier</string>
+    <string name="settings_calendar_pick_title">Enregistrer le calendrier</string>
+    <string name="settings_calendar_exported">Calendrier enregistré sous %1$s</string>
+    <string name="settings_calendar_empty">Il n\'y a encore rien à exporter : aucun contrôle planifié ni échéance à venir.</string>
+    <string name="failure_export_calendar">Le calendrier n\'a pas pu être exporté : %1$s</string>
+    <string name="failure_save_settings">Les réglages n\'ont pas pu être enregistrés : %1$s</string>
+    <string name="failure_load_settings">Les réglages n\'ont pas pu être chargés : %1$s</string>
+    <string name="failure_load_attention">Les rappels n\'ont pas pu être chargés : %1$s</string>
+
+    <string name="notification_title">Wing Tracker</string>
+    <string name="notification_due">%1$d dû(s)</string>
+    <string name="notification_due_soon">%1$d bientôt dû(s)</string>
+    <string name="notification_planned">%1$d planifié(s)</string>
+    <string name="notification_message">%1$s : %2$s</string>
+
+    <string name="calendar_due">%1$s : contrôle dû</string>
+    <string name="calendar_due_description">L\'intervalle de contrôle de %1$s se termine aujourd\'hui.</string>
+    <string name="calendar_planned">%1$s : %2$s</string>
+    <string name="calendar_calendar_name">Wing Tracker</string>
 </resources>

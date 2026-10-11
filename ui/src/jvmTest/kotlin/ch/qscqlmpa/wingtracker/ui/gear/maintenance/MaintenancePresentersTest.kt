@@ -25,6 +25,8 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.UpdatePlannedCheck
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
+import ch.qscqlmpa.wingtracker.settings.AppSettings
+import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
@@ -73,6 +75,7 @@ private fun aCheck() = MaintenanceCheck(CheckId("check-1"), LocalDate(2025, 4, 1
 class MaintenancePresentersTest {
     private val wings = mockk<MaintainedGearRepository>(relaxUnitFun = true)
     private val flights = mockk<FlightRepository>()
+    private val settings = mockk<SettingsRepository>().also { coEvery { it.load() } returns AppSettings() }
     private val attachments = mockk<AttachmentStore>(relaxUnitFun = true)
     private val opener = mockk<FileOpener>(relaxUnitFun = true)
     private val picker = mockk<FilePicker>()
@@ -87,7 +90,7 @@ class MaintenancePresentersTest {
 
     private fun TestScope.useCases() =
         MaintenanceUseCases(
-            getGearMaintenance = GetGearMaintenance(wings, flights, clock),
+            getGearMaintenance = GetGearMaintenance(wings, flights, settings, clock),
             recordCheck = RecordCheck(wings, attachments, clock) { CheckId("new-check") },
             updateCheck = UpdateCheck(wings, attachments, clock),
             deleteCheck = DeleteCheck(wings, attachments),

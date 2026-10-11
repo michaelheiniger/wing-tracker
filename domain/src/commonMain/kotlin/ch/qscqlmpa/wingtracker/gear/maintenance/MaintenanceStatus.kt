@@ -2,6 +2,7 @@ package ch.qscqlmpa.wingtracker.gear.maintenance
 
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.daysUntil
 import kotlinx.datetime.plus
 import kotlin.time.Duration
 
@@ -11,9 +12,11 @@ data class FlownHours(
     val duration: Duration,
 )
 
+enum class DueState { Ok, DueSoon, Due }
+
 /**
- * Where a wing stands against its interval. "Due" means the interval is reached or passed, by date or hours;
- * a softer "due soon" belongs to reminders and is not decided here.
+ * Where a piece of gear stands against its interval. "Due" means the interval is reached or passed, by date or hours;
+ * "due soon" means it will be within the lead times.
  */
 data class MaintenanceStatus(
     // The clock starts at the last periodic check, or at the in-service date when there is none.
@@ -21,8 +24,11 @@ data class MaintenanceStatus(
     val dueDate: LocalDate?,
     val hoursSince: Duration,
     val hoursLimit: Duration?,
-    val isDue: Boolean,
+    val state: DueState,
 ) {
+    val isDue: Boolean get() = state == DueState.Due
+    val isDueSoon: Boolean get() = state == DueState.DueSoon
+
     val hoursRemaining: Duration? get() = hoursLimit?.let { (it - hoursSince).coerceAtLeast(Duration.ZERO) }
 }
 
@@ -30,6 +36,7 @@ data class MaintenanceStatus(
 fun MaintainedGear.maintenanceStatus(
     flown: List<FlownHours>,
     today: LocalDate,
+    leadTimes: ReminderLeadTimes = ReminderLeadTimes.DEFAULT,
 ): MaintenanceStatus? {
     val interval = maintenanceInterval ?: return null
     val since = history.lastPeriodicCheck?.date ?: inServiceDate
@@ -38,5 +45,13 @@ fun MaintainedGear.maintenanceStatus(
     val dueDate = interval.months?.let { since.plus(it, DateTimeUnit.MONTH) }
     val dueByDate = dueDate != null && today >= dueDate
     val dueByHours = interval.hours != null && hoursSince >= interval.hours
-    return MaintenanceStatus(since, dueDate, hoursSince, interval.hours, dueByDate || dueByHours)
+    val soonByDate = dueDate != null && today.daysUntil(dueDate) <= leadTimes.days
+    val soonByHours = interval.hours != null && interval.hours - hoursSince <= leadTimes.hours
+    val state =
+        when {
+            dueByDate || dueByHours -> DueState.Due
+            soonByDate || soonByHours -> DueState.DueSoon
+            else -> DueState.Ok
+        }
+    return MaintenanceStatus(since, dueDate, hoursSince, interval.hours, state)
 }

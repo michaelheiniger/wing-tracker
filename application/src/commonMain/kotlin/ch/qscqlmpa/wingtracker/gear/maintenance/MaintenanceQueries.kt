@@ -5,6 +5,7 @@ import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
+import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import kotlin.time.Duration
 
 data class GearMaintenance(
@@ -16,7 +17,8 @@ data class GearMaintenance(
     val knownCompanies: List<String>,
 )
 
-private fun List<Flight>.flownOn(gear: MaintainedGear): List<FlownHours> =
+/** Hours flown on this gear, dated; empty for gear that is not linked to flights. */
+fun List<Flight>.flownOn(gear: MaintainedGear): List<FlownHours> =
     if (!gear.ref.kind.countsFlightHours) {
         emptyList()
     } else {
@@ -26,6 +28,7 @@ private fun List<Flight>.flownOn(gear: MaintainedGear): List<FlownHours> =
 class GetGearMaintenance(
     private val gear: MaintainedGearRepository,
     private val flights: FlightRepository,
+    private val settings: SettingsRepository,
     private val clock: AppClock,
 ) {
     suspend operator fun invoke(ref: GearRef): GearMaintenance {
@@ -38,7 +41,8 @@ class GetGearMaintenance(
                         f.duration
                 }
             }
-        return GearMaintenance(item, item.maintenanceStatus(flown, clock.today()), total, companiesUsed(gear.findAll()))
+        val status = item.maintenanceStatus(flown, clock.today(), settings.load().reminderLeadTimes)
+        return GearMaintenance(item, status, total, companiesUsed(gear.findAll()))
     }
 
     private fun companiesUsed(all: List<MaintainedGear>): List<String> =
@@ -57,12 +61,14 @@ class GetGearMaintenance(
 class GetMaintenanceStatuses(
     private val gear: MaintainedGearRepository,
     private val flights: FlightRepository,
+    private val settings: SettingsRepository,
     private val clock: AppClock,
 ) {
     suspend operator fun invoke(): Map<GearRef, MaintenanceStatus?> {
         val allFlights = flights.findAll().items
+        val leadTimes = settings.load().reminderLeadTimes
         return gear.findAll().associate { item ->
-            item.ref to item.maintenanceStatus(allFlights.flownOn(item), clock.today())
+            item.ref to item.maintenanceStatus(allFlights.flownOn(item), clock.today(), leadTimes)
         }
     }
 }

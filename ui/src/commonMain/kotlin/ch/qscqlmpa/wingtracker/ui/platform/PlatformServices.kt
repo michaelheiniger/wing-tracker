@@ -16,7 +16,18 @@ interface FileOpener {
     )
 }
 
+/** Lets the user save a file where they choose, e.g. an exported calendar. */
+interface FileSaver {
+    /** Returns the name the file was saved under, or null when the dialog was cancelled. */
+    suspend fun save(
+        title: String,
+        suggestedName: String,
+        bytes: ByteArray,
+    ): String?
+}
+
 class PlatformServices(
     val filePicker: FilePicker,
     val fileOpener: FileOpener,
+    val fileSaver: FileSaver,
 )

@@ -38,6 +38,13 @@ import ch.qscqlmpa.wingtracker.gear.wing.RetireWing
 import ch.qscqlmpa.wingtracker.gear.wing.UpdateWingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingFlightLookup
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
+import ch.qscqlmpa.wingtracker.reminders.GetAttention
+import ch.qscqlmpa.wingtracker.reminders.GetCalendarEntries
+import ch.qscqlmpa.wingtracker.reminders.GetStartNotification
+import ch.qscqlmpa.wingtracker.reminders.MarkStartNotificationShown
+import ch.qscqlmpa.wingtracker.settings.GetAppSettings
+import ch.qscqlmpa.wingtracker.settings.SaveReminderLeadTimes
+import ch.qscqlmpa.wingtracker.settings.SaveThemeMode
 import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
 import ch.qscqlmpa.wingtracker.storage.json.FileAttachmentStore
@@ -52,26 +59,46 @@ import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.simple.HarnessOps
 import ch.qscqlmpa.wingtracker.ui.gear.simple.ReserveOps
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
+import ch.qscqlmpa.wingtracker.ui.reminders.RemindersUseCases
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
+import org.koin.core.module.Module
 import org.koin.dsl.module
 import java.nio.file.Path
 
-/** Composition root: the only place where layers get wired together (ADR 0007). */
-fun appModule(dataDirectory: Path) =
-    module {
-        single<WingRepository> { JsonWingRepository(dataDirectory) }
-        single<SettingsRepository> { JsonSettingsRepository(dataDirectory) }
+/**
+ * Composition root: the only place where layers get wired together (ADR 0007). Split by feature so each module
+ * stays small enough to read at a glance.
+ */
+fun appModules(dataDirectory: Path): List<Module> =
+    listOf(
+        storageModule(dataDirectory),
+        gearModule(),
+        flightsModule(),
+        maintenanceModule(),
+        remindersModule(),
+        uiModule(),
+    )
 
+private fun storageModule(dataDirectory: Path) =
+    module {
+        single { AppClock() }
+        single<WingRepository> { JsonWingRepository(dataDirectory) }
+        single<HarnessRepository> { JsonHarnessRepository(dataDirectory) }
+        single<ReserveRepository> { JsonReserveRepository(dataDirectory) }
+        single<FlightRepository> { JsonFlightRepository(dataDirectory) }
+        single<SettingsRepository> { JsonSettingsRepository(dataDirectory) }
+        single<AttachmentStore> { FileAttachmentStore(dataDirectory) }
+        single<MaintainedGearRepository> { CompositeMaintainedGearRepository(get(), get(), get()) }
+    }
+
+private fun gearModule() =
+    module {
         factory { ListWings(get()) }
         factory { RegisterWing(get()) }
         factory { UpdateWingDetails(get()) }
         factory { RetireWing(get()) }
         single<WingFlightLookup> { FlightsOfWing(get()) }
         factory { DeleteWing(get(), get()) }
-        single<HarnessRepository> { JsonHarnessRepository(dataDirectory) }
-        single<ReserveRepository> { JsonReserveRepository(dataDirectory) }
-        single<MaintainedGearRepository> { CompositeMaintainedGearRepository(get(), get(), get()) }
-
         factory {
             HarnessOps(
                 ListHarnesses(get()),
@@ -91,10 +118,22 @@ fun appModule(dataDirectory: Path) =
             )
         }
         single { GearUseCases(get(), get(), get(), get(), get(), get(), get<HarnessOps>(), get<ReserveOps>()) }
+    }
 
-        single<AttachmentStore> { FileAttachmentStore(dataDirectory) }
-        factory { GetMaintenanceStatuses(get(), get(), get()) }
-        factory { GetGearMaintenance(get(), get(), get()) }
+private fun flightsModule() =
+    module {
+        factory { LogFlight(get(), get(), get()) }
+        factory { UpdateFlight(get(), get(), get()) }
+        factory { DeleteFlight(get()) }
+        factory { GetLogbook(get(), get()) }
+        single { LogbookUseCases(get(), get(), get(), get()) }
+        factory { GetStatistics(get(), get(), get()) }
+    }
+
+private fun maintenanceModule() =
+    module {
+        factory { GetMaintenanceStatuses(get(), get(), get(), get()) }
+        factory { GetGearMaintenance(get(), get(), get(), get()) }
         factory { RecordCheck(get(), get(), get()) }
         factory { UpdateCheck(get(), get(), get()) }
         factory { DeleteCheck(get(), get()) }
@@ -103,16 +142,23 @@ fun appModule(dataDirectory: Path) =
         factory { CancelPlannedCheck(get()) }
         factory { ReadAttachment(get()) }
         single { MaintenanceUseCases(get(), get(), get(), get(), get(), get(), get(), get()) }
-        single { PlatformServices(DesktopFilePicker(), DesktopFileOpener()) }
+    }
 
-        single<FlightRepository> { JsonFlightRepository(dataDirectory) }
-        single { AppClock() }
-        factory { LogFlight(get(), get(), get()) }
-        factory { UpdateFlight(get(), get(), get()) }
-        factory { DeleteFlight(get()) }
-        factory { GetLogbook(get(), get()) }
-        single { LogbookUseCases(get(), get(), get(), get()) }
-        factory { GetStatistics(get(), get(), get()) }
+private fun remindersModule() =
+    module {
+        factory { GetAttention(get(), get(), get(), get()) }
+        factory { GetStartNotification(get(), get(), get()) }
+        factory { MarkStartNotificationShown(get(), get()) }
+        factory { GetCalendarEntries(get(), get(), get()) }
+        factory { GetAppSettings(get()) }
+        factory { SaveReminderLeadTimes(get()) }
+        factory { SaveThemeMode(get()) }
+        single { RemindersUseCases(get(), get(), get(), get()) }
+        single { StartupReminder(get(), get(), TrayNotifier()) }
+    }
 
+private fun uiModule() =
+    module {
+        single { PlatformServices(DesktopFilePicker(), DesktopFileOpener(), DesktopFileSaver()) }
         single { ThemePreference() }
     }
