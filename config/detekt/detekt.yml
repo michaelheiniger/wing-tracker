@@ -1,0 +1,18 @@
+# Only deviations from the detekt defaults belong here (buildUponDefaultConfig).
+style:
+  ReturnCount:
+    # Early returns on invalid input read better than nesting.
+    excludeGuardClauses: true
+  MagicNumber:
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreNamedArgument: true
+complexity:
+  # Compose UI functions are long by nature and are covered by function-length reviews instead.
+  LongMethod:
+    ignoreAnnotated:
+      - 'Composable'
+naming:
+  FunctionNaming:
+    ignoreAnnotated:
+      - 'Composable'

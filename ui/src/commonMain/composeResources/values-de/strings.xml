@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_gear">Ausrüstung</string>
+    <string name="nav_settings">Einstellungen</string>
+
+    <string name="wings_title">Gleitschirme</string>
+    <string name="wings_add">Gleitschirm hinzufügen</string>
+    <string name="wings_empty_title">Noch keine Gleitschirme</string>
+    <string name="wings_empty_body">Füge deinen ersten Gleitschirm hinzu, um Flugstunden und Wartung zu verfolgen.</string>
+    <string name="wings_empty_action">Ersten Gleitschirm hinzufügen</string>
+    <string name="wings_show_retired">Ausgemusterte anzeigen (%1$d)</string>
+
+    <string name="wing_in_service_since">In Betrieb seit %1$s</string>
+    <string name="wing_hours_before_tracking">%1$d h %2$d min vor der Erfassung</string>
+    <string name="wing_certification">EN/LTF %1$s</string>
+    <string name="wing_status_active">In Betrieb</string>
+    <string name="wing_status_retired">Ausgemustert %1$s</string>
+    <string name="wing_status_retired_reason">Ausgemustert %1$s · %2$s</string>
+    <string name="wing_edit">%1$s bearbeiten</string>
+    <string name="wing_retire">Ausmustern</string>
+    <string name="wing_delete">%1$s löschen</string>
+
+    <string name="retire_title">%1$s ausmustern?</string>
+    <string name="retire_body">Der Gleitschirm verschwindet aus deiner aktiven Liste und den Erinnerungen, seine Flüge und seine Historie bleiben erhalten.</string>
+    <string name="retire_reason_label">Grund (optional), z. B. verkauft</string>
+    <string name="delete_title">%1$s löschen?</string>
+    <string name="delete_body">Für einen irrtümlich erfassten Gleitschirm. Er wird endgültig entfernt. Ein Gleitschirm mit Flügen kann nur ausgemustert werden.</string>
+    <string name="delete_confirm">Löschen</string>
+
+    <string name="form_title_add">Gleitschirm hinzufügen</string>
+    <string name="form_title_edit">%1$s bearbeiten</string>
+    <string name="field_name">Name *</string>
+    <string name="field_manufacturer">Hersteller *</string>
+    <string name="field_model">Modell *</string>
+    <string name="field_size">Grösse</string>
+    <string name="field_serial_number">Seriennummer</string>
+    <string name="section_certification">Zulassungsklasse</string>
+    <string name="certification_unknown">Unbekannt</string>
+    <string name="section_acquisition">Erwerb</string>
+    <string name="acquisition_new">Neu</string>
+    <string name="acquisition_second_hand">Gebraucht</string>
+    <string name="field_purchase_date">Kaufdatum</string>
+    <string name="field_price">Preis</string>
+    <string name="field_currency">Währung</string>
+    <string name="section_usage">Nutzung</string>
+    <string name="field_in_service_date">In Betrieb seit *</string>
+    <string name="field_hours_before_tracking">Flugstunden vor der Erfassung (h oder h:mm)</string>
+    <string name="action_save">Speichern</string>
+    <string name="action_cancel">Abbrechen</string>
+    <string name="action_dismiss">Schliessen</string>
+
+    <string name="date_pick">Datum wählen</string>
+    <string name="date_clear">Datum entfernen</string>
+    <string name="date_ok">OK</string>
+
+    <string name="error_required">Pflichtfeld</string>
+    <string name="error_amount">Eine Zahl wie 2150 oder 2150.50 verwenden</string>
+    <string name="error_currency">Einen 3-stelligen Code wie CHF verwenden</string>
+    <string name="error_hours">Stunden oder Stunden:Minuten verwenden, z. B. 42 oder 42:30</string>
+
+    <string name="failure_load">Die Gleitschirme konnten nicht geladen werden: %1$s</string>
+    <string name="failure_save">Der Gleitschirm konnte nicht gespeichert werden: %1$s</string>
+    <string name="failure_retire">Der Gleitschirm konnte nicht ausgemustert werden: %1$s</string>
+    <string name="failure_delete">Der Gleitschirm konnte nicht gelöscht werden: %1$s</string>
+    <string name="failure_delete_in_use">Dieser Gleitschirm hat Flüge und kann deshalb nicht gelöscht werden. Mustere ihn stattdessen aus.</string>
+
+    <string name="unreadable_quarantined">Die Datei %1$s konnte nicht gelesen werden und wurde in den Quarantäne-Ordner deines Datenordners verschoben. Der zugehörige Gleitschirm wird nicht angezeigt, bis die Datei repariert und zurückgelegt wurde.</string>
+    <string name="unreadable_kept">Die Datei %1$s stammt von einer neueren Version der Anwendung und wird nicht angezeigt. Sie wurde nicht verändert.</string>
+
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_theme">Design</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Hell</string>
+    <string name="theme_dark">Dunkel</string>
+
+    <string name="nav_logbook">Flugbuch</string>
+
+    <string name="logbook_title">Flugbuch</string>
+    <string name="logbook_log_flight">Flug erfassen</string>
+    <string name="logbook_no_wings_title">Zuerst einen Gleitschirm hinzufügen</string>
+    <string name="logbook_no_wings_body">Jeder Flug wird auf einem Gleitschirm erfasst. Füge deinen Gleitschirm hinzu, um dein Flugbuch zu beginnen.</string>
+    <string name="logbook_no_wings_action">Gleitschirm hinzufügen</string>
+    <string name="logbook_empty_title">Noch keine Flüge</string>
+    <string name="logbook_empty_body">Erfasse einen Flug gleich nach der Landung. Deine Stunden pro Gleitschirm summieren sich hier.</string>
+    <string name="logbook_empty_action">Ersten Flug erfassen</string>
+    <string name="logbook_month_header">%1$s %2$d</string>
+    <string name="logbook_month_summary">%1$s · %2$s</string>
+    <plurals name="flights_count">
+        <item quantity="one">%1$d Flug</item>
+        <item quantity="other">%1$d Flüge</item>
+    </plurals>
+    <string-array name="month_names">
+        <item>Januar</item>
+        <item>Februar</item>
+        <item>März</item>
+        <item>April</item>
+        <item>Mai</item>
+        <item>Juni</item>
+        <item>Juli</item>
+        <item>August</item>
+        <item>September</item>
+        <item>Oktober</item>
+        <item>November</item>
+        <item>Dezember</item>
+    </string-array>
+    <string name="duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="wing_hours_total">%1$s · %2$s</string>
+
+    <string name="flight_unknown_wing">Unbekannter Gleitschirm</string>
+    <string name="flight_sites">%1$s → %2$s</string>
+    <string name="flight_edit">Flug bearbeiten</string>
+    <string name="flight_delete">Flug löschen</string>
+    <string name="flight_delete_title">Diesen Flug löschen?</string>
+    <string name="flight_delete_body">Der Flug vom %1$s mit %2$s wird endgültig entfernt.</string>
+
+    <string name="flight_form_title_add">Flug erfassen</string>
+    <string name="flight_form_title_edit">Flug bearbeiten</string>
+    <string name="field_flight_date">Datum *</string>
+    <string name="field_flight_wing">Gleitschirm *</string>
+    <string name="field_flight_duration">Dauer (h:mm) *</string>
+    <string name="field_takeoff_site">Startplatz</string>
+    <string name="field_landing_site">Landeplatz</string>
+    <string name="field_notes">Notizen</string>
+    <string name="flight_wing_retired">%1$s (ausgemustert)</string>
+
+    <string name="error_duration">Stunden:Minuten von mindestens einer Minute verwenden, z. B. 1:35</string>
+    <string name="error_date_future">Dieser Tag liegt noch in der Zukunft</string>
+    <string name="error_date_before_service">Der Gleitschirm war an diesem Tag noch nicht in Betrieb</string>
+
+    <string name="failure_load_logbook">Das Flugbuch konnte nicht geladen werden: %1$s</string>
+    <string name="failure_save_flight">Der Flug konnte nicht gespeichert werden: %1$s</string>
+    <string name="failure_delete_flight">Der Flug konnte nicht gelöscht werden: %1$s</string>
+
+    <string name="nav_statistics">Statistik</string>
+    <string name="statistics_title">Statistik</string>
+    <string name="statistics_legend_hint">Gleitschirm anklicken, um ihn ein- oder auszublenden</string>
+    <string name="statistics_yearly_title">Stunden pro Jahr</string>
+    <string name="statistics_yearly_note">Nur erfasste Flüge</string>
+    <string name="statistics_cumulative_title">Kumulierte Stunden</string>
+    <string name="statistics_cumulative_note">Inklusive der Stunden vor der Erfassung</string>
+    <string name="statistics_show_table">Als Tabelle anzeigen</string>
+    <string name="statistics_show_charts">Als Diagramm anzeigen</string>
+    <string name="statistics_all_hidden">Alle Gleitschirme sind ausgeblendet. Klicke oben auf einen Gleitschirm, um ihn wieder einzublenden.</string>
+    <string name="statistics_empty_title">Noch nichts darzustellen</string>
+    <string name="statistics_empty_body">Diagramme erscheinen, sobald du einen Flug erfasst hast.</string>
+    <string name="statistics_empty_action">Zum Flugbuch</string>
+    <string name="statistics_table_year">Jahr</string>
+    <string name="statistics_table_yearly_title">Stunden pro Jahr (h:mm)</string>
+    <string name="statistics_table_cumulative_title">Kumulierte Stunden am Jahresende (h:mm)</string>
+    <string name="statistics_total">Total</string>
+    <string name="series_other">Übrige Gleitschirme (%1$d)</string>
+    <string name="chart_axis_hours">%1$s h</string>
+    <string name="failure_load_statistics">Die Statistik konnte nicht geladen werden: %1$s</string>
+</resources>

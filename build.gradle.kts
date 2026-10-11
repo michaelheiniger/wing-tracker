@@ -1,0 +1,3 @@
+plugins {
+    id("wingtracker.root")
+}

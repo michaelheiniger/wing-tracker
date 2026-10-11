@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_gear">Gear</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="wings_title">Wings</string>
+    <string name="wings_add">Add wing</string>
+    <string name="wings_empty_title">No wings yet</string>
+    <string name="wings_empty_body">Add your first wing to start tracking its hours and maintenance.</string>
+    <string name="wings_empty_action">Add your first wing</string>
+    <string name="wings_show_retired">Show retired (%1$d)</string>
+
+    <string name="wing_in_service_since">In service since %1$s</string>
+    <string name="wing_hours_before_tracking">%1$d h %2$d min before tracking</string>
+    <string name="wing_certification">EN/LTF %1$s</string>
+    <string name="wing_status_active">In service</string>
+    <string name="wing_status_retired">Retired %1$s</string>
+    <string name="wing_status_retired_reason">Retired %1$s · %2$s</string>
+    <string name="wing_edit">Edit %1$s</string>
+    <string name="wing_retire">Retire</string>
+    <string name="wing_delete">Delete %1$s</string>
+
+    <string name="retire_title">Retire %1$s?</string>
+    <string name="retire_body">It leaves your active list and reminders, but its flights and history are kept.</string>
+    <string name="retire_reason_label">Reason (optional), e.g. sold</string>
+    <string name="delete_title">Delete %1$s?</string>
+    <string name="delete_body">Use this for a wing entered by mistake. It is removed for good. A wing that has flights can only be retired.</string>
+    <string name="delete_confirm">Delete</string>
+
+    <string name="form_title_add">Add wing</string>
+    <string name="form_title_edit">Edit %1$s</string>
+    <string name="field_name">Name *</string>
+    <string name="field_manufacturer">Manufacturer *</string>
+    <string name="field_model">Model *</string>
+    <string name="field_size">Size</string>
+    <string name="field_serial_number">Serial number</string>
+    <string name="section_certification">Certification class</string>
+    <string name="certification_unknown">Unknown</string>
+    <string name="section_acquisition">Acquisition</string>
+    <string name="acquisition_new">New</string>
+    <string name="acquisition_second_hand">Second-hand</string>
+    <string name="field_purchase_date">Purchase date</string>
+    <string name="field_price">Price</string>
+    <string name="field_currency">Currency</string>
+    <string name="section_usage">Usage</string>
+    <string name="field_in_service_date">In service since *</string>
+    <string name="field_hours_before_tracking">Hours flown before tracking (h or h:mm)</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_dismiss">Dismiss</string>
+
+    <string name="date_pick">Choose a date</string>
+    <string name="date_clear">Clear date</string>
+    <string name="date_ok">OK</string>
+
+    <string name="error_required">Required</string>
+    <string name="error_amount">Use a number such as 2150 or 2150.50</string>
+    <string name="error_currency">Use a 3-letter code such as CHF</string>
+    <string name="error_hours">Use hours or hours:minutes, e.g. 42 or 42:30</string>
+
+    <string name="failure_load">The wings could not be loaded: %1$s</string>
+    <string name="failure_save">The wing could not be saved: %1$s</string>
+    <string name="failure_retire">The wing could not be retired: %1$s</string>
+    <string name="failure_delete">The wing could not be deleted: %1$s</string>
+    <string name="failure_delete_in_use">This wing has flights, so it cannot be deleted. Retire it instead.</string>
+
+    <string name="unreadable_quarantined">The file %1$s could not be read and was moved to the quarantine folder in your data folder. Its wing is not shown until the file is repaired and moved back.</string>
+    <string name="unreadable_kept">The file %1$s was written by a newer version of the application and is not shown. It has been left untouched.</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_theme">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+
+    <string name="nav_logbook">Logbook</string>
+
+    <string name="logbook_title">Logbook</string>
+    <string name="logbook_log_flight">Log flight</string>
+    <string name="logbook_no_wings_title">Add a wing first</string>
+    <string name="logbook_no_wings_body">Every flight is logged on a wing, so add your wing to start your logbook.</string>
+    <string name="logbook_no_wings_action">Add a wing</string>
+    <string name="logbook_empty_title">No flights yet</string>
+    <string name="logbook_empty_body">Log a flight right after landing. Your hours per wing add up here.</string>
+    <string name="logbook_empty_action">Log your first flight</string>
+    <string name="logbook_month_header">%1$s %2$d</string>
+    <string name="logbook_month_summary">%1$s · %2$s</string>
+    <plurals name="flights_count">
+        <item quantity="one">%1$d flight</item>
+        <item quantity="other">%1$d flights</item>
+    </plurals>
+    <string-array name="month_names">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+    <string name="duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="wing_hours_total">%1$s · %2$s</string>
+
+    <string name="flight_unknown_wing">Unknown wing</string>
+    <string name="flight_sites">%1$s → %2$s</string>
+    <string name="flight_edit">Edit flight</string>
+    <string name="flight_delete">Delete flight</string>
+    <string name="flight_delete_title">Delete this flight?</string>
+    <string name="flight_delete_body">The flight on %1$s with %2$s is removed for good.</string>
+
+    <string name="flight_form_title_add">Log flight</string>
+    <string name="flight_form_title_edit">Edit flight</string>
+    <string name="field_flight_date">Date *</string>
+    <string name="field_flight_wing">Wing *</string>
+    <string name="field_flight_duration">Duration (h:mm) *</string>
+    <string name="field_takeoff_site">Take-off site</string>
+    <string name="field_landing_site">Landing site</string>
+    <string name="field_notes">Notes</string>
+    <string name="flight_wing_retired">%1$s (retired)</string>
+
+    <string name="error_duration">Use hours:minutes of at least one minute, e.g. 1:35</string>
+    <string name="error_date_future">This day has not happened yet</string>
+    <string name="error_date_before_service">The wing was not in service yet on this day</string>
+
+    <string name="failure_load_logbook">The logbook could not be loaded: %1$s</string>
+    <string name="failure_save_flight">The flight could not be saved: %1$s</string>
+    <string name="failure_delete_flight">The flight could not be deleted: %1$s</string>
+
+    <string name="nav_statistics">Statistics</string>
+    <string name="statistics_title">Statistics</string>
+    <string name="statistics_legend_hint">Click a wing to show or hide it</string>
+    <string name="statistics_yearly_title">Hours per year</string>
+    <string name="statistics_yearly_note">Logged flights only</string>
+    <string name="statistics_cumulative_title">Cumulative hours</string>
+    <string name="statistics_cumulative_note">Includes the hours flown before tracking</string>
+    <string name="statistics_show_table">Show as table</string>
+    <string name="statistics_show_charts">Show as charts</string>
+    <string name="statistics_all_hidden">All wings are hidden. Click a wing above to show it again.</string>
+    <string name="statistics_empty_title">Nothing to chart yet</string>
+    <string name="statistics_empty_body">Charts appear as soon as you have logged a flight.</string>
+    <string name="statistics_empty_action">Go to the logbook</string>
+    <string name="statistics_table_year">Year</string>
+    <string name="statistics_table_yearly_title">Hours per year (h:mm)</string>
+    <string name="statistics_table_cumulative_title">Cumulative hours at the end of the year (h:mm)</string>
+    <string name="statistics_total">Total</string>
+    <string name="series_other">Other wings (%1$d)</string>
+    <string name="chart_axis_hours">%1$s h</string>
+    <string name="failure_load_statistics">The statistics could not be loaded: %1$s</string>
+</resources>

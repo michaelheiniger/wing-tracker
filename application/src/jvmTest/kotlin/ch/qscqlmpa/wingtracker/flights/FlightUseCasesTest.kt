@@ -1,0 +1,240 @@
+package ch.qscqlmpa.wingtracker.flights
+
+import ch.qscqlmpa.wingtracker.gear.wing.WingId
+import ch.qscqlmpa.wingtracker.gear.wing.WingNotFoundException
+import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDate
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class FlightUseCasesTest {
+    private val flights = mockk<FlightRepository>(relaxUnitFun = true)
+    private val wings = mockk<WingRepository>()
+    private val wing = aWingInService()
+
+    private fun givenTheWingExists() {
+        coEvery { wings.findById(wing.id) } returns wing
+    }
+
+    @Nested
+    inner class LogFlightUseCase {
+        private val logFlight = LogFlight(flights, wings, aFixedClock()) { FlightId("new-flight") }
+
+        @Test
+        fun `saves the flight with a generated id and the time it was logged`() =
+            runTest {
+                // given
+                givenTheWingExists()
+                val details = aFlightDetails()
+
+                // when
+                val flight = logFlight(details)
+
+                // then
+                val expected = Flight(FlightId("new-flight"), details, NOW)
+                assertThat(flight).usingRecursiveComparison().isEqualTo(expected)
+                coVerify(exactly = 1) { flights.save(expected) }
+            }
+
+        @Test
+        fun `accepts a flight dated today`() =
+            runTest {
+                // given
+                givenTheWingExists()
+
+                // when
+                val flight = logFlight(aFlightDetails(date = TODAY))
+
+                // then
+                assertThat(flight.details.date).isEqualTo(TODAY)
+            }
+
+        @Test
+        fun `accepts a flight dated on the day the wing entered service`() =
+            runTest {
+                // given
+                givenTheWingExists()
+
+                // when
+                val flight = logFlight(aFlightDetails(date = wing.details.inServiceDate))
+
+                // then
+                assertThat(flight.details.date).isEqualTo(wing.details.inServiceDate)
+            }
+
+        @Test
+        fun `rejects a flight dated tomorrow`() =
+            runTest {
+                // given
+                givenTheWingExists()
+
+                // when
+                val failure =
+                    runCatching {
+                        logFlight(
+                            aFlightDetails(date = LocalDate(2026, 10, 12)),
+                        )
+                    }.exceptionOrNull()
+
+                // then
+                assertThat(failure).isInstanceOf(FlightDateInFutureException::class.java)
+                coVerify(exactly = 0) { flights.save(any()) }
+            }
+
+        @Test
+        fun `rejects a flight dated before the wing entered service`() =
+            runTest {
+                // given
+                givenTheWingExists()
+
+                // when
+                val failure = runCatching { logFlight(aFlightDetails(date = LocalDate(2024, 3, 8))) }.exceptionOrNull()
+
+                // then
+                assertThat(failure).isInstanceOf(FlightBeforeWingInServiceException::class.java)
+                coVerify(exactly = 0) { flights.save(any()) }
+            }
+
+        @Test
+        fun `rejects a flight on a wing that does not exist`() =
+            runTest {
+                // given
+                val missing = WingId("missing-wing")
+                coEvery { wings.findById(missing) } returns null
+
+                // when
+                val failure = runCatching { logFlight(aFlightDetails(wingId = missing)) }.exceptionOrNull()
+
+                // then
+                assertThat(failure).isInstanceOf(WingNotFoundException::class.java)
+            }
+    }
+
+    @Nested
+    inner class UpdateFlightUseCase {
+        private val updateFlight = UpdateFlight(flights, wings, aFixedClock())
+
+        @Test
+        fun `replaces the details and keeps the id and the logging time`() =
+            runTest {
+                // given
+                givenTheWingExists()
+                val existing = aFlight()
+                coEvery { flights.findById(existing.id) } returns existing
+                val newDetails = aFlightDetails(date = LocalDate(2026, 9, 21))
+
+                // when
+                val updated = updateFlight(existing.id, newDetails)
+
+                // then
+                assertThat(updated).usingRecursiveComparison().isEqualTo(existing.copy(details = newDetails))
+                coVerify(exactly = 1) { flights.save(updated) }
+            }
+
+        @Test
+        fun `applies the same date rules as logging`() =
+            runTest {
+                // given
+                givenTheWingExists()
+                val existing = aFlight()
+                coEvery { flights.findById(existing.id) } returns existing
+
+                // when
+                val failure =
+                    runCatching {
+                        updateFlight(
+                            existing.id,
+                            aFlightDetails(date = LocalDate(2027, 1, 1)),
+                        )
+                    }.exceptionOrNull()
+
+                // then
+                assertThat(failure).isInstanceOf(FlightDateInFutureException::class.java)
+                coVerify(exactly = 0) { flights.save(any()) }
+            }
+
+        @Test
+        fun `fails when the flight does not exist`() =
+            runTest {
+                // given
+                val id = FlightId("missing-flight")
+                coEvery { flights.findById(id) } returns null
+
+                // when
+                val failure = runCatching { updateFlight(id, aFlightDetails()) }.exceptionOrNull()
+
+                // then
+                assertThat(failure).isInstanceOf(FlightNotFoundException::class.java)
+            }
+    }
+
+    @Nested
+    inner class DeleteFlightUseCase {
+        @Test
+        fun `deletes an existing flight`() =
+            runTest {
+                // given
+                val existing = aFlight()
+                coEvery { flights.findById(existing.id) } returns existing
+
+                // when
+                DeleteFlight(flights)(existing.id)
+
+                // then
+                coVerify(exactly = 1) { flights.delete(existing.id) }
+            }
+
+        @Test
+        fun `fails when the flight does not exist`() =
+            runTest {
+                // given
+                val id = FlightId("missing-flight")
+                coEvery { flights.findById(id) } returns null
+
+                // when
+                val failure = runCatching { DeleteFlight(flights)(id) }.exceptionOrNull()
+
+                // then
+                assertThat(failure).isInstanceOf(FlightNotFoundException::class.java)
+            }
+    }
+
+    @Nested
+    inner class FlightsOfWingLookup {
+        @Test
+        fun `reports flights for a wing that has some`() =
+            runTest {
+                // given
+                coEvery { flights.findAll() } returns
+                    ch.qscqlmpa.wingtracker.shared
+                        .LoadResult(listOf(aFlight()))
+
+                // when
+                val has = FlightsOfWing(flights).hasFlights(wing.id)
+
+                // then
+                assertThat(has).isTrue()
+            }
+
+        @Test
+        fun `reports no flights for a wing that has none`() =
+            runTest {
+                // given
+                val other = aFlight(details = aFlightDetails(wingId = WingId("other-wing")))
+                coEvery { flights.findAll() } returns
+                    ch.qscqlmpa.wingtracker.shared
+                        .LoadResult(listOf(other))
+
+                // when
+                val has = FlightsOfWing(flights).hasFlights(wing.id)
+
+                // then
+                assertThat(has).isFalse()
+            }
+    }
+}

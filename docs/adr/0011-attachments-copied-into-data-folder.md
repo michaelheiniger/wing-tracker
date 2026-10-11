@@ -1,0 +1,19 @@
+# 11. Attachments are copied into the data folder
+
+Date: 2026-10-11
+
+## Status
+
+Accepted
+
+## Context
+
+Maintenance reports (PDF) and IGC files are attached to records. Referencing original paths breaks when files move and does not carry to other storage backends.
+
+## Decision
+
+Attached files are copied into the app's data folder and referenced from aggregates by an attachment id, never by the original path. A storage port hides where bytes live, so cloud storage can replace the folder. Imported IGC files are stored unmodified.
+
+## Consequences
+
+The data folder is self-contained, easy to back up and move. Files are duplicated on disk. Deleting a record must also delete or orphan-clean its attachments.

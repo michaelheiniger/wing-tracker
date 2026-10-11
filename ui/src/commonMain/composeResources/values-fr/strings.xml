@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_gear">Matériel</string>
+    <string name="nav_settings">Réglages</string>
+
+    <string name="wings_title">Voiles</string>
+    <string name="wings_add">Ajouter une voile</string>
+    <string name="wings_empty_title">Aucune voile pour l\'instant</string>
+    <string name="wings_empty_body">Ajoute ta première voile pour suivre ses heures de vol et son entretien.</string>
+    <string name="wings_empty_action">Ajouter ma première voile</string>
+    <string name="wings_show_retired">Afficher les voiles retirées (%1$d)</string>
+
+    <string name="wing_in_service_since">En service depuis le %1$s</string>
+    <string name="wing_hours_before_tracking">%1$d h %2$d min avant le suivi</string>
+    <string name="wing_certification">EN/LTF %1$s</string>
+    <string name="wing_status_active">En service</string>
+    <string name="wing_status_retired">Retirée le %1$s</string>
+    <string name="wing_status_retired_reason">Retirée le %1$s · %2$s</string>
+    <string name="wing_edit">Modifier %1$s</string>
+    <string name="wing_retire">Retirer</string>
+    <string name="wing_delete">Supprimer %1$s</string>
+
+    <string name="retire_title">Retirer %1$s ?</string>
+    <string name="retire_body">La voile quitte ta liste active et les rappels, mais ses vols et son historique sont conservés.</string>
+    <string name="retire_reason_label">Motif (facultatif), p. ex. vendue</string>
+    <string name="delete_title">Supprimer %1$s ?</string>
+    <string name="delete_body">À utiliser pour une voile saisie par erreur. Elle est supprimée définitivement. Une voile qui a des vols ne peut être que retirée.</string>
+    <string name="delete_confirm">Supprimer</string>
+
+    <string name="form_title_add">Ajouter une voile</string>
+    <string name="form_title_edit">Modifier %1$s</string>
+    <string name="field_name">Nom *</string>
+    <string name="field_manufacturer">Fabricant *</string>
+    <string name="field_model">Modèle *</string>
+    <string name="field_size">Taille</string>
+    <string name="field_serial_number">Numéro de série</string>
+    <string name="section_certification">Classe d\'homologation</string>
+    <string name="certification_unknown">Inconnue</string>
+    <string name="section_acquisition">Acquisition</string>
+    <string name="acquisition_new">Neuve</string>
+    <string name="acquisition_second_hand">D\'occasion</string>
+    <string name="field_purchase_date">Date d\'achat</string>
+    <string name="field_price">Prix</string>
+    <string name="field_currency">Devise</string>
+    <string name="section_usage">Utilisation</string>
+    <string name="field_in_service_date">En service depuis *</string>
+    <string name="field_hours_before_tracking">Heures de vol avant le suivi (h ou h:mm)</string>
+    <string name="action_save">Enregistrer</string>
+    <string name="action_cancel">Annuler</string>
+    <string name="action_dismiss">Fermer</string>
+
+    <string name="date_pick">Choisir une date</string>
+    <string name="date_clear">Effacer la date</string>
+    <string name="date_ok">OK</string>
+
+    <string name="error_required">Obligatoire</string>
+    <string name="error_amount">Utiliser un nombre comme 2150 ou 2150.50</string>
+    <string name="error_currency">Utiliser un code à 3 lettres comme CHF</string>
+    <string name="error_hours">Utiliser des heures ou heures:minutes, p. ex. 42 ou 42:30</string>
+
+    <string name="failure_load">Les voiles n\'ont pas pu être chargées : %1$s</string>
+    <string name="failure_save">La voile n\'a pas pu être enregistrée : %1$s</string>
+    <string name="failure_retire">La voile n\'a pas pu être retirée : %1$s</string>
+    <string name="failure_delete">La voile n\'a pas pu être supprimée : %1$s</string>
+    <string name="failure_delete_in_use">Cette voile a des vols, elle ne peut donc pas être supprimée. Retire-la plutôt.</string>
+
+    <string name="unreadable_quarantined">Le fichier %1$s n\'a pas pu être lu et a été déplacé dans le dossier de quarantaine de ton dossier de données. Sa voile n\'est pas affichée tant que le fichier n\'est pas réparé et remis en place.</string>
+    <string name="unreadable_kept">Le fichier %1$s a été écrit par une version plus récente de l\'application et n\'est pas affiché. Il n\'a pas été modifié.</string>
+
+    <string name="settings_title">Réglages</string>
+    <string name="settings_theme">Thème</string>
+    <string name="theme_system">Système</string>
+    <string name="theme_light">Clair</string>
+    <string name="theme_dark">Sombre</string>
+
+    <string name="nav_logbook">Carnet de vol</string>
+
+    <string name="logbook_title">Carnet de vol</string>
+    <string name="logbook_log_flight">Saisir un vol</string>
+    <string name="logbook_no_wings_title">Ajoute d\'abord une voile</string>
+    <string name="logbook_no_wings_body">Chaque vol est saisi sur une voile : ajoute ta voile pour commencer ton carnet de vol.</string>
+    <string name="logbook_no_wings_action">Ajouter une voile</string>
+    <string name="logbook_empty_title">Aucun vol pour l\'instant</string>
+    <string name="logbook_empty_body">Saisis un vol juste après l\'atterrissage. Tes heures par voile s\'additionnent ici.</string>
+    <string name="logbook_empty_action">Saisir mon premier vol</string>
+    <string name="logbook_month_header">%1$s %2$d</string>
+    <string name="logbook_month_summary">%1$s · %2$s</string>
+    <plurals name="flights_count">
+        <item quantity="one">%1$d vol</item>
+        <item quantity="other">%1$d vols</item>
+    </plurals>
+    <string-array name="month_names">
+        <item>Janvier</item>
+        <item>Février</item>
+        <item>Mars</item>
+        <item>Avril</item>
+        <item>Mai</item>
+        <item>Juin</item>
+        <item>Juillet</item>
+        <item>Août</item>
+        <item>Septembre</item>
+        <item>Octobre</item>
+        <item>Novembre</item>
+        <item>Décembre</item>
+    </string-array>
+    <string name="duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="wing_hours_total">%1$s · %2$s</string>
+
+    <string name="flight_unknown_wing">Voile inconnue</string>
+    <string name="flight_sites">%1$s → %2$s</string>
+    <string name="flight_edit">Modifier le vol</string>
+    <string name="flight_delete">Supprimer le vol</string>
+    <string name="flight_delete_title">Supprimer ce vol ?</string>
+    <string name="flight_delete_body">Le vol du %1$s avec %2$s est supprimé définitivement.</string>
+
+    <string name="flight_form_title_add">Saisir un vol</string>
+    <string name="flight_form_title_edit">Modifier le vol</string>
+    <string name="field_flight_date">Date *</string>
+    <string name="field_flight_wing">Voile *</string>
+    <string name="field_flight_duration">Durée (h:mm) *</string>
+    <string name="field_takeoff_site">Décollage</string>
+    <string name="field_landing_site">Atterrissage</string>
+    <string name="field_notes">Notes</string>
+    <string name="flight_wing_retired">%1$s (retirée)</string>
+
+    <string name="error_duration">Utiliser des heures:minutes d\'au moins une minute, p. ex. 1:35</string>
+    <string name="error_date_future">Ce jour n\'est pas encore arrivé</string>
+    <string name="error_date_before_service">La voile n\'était pas encore en service ce jour-là</string>
+
+    <string name="failure_load_logbook">Le carnet de vol n\'a pas pu être chargé : %1$s</string>
+    <string name="failure_save_flight">Le vol n\'a pas pu être enregistré : %1$s</string>
+    <string name="failure_delete_flight">Le vol n\'a pas pu être supprimé : %1$s</string>
+
+    <string name="nav_statistics">Statistiques</string>
+    <string name="statistics_title">Statistiques</string>
+    <string name="statistics_legend_hint">Clique sur une voile pour l\'afficher ou la masquer</string>
+    <string name="statistics_yearly_title">Heures par année</string>
+    <string name="statistics_yearly_note">Vols saisis uniquement</string>
+    <string name="statistics_cumulative_title">Heures cumulées</string>
+    <string name="statistics_cumulative_note">Comprend les heures de vol avant le suivi</string>
+    <string name="statistics_show_table">Afficher en tableau</string>
+    <string name="statistics_show_charts">Afficher en graphiques</string>
+    <string name="statistics_all_hidden">Toutes les voiles sont masquées. Clique sur une voile ci-dessus pour la réafficher.</string>
+    <string name="statistics_empty_title">Rien à représenter pour l\'instant</string>
+    <string name="statistics_empty_body">Les graphiques apparaissent dès que tu as saisi un vol.</string>
+    <string name="statistics_empty_action">Aller au carnet de vol</string>
+    <string name="statistics_table_year">Année</string>
+    <string name="statistics_table_yearly_title">Heures par année (h:mm)</string>
+    <string name="statistics_table_cumulative_title">Heures cumulées à la fin de l\'année (h:mm)</string>
+    <string name="statistics_total">Total</string>
+    <string name="series_other">Autres voiles (%1$d)</string>
+    <string name="chart_axis_hours">%1$s h</string>
+    <string name="failure_load_statistics">Les statistiques n\'ont pas pu être chargées : %1$s</string>
+</resources>
