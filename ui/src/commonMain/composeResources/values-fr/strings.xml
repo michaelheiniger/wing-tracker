@@ -294,4 +294,8 @@
     <string name="igc_open_track">Ouvrir la trace de ce vol</string>
     <string name="failure_import_igc">La trace n'a pas pu être lue : %1$s</string>
     <string name="failure_open_track">La trace n'a pas pu être ouverte : %1$s</string>
+
+    <string name="settings_scale_title">Taille de l'interface</string>
+    <string name="settings_scale_hint">Automatique suit la mise à l'échelle de ton bureau. Un changement s'applique immédiatement.</string>
+    <string name="scale_automatic">Automatique</string>
 </resources>

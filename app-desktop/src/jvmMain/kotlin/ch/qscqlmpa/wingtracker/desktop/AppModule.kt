@@ -47,6 +47,7 @@ import ch.qscqlmpa.wingtracker.reminders.GetCalendarEntries
 import ch.qscqlmpa.wingtracker.reminders.GetStartNotification
 import ch.qscqlmpa.wingtracker.reminders.MarkStartNotificationShown
 import ch.qscqlmpa.wingtracker.settings.GetAppSettings
+import ch.qscqlmpa.wingtracker.settings.SaveInterfaceScale
 import ch.qscqlmpa.wingtracker.settings.SaveReminderLeadTimes
 import ch.qscqlmpa.wingtracker.settings.SaveThemeMode
 import ch.qscqlmpa.wingtracker.settings.SettingsRepository
@@ -160,6 +161,7 @@ private fun remindersModule() =
         factory { GetAppSettings(get()) }
         factory { SaveReminderLeadTimes(get()) }
         factory { SaveThemeMode(get()) }
+        factory { SaveInterfaceScale(get()) }
         single { RemindersUseCases(get(), get(), get(), get()) }
         single { StartupReminder(get(), get(), TrayNotifier()) }
     }

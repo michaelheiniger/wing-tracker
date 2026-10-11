@@ -1,14 +1,19 @@
 package ch.qscqlmpa.wingtracker.desktop
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import ch.qscqlmpa.wingtracker.settings.SaveInterfaceScale
 import ch.qscqlmpa.wingtracker.settings.SaveThemeMode
 import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
@@ -18,49 +23,86 @@ import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.reminders.RemindersUseCases
 import ch.qscqlmpa.wingtracker.ui.shell.AppShell
+import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import ch.qscqlmpa.wingtracker.ui.theme.WingTrackerTheme
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
+import java.awt.GraphicsEnvironment
+import java.awt.HeadlessException
 import javax.imageio.ImageIO
+
+private const val WINDOW_WIDTH = 1100
+private const val WINDOW_HEIGHT = 950
 
 fun main() {
     val devMode = System.getProperty("wingtracker.dev").toBoolean()
     val koin = startKoin { modules(appModules(DataDirectory.resolve(devMode))) }.koin
 
-    val settingsRepository = koin.get<SettingsRepository>()
     val saveThemeMode = koin.get<SaveThemeMode>()
-    val themePreference = koin.get<ThemePreference>()
-    // Loaded before the first frame so the window never flashes the wrong theme.
-    themePreference.mode = runBlocking { settingsRepository.load() }.themeMode
+    val saveInterfaceScale = koin.get<SaveInterfaceScale>()
+    // Loaded before the first frame so the window never flashes the wrong theme or size.
+    val settings = runBlocking { koin.get<SettingsRepository>().load() }
+    val themePreference = koin.get<ThemePreference>().also { it.mode = settings.themeMode }
+    val scalePreference = InterfaceScalePreference(settings.interfaceScalePercent)
+    val detectedScale = DesktopScale.detect()
+    val jvmScale = jvmScale()
+    val initialFactor = DesktopScale.factor(scalePreference.percent, detectedScale, jvmScale)
 
     application {
         LaunchedEffect(themePreference) {
-            snapshotFlow { themePreference.mode }
-                .drop(1)
-                .collect { saveThemeMode(it) }
+            snapshotFlow { themePreference.mode }.drop(1).collect { saveThemeMode(it) }
+        }
+        LaunchedEffect(scalePreference) {
+            snapshotFlow { scalePreference.percent }.drop(1).collect { saveInterfaceScale(it) }
         }
         LaunchedEffect(Unit) { koin.get<StartupReminder>()() }
         Window(
             onCloseRequest = ::exitApplication,
             title = if (devMode) "Wing Tracker (dev)" else "Wing Tracker",
-            state = rememberWindowState(size = DpSize(1100.dp, 950.dp)),
+            // The window is sized in the JVM's own units, so it grows with the interface.
+            state =
+                rememberWindowState(
+                    size = DpSize((WINDOW_WIDTH * initialFactor).dp, (WINDOW_HEIGHT * initialFactor).dp),
+                ),
             icon = applicationIcon(),
         ) {
-            WingTrackerTheme(themePreference.mode) {
-                AppShell(
-                    logbookUseCases = koin.get<LogbookUseCases>(),
-                    getStatistics = koin.get<GetStatistics>(),
-                    gearUseCases = koin.get<GearUseCases>(),
-                    maintenanceUseCases = koin.get<MaintenanceUseCases>(),
-                    reminders = koin.get<RemindersUseCases>(),
-                    platform = koin.get<PlatformServices>(),
-                    themePreference = themePreference,
-                )
+            WithInterfaceScale(DesktopScale.factor(scalePreference.percent, detectedScale, jvmScale)) {
+                WingTrackerTheme(themePreference.mode) {
+                    AppShell(
+                        logbookUseCases = koin.get<LogbookUseCases>(),
+                        getStatistics = koin.get<GetStatistics>(),
+                        gearUseCases = koin.get<GearUseCases>(),
+                        maintenanceUseCases = koin.get<MaintenanceUseCases>(),
+                        reminders = koin.get<RemindersUseCases>(),
+                        platform = koin.get<PlatformServices>(),
+                        themePreference = themePreference,
+                        scalePreference = scalePreference,
+                    )
+                }
             }
         }
     }
+}
+
+/** The scale the JVM applied to this screen itself; 1.0 when it applied none or there is no screen. */
+private fun jvmScale(): Double =
+    try {
+        GraphicsEnvironment
+            .getLocalGraphicsEnvironment()
+            .defaultScreenDevice.defaultConfiguration.defaultTransform.scaleX
+    } catch (_: HeadlessException) {
+        1.0
+    }
+
+@Composable
+private fun WithInterfaceScale(
+    factor: Float,
+    content: @Composable () -> Unit,
+) {
+    val base = LocalDensity.current
+    CompositionLocalProvider(LocalDensity provides Density(base.density * factor, base.fontScale), content = content)
 }
 
 /** The window icon, generated by design/generate-icon.py; null leaves the platform default if it is missing. */

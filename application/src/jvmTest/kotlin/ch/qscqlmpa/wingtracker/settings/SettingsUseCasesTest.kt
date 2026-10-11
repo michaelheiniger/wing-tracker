@@ -51,4 +51,56 @@ class SettingsUseCasesTest {
                 coVerify(exactly = 1) { settings.save(stored.copy(reminderLeadTimes = newLeadTimes)) }
             }
     }
+
+    @Nested
+    inner class SavingTheInterfaceScale {
+        @Test
+        fun `changes the size and keeps the other settings`() =
+            runTest {
+                // given
+                coEvery { settings.load() } returns stored
+
+                // when
+                SaveInterfaceScale(settings)(150)
+
+                // then
+                coVerify(exactly = 1) { settings.save(stored.copy(interfaceScalePercent = 150)) }
+            }
+
+        @Test
+        fun `goes back to following the desktop`() =
+            runTest {
+                // given
+                coEvery { settings.load() } returns stored.copy(interfaceScalePercent = 150)
+
+                // when
+                SaveInterfaceScale(settings)(null)
+
+                // then
+                coVerify(exactly = 1) { settings.save(stored.copy(interfaceScalePercent = null)) }
+            }
+    }
+
+    @Nested
+    inner class SettingsValidation {
+        @Test
+        fun `rejects an interface size outside the supported range`() {
+            org.assertj.core.api.Assertions
+                .assertThatThrownBy { AppSettings(interfaceScalePercent = 10) }
+                .isInstanceOf(IllegalArgumentException::class.java)
+            org.assertj.core.api.Assertions
+                .assertThatThrownBy { AppSettings(interfaceScalePercent = 900) }
+                .isInstanceOf(IllegalArgumentException::class.java)
+        }
+
+        @Test
+        fun `accepts the limits and following the desktop`() {
+            org.assertj.core.api.Assertions
+                .assertThatCode {
+                    AppSettings(interfaceScalePercent = AppSettings.MIN_SCALE_PERCENT)
+                    AppSettings(interfaceScalePercent = AppSettings.MAX_SCALE_PERCENT)
+                    AppSettings(interfaceScalePercent = null)
+                }.doesNotThrowAnyException()
+        }
+    }
 }

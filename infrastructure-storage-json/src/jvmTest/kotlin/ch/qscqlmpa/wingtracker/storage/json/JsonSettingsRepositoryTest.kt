@@ -57,6 +57,7 @@ class JsonSettingsRepositoryTest {
                         themeMode = ThemeMode.Light,
                         reminderLeadTimes = ReminderLeadTimes(days = 14, hours = 5.hours + 30.minutes),
                         lastReminderNotificationOn = LocalDate(2026, 10, 10),
+                        interfaceScalePercent = 150,
                     )
                 repository.save(saved)
 
@@ -65,6 +66,34 @@ class JsonSettingsRepositoryTest {
 
                 // then
                 assertThat(settings).usingRecursiveComparison().isEqualTo(saved)
+            }
+
+        @Test
+        fun `reads a settings file written before the interface size existed`() =
+            runTest {
+                // given
+                dataDirectory.resolve("settings.json").writeText("""{"schemaVersion": 2, "themeMode": "Light"}""")
+
+                // when
+                val settings = repository.load()
+
+                // then
+                assertThat(settings.interfaceScalePercent).isNull()
+                assertThat(settings.themeMode).isEqualTo(ThemeMode.Light)
+            }
+
+        @Test
+        fun `quarantines a settings file with an interface size the domain rejects`() =
+            runTest {
+                // given
+                dataDirectory.resolve("settings.json").writeText("""{"schemaVersion": 3, "interfaceScalePercent": 5}""")
+
+                // when
+                val settings = repository.load()
+
+                // then
+                assertThat(settings).isEqualTo(AppSettings())
+                assertThat(dataDirectory.resolve("quarantine/settings.json").exists()).isTrue()
             }
 
         @Test

@@ -26,6 +26,7 @@ import ch.qscqlmpa.wingtracker.ui.reminders.ReminderSettingsPresenter
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.field_lead_days
 import ch.qscqlmpa.wingtracker.ui.resources.field_lead_hours
+import ch.qscqlmpa.wingtracker.ui.resources.scale_automatic
 import ch.qscqlmpa.wingtracker.ui.resources.settings_calendar_empty
 import ch.qscqlmpa.wingtracker.ui.resources.settings_calendar_export
 import ch.qscqlmpa.wingtracker.ui.resources.settings_calendar_exported
@@ -35,17 +36,21 @@ import ch.qscqlmpa.wingtracker.ui.resources.settings_reminders_hint
 import ch.qscqlmpa.wingtracker.ui.resources.settings_reminders_title
 import ch.qscqlmpa.wingtracker.ui.resources.settings_save
 import ch.qscqlmpa.wingtracker.ui.resources.settings_saved
+import ch.qscqlmpa.wingtracker.ui.resources.settings_scale_hint
+import ch.qscqlmpa.wingtracker.ui.resources.settings_scale_title
 import ch.qscqlmpa.wingtracker.ui.resources.settings_theme
 import ch.qscqlmpa.wingtracker.ui.resources.settings_title
 import ch.qscqlmpa.wingtracker.ui.resources.theme_dark
 import ch.qscqlmpa.wingtracker.ui.resources.theme_light
 import ch.qscqlmpa.wingtracker.ui.resources.theme_system
+import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SettingsScreen(
     themePreference: ThemePreference,
+    scalePreference: InterfaceScalePreference,
     reminders: ReminderSettingsPresenter,
 ) {
     Column(
@@ -63,6 +68,7 @@ fun SettingsScreen(
                 )
             }
         }
+        ScaleSection(scalePreference)
         RemindersSection(reminders)
         CalendarSection(reminders)
         reminders.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
@@ -133,5 +139,33 @@ private fun CalendarSection(presenter: ReminderSettingsPresenter) {
         Text(stringResource(Res.string.settings_calendar_exported, outcome.fileName))
     } else if (outcome == ExportOutcome.NothingToExport) {
         Text(stringResource(Res.string.settings_calendar_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun ScaleSection(preference: InterfaceScalePreference) {
+    Text(
+        stringResource(Res.string.settings_scale_title),
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(top = 16.dp),
+    )
+    Text(
+        stringResource(Res.string.settings_scale_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FilterChip(
+            selected = preference.percent == null,
+            onClick = { preference.percent = null },
+            label = { Text(stringResource(Res.string.scale_automatic)) },
+        )
+        InterfaceScalePreference.CHOICES.forEach { percent ->
+            FilterChip(
+                selected = preference.percent == percent,
+                onClick = { preference.percent = percent },
+                label = { Text("$percent %") },
+            )
+        }
     }
 }

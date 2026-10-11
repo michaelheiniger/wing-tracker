@@ -47,6 +47,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.nav_settings
 import ch.qscqlmpa.wingtracker.ui.resources.nav_statistics
 import ch.qscqlmpa.wingtracker.ui.settings.SettingsScreen
 import ch.qscqlmpa.wingtracker.ui.statistics.StatisticsRoute
+import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -71,6 +72,7 @@ fun AppShell(
     reminders: RemindersUseCases,
     platform: PlatformServices,
     themePreference: ThemePreference,
+    scalePreference: InterfaceScalePreference,
 ) {
     var destination by rememberSaveable { mutableStateOf(Destination.Logbook.name) }
     val current = Destination.valueOf(destination)
@@ -139,7 +141,7 @@ fun AppShell(
                 }
 
                 Destination.Settings -> {
-                    SettingsScreen(themePreference, reminderSettings)
+                    SettingsScreen(themePreference, scalePreference, reminderSettings)
                 }
             }
         }

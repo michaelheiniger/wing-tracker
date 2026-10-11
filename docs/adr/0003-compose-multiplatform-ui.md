@@ -18,4 +18,5 @@ We use Compose Multiplatform with Material 3 for one declarative UI codebase acr
 
 Less UI code to maintain. The iOS and web targets are less mature than desktop and Android, and the desktop look is less native. Platform-specific needs go behind interfaces.
 - 2026-10-11: The Material 3 theme is customised with the application's own colours, shapes and type weights (see [ADR 0019](0019-theme-and-status-colors.md)).
+- 2026-10-11: The interface size follows the desktop's scaling by default and can be set in the settings. The desktop module applies it on top of the density the JVM chose, and only to the extent the JVM has not scaled itself, because on Linux under Wayland the JVM draws at one pixel per unit and ignores the desktop's scale.
 

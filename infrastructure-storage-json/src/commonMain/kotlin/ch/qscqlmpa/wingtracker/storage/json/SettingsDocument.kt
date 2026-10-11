@@ -15,6 +15,8 @@ internal data class SettingsDocument(
     val reminderLeadDays: Int = ReminderLeadTimes.DEFAULT.days,
     val reminderLeadHoursMinutes: Long = ReminderLeadTimes.DEFAULT.hours.inWholeMinutes,
     val lastReminderNotificationOn: LocalDate? = null,
+    // Added in schema 3; null follows the desktop.
+    val interfaceScalePercent: Int? = null,
 ) {
     fun toDomain(): AppSettings {
         if (schemaVersion > CURRENT_SCHEMA_VERSION) {
@@ -24,11 +26,12 @@ internal data class SettingsDocument(
             themeMode = ThemeMode.valueOf(themeMode),
             reminderLeadTimes = ReminderLeadTimes(reminderLeadDays, reminderLeadHoursMinutes.minutes),
             lastReminderNotificationOn = lastReminderNotificationOn,
+            interfaceScalePercent = interfaceScalePercent,
         )
     }
 
     companion object {
-        const val CURRENT_SCHEMA_VERSION = 2
+        const val CURRENT_SCHEMA_VERSION = 3
 
         fun from(settings: AppSettings) =
             SettingsDocument(
@@ -36,6 +39,7 @@ internal data class SettingsDocument(
                 reminderLeadDays = settings.reminderLeadTimes.days,
                 reminderLeadHoursMinutes = settings.reminderLeadTimes.hours.inWholeMinutes,
                 lastReminderNotificationOn = settings.lastReminderNotificationOn,
+                interfaceScalePercent = settings.interfaceScalePercent,
             )
     }
 }

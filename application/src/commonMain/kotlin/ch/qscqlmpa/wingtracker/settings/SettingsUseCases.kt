@@ -21,3 +21,12 @@ class SaveReminderLeadTimes(
         settings.save(settings.load().copy(reminderLeadTimes = leadTimes))
     }
 }
+
+class SaveInterfaceScale(
+    private val settings: SettingsRepository,
+) {
+    /** [percent] is null to follow the desktop's scaling. */
+    suspend operator fun invoke(percent: Int?) {
+        settings.save(settings.load().copy(interfaceScalePercent = percent))
+    }
+}
