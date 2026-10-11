@@ -6,3 +6,6 @@ build/
 !.idea/runConfigurations/
 .DS_Store
 local.properties
+
+# Size previews written by design/generate-icon.py
+design/preview-*.png

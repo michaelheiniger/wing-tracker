@@ -57,3 +57,7 @@ Versions follow Semantic Versioning (`MAJOR.MINOR.PATCH`); a hotfix is a patch r
 To rehearse a release without tagging, run the **Release** workflow by hand from the Actions tab (or `gh workflow run release.yml -f version=0.0.1`). It builds the package and uploads it as a workflow artifact, and publishes nothing.
 
 To build a package locally: `./gradlew :app-desktop:packageDeb -PappVersion=X.Y.Z`; the result is under `app-desktop/build/compose/binaries`.
+
+## Application icon
+The icon is drawn by `design/generate-icon.py` (needs Python and Pillow) and written to `app-desktop/icons` (installer) and `app-desktop/src/jvmMain/resources` (window and notification). Change the geometry in the script and run `python3 design/generate-icon.py` to regenerate every size; do not edit the images by hand.
+

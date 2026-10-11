@@ -4,10 +4,12 @@ import ch.qscqlmpa.wingtracker.reminders.GetStartNotification
 import ch.qscqlmpa.wingtracker.reminders.MarkStartNotificationShown
 import ch.qscqlmpa.wingtracker.ui.reminders.toText
 import java.awt.Color
+import java.awt.Image
 import java.awt.SystemTray
 import java.awt.TrayIcon
 import java.awt.image.BufferedImage
 import java.util.Timer
+import javax.imageio.ImageIO
 import kotlin.concurrent.schedule
 
 /** Shows a message through the system tray, if the desktop has one. */
@@ -33,7 +35,11 @@ class TrayNotifier {
         }
     }
 
-    private fun iconImage(): BufferedImage =
+    /** The application icon; a plain dot only if the resource is missing, so a notification is never lost over it. */
+    private fun iconImage(): Image =
+        TrayNotifier::class.java.getResource(ICON_RESOURCE)?.let { ImageIO.read(it) } ?: fallbackIcon()
+
+    private fun fallbackIcon(): BufferedImage =
         BufferedImage(ICON_SIZE, ICON_SIZE, BufferedImage.TYPE_INT_ARGB).also { image ->
             val graphics = image.createGraphics()
             graphics.color = Color(ICON_COLOR)
@@ -42,6 +48,7 @@ class TrayNotifier {
         }
 
     private companion object {
+        const val ICON_RESOURCE = "/tray-icon.png"
         const val ICON_SIZE = 16
         const val ICON_COLOR = 0x2A78D6
         const val REMOVE_AFTER_MILLIS = 15_000L
