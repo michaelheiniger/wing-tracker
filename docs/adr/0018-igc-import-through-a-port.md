@@ -17,3 +17,7 @@ The application layer defines a `TrackReader` port and does everything else itse
 ## Consequences
 
 Replacing the library, or writing our own reader for other targets, only touches `infrastructure-igc`. A dependency on a very small project is accepted, with the third-party repository confined to it. Speed-based detection can misjudge unusual recordings, for example a logger left running in a car straight after landing, which the editable duration and the shown take-off and landing times make visible.
+
+## Amendments
+
+- 2026-10-11: Several tracks are imported at once, from the file chooser or by dropping files on the logbook, through one review list (ticked tracks, wing for all tracks with a per-track override). The review shows what the track says but no longer edits the date or duration, so a track without a detectable flight cannot be imported; such a flight is logged by hand. Tracks already imported, or repeated in the same selection, are unticked rather than asked about one by one. Detection, the checksum check and the flight rules are unchanged.

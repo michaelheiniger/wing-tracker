@@ -1,5 +1,12 @@
 package ch.qscqlmpa.wingtracker.ui.flights
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -7,12 +14,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
+import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import ch.qscqlmpa.wingtracker.reminders.Attention
-import ch.qscqlmpa.wingtracker.ui.formatHoursAndMinutes
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.resources.Res
+import ch.qscqlmpa.wingtracker.ui.resources.igc_drop_hint
 import ch.qscqlmpa.wingtracker.ui.resources.igc_pick_title
 import ch.qscqlmpa.wingtracker.ui.today
 import org.jetbrains.compose.resources.stringResource
@@ -25,7 +36,7 @@ private sealed interface LogbookDialog {
     ) : LogbookDialog
 
     data class Import(
-        val prepared: PreparedIgc,
+        val files: List<NewAttachment>,
     ) : LogbookDialog
 }
 
@@ -49,69 +60,96 @@ fun LogbookRoute(
             )
         }
     val pickTitle = stringResource(Res.string.igc_pick_title)
-    val importer = remember { IgcImportPresenter(scope, useCases.prepareIgcImport, platform.filePicker, pickTitle) }
+    val importer = remember { IgcImportPresenter(scope, platform.filePicker, pickTitle) }
+    var dropHover by remember { mutableStateOf(false) }
     var dialog by remember { mutableStateOf<LogbookDialog?>(null) }
 
     LaunchedEffect(Unit) { presenter.refresh() }
 
-    LogbookScreen(
-        presenter = presenter,
-        importFailure = importer.failure,
-        onLogFlight = { dialog = LogbookDialog.New },
-        onEditFlight = { dialog = LogbookDialog.Edit(it) },
-        onImportIgc = { importer.start { prepared -> dialog = LogbookDialog.Import(prepared) } },
-        attention = attention,
-        onOpenAttention = onOpenGear,
-        onGoToGear = onGoToGear,
-    )
-
-    dialog?.let { current ->
-        val formPresenter =
-            remember(current) {
-                val fresh = presenter.state.newFlightInput(today())
-                FlightFormPresenter(
-                    scope = scope,
-                    logFlight = useCases.logFlight,
-                    updateFlight = useCases.updateFlight,
-                    importIgcFlight = useCases.importIgcFlight,
-                    initial =
-                        when (current) {
-                            LogbookDialog.New -> {
-                                fresh
-                            }
-
-                            is LogbookDialog.Edit -> {
-                                FlightFormInput.from(current.flight)
-                            }
-
-                            // Date and duration come from the track, the wing is the one flown last; all stay editable.
-                            is LogbookDialog.Import -> {
-                                fresh.copy(
-                                    date = current.prepared.draft.date,
-                                    duration =
-                                        current.prepared.draft.duration
-                                            ?.let {
-                                                formatHoursAndMinutes(
-                                                    it.inWholeMinutes,
-                                                )
-                                            }.orEmpty(),
-                                )
-                            }
-                        },
-                    editing = (current as? LogbookDialog.Edit)?.flight,
-                    igc = (current as? LogbookDialog.Import)?.prepared,
-                )
-            }
-        FlightDialog(
-            presenter = formPresenter,
-            wings =
-                presenter.state.logbook
-                    ?.wings
-                    .orEmpty(),
-            onClose = {
-                dialog = null
-                presenter.refresh()
+    val dropTarget =
+        platform.fileDrop.target(
+            extension = IGC_EXTENSION,
+            onHover = { dropHover = it },
+            onDropped = { files, _ ->
+                // Dropping only unrelated files would otherwise seem to do nothing.
+                if (files.isEmpty()) importer.dropRejected() else dialog = LogbookDialog.Import(files)
             },
+        )
+    val wings =
+        presenter.state.logbook
+            ?.wings
+            .orEmpty()
+    Box(modifier = Modifier.fillMaxSize().then(dropTarget)) {
+        LogbookScreen(
+            presenter = presenter,
+            importFailure = importer.failure,
+            onLogFlight = { dialog = LogbookDialog.New },
+            onEditFlight = { dialog = LogbookDialog.Edit(it) },
+            onImportIgc = { importer.choose { files -> dialog = LogbookDialog.Import(files) } },
+            attention = attention,
+            onOpenAttention = onOpenGear,
+            onGoToGear = onGoToGear,
+        )
+        if (dropHover) DropOverlay()
+    }
+
+    val closeDialog = {
+        dialog = null
+        presenter.refresh()
+    }
+    when (val current = dialog) {
+        null -> {}
+
+        is LogbookDialog.Import -> {
+            val batch =
+                remember(current) {
+                    IgcBatchPresenter(
+                        scope,
+                        useCases.prepareIgcImport,
+                        useCases.importIgcFlight,
+                        // The wing flown last, like for a flight entered by hand.
+                        checkNotNull(presenter.state.newFlightInput(today()).wingId ?: wings.firstOrNull()?.id),
+                    )
+                }
+            IgcBatchDialog(batch, current.files, wings, onClose = closeDialog)
+        }
+
+        else -> {
+            val formPresenter =
+                remember(current) {
+                    val fresh = presenter.state.newFlightInput(today())
+                    val editing = (current as? LogbookDialog.Edit)?.flight
+                    FlightFormPresenter(
+                        scope = scope,
+                        logFlight = useCases.logFlight,
+                        updateFlight = useCases.updateFlight,
+                        initial = editing?.let { FlightFormInput.from(it) } ?: fresh,
+                        editing = editing,
+                    )
+                }
+            FlightDialog(presenter = formPresenter, wings = wings, onClose = closeDialog)
+        }
+    }
+}
+
+/** Shown while files are held over the logbook, so the pilot knows the drop will be accepted. */
+@Composable
+private fun DropOverlay() {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = OVERLAY_ALPHA), MaterialTheme.shapes.large)
+                .border(2.dp, MaterialTheme.colorScheme.primary, MaterialTheme.shapes.large),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            stringResource(Res.string.igc_drop_hint),
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.primary,
         )
     }
 }
+
+private const val OVERLAY_ALPHA = 0.12f

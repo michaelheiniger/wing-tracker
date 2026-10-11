@@ -10,7 +10,6 @@ import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.GetLogbook
 import ch.qscqlmpa.wingtracker.flights.LogFlight
 import ch.qscqlmpa.wingtracker.flights.UpdateFlight
-import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
 import ch.qscqlmpa.wingtracker.gear.Acquisition
 import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.GearStatus
@@ -235,14 +234,11 @@ class LogbookPresentersTest {
         private fun TestScope.formPresenter(
             initial: FlightFormInput,
             editing: Flight? = null,
-            igc: PreparedIgc? = null,
         ) = FlightFormPresenter(
             scope = TestScope(UnconfinedTestDispatcher(testScheduler)),
             logFlight = LogFlight(flights, wings, clock) { FlightId("new-flight") },
             updateFlight = UpdateFlight(flights, wings, clock),
-            importIgcFlight = ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported-flight") },
             initial = initial,
-            igc = igc,
             editing = editing,
         )
 

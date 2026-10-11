@@ -284,12 +284,23 @@
 
     <string name="igc_import">IGC importieren</string>
     <string name="igc_pick_title">Flugtrack auswählen</string>
-    <string name="igc_dialog_title">Flugtrack importieren</string>
-    <string name="igc_file">Datei: %1$s</string>
     <string name="igc_detected">Im Track gefunden: Start %1$s, Landung %2$s (UTC)</string>
-    <string name="igc_none_detected">In diesem Track wurde kein Flug gefunden. Gib die Dauer selbst ein.</string>
-    <string name="igc_duplicate">Diese Datei wurde bereits als Flug vom %1$s mit %2$s importiert.</string>
-    <string name="igc_duplicate_confirm">Trotzdem importieren</string>
+    <string name="igc_batch_title">Flugtracks importieren</string>
+    <string name="igc_batch_wing_for_all">Schirm für alle Tracks:</string>
+    <plurals name="igc_batch_import">
+        <item quantity="one">%1$d Flug importieren</item>
+        <item quantity="other">%1$d Flüge importieren</item>
+    </plurals>
+    <string name="igc_batch_result">%1$d importiert, %2$d konnten nicht importiert werden</string>
+    <string name="igc_problem_unreadable">Nicht lesbar: %1$s</string>
+    <string name="igc_problem_no_flight">In diesem Track wurde kein Flug gefunden</string>
+    <string name="igc_problem_duplicate">Bereits importiert</string>
+    <string name="igc_problem_repeated">Dieselbe Datei ist zweimal in der Auswahl</string>
+    <string name="igc_problem_future">Das Datum liegt in der Zukunft</string>
+    <string name="igc_problem_before_service">Vor der Inbetriebnahme des Schirms geflogen</string>
+    <string name="igc_problem_save">Konnte nicht gespeichert werden: %1$s</string>
+    <string name="igc_drop_hint">IGC-Dateien hierher ziehen, um sie zu importieren</string>
+    <string name="failure_drop_no_igc">Nur IGC-Flugtracks können importiert werden. Es wurde nichts importiert.</string>
     <string name="igc_track_chip">Track</string>
     <string name="igc_open_track">Track dieses Flugs öffnen</string>
     <string name="failure_import_igc">Der Track konnte nicht gelesen werden: %1$s</string>

@@ -284,12 +284,23 @@
 
     <string name="igc_import">Import IGC</string>
     <string name="igc_pick_title">Choose a flight track</string>
-    <string name="igc_dialog_title">Import flight track</string>
-    <string name="igc_file">File: %1$s</string>
     <string name="igc_detected">Found in the track: take-off %1$s, landing %2$s (UTC)</string>
-    <string name="igc_none_detected">No flight was found in this track. Enter the duration yourself.</string>
-    <string name="igc_duplicate">This file was already imported as the flight of %1$s on %2$s.</string>
-    <string name="igc_duplicate_confirm">Import it anyway</string>
+    <string name="igc_batch_title">Import flight tracks</string>
+    <string name="igc_batch_wing_for_all">Wing for all tracks:</string>
+    <plurals name="igc_batch_import">
+        <item quantity="one">Import %1$d flight</item>
+        <item quantity="other">Import %1$d flights</item>
+    </plurals>
+    <string name="igc_batch_result">%1$d imported, %2$d could not be imported</string>
+    <string name="igc_problem_unreadable">Not readable: %1$s</string>
+    <string name="igc_problem_no_flight">No flight found in this track</string>
+    <string name="igc_problem_duplicate">Already imported</string>
+    <string name="igc_problem_repeated">The same file is in this selection twice</string>
+    <string name="igc_problem_future">The date is in the future</string>
+    <string name="igc_problem_before_service">Flown before the wing was in service</string>
+    <string name="igc_problem_save">Could not be saved: %1$s</string>
+    <string name="igc_drop_hint">Drop IGC files here to import them</string>
+    <string name="failure_drop_no_igc">Only IGC flight tracks can be imported. Nothing was imported.</string>
     <string name="igc_track_chip">Track</string>
     <string name="igc_open_track">Open the track of this flight</string>
     <string name="failure_import_igc">The track could not be read: %1$s</string>

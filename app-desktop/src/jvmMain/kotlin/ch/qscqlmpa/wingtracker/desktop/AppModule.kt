@@ -168,6 +168,6 @@ private fun remindersModule() =
 
 private fun uiModule() =
     module {
-        single { PlatformServices(DesktopFilePicker(), DesktopFileOpener(), DesktopFileSaver()) }
+        single { PlatformServices(DesktopFilePicker(), DesktopFileOpener(), DesktopFileSaver(), DesktopFileDrop()) }
         single { ThemePreference() }
     }

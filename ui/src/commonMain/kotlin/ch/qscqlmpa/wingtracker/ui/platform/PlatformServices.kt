@@ -1,5 +1,7 @@
 package ch.qscqlmpa.wingtracker.ui.platform
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 
 /** Lets the user choose files; each platform has its own picker, so the shared UI only sees this port. */
@@ -29,8 +31,23 @@ interface FileSaver {
     ): String?
 }
 
+/** Lets the user drop files onto a part of the window; only desktop has this, so it is a port. */
+interface FileDrop {
+    /**
+     * A modifier that accepts dropped files. [onHover] tells whether files are currently held over the area;
+     * [onDropped] gets the files with the given [extension] and how many dropped files were left out.
+     */
+    @Composable
+    fun target(
+        extension: String,
+        onHover: (Boolean) -> Unit,
+        onDropped: (files: List<NewAttachment>, ignored: Int) -> Unit,
+    ): Modifier
+}
+
 class PlatformServices(
     val filePicker: FilePicker,
     val fileOpener: FileOpener,
     val fileSaver: FileSaver,
+    val fileDrop: FileDrop,
 )

@@ -10,7 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -46,17 +45,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.field_notes
 import ch.qscqlmpa.wingtracker.ui.resources.field_takeoff_site
 import ch.qscqlmpa.wingtracker.ui.resources.flight_form_title_add
 import ch.qscqlmpa.wingtracker.ui.resources.flight_form_title_edit
-import ch.qscqlmpa.wingtracker.ui.resources.flight_unknown_wing
 import ch.qscqlmpa.wingtracker.ui.resources.flight_wing_retired
-import ch.qscqlmpa.wingtracker.ui.resources.igc_detected
-import ch.qscqlmpa.wingtracker.ui.resources.igc_dialog_title
-import ch.qscqlmpa.wingtracker.ui.resources.igc_duplicate
-import ch.qscqlmpa.wingtracker.ui.resources.igc_duplicate_confirm
-import ch.qscqlmpa.wingtracker.ui.resources.igc_file
-import ch.qscqlmpa.wingtracker.ui.resources.igc_none_detected
-import ch.qscqlmpa.wingtracker.ui.toDisplay
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 
 /** Quick-entry dialog: focus starts on the duration, the one thing that is never pre-filled. */
@@ -90,7 +79,6 @@ fun FlightDialog(
                     style = MaterialTheme.typography.headlineSmall,
                 )
 
-                presenter.igc?.let { TrackInfo(it, presenter, wings) }
                 DateField(
                     label = stringResource(Res.string.field_flight_date),
                     value = input.date,
@@ -147,7 +135,7 @@ fun FlightDialog(
                     TextButton(onClick = onClose) { Text(stringResource(Res.string.action_cancel)) }
                     Button(
                         onClick = { presenter.submit(onSaved = onClose) },
-                        enabled = !presenter.saving && presenter.mayImport,
+                        enabled = !presenter.saving,
                     ) {
                         Text(stringResource(Res.string.action_save))
                     }
@@ -159,7 +147,7 @@ fun FlightDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun WingDropdown(
+internal fun WingDropdown(
     wings: List<Wing>,
     selected: Wing?,
     errorText: String?,
@@ -192,52 +180,5 @@ private fun WingDropdown(
 }
 
 @Composable
-private fun wingLabel(wing: Wing): String =
+internal fun wingLabel(wing: Wing): String =
     if (wing.isActive) wing.details.name else stringResource(Res.string.flight_wing_retired, wing.details.name)
-
-/** What the track told us, and a warning when this exact file was imported before. */
-@Composable
-private fun TrackInfo(
-    prepared: PreparedIgc,
-    presenter: FlightFormPresenter,
-    wings: List<Wing>,
-) {
-    val draft = prepared.draft
-    Text(stringResource(Res.string.igc_file, draft.fileName), style = MaterialTheme.typography.bodySmall)
-    val takeOff = draft.takeOff
-    val landing = draft.landing
-    if (takeOff != null && landing != null) {
-        Text(
-            stringResource(Res.string.igc_detected, takeOff.toUtcClock(), landing.toUtcClock()),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    } else {
-        Text(
-            stringResource(Res.string.igc_none_detected),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.error,
-        )
-    }
-    draft.duplicateOf?.let { earlier ->
-        Text(
-            stringResource(
-                Res.string.igc_duplicate,
-                earlier.details.date.toDisplay(),
-                wings.firstOrNull { it.id == earlier.details.wingId }?.details?.name
-                    ?: stringResource(Res.string.flight_unknown_wing),
-            ),
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodySmall,
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = presenter.importAnyway, onCheckedChange = presenter::confirmImportAnyway)
-            Text(stringResource(Res.string.igc_duplicate_confirm))
-        }
-    }
-}
-
-private fun kotlin.time.Instant.toUtcClock(): String {
-    val time = toLocalDateTime(TimeZone.UTC).time
-    return "${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}"
-}

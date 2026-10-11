@@ -22,6 +22,7 @@ enum class FailureKind {
     ExportCalendar,
     ImportIgc,
     OpenTrack,
+    DropNoIgc,
 }
 
 /** A technical [detail] travels with the kind; the screen wraps it in a message in the user's language. */

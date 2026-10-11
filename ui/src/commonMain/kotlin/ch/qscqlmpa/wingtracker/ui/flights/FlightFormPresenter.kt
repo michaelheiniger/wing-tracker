@@ -9,7 +9,6 @@ import ch.qscqlmpa.wingtracker.flights.FlightDateInFutureException
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.LogFlight
 import ch.qscqlmpa.wingtracker.flights.UpdateFlight
-import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import kotlinx.coroutines.CancellationException
@@ -21,11 +20,8 @@ class FlightFormPresenter(
     private val scope: CoroutineScope,
     private val logFlight: LogFlight,
     private val updateFlight: UpdateFlight,
-    private val importIgcFlight: ImportIgcFlight,
     initial: FlightFormInput,
     val editing: Flight? = null,
-    // Set when the dialog imports a track instead of logging a flight by hand.
-    val igc: PreparedIgc? = null,
 ) {
     var input by mutableStateOf(initial)
         private set
@@ -35,15 +31,6 @@ class FlightFormPresenter(
         private set
     var saving by mutableStateOf(false)
         private set
-    var importAnyway by mutableStateOf(false)
-        private set
-
-    /** A file that was imported before is only imported again when the pilot says so. */
-    val mayImport: Boolean get() = igc?.draft?.duplicateOf == null || importAnyway
-
-    fun confirmImportAnyway(confirmed: Boolean) {
-        importAnyway = confirmed
-    }
 
     fun change(update: (FlightFormInput) -> FlightFormInput) {
         input = update(input)
@@ -83,10 +70,6 @@ class FlightFormPresenter(
     }
 
     private suspend fun save(details: FlightDetails) {
-        when {
-            igc != null -> importIgcFlight(details, igc.file, igc.draft.checksum)
-            editing == null -> logFlight(details)
-            else -> updateFlight(editing.id, details)
-        }
+        if (editing == null) logFlight(details) else updateFlight(editing.id, details)
     }
 }

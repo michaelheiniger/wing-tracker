@@ -284,12 +284,23 @@
 
     <string name="igc_import">Importer un IGC</string>
     <string name="igc_pick_title">Choisir une trace de vol</string>
-    <string name="igc_dialog_title">Importer une trace de vol</string>
-    <string name="igc_file">Fichier : %1$s</string>
     <string name="igc_detected">Trouvé dans la trace : décollage %1$s, atterrissage %2$s (UTC)</string>
-    <string name="igc_none_detected">Aucun vol n'a été trouvé dans cette trace. Saisis la durée toi-même.</string>
-    <string name="igc_duplicate">Ce fichier a déjà été importé comme le vol du %1$s avec %2$s.</string>
-    <string name="igc_duplicate_confirm">L'importer quand même</string>
+    <string name="igc_batch_title">Importer des traces de vol</string>
+    <string name="igc_batch_wing_for_all">Voile pour toutes les traces :</string>
+    <plurals name="igc_batch_import">
+        <item quantity="one">Importer %1$d vol</item>
+        <item quantity="other">Importer %1$d vols</item>
+    </plurals>
+    <string name="igc_batch_result">%1$d importé(s), %2$d n'ont pas pu être importés</string>
+    <string name="igc_problem_unreadable">Illisible : %1$s</string>
+    <string name="igc_problem_no_flight">Aucun vol trouvé dans cette trace</string>
+    <string name="igc_problem_duplicate">Déjà importé</string>
+    <string name="igc_problem_repeated">Le même fichier apparaît deux fois dans la sélection</string>
+    <string name="igc_problem_future">La date est dans le futur</string>
+    <string name="igc_problem_before_service">Volé avant la mise en service de la voile</string>
+    <string name="igc_problem_save">Enregistrement impossible : %1$s</string>
+    <string name="igc_drop_hint">Dépose des fichiers IGC ici pour les importer</string>
+    <string name="failure_drop_no_igc">Seules les traces de vol IGC peuvent être importées. Rien n'a été importé.</string>
     <string name="igc_track_chip">Trace</string>
     <string name="igc_open_track">Ouvrir la trace de ce vol</string>
     <string name="failure_import_igc">La trace n'a pas pu être lue : %1$s</string>

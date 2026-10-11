@@ -101,32 +101,41 @@ class IgcImportPresentersTest {
 
     private fun TestScope.scope() = TestScope(UnconfinedTestDispatcher(testScheduler))
 
+    private fun track(
+        fileName: String,
+        checksum: String,
+        date: LocalDate = LocalDate(2026, 9, 20),
+        moving: Boolean = true,
+    ): NewAttachment {
+        val file = NewAttachment(fileName, fileName.encodeToByteArray())
+        // A track that never moves has a single fix, so no flight can be detected in it.
+        val fixes =
+            if (moving) {
+                // One fix a minute at about 9 m/s: well above walking speed, so a flight is detected.
+                (0..95).map { TrackFix(Instant.parse("2026-09-20T09:42:00Z") + it.minutes, 46.7 + it * 0.005, 7.8) }
+            } else {
+                listOf(TrackFix(Instant.parse("2026-09-20T09:42:00Z"), 46.7, 7.8))
+            }
+        every { reader.read(file.bytes) } returns ReadTrack(FlightTrack(date, fixes), checksum)
+        return file
+    }
+
     @Nested
-    inner class ChoosingTheFile {
-        private fun TestScope.importer() =
-            IgcImportPresenter(scope(), PrepareIgcImport(reader, flights), picker, "Choose")
+    inner class ChoosingTheFiles {
+        private fun TestScope.importer() = IgcImportPresenter(scope(), picker, "Choose")
 
         @Test
-        fun `reads the chosen file and hands over what was found`() =
+        fun `hands over every chosen file`() =
             runTest {
                 // given
-                coEvery { picker.pick("Choose", "igc") } returns listOf(FILE)
-                every { reader.read(FILE.bytes) } returns
-                    ReadTrack(
-                        FlightTrack(
-                            LocalDate(2026, 9, 20),
-                            listOf(TrackFix(Instant.parse("2026-09-20T09:42:00Z"), 46.7, 7.8)),
-                        ),
-                        CHECKSUM,
-                    )
-                var prepared: PreparedIgc? = null
+                coEvery { picker.pick("Choose", "igc") } returns listOf(FILE, FILE)
+                var chosen = emptyList<NewAttachment>()
 
                 // when
-                importer().start { prepared = it }
+                importer().choose { chosen = it }
 
                 // then
-                assertThat(prepared?.draft?.date).isEqualTo(LocalDate(2026, 9, 20))
-                assertThat(prepared?.file).isEqualTo(FILE)
+                assertThat(chosen).hasSize(2)
             }
 
         @Test
@@ -135,83 +144,78 @@ class IgcImportPresentersTest {
                 // given
                 coEvery { picker.pick("Choose", "igc") } returns emptyList()
                 val presenter = importer()
-                var prepared: PreparedIgc? = null
+                var called = false
 
                 // when
-                presenter.start { prepared = it }
+                presenter.choose { called = true }
 
                 // then
-                assertThat(prepared).isNull()
+                assertThat(called).isFalse()
                 assertThat(presenter.failure).isNull()
             }
 
         @Test
-        fun `shows why a file could not be read`() =
+        fun `shows why the files could not be read`() =
             runTest {
                 // given
-                coEvery { picker.pick("Choose", "igc") } returns listOf(FILE)
-                every { reader.read(FILE.bytes) } throws InvalidTrackException("The file has no flight date")
+                coEvery { picker.pick("Choose", "igc") } throws IOException("Permission denied")
                 val presenter = importer()
 
                 // when
-                presenter.start {}
+                presenter.choose {}
 
                 // then
-                assertThat(presenter.failure).isEqualTo(Failure(FailureKind.ImportIgc, "The file has no flight date"))
+                assertThat(presenter.failure).isEqualTo(Failure(FailureKind.ImportIgc, "Permission denied"))
+            }
+
+        @Test
+        fun `reports a drop that holds no track`() =
+            runTest {
+                // given
+                val presenter = importer()
+
+                // when
+                presenter.dropRejected()
+
+                // then
+                assertThat(presenter.failure).isEqualTo(Failure(FailureKind.DropNoIgc, null))
             }
     }
 
     @Nested
-    inner class ConfirmingTheImport {
-        private fun TestScope.form(
-            draft: IgcImportDraft,
-            input: FlightFormInput = FlightFormInput(date = draft.date, wingId = WING_ID, duration = "1:35"),
-        ) = FlightFormPresenter(
-            scope = scope(),
-            logFlight = LogFlight(flights, wings, clock),
-            updateFlight = UpdateFlight(flights, wings, clock),
-            importIgcFlight = ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported") },
-            initial = input,
-            igc = PreparedIgc(FILE, draft),
-        )
+    inner class ReviewingTheBatch {
+        private fun TestScope.batch() =
+            IgcBatchPresenter(
+                scope(),
+                PrepareIgcImport(reader, flights),
+                ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported-${counter++}") },
+                WING_ID,
+            )
+
+        private var counter = 0
 
         @Test
-        fun `saves the flight with the original track attached`() =
+        fun `ticks every new track that holds a flight`() =
             runTest {
                 // given
-                val presenter = form(aDraft())
-                var saved = false
+                val first = track("a.igc", "sum-a")
+                val second = track("b.igc", "sum-b", LocalDate(2026, 9, 21))
+                val presenter = batch()
 
                 // when
-                presenter.submit { saved = true }
+                presenter.load(listOf(first, second))
 
                 // then
-                assertThat(saved).isTrue()
-                coVerify(exactly = 1) { attachments.save(any(), FILE.bytes) }
-                coVerify(exactly = 1) {
-                    flights.save(
-                        match {
-                            it.id == FlightId("imported") &&
-                                it.igcFile?.checksum == CHECKSUM
-                        },
-                    )
-                }
+                assertThat(presenter.loading).isFalse()
+                assertThat(presenter.rows.map { it.selected }).containsExactly(true, true)
+                assertThat(presenter.importableCount).isEqualTo(2)
             }
 
         @Test
-        fun `lets the pilot import straight away when the file is new`() =
+        fun `leaves a track unticked when it was imported before`() =
             runTest {
                 // given
-                val presenter = form(aDraft(duplicateOf = null))
-
-                // then
-                assertThat(presenter.mayImport).isTrue()
-            }
-
-        @Test
-        fun `holds back a file that was imported before until the pilot confirms`() =
-            runTest {
-                // given
+                val file = track("a.igc", CHECKSUM)
                 val earlier =
                     Flight(
                         FlightId("flight-0"),
@@ -219,48 +223,202 @@ class IgcImportPresentersTest {
                         Instant.parse("2026-09-20T17:00:00Z"),
                         IgcFile(Attachment(AttachmentId("igc-0"), "old.igc"), CHECKSUM),
                     )
-                val presenter = form(aDraft(duplicateOf = earlier))
-
-                // then
-                assertThat(presenter.mayImport).isFalse()
+                coEvery { flights.findAll() } returns LoadResult(listOf(earlier))
+                val presenter = batch()
 
                 // when
-                presenter.confirmImportAnyway(true)
+                presenter.load(listOf(file))
 
                 // then
-                assertThat(presenter.mayImport).isTrue()
+                assertThat(presenter.rows.single().problem).isEqualTo(IgcRowProblem.AlreadyImported)
+                assertThat(presenter.rows.single().selected).isFalse()
+                assertThat(presenter.rows.single().selectable).isTrue()
             }
 
         @Test
-        fun `validates the form like any flight, so a missing duration is not saved`() =
+        fun `flags the second copy of a file that is twice in the selection`() =
             runTest {
                 // given
-                val presenter =
-                    form(aDraft(), FlightFormInput(date = LocalDate(2026, 9, 20), wingId = WING_ID, duration = ""))
-                var saved = false
+                val first = track("a.igc", "same")
+                val copy = track("a-copy.igc", "same")
+                val presenter = batch()
 
                 // when
-                presenter.submit { saved = true }
+                presenter.load(listOf(first, copy))
 
                 // then
-                assertThat(saved).isFalse()
-                assertThat(presenter.errors).containsKey(FlightFormField.Duration)
-                coVerify(exactly = 0) { attachments.save(any(), any()) }
+                assertThat(presenter.rows.map { it.problem }).containsExactly(null, IgcRowProblem.RepeatedInSelection)
             }
 
         @Test
-        fun `shows the failure and removes the stored track when saving fails`() =
+        fun `shows an unreadable file on its row without stopping the others`() =
+            runTest {
+                // given
+                val broken = NewAttachment("broken.igc", byteArrayOf(0))
+                every { reader.read(broken.bytes) } throws InvalidTrackException("The file has no flight date")
+                val good = track("a.igc", "sum-a")
+                val presenter = batch()
+
+                // when
+                presenter.load(listOf(broken, good))
+
+                // then
+                assertThat(presenter.rows[0].problem).isEqualTo(IgcRowProblem.Unreadable)
+                assertThat(presenter.rows[0].detail).isEqualTo("The file has no flight date")
+                assertThat(presenter.rows[0].selectable).isFalse()
+                assertThat(presenter.rows[1].selected).isTrue()
+            }
+
+        @Test
+        fun `cannot tick a track without a detected flight`() =
+            runTest {
+                // given
+                val presenter = batch()
+                presenter.load(listOf(track("still.igc", "sum-s", moving = false)))
+                val row = presenter.rows.single()
+
+                // when
+                presenter.select(row, true)
+
+                // then
+                assertThat(row.problem).isEqualTo(IgcRowProblem.NoFlightFound)
+                assertThat(presenter.importableCount).isEqualTo(0)
+            }
+
+        @Test
+        fun `follows the wing for all tracks unless a row has its own`() =
+            runTest {
+                // given
+                val presenter = batch()
+                presenter.load(listOf(track("a.igc", "sum-a"), track("b.igc", "sum-b")))
+                val other = WingId("wing-2")
+
+                // when
+                presenter.changeWing(presenter.rows[0], other)
+                presenter.changeDefaultWing(WingId("wing-3"))
+
+                // then
+                assertThat(presenter.wingOf(presenter.rows[0])).isEqualTo(other)
+                assertThat(presenter.wingOf(presenter.rows[1])).isEqualTo(WingId("wing-3"))
+            }
+    }
+
+    @Nested
+    inner class ImportingTheBatch {
+        private var counter = 0
+
+        private fun TestScope.batch() =
+            IgcBatchPresenter(
+                scope(),
+                PrepareIgcImport(reader, flights),
+                ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported-${counter++}") },
+                WING_ID,
+            )
+
+        @Test
+        fun `saves every ticked track with its original file and closes`() =
+            runTest {
+                // given
+                val presenter = batch()
+                presenter.load(listOf(track("a.igc", "sum-a"), track("b.igc", "sum-b", LocalDate(2026, 9, 21))))
+                var closed = false
+
+                // when
+                presenter.import { closed = true }
+
+                // then
+                assertThat(closed).isTrue()
+                assertThat(presenter.importedCount).isEqualTo(2)
+                coVerify(exactly = 2) { attachments.save(any(), any()) }
+                coVerify {
+                    flights.save(
+                        match { it.igcFile?.checksum == "sum-a" && it.details.duration.isPositive() },
+                    )
+                }
+            }
+
+        @Test
+        fun `skips tracks the pilot unticked`() =
+            runTest {
+                // given
+                val presenter = batch()
+                presenter.load(listOf(track("a.igc", "sum-a"), track("b.igc", "sum-b")))
+                presenter.select(presenter.rows[1], false)
+                var closed = false
+
+                // when
+                presenter.import { closed = true }
+
+                // then
+                assertThat(closed).isTrue()
+                assertThat(presenter.importedCount).isEqualTo(1)
+                coVerify(exactly = 0) { flights.save(match { it.igcFile?.checksum == "sum-b" }) }
+            }
+
+        @Test
+        fun `keeps the failed tracks open with the reason and imports the others`() =
+            runTest {
+                // given
+                val presenter = batch()
+                presenter.load(
+                    listOf(
+                        track("future.igc", "sum-f", LocalDate(2027, 1, 1)),
+                        track("ok.igc", "sum-ok"),
+                        track("early.igc", "sum-e", LocalDate(2020, 1, 1)),
+                    ),
+                )
+                var closed = false
+
+                // when
+                presenter.import { closed = true }
+
+                // then
+                assertThat(closed).isFalse()
+                assertThat(presenter.importedCount).isEqualTo(1)
+                assertThat(presenter.rows.map { it.file.fileName }).containsExactly("future.igc", "early.igc")
+                assertThat(presenter.rows.map { it.problem })
+                    .containsExactly(IgcRowProblem.DateInFuture, IgcRowProblem.BeforeWingInService)
+                assertThat(presenter.rows).allMatch { it.selected }
+            }
+
+        @Test
+        fun `shows a storage failure on its row and removes the stored track`() =
             runTest {
                 // given
                 coEvery { flights.save(any()) } throws IOException("Disk full")
-                val presenter = form(aDraft())
+                val presenter = batch()
+                presenter.load(listOf(track("a.igc", "sum-a")))
 
                 // when
-                presenter.submit {}
+                presenter.import {}
 
                 // then
-                assertThat(presenter.failure).isEqualTo(Failure(FailureKind.SaveFlight, "Disk full"))
+                assertThat(presenter.rows.single().problem).isEqualTo(IgcRowProblem.SaveFailed)
+                assertThat(presenter.rows.single().detail).isEqualTo("Disk full")
                 coVerify(exactly = 1) { attachments.delete(any()) }
+            }
+
+        @Test
+        fun `imports an unticked duplicate once the pilot ticks it`() =
+            runTest {
+                // given
+                val earlier =
+                    Flight(
+                        FlightId("flight-0"),
+                        FlightDetails(LocalDate(2026, 9, 20), 95.minutes, WING_ID),
+                        Instant.parse("2026-09-20T17:00:00Z"),
+                        IgcFile(Attachment(AttachmentId("igc-0"), "old.igc"), "sum-a"),
+                    )
+                coEvery { flights.findAll() } returns LoadResult(listOf(earlier))
+                val presenter = batch()
+                presenter.load(listOf(track("a.igc", "sum-a")))
+                presenter.select(presenter.rows.single(), true)
+
+                // when
+                presenter.import {}
+
+                // then
+                assertThat(presenter.importedCount).isEqualTo(1)
             }
     }
 
