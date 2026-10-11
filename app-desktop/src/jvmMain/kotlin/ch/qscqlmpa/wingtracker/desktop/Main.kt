@@ -48,7 +48,7 @@ private const val WINDOW_HEIGHT = 950
 
 fun main() {
     val devMode = System.getProperty("wingtracker.dev").toBoolean()
-    val koin = startKoin { modules(appModules(DataDirectory.resolve(devMode))) }.koin
+    val koin = startKoin { modules(appModules(DataDirectory.configured(devMode), devMode)) }.koin
 
     val saveThemeMode = koin.get<SaveThemeMode>()
     val saveInterfaceScale = koin.get<SaveInterfaceScale>()

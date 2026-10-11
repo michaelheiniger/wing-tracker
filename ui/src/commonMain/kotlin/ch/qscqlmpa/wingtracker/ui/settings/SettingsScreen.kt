@@ -7,13 +7,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +27,17 @@ import ch.qscqlmpa.wingtracker.ui.reminders.ExportOutcome
 import ch.qscqlmpa.wingtracker.ui.reminders.ReminderSettingsField
 import ch.qscqlmpa.wingtracker.ui.reminders.ReminderSettingsPresenter
 import ch.qscqlmpa.wingtracker.ui.resources.Res
+import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
+import ch.qscqlmpa.wingtracker.ui.resources.data_change_body
+import ch.qscqlmpa.wingtracker.ui.resources.data_change_has_data
+import ch.qscqlmpa.wingtracker.ui.resources.data_change_move
+import ch.qscqlmpa.wingtracker.ui.resources.data_change_move_hint
+import ch.qscqlmpa.wingtracker.ui.resources.data_change_title
+import ch.qscqlmpa.wingtracker.ui.resources.data_change_use
+import ch.qscqlmpa.wingtracker.ui.resources.data_change_use_existing
+import ch.qscqlmpa.wingtracker.ui.resources.data_restart_body
+import ch.qscqlmpa.wingtracker.ui.resources.data_restart_now
+import ch.qscqlmpa.wingtracker.ui.resources.data_restart_title
 import ch.qscqlmpa.wingtracker.ui.resources.field_lead_days
 import ch.qscqlmpa.wingtracker.ui.resources.field_lead_hours
 import ch.qscqlmpa.wingtracker.ui.resources.scale_automatic
@@ -32,6 +46,11 @@ import ch.qscqlmpa.wingtracker.ui.resources.settings_calendar_export
 import ch.qscqlmpa.wingtracker.ui.resources.settings_calendar_exported
 import ch.qscqlmpa.wingtracker.ui.resources.settings_calendar_hint
 import ch.qscqlmpa.wingtracker.ui.resources.settings_calendar_title
+import ch.qscqlmpa.wingtracker.ui.resources.settings_data_change
+import ch.qscqlmpa.wingtracker.ui.resources.settings_data_default
+import ch.qscqlmpa.wingtracker.ui.resources.settings_data_hint
+import ch.qscqlmpa.wingtracker.ui.resources.settings_data_open
+import ch.qscqlmpa.wingtracker.ui.resources.settings_data_title
 import ch.qscqlmpa.wingtracker.ui.resources.settings_reminders_hint
 import ch.qscqlmpa.wingtracker.ui.resources.settings_reminders_title
 import ch.qscqlmpa.wingtracker.ui.resources.settings_save
@@ -52,6 +71,7 @@ fun SettingsScreen(
     themePreference: ThemePreference,
     scalePreference: InterfaceScalePreference,
     reminders: ReminderSettingsPresenter,
+    dataLocation: DataLocationPresenter,
 ) {
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
@@ -71,8 +91,94 @@ fun SettingsScreen(
         ScaleSection(scalePreference)
         RemindersSection(reminders)
         CalendarSection(reminders)
+        DataLocationSection(dataLocation)
         reminders.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
     }
+}
+
+@Composable
+private fun DataLocationSection(presenter: DataLocationPresenter) {
+    Text(
+        stringResource(Res.string.settings_data_title),
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(top = 16.dp),
+    )
+    Text(
+        stringResource(Res.string.settings_data_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    // Selectable, so the pilot can copy the path into a terminal or a backup tool.
+    SelectionContainer { Text(presenter.path, style = MaterialTheme.typography.bodyLarge) }
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        OutlinedButton(onClick = presenter::open) { Text(stringResource(Res.string.settings_data_open)) }
+        OutlinedButton(onClick = presenter::choose, enabled = !presenter.busy) {
+            Text(stringResource(Res.string.settings_data_change))
+        }
+        if (!presenter.isDefault) {
+            TextButton(onClick = presenter::useDefault, enabled = !presenter.busy) {
+                Text(stringResource(Res.string.settings_data_default))
+            }
+        }
+    }
+    presenter.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
+    presenter.proposal?.let { ChangeDialog(it, presenter) }
+    if (presenter.restartRequired) RestartDialog(presenter)
+}
+
+@Composable
+private fun ChangeDialog(
+    proposal: FolderProposal,
+    presenter: DataLocationPresenter,
+) {
+    AlertDialog(
+        onDismissRequest = presenter::cancel,
+        title = { Text(stringResource(Res.string.data_change_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(Res.string.data_change_body, proposal.folder))
+                Text(
+                    stringResource(
+                        if (proposal.canMove) Res.string.data_change_move_hint else Res.string.data_change_has_data,
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        confirmButton = {
+            if (proposal.canMove) {
+                Button(
+                    onClick = { presenter.confirm(moveData = true) },
+                ) { Text(stringResource(Res.string.data_change_move)) }
+            } else {
+                Button(onClick = { presenter.confirm(moveData = false) }) {
+                    Text(stringResource(Res.string.data_change_use_existing))
+                }
+            }
+        },
+        dismissButton = {
+            Row {
+                if (proposal.canMove) {
+                    TextButton(onClick = { presenter.confirm(moveData = false) }) {
+                        Text(stringResource(Res.string.data_change_use))
+                    }
+                }
+                TextButton(onClick = presenter::cancel) { Text(stringResource(Res.string.action_cancel)) }
+            }
+        },
+    )
+}
+
+// Not dismissible: carrying on would write to the old folder while the new one is already chosen.
+@Composable
+private fun RestartDialog(presenter: DataLocationPresenter) {
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text(stringResource(Res.string.data_restart_title)) },
+        text = { Text(stringResource(Res.string.data_restart_body)) },
+        confirmButton = { Button(onClick = presenter::restart) { Text(stringResource(Res.string.data_restart_now)) } },
+    )
 }
 
 private fun ThemeMode.label() =

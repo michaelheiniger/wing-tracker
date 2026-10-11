@@ -17,7 +17,7 @@ import kotlin.io.path.name
  */
 @OptIn(kotlin.io.path.ExperimentalPathApi::class)
 fun main() {
-    val directory = DataDirectory.resolve(devMode = true)
+    val directory = DataDirectory.configured(devMode = true)
     reset(directory)
     val koin = koinApplication { modules(appModules(directory)) }.koin
     val summary = seedDevData(koin, directory)

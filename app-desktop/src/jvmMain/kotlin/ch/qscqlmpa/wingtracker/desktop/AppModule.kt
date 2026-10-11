@@ -75,14 +75,17 @@ import java.nio.file.Path
  * Composition root: the only place where layers get wired together (ADR 0007). Split by feature so each module
  * stays small enough to read at a glance.
  */
-fun appModules(dataDirectory: Path): List<Module> =
+fun appModules(
+    dataDirectory: Path,
+    devMode: Boolean = false,
+): List<Module> =
     listOf(
         storageModule(dataDirectory),
         gearModule(),
         flightsModule(),
         maintenanceModule(),
         remindersModule(),
-        uiModule(),
+        uiModule(dataDirectory, devMode),
     )
 
 private fun storageModule(dataDirectory: Path) =
@@ -167,9 +170,19 @@ private fun remindersModule() =
         single { StartupReminder(get(), get(), TrayNotifier()) }
     }
 
-private fun uiModule() =
-    module {
-        single { PlatformServices(DesktopFilePicker(), DesktopFileOpener(), DesktopFileSaver(), DesktopFileDrop()) }
-        single { ThemePreference() }
-        single { UndoCoordinator() }
+private fun uiModule(
+    dataDirectory: Path,
+    devMode: Boolean,
+) = module {
+    single {
+        PlatformServices(
+            DesktopFilePicker(),
+            DesktopFileOpener(),
+            DesktopFileSaver(),
+            DesktopFileDrop(),
+            dataLocation(dataDirectory, devMode),
+        )
     }
+    single { ThemePreference() }
+    single { UndoCoordinator() }
+}

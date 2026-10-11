@@ -315,4 +315,25 @@
     <string name="undo_check_deleted">Contrôle supprimé</string>
     <string name="undo_plan_cancelled">Contrôle planifié annulé</string>
     <string name="undo_flight_discarded">Vol abandonné</string>
+    <string name="settings_data_title">Dossier de données</string>
+    <string name="settings_data_hint">Ton carnet de vols, ton matériel et les fichiers joints sont enregistrés dans ce dossier. Pour les sauvegarder, copie-le.</string>
+    <string name="settings_data_open">Ouvrir le dossier</string>
+    <string name="settings_data_change">Changer…</string>
+    <string name="settings_data_default">Utiliser le dossier par défaut</string>
+    <string name="settings_data_choose_title">Choisir le dossier de données</string>
+    <string name="data_change_title">Changer le dossier de données</string>
+    <string name="data_change_body">Nouveau dossier : %1$s</string>
+    <string name="data_change_move_hint">Tes données actuelles peuvent y être déplacées : tout est copié, vérifié, puis seulement retiré de l'ancien dossier.</string>
+    <string name="data_change_has_data">Ce dossier contient déjà des données. Il est utilisé tel quel ; tes données actuelles restent dans l'ancien dossier.</string>
+    <string name="data_change_move">Déplacer mes données</string>
+    <string name="data_change_use">Utiliser sans déplacer</string>
+    <string name="data_change_use_existing">Utiliser ce dossier</string>
+    <string name="data_restart_title">Redémarrage nécessaire</string>
+    <string name="data_restart_body">Le dossier de données a été changé. Wing Tracker redémarre maintenant pour l'utiliser.</string>
+    <string name="data_restart_now">Redémarrer maintenant</string>
+    <string name="failure_open_data_folder">Le dossier n'a pas pu être ouvert : %1$s</string>
+    <string name="failure_change_data_folder">Le dossier de données n'a pas pu être changé : %1$s</string>
+    <string name="failure_data_same">C'est déjà le dossier utilisé.</string>
+    <string name="failure_data_unusable">Ce dossier ne peut pas être utilisé : ce doit être un dossier dans lequel tu peux écrire.</string>
+    <string name="failure_data_overlaps">Choisis un dossier qui n'est pas dans le dossier de données actuel et qui ne le contient pas.</string>
 </resources>

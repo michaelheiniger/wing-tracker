@@ -315,4 +315,25 @@
     <string name="undo_check_deleted">Kontrolle gelöscht</string>
     <string name="undo_plan_cancelled">Geplante Kontrolle abgebrochen</string>
     <string name="undo_flight_discarded">Flug verworfen</string>
+    <string name="settings_data_title">Datenordner</string>
+    <string name="settings_data_hint">Dein Logbuch, deine Ausrüstung und angehängte Dateien liegen in diesem Ordner. Zum Sichern genügt es, ihn zu kopieren.</string>
+    <string name="settings_data_open">Ordner öffnen</string>
+    <string name="settings_data_change">Ändern…</string>
+    <string name="settings_data_default">Standardordner verwenden</string>
+    <string name="settings_data_choose_title">Datenordner auswählen</string>
+    <string name="data_change_title">Datenordner ändern</string>
+    <string name="data_change_body">Neuer Ordner: %1$s</string>
+    <string name="data_change_move_hint">Deine bisherigen Daten können dorthin verschoben werden: alles wird kopiert, geprüft und erst dann aus dem alten Ordner entfernt.</string>
+    <string name="data_change_has_data">Dieser Ordner enthält bereits Daten. Er wird so verwendet, wie er ist; deine bisherigen Daten bleiben im alten Ordner.</string>
+    <string name="data_change_move">Meine Daten verschieben</string>
+    <string name="data_change_use">Ohne Verschieben verwenden</string>
+    <string name="data_change_use_existing">Diesen Ordner verwenden</string>
+    <string name="data_restart_title">Neustart nötig</string>
+    <string name="data_restart_body">Der Datenordner wurde geändert. Wing Tracker startet jetzt neu, um ihn zu verwenden.</string>
+    <string name="data_restart_now">Jetzt neu starten</string>
+    <string name="failure_open_data_folder">Der Ordner konnte nicht geöffnet werden: %1$s</string>
+    <string name="failure_change_data_folder">Der Datenordner konnte nicht geändert werden: %1$s</string>
+    <string name="failure_data_same">Das ist der Ordner, der bereits verwendet wird.</string>
+    <string name="failure_data_unusable">Dieser Ordner kann nicht verwendet werden: Es muss ein Ordner sein, in den du schreiben darfst.</string>
+    <string name="failure_data_overlaps">Wähle einen Ordner, der nicht im aktuellen Datenordner liegt und ihn nicht enthält.</string>
 </resources>

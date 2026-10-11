@@ -26,6 +26,7 @@ ADRs capture **why** wing-tracker is built the way it is. They use the
 | [0017](0017-platform-capabilities-behind-ports.md) | Platform capabilities sit behind ports | Accepted |
 | [0018](0018-igc-import-through-a-port.md) | IGC import goes through a port | Accepted |
 | [0019](0019-theme-and-status-colors.md) | A brand theme with checked contrast and status colours | Accepted |
+| [0020](0020-data-folder-location-is-user-chosen.md) | The data folder is chosen by the pilot and applied on restart | Accepted |
 
 ## Rules
 

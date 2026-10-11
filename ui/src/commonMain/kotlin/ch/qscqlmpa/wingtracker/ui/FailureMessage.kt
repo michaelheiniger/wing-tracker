@@ -10,6 +10,10 @@ import ch.qscqlmpa.wingtracker.ui.resources.error_hours
 import ch.qscqlmpa.wingtracker.ui.resources.error_months
 import ch.qscqlmpa.wingtracker.ui.resources.error_required
 import ch.qscqlmpa.wingtracker.ui.resources.failure_cancel_plan
+import ch.qscqlmpa.wingtracker.ui.resources.failure_change_data_folder
+import ch.qscqlmpa.wingtracker.ui.resources.failure_data_overlaps
+import ch.qscqlmpa.wingtracker.ui.resources.failure_data_same
+import ch.qscqlmpa.wingtracker.ui.resources.failure_data_unusable
 import ch.qscqlmpa.wingtracker.ui.resources.failure_delete
 import ch.qscqlmpa.wingtracker.ui.resources.failure_delete_check
 import ch.qscqlmpa.wingtracker.ui.resources.failure_delete_flight
@@ -23,6 +27,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_load_logbook
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_maintenance
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_settings
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_statistics
+import ch.qscqlmpa.wingtracker.ui.resources.failure_open_data_folder
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_report
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_track
 import ch.qscqlmpa.wingtracker.ui.resources.failure_retire
@@ -42,6 +47,11 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.ImportIgc to Res.string.failure_import_igc,
         FailureKind.OpenTrack to Res.string.failure_open_track,
         FailureKind.DropNoIgc to Res.string.failure_drop_no_igc,
+        FailureKind.OpenDataFolder to Res.string.failure_open_data_folder,
+        FailureKind.ChangeDataFolder to Res.string.failure_change_data_folder,
+        FailureKind.DataFolderSame to Res.string.failure_data_same,
+        FailureKind.DataFolderUnusable to Res.string.failure_data_unusable,
+        FailureKind.DataFolderOverlaps to Res.string.failure_data_overlaps,
         FailureKind.SaveSettings to Res.string.failure_save_settings,
         FailureKind.LoadSettings to Res.string.failure_load_settings,
         FailureKind.Load to Res.string.failure_load,

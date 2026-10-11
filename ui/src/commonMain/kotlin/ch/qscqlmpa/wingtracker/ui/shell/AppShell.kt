@@ -51,6 +51,8 @@ import ch.qscqlmpa.wingtracker.ui.resources.nav_gear
 import ch.qscqlmpa.wingtracker.ui.resources.nav_logbook
 import ch.qscqlmpa.wingtracker.ui.resources.nav_settings
 import ch.qscqlmpa.wingtracker.ui.resources.nav_statistics
+import ch.qscqlmpa.wingtracker.ui.resources.settings_data_choose_title
+import ch.qscqlmpa.wingtracker.ui.settings.DataLocationPresenter
 import ch.qscqlmpa.wingtracker.ui.settings.SettingsScreen
 import ch.qscqlmpa.wingtracker.ui.statistics.StatisticsRoute
 import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
@@ -96,6 +98,9 @@ fun AppShell(
                 onLeadTimesSaved = attentionPresenter::refresh,
             )
         }
+    val chooseTitle = stringResource(Res.string.settings_data_choose_title)
+    val dataLocation =
+        remember { DataLocationPresenter(scope, platform.dataLocation, chooseTitle, beforeChange = undo::flush) }
     // Set when the attention panel opens a piece of gear, consumed by the gear section.
     var pendingGear by remember { mutableStateOf<GearRef?>(null) }
 
@@ -152,7 +157,7 @@ fun AppShell(
                         }
 
                         Destination.Settings -> {
-                            SettingsScreen(themePreference, scalePreference, reminderSettings)
+                            SettingsScreen(themePreference, scalePreference, reminderSettings, dataLocation)
                         }
                     }
                 }

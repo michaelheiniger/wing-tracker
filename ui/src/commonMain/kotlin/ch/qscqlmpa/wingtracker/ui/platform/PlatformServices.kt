@@ -45,9 +45,52 @@ interface FileDrop {
     ): Modifier
 }
 
+/** What a folder chosen as the new data location turned out to be. */
+enum class FolderCheck {
+    // Nothing in it yet: the current data can be moved here.
+    Empty,
+
+    // Already holds files, e.g. a restored backup: it can only be used as it is.
+    HasData,
+
+    // Cannot be written to, or is not a folder.
+    Unusable,
+
+    // The folder in use now.
+    Same,
+
+    // Inside the current folder or containing it, so moving would copy a folder into itself.
+    Overlaps,
+}
+
+/** Where the application keeps its data, and the ways to look at it and move it; each platform decides how. */
+interface DataLocation {
+    val path: String
+    val defaultPath: String
+    val isDefault: Boolean
+
+    /** Lets the user choose a folder; null when the dialog was cancelled. */
+    suspend fun chooseFolder(title: String): String?
+
+    suspend fun inspect(folder: String): FolderCheck
+
+    /** Remembers [folder] for the next start, moving the current data into it when [moveData] is set. */
+    suspend fun change(
+        folder: String,
+        moveData: Boolean,
+    )
+
+    /** Shows the data folder in the system's file manager. */
+    suspend fun open()
+
+    /** Starts the application again so a changed location takes effect. */
+    fun restart()
+}
+
 class PlatformServices(
     val filePicker: FilePicker,
     val fileOpener: FileOpener,
     val fileSaver: FileSaver,
     val fileDrop: FileDrop,
+    val dataLocation: DataLocation,
 )
