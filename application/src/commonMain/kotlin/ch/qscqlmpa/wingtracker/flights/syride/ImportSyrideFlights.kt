@@ -109,7 +109,7 @@ class ImportSyrideFlights(
                     it.second is WingTarget.New
                 }.groupBy({ (it.second as WingTarget.New).key }, { it.first })
         // A wing nobody flew on in this selection is not created.
-        return flightsByKey.mapValues { (key, list) ->
+        return flightsByKey.mapValues { (key, _) ->
             val spec = newWings.getValue(key)
             val details =
                 WingDetails(
@@ -117,8 +117,7 @@ class ImportSyrideFlights(
                     manufacturer = spec.manufacturer,
                     model = spec.model,
                     acquisition = Acquisition(AcquisitionCondition.New),
-                    // Flights cannot predate the wing, so the wing starts with its first imported flight.
-                    inServiceDate = list.minOf { it.date },
+                    // Syride does not know when the pilot started using the wing, so the date is left for the pilot.
                 )
             spec to registerWing(details)
         }

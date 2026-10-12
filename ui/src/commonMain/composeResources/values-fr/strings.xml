@@ -369,7 +369,7 @@
     <string name="syride_nothing_new">Il n'y a aucun nouveau vol à importer.</string>
     <string name="syride_back">Retour</string>
     <string name="syride_newwing_title">Nouvelle voile</string>
-    <string name="syride_newwing_hint">Elle est en service dès son premier vol importé. Tu pourras compléter les autres informations plus tard sous Matériel.</string>
+    <string name="syride_newwing_hint">Sa date de mise en service reste vide. Tu pourras la compléter, ainsi que les autres informations, plus tard sous Matériel.</string>
     <string name="syride_done_title">Import terminé</string>
     <string name="syride_done_summary">%1$d vols importés, %2$d voiles créées, %3$d laissés de côté.</string>
     <string name="syride_failed_title">Ces vols n'ont pas pu être importés :</string>

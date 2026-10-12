@@ -369,7 +369,7 @@
     <string name="syride_nothing_new">There are no new flights to import.</string>
     <string name="syride_back">Back</string>
     <string name="syride_newwing_title">New wing</string>
-    <string name="syride_newwing_hint">It is in service from its first imported flight. You can complete the other details later under Gear.</string>
+    <string name="syride_newwing_hint">Its in-service date is left empty. You can complete it and the other details later under Gear.</string>
     <string name="syride_done_title">Import finished</string>
     <string name="syride_done_summary">%1$d flights imported, %2$d wings created, %3$d left out.</string>
     <string name="syride_failed_title">These flights could not be imported:</string>

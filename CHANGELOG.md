@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Changed
+- Wings created by the Syride import no longer get an in-service date from their first flight; it stays empty until you set it.
 - "In service since" is optional for wings, harnesses and reserves. Without it, a maintenance interval counts from the last check, else from the purchase date, and says so when it has no start. An info icon next to the date explains what it is used for.
 - Adding a wing asks for manufacturer and model first, and fills in the name from them until you type a name yourself.
 - A flight can now be dated before its wing's in-service date, in the flight form and in both imports. The flight form and the IGC import show a warning instead of an error, and the statistics chart starts at the earliest flight.

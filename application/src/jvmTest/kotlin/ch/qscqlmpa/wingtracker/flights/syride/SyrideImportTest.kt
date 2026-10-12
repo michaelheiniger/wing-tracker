@@ -199,7 +199,7 @@ class SyrideImportTest {
                 // then
                 val wing = result.createdWings.single()
                 assertThat(wing.details.name).isEqualTo("Birdy")
-                assertThat(wing.details.inServiceDate).isEqualTo(LocalDate(2025, 4, 4))
+                assertThat(wing.details.inServiceDate).isNull()
                 assertThat(saved.map { it.details.wingId }).containsOnly(wing.id)
                 assertThat(result.imported).isEqualTo(2)
             }

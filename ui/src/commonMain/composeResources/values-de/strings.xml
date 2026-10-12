@@ -369,7 +369,7 @@
     <string name="syride_nothing_new">Es gibt keine neuen Flüge zu importieren.</string>
     <string name="syride_back">Zurück</string>
     <string name="syride_newwing_title">Neuer Schirm</string>
-    <string name="syride_newwing_hint">Er ist ab seinem ersten importierten Flug in Betrieb. Die übrigen Angaben kannst du später unter Ausrüstung ergänzen.</string>
+    <string name="syride_newwing_hint">Das Datum der Inbetriebnahme bleibt leer. Du kannst es und die übrigen Angaben später unter Ausrüstung ergänzen.</string>
     <string name="syride_done_title">Import abgeschlossen</string>
     <string name="syride_done_summary">%1$d Flüge importiert, %2$d Schirme angelegt, %3$d ausgelassen.</string>
     <string name="syride_failed_title">Diese Flüge konnten nicht importiert werden:</string>
