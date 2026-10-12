@@ -32,12 +32,24 @@ data class WingFormInput(
     val hoursBeforeTracking: String = "",
     val intervalMonths: String = "",
     val intervalHours: String = "",
+    // Until the pilot types a name, it follows manufacturer and model; afterwards it is theirs to keep.
+    val nameEdited: Boolean = false,
 ) {
+    fun withName(value: String) = copy(name = value, nameEdited = true)
+
+    fun withManufacturer(value: String) = copy(manufacturer = value).withSuggestedName()
+
+    fun withModel(value: String) = copy(model = value).withSuggestedName()
+
+    private fun withSuggestedName() = if (nameEdited) this else copy(name = "$manufacturer $model".trim())
+
     companion object {
         fun from(wing: Wing): WingFormInput {
             val details = wing.details
             val price = details.acquisition.price
             return WingFormInput(
+                // An existing name must never be overwritten by a later change of manufacturer or model.
+                nameEdited = true,
                 name = details.name,
                 manufacturer = details.manufacturer,
                 model = details.model,

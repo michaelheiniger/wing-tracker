@@ -75,6 +75,26 @@ fun WingFormScreen(
         modifier = modifier,
     )
 
+    @Composable
+    fun NameField() =
+        Field(stringResource(Res.string.field_name), input.name, WingFormField.Name) { v ->
+            presenter.change { it.withName(v) }
+        }
+
+    @Composable
+    fun ManufacturerAndModel() =
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+            Field(
+                stringResource(Res.string.field_manufacturer),
+                input.manufacturer,
+                WingFormField.Manufacturer,
+                Modifier.weight(1f),
+            ) { v -> presenter.change { it.withManufacturer(v) } }
+            Field(stringResource(Res.string.field_model), input.model, WingFormField.Model, Modifier.weight(1f)) { v ->
+                presenter.change { it.withModel(v) }
+            }
+        }
+
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -88,19 +108,13 @@ fun WingFormScreen(
             style = MaterialTheme.typography.headlineMedium,
         )
 
-        Field(stringResource(Res.string.field_name), input.name, WingFormField.Name) { v ->
-            presenter.change { it.copy(name = v) }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            Field(
-                stringResource(Res.string.field_manufacturer),
-                input.manufacturer,
-                WingFormField.Manufacturer,
-                Modifier.weight(1f),
-            ) { v -> presenter.change { it.copy(manufacturer = v) } }
-            Field(stringResource(Res.string.field_model), input.model, WingFormField.Model, Modifier.weight(1f)) { v ->
-                presenter.change { it.copy(model = v) }
-            }
+        // A new wing starts from manufacturer and model, which fill in the name; an existing one keeps its name first.
+        if (editing == null) {
+            ManufacturerAndModel()
+            NameField()
+        } else {
+            NameField()
+            ManufacturerAndModel()
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
             Field(stringResource(Res.string.field_size), input.size, null, Modifier.weight(1f)) { v ->

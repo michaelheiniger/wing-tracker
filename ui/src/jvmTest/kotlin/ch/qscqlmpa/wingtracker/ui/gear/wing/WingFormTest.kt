@@ -49,6 +49,67 @@ class WingFormTest {
     }
 
     @Nested
+    inner class SuggestedName {
+        @Test
+        fun `follows manufacturer and model while the name was not typed`() {
+            // given
+            val input = WingFormInput()
+
+            // when
+            val result = input.withManufacturer("Advance").withModel("Iota 3")
+
+            // then
+            assertThat(result.name).isEqualTo("Advance Iota 3")
+        }
+
+        @Test
+        fun `has no stray space while only one of them is filled in`() {
+            // given / when
+            val result = WingFormInput().withModel("Iota 3")
+
+            // then
+            assertThat(result.name).isEqualTo("Iota 3")
+        }
+
+        @Test
+        fun `stops following once the name was typed`() {
+            // given
+            val input = WingFormInput().withManufacturer("Advance").withName("Sky Dancer")
+
+            // when
+            val result = input.withModel("Iota 3").withManufacturer("Ozone")
+
+            // then
+            assertThat(result.name).isEqualTo("Sky Dancer")
+        }
+
+        @Test
+        fun `stays the pilot's even when they emptied the name`() {
+            // given
+            val input = WingFormInput().withManufacturer("Advance").withName("")
+
+            // when
+            val result = input.withModel("Iota 3")
+
+            // then
+            assertThat(result.name).isEmpty()
+        }
+
+        @Test
+        fun `is never replaced on an existing wing`() {
+            // given
+            val details = (aFormInput().validate() as WingFormResult.Valid).details
+            val input = WingFormInput.from(Wing(WingId("3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47"), details))
+
+            // when
+            val result = input.withModel("Iota 4")
+
+            // then
+            assertThat(result.name).isEqualTo("Sky Dancer")
+        }
+    }
+
+    @Nested
     inner class Validate {
         @Test
         fun `builds the wing details from a fully populated form`() {

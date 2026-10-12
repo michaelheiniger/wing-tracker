@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Changed
+- Adding a wing asks for manufacturer and model first, and fills in the name from them until you type a name yourself.
 - A flight can now be dated before its wing's in-service date, in the flight form and in both imports. The flight form and the IGC import show a warning instead of an error, and the statistics chart starts at the earliest flight.
 
 ### Added
