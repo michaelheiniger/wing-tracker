@@ -488,7 +488,6 @@ class IgcImportPresentersTest {
                     listOf(
                         track("future.igc", "sum-f", LocalDate(2027, 1, 1)),
                         track("ok.igc", "sum-ok"),
-                        track("early.igc", "sum-e", LocalDate(2020, 1, 1)),
                     ),
                 )
                 var closed = false
@@ -499,9 +498,9 @@ class IgcImportPresentersTest {
                 // then
                 assertThat(closed).isFalse()
                 assertThat(presenter.importedCount).isEqualTo(1)
-                assertThat(presenter.rows.map { it.file.fileName }).containsExactly("future.igc", "early.igc")
+                assertThat(presenter.rows.map { it.file.fileName }).containsExactly("future.igc")
                 assertThat(presenter.rows.map { it.problem })
-                    .containsExactly(IgcRowProblem.DateInFuture, IgcRowProblem.BeforeWingInService)
+                    .containsExactly(IgcRowProblem.DateInFuture)
                 assertThat(presenter.rows).allMatch { it.selected }
             }
 

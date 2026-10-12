@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Changed
+- A flight can now be dated before its wing's in-service date, in the flight form and in both imports. The flight form and the IGC import show a warning instead of an error, and the statistics chart starts at the earliest flight.
+
 ### Added
 - Import from a device: choose a logger mounted as a drive (e.g. a Syride) in the logbook, and all its IGC tracks are read, including those in subfolders. Tracks already imported are left out of the list. The folder chooser opens where you found the device last time.
 - The flight form has fields for distance, top altitude and instrument, so they can be added or corrected on any flight.

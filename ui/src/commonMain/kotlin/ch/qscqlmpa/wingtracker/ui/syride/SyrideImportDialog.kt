@@ -58,7 +58,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.syride_done_title
 import ch.qscqlmpa.wingtracker.ui.resources.syride_edit_new
 import ch.qscqlmpa.wingtracker.ui.resources.syride_failed_row
 import ch.qscqlmpa.wingtracker.ui.resources.syride_failed_title
-import ch.qscqlmpa.wingtracker.ui.resources.syride_failure_before_service
 import ch.qscqlmpa.wingtracker.ui.resources.syride_failure_future
 import ch.qscqlmpa.wingtracker.ui.resources.syride_failure_save
 import ch.qscqlmpa.wingtracker.ui.resources.syride_import_count
@@ -322,10 +321,6 @@ private fun DoneStep(
                     when (failed.failure) {
                         SyrideFailure.DateInFuture -> {
                             stringResource(Res.string.syride_failure_future)
-                        }
-
-                        SyrideFailure.BeforeWingInService -> {
-                            stringResource(Res.string.syride_failure_before_service)
                         }
 
                         SyrideFailure.SaveFailed -> {

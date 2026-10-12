@@ -130,7 +130,6 @@
     <string name="field_flight_top_altitude">Top altitude (m)</string>
     <string name="field_flight_instrument">Instrument</string>
     <string name="error_date_future">This day has not happened yet</string>
-    <string name="error_date_before_service">The wing was not in service yet on this day</string>
 
     <string name="failure_load_logbook">The logbook could not be loaded: %1$s</string>
     <string name="failure_save_flight">The flight could not be saved: %1$s</string>
@@ -294,6 +293,7 @@
         <item quantity="other">%1$d tracks were already imported and are not listed.</item>
     </plurals>
     <string name="igc_batch_nothing_new">There is nothing new to import.</string>
+    <string name="flight_warning_before_service">The wing was not in service yet on this day. The flight is saved anyway.</string>
     <string name="igc_pick_title">Choose a flight track</string>
     <string name="igc_detected">Found in the track: take-off %1$s, landing %2$s (UTC)</string>
     <string name="igc_batch_title">Import flight tracks</string>
@@ -308,7 +308,6 @@
     <string name="igc_problem_duplicate">Already imported</string>
     <string name="igc_problem_repeated">The same file is in this selection twice</string>
     <string name="igc_problem_future">The date is in the future</string>
-    <string name="igc_problem_before_service">Flown before the wing was in service</string>
     <string name="igc_problem_save">Could not be saved: %1$s</string>
     <string name="igc_drop_hint">Drop IGC files here to import them</string>
     <string name="failure_drop_no_igc">Only IGC flight tracks can be imported. Nothing was imported.</string>
@@ -373,7 +372,6 @@
     <string name="syride_failed_title">These flights could not be imported:</string>
     <string name="syride_failed_row">%1$s · %2$s</string>
     <string name="syride_failure_future">the date is in the future</string>
-    <string name="syride_failure_before_service">flown before the wing was in service</string>
     <string name="syride_failure_save">could not be saved: %1$s</string>
     <string name="action_close">Close</string>
     <string name="failure_syride_user">No Syride pilot with this name was found.</string>

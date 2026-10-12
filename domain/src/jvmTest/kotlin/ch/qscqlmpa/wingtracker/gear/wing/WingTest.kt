@@ -1,13 +1,39 @@
 package ch.qscqlmpa.wingtracker.gear.wing
 
 import ch.qscqlmpa.wingtracker.gear.GearStatus
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class WingTest {
+    @Nested
+    inner class WasInServiceOn {
+        @Test
+        fun `is true on the in-service date and after it`() {
+            // given
+            val wing = aWing()
+            val inService = wing.details.inServiceDate
+
+            // when / then
+            assertThat(wing.wasInServiceOn(inService)).isTrue()
+            assertThat(wing.wasInServiceOn(inService.plus(1, DateTimeUnit.DAY))).isTrue()
+        }
+
+        @Test
+        fun `is false before the in-service date`() {
+            // given
+            val wing = aWing()
+
+            // when / then
+            assertThat(wing.wasInServiceOn(wing.details.inServiceDate.minus(1, DateTimeUnit.DAY))).isFalse()
+        }
+    }
+
     @Nested
     inner class Retire {
         @Test

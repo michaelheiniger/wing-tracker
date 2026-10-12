@@ -80,11 +80,17 @@ class GetStatistics(
         wingFlights: List<Flight>,
         today: LocalDate,
     ): List<CumulativePoint> {
-        val points = mutableListOf(CumulativePoint(wing.details.inServiceDate, wing.details.hoursBeforeTracking))
+        // Flights can predate the in-service date, so the line starts at whichever comes first.
+        val start =
+            minOf(
+                wing.details.inServiceDate,
+                wingFlights.minOfOrNull { it.details.date } ?: wing.details.inServiceDate,
+            )
+        val points = mutableListOf(CumulativePoint(start, wing.details.hoursBeforeTracking))
         var running = wing.details.hoursBeforeTracking
         wingFlights.groupBy { it.details.date }.entries.sortedBy { it.key }.forEach { (date, sameDay) ->
             running += sameDay.fold(Duration.ZERO) { sum, f -> sum + f.details.duration }
-            // A flight on the in-service day updates the starting point instead of duplicating the date.
+            // A flight on the first day updates the starting point instead of duplicating the date.
             if (points.last().date == date) {
                 points[points.lastIndex] = CumulativePoint(date, running)
             } else {

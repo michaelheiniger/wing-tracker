@@ -33,6 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.ui.components.DateField
+import ch.qscqlmpa.wingtracker.ui.components.Severity
+import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
@@ -48,6 +50,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.field_notes
 import ch.qscqlmpa.wingtracker.ui.resources.field_takeoff_site
 import ch.qscqlmpa.wingtracker.ui.resources.flight_form_title_add
 import ch.qscqlmpa.wingtracker.ui.resources.flight_form_title_edit
+import ch.qscqlmpa.wingtracker.ui.resources.flight_warning_before_service
 import ch.qscqlmpa.wingtracker.ui.resources.flight_wing_retired
 import org.jetbrains.compose.resources.stringResource
 
@@ -89,6 +92,11 @@ fun FlightDialog(
                     errorText = errors[FlightFormField.Date]?.message(),
                     modifier = Modifier.fillMaxWidth(),
                 )
+                val date = input.date
+                val chosenWing = input.wingId?.let { id -> wings.firstOrNull { it.id == id } }
+                if (date != null && chosenWing?.wasInServiceOn(date) == false) {
+                    StatusBadge(stringResource(Res.string.flight_warning_before_service), Severity.Warning)
+                }
                 WingDropdown(
                     wings = wings,
                     selected = input.wingId?.let { id -> wings.firstOrNull { it.id == id } },

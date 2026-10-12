@@ -197,6 +197,28 @@ class GetStatisticsTest {
             }
 
         @Test
+        fun `starts on the first flight when it predates the in-service date`() =
+            runTest {
+                // given
+                val sky = aWing("wing-1", inService = LocalDate(2024, 3, 9), before = 42.hours)
+                givenStored(
+                    listOf(sky),
+                    aFlight("wing-1", LocalDate(2024, 3, 1), 60.minutes),
+                    aFlight("wing-1", LocalDate(2024, 4, 1), 30.minutes),
+                )
+
+                // when
+                val points = statistics().cumulative.getValue(SeriesKey.OfWing(sky.id))
+
+                // then
+                assertThat(points.map { it.date to it.total }).containsExactly(
+                    LocalDate(2024, 3, 1) to 43.hours,
+                    LocalDate(2024, 4, 1) to 43.hours + 30.minutes,
+                    TODAY to 43.hours + 30.minutes,
+                )
+            }
+
+        @Test
         fun `ends a retired wing on its retirement date`() =
             runTest {
                 // given

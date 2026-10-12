@@ -417,21 +417,6 @@ class LogbookPresentersTest {
             }
 
         @Test
-        fun `shows an error on the date when it precedes the wing's service date`() =
-            runTest {
-                // given
-                coEvery { wings.findById(skyDancer.id) } returns skyDancer
-                val presenter = formPresenter(validInput.copy(date = LocalDate(2024, 3, 8)))
-
-                // when
-                presenter.submit {}
-
-                // then
-                assertThat(presenter.errors)
-                    .containsEntry(FlightFormField.Date, FlightFormError.DateBeforeWingInService)
-            }
-
-        @Test
         fun `updates the flight when editing`() =
             runTest {
                 // given

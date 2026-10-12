@@ -130,7 +130,6 @@
     <string name="field_flight_top_altitude">Altitude maximale (m)</string>
     <string name="field_flight_instrument">Instrument</string>
     <string name="error_date_future">Ce jour n'est pas encore arrivé</string>
-    <string name="error_date_before_service">La voile n'était pas encore en service ce jour-là</string>
 
     <string name="failure_load_logbook">Le carnet de vol n'a pas pu être chargé : %1$s</string>
     <string name="failure_save_flight">Le vol n'a pas pu être enregistré : %1$s</string>
@@ -294,6 +293,7 @@
         <item quantity="other">%1$d traces étaient déjà importées et ne sont pas listées.</item>
     </plurals>
     <string name="igc_batch_nothing_new">Il n'y a rien de nouveau à importer.</string>
+    <string name="flight_warning_before_service">La voile n'était pas encore en service ce jour-là. Le vol est enregistré quand même.</string>
     <string name="igc_pick_title">Choisir une trace de vol</string>
     <string name="igc_detected">Trouvé dans la trace : décollage %1$s, atterrissage %2$s (UTC)</string>
     <string name="igc_batch_title">Importer des traces de vol</string>
@@ -308,7 +308,6 @@
     <string name="igc_problem_duplicate">Déjà importé</string>
     <string name="igc_problem_repeated">Le même fichier apparaît deux fois dans la sélection</string>
     <string name="igc_problem_future">La date est dans le futur</string>
-    <string name="igc_problem_before_service">Volé avant la mise en service de la voile</string>
     <string name="igc_problem_save">Enregistrement impossible : %1$s</string>
     <string name="igc_drop_hint">Dépose des fichiers IGC ici pour les importer</string>
     <string name="failure_drop_no_igc">Seules les traces de vol IGC peuvent être importées. Rien n'a été importé.</string>
@@ -373,7 +372,6 @@
     <string name="syride_failed_title">Ces vols n'ont pas pu être importés :</string>
     <string name="syride_failed_row">%1$s · %2$s</string>
     <string name="syride_failure_future">la date est dans le futur</string>
-    <string name="syride_failure_before_service">volé avant la mise en service de la voile</string>
     <string name="syride_failure_save">enregistrement impossible : %1$s</string>
     <string name="action_close">Fermer</string>
     <string name="failure_syride_user">Aucun pilote Syride de ce nom n'a été trouvé.</string>

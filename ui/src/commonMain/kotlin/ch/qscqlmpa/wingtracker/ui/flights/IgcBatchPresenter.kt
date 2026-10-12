@@ -3,7 +3,6 @@ package ch.qscqlmpa.wingtracker.ui.flights
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import ch.qscqlmpa.wingtracker.flights.FlightBeforeWingInServiceException
 import ch.qscqlmpa.wingtracker.flights.FlightDateInFutureException
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.igc.IgcImportDraft
@@ -22,13 +21,12 @@ enum class IgcRowProblem {
     AlreadyImported,
     RepeatedInSelection,
     DateInFuture,
-    BeforeWingInService,
     SaveFailed,
 }
 
 // Problems that arise while importing; the row stays ticked so the pilot can fix the cause and try again.
 private val IMPORT_FAILURES =
-    setOf(IgcRowProblem.DateInFuture, IgcRowProblem.BeforeWingInService, IgcRowProblem.SaveFailed)
+    setOf(IgcRowProblem.DateInFuture, IgcRowProblem.SaveFailed)
 
 /** One track of the batch. [wingId] is null while the row follows the dialog's wing for all tracks. */
 data class IgcBatchRow(
@@ -172,8 +170,6 @@ class IgcBatchPresenter(
             throw e
         } catch (_: FlightDateInFutureException) {
             row.copy(problem = IgcRowProblem.DateInFuture, detail = null)
-        } catch (_: FlightBeforeWingInServiceException) {
-            row.copy(problem = IgcRowProblem.BeforeWingInService, detail = null)
             // Any storage failure must reach the user as a message on its row; it must never crash the window.
         } catch (
             @Suppress("TooGenericExceptionCaught") e: Exception,

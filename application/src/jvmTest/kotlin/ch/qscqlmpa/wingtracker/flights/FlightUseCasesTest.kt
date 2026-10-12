@@ -90,17 +90,17 @@ class FlightUseCasesTest {
             }
 
         @Test
-        fun `rejects a flight dated before the wing entered service`() =
+        fun `saves a flight dated before the wing entered service`() =
             runTest {
                 // given
                 givenTheWingExists()
+                val details = aFlightDetails(date = LocalDate(2024, 3, 8))
 
                 // when
-                val failure = runCatching { logFlight(aFlightDetails(date = LocalDate(2024, 3, 8))) }.exceptionOrNull()
+                logFlight(details)
 
                 // then
-                assertThat(failure).isInstanceOf(FlightBeforeWingInServiceException::class.java)
-                coVerify(exactly = 0) { flights.save(any()) }
+                coVerify(exactly = 1) { flights.save(match { it.details == details }) }
             }
 
         @Test

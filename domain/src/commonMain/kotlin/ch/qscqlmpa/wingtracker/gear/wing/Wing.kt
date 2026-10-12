@@ -30,6 +30,10 @@ data class Wing(
     override val ref: GearRef get() = GearRef(GearKind.Wing, id.value)
     override val displayName: String get() = details.name
     override val inServiceDate: LocalDate get() = details.inServiceDate
+
+    /** Flights before this date are allowed but suspicious: the date or the wing may have been entered wrongly. */
+    fun wasInServiceOn(date: LocalDate): Boolean = date >= details.inServiceDate
+
     override val maintenanceInterval get() = details.maintenanceInterval
     override val history: MaintenanceHistory get() = MaintenanceHistory(GearKind.Wing, checks, plannedChecks)
 

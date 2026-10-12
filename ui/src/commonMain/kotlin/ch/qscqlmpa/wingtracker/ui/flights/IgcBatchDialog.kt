@@ -37,6 +37,7 @@ import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
+import ch.qscqlmpa.wingtracker.ui.resources.flight_warning_before_service
 import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_import
 import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_nothing_new
 import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_result
@@ -44,7 +45,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_skipped
 import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_title
 import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_wing_for_all
 import ch.qscqlmpa.wingtracker.ui.resources.igc_detected
-import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_before_service
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_duplicate
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_future
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_no_flight
@@ -189,6 +189,12 @@ private fun TrackRow(
                 )
             }
             row.problem?.let { StatusBadge(it.text(row.detail), it.severity()) }
+            val date = draft?.date
+            if (row.selectable && date != null &&
+                wings.firstOrNull { it.id == presenter.wingOf(row) }?.wasInServiceOn(date) == false
+            ) {
+                StatusBadge(stringResource(Res.string.flight_warning_before_service), Severity.Warning)
+            }
         }
         if (row.selectable) {
             WingMenu(wings, presenter.wingOf(row), onSelected = { presenter.changeWing(row, it.id) })
@@ -229,7 +235,6 @@ private fun IgcRowProblem.text(detail: String?): String =
         IgcRowProblem.AlreadyImported -> stringResource(Res.string.igc_problem_duplicate)
         IgcRowProblem.RepeatedInSelection -> stringResource(Res.string.igc_problem_repeated)
         IgcRowProblem.DateInFuture -> stringResource(Res.string.igc_problem_future)
-        IgcRowProblem.BeforeWingInService -> stringResource(Res.string.igc_problem_before_service)
         IgcRowProblem.SaveFailed -> stringResource(Res.string.igc_problem_save, detail.orEmpty())
     }
 

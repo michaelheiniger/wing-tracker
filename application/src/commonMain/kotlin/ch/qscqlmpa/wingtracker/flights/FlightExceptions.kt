@@ -6,6 +6,3 @@ class FlightNotFoundException(
 
 class FlightDateInFutureException :
     IllegalArgumentException("A flight cannot be logged for a day that has not happened yet")
-
-class FlightBeforeWingInServiceException :
-    IllegalArgumentException("A flight cannot be dated before its wing entered service")

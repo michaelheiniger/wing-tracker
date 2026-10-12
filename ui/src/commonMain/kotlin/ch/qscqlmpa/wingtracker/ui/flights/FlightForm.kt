@@ -7,7 +7,6 @@ import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.ui.formatHoursAndMinutes
 import ch.qscqlmpa.wingtracker.ui.parseHoursAndMinutes
 import ch.qscqlmpa.wingtracker.ui.resources.Res
-import ch.qscqlmpa.wingtracker.ui.resources.error_date_before_service
 import ch.qscqlmpa.wingtracker.ui.resources.error_date_future
 import ch.qscqlmpa.wingtracker.ui.resources.error_duration
 import ch.qscqlmpa.wingtracker.ui.resources.error_number
@@ -57,7 +56,6 @@ enum class FlightFormError {
     InvalidDuration,
     InvalidNumber,
     DateInFuture,
-    DateBeforeWingInService,
 }
 
 sealed interface FlightFormResult {
@@ -119,5 +117,4 @@ fun FlightFormError.message(): String =
         FlightFormError.InvalidDuration -> stringResource(Res.string.error_duration)
         FlightFormError.InvalidNumber -> stringResource(Res.string.error_number)
         FlightFormError.DateInFuture -> stringResource(Res.string.error_date_future)
-        FlightFormError.DateBeforeWingInService -> stringResource(Res.string.error_date_before_service)
     }

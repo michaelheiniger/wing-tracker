@@ -3,7 +3,6 @@ package ch.qscqlmpa.wingtracker.flights.syride
 import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.flights.ExternalReference
 import ch.qscqlmpa.wingtracker.flights.Flight
-import ch.qscqlmpa.wingtracker.flights.FlightBeforeWingInServiceException
 import ch.qscqlmpa.wingtracker.flights.FlightDateInFutureException
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.FlightId
@@ -42,7 +41,7 @@ data class NewWingSpec(
     val model: String,
 )
 
-enum class SyrideFailure { DateInFuture, BeforeWingInService, SaveFailed }
+enum class SyrideFailure { DateInFuture, SaveFailed }
 
 data class FailedSyrideFlight(
     val flight: SyrideFlight,
@@ -161,8 +160,6 @@ class ImportSyrideFlights(
             throw e
         } catch (_: FlightDateInFutureException) {
             FailedSyrideFlight(flight, SyrideFailure.DateInFuture)
-        } catch (_: FlightBeforeWingInServiceException) {
-            FailedSyrideFlight(flight, SyrideFailure.BeforeWingInService)
             // A storage failure on one flight is reported on that flight; the others still go through.
         } catch (
             @Suppress("TooGenericExceptionCaught") e: Exception,

@@ -130,7 +130,6 @@
     <string name="field_flight_top_altitude">Maximale Höhe (m)</string>
     <string name="field_flight_instrument">Instrument</string>
     <string name="error_date_future">Dieser Tag liegt noch in der Zukunft</string>
-    <string name="error_date_before_service">Der Gleitschirm war an diesem Tag noch nicht in Betrieb</string>
 
     <string name="failure_load_logbook">Das Flugbuch konnte nicht geladen werden: %1$s</string>
     <string name="failure_save_flight">Der Flug konnte nicht gespeichert werden: %1$s</string>
@@ -294,6 +293,7 @@
         <item quantity="other">%1$d Tracks waren bereits importiert und werden nicht aufgeführt.</item>
     </plurals>
     <string name="igc_batch_nothing_new">Es gibt nichts Neues zu importieren.</string>
+    <string name="flight_warning_before_service">Der Gleitschirm war an diesem Tag noch nicht in Betrieb. Der Flug wird trotzdem gespeichert.</string>
     <string name="igc_pick_title">Flugtrack auswählen</string>
     <string name="igc_detected">Im Track gefunden: Start %1$s, Landung %2$s (UTC)</string>
     <string name="igc_batch_title">Flugtracks importieren</string>
@@ -308,7 +308,6 @@
     <string name="igc_problem_duplicate">Bereits importiert</string>
     <string name="igc_problem_repeated">Dieselbe Datei ist zweimal in der Auswahl</string>
     <string name="igc_problem_future">Das Datum liegt in der Zukunft</string>
-    <string name="igc_problem_before_service">Vor der Inbetriebnahme des Schirms geflogen</string>
     <string name="igc_problem_save">Konnte nicht gespeichert werden: %1$s</string>
     <string name="igc_drop_hint">IGC-Dateien hierher ziehen, um sie zu importieren</string>
     <string name="failure_drop_no_igc">Nur IGC-Flugtracks können importiert werden. Es wurde nichts importiert.</string>
@@ -373,7 +372,6 @@
     <string name="syride_failed_title">Diese Flüge konnten nicht importiert werden:</string>
     <string name="syride_failed_row">%1$s · %2$s</string>
     <string name="syride_failure_future">das Datum liegt in der Zukunft</string>
-    <string name="syride_failure_before_service">vor der Inbetriebnahme des Schirms geflogen</string>
     <string name="syride_failure_save">konnte nicht gespeichert werden: %1$s</string>
     <string name="action_close">Schliessen</string>
     <string name="failure_syride_user">Es wurde kein Syride-Pilot mit diesem Namen gefunden.</string>

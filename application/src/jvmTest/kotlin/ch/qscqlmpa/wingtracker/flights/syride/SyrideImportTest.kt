@@ -257,27 +257,19 @@ class SyrideImportTest {
             }
 
         @Test
-        fun `reports a flight before the wing was in service and imports the others`() =
+        fun `imports a flight dated before the wing was in service`() =
             runTest {
                 // given
                 givenStored()
                 val selection =
-                    listOf(
-                        aSyrideFlight("flight:1", LocalDate(2020, 1, 1)) to WingTarget.Existing(skyDancer.id),
-                        aSyrideFlight("flight:2") to WingTarget.Existing(skyDancer.id),
-                    )
+                    listOf(aSyrideFlight("flight:1", LocalDate(2020, 1, 1)) to WingTarget.Existing(skyDancer.id))
 
                 // when
                 val result = import(selection, emptyMap())
 
                 // then
                 assertThat(result.imported).isEqualTo(1)
-                assertThat(result.failed.single().failure).isEqualTo(SyrideFailure.BeforeWingInService)
-                assertThat(
-                    result.failed
-                        .single()
-                        .flight.id,
-                ).isEqualTo("flight:1")
+                assertThat(result.failed).isEmpty()
             }
 
         @Test

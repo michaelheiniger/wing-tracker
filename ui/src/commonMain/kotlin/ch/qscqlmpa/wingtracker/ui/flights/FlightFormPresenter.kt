@@ -4,7 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ch.qscqlmpa.wingtracker.flights.Flight
-import ch.qscqlmpa.wingtracker.flights.FlightBeforeWingInServiceException
 import ch.qscqlmpa.wingtracker.flights.FlightDateInFutureException
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.LogFlight
@@ -60,8 +59,6 @@ class FlightFormPresenter(
                         throw e
                     } catch (_: FlightDateInFutureException) {
                         errors = mapOf(FlightFormField.Date to FlightFormError.DateInFuture)
-                    } catch (_: FlightBeforeWingInServiceException) {
-                        errors = mapOf(FlightFormField.Date to FlightFormError.DateBeforeWingInService)
                         // Any storage failure must reach the user as a message; it must never crash the window.
                     } catch (
                         @Suppress("TooGenericExceptionCaught") e: Exception,

@@ -10,11 +10,9 @@ internal class FlightRules(
     private val clock: AppClock,
 ) {
     suspend fun ensureAllowed(details: FlightDetails) {
-        val wing = wingOf(details)
-        if (details.date > clock.today()) throw FlightDateInFutureException()
-        if (details.date < wing.details.inServiceDate) throw FlightBeforeWingInServiceException()
-    }
-
-    private suspend fun wingOf(details: FlightDetails) =
+        // The wing must exist, but a flight dated before its in-service date is allowed: the date of a wing is
+        // often entered later from memory, and the flights are the better record.
         wings.findById(details.wingId) ?: throw WingNotFoundException(details.wingId)
+        if (details.date > clock.today()) throw FlightDateInFutureException()
+    }
 }
