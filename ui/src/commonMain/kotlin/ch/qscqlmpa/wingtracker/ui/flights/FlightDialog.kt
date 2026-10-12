@@ -38,7 +38,10 @@ import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.action_save
 import ch.qscqlmpa.wingtracker.ui.resources.field_flight_date
+import ch.qscqlmpa.wingtracker.ui.resources.field_flight_distance
 import ch.qscqlmpa.wingtracker.ui.resources.field_flight_duration
+import ch.qscqlmpa.wingtracker.ui.resources.field_flight_instrument
+import ch.qscqlmpa.wingtracker.ui.resources.field_flight_top_altitude
 import ch.qscqlmpa.wingtracker.ui.resources.field_flight_wing
 import ch.qscqlmpa.wingtracker.ui.resources.field_landing_site
 import ch.qscqlmpa.wingtracker.ui.resources.field_notes
@@ -117,6 +120,33 @@ fun FlightDialog(
                         modifier = Modifier.weight(1f),
                     )
                 }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = input.distanceKm,
+                        onValueChange = { v -> presenter.change { it.copy(distanceKm = v) } },
+                        label = { Text(stringResource(Res.string.field_flight_distance)) },
+                        isError = FlightFormField.Distance in errors,
+                        supportingText = { errors[FlightFormField.Distance]?.let { Text(it.message()) } },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                    OutlinedTextField(
+                        value = input.topAltitudeMeters,
+                        onValueChange = { v -> presenter.change { it.copy(topAltitudeMeters = v) } },
+                        label = { Text(stringResource(Res.string.field_flight_top_altitude)) },
+                        isError = FlightFormField.TopAltitude in errors,
+                        supportingText = { errors[FlightFormField.TopAltitude]?.let { Text(it.message()) } },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                OutlinedTextField(
+                    value = input.instrument,
+                    onValueChange = { v -> presenter.change { it.copy(instrument = v) } },
+                    label = { Text(stringResource(Res.string.field_flight_instrument)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
                 OutlinedTextField(
                     value = input.notes,
                     onValueChange = { v -> presenter.change { it.copy(notes = v) } },

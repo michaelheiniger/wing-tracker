@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+- The flight form has fields for distance, top altitude and instrument, so they can be added or corrected on any flight.
+
 ## [0.0.2] - 2026-10-12
 
 ### Added

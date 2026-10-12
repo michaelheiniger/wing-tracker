@@ -373,4 +373,4 @@ private fun importedFacts(details: FlightDetails): String? {
     return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
 }
 
-private fun Double.toDisplayNumber(): String = if (this % 1.0 == 0.0) toInt().toString() else toString()
+internal fun Double.toDisplayNumber(): String = if (this % 1.0 == 0.0) toInt().toString() else toString()

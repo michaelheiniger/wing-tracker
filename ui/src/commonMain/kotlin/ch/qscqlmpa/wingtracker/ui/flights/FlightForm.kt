@@ -10,6 +10,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.error_date_before_service
 import ch.qscqlmpa.wingtracker.ui.resources.error_date_future
 import ch.qscqlmpa.wingtracker.ui.resources.error_duration
+import ch.qscqlmpa.wingtracker.ui.resources.error_number
 import ch.qscqlmpa.wingtracker.ui.resources.error_required
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
@@ -22,10 +23,9 @@ data class FlightFormInput(
     val takeOffSite: String = "",
     val landingSite: String = "",
     val notes: String = "",
-    // Not edited here, but kept so editing an imported flight never drops what the import brought.
-    val distanceKm: Double? = null,
-    val topAltitudeMeters: Int? = null,
-    val instrument: String? = null,
+    val distanceKm: String = "",
+    val topAltitudeMeters: String = "",
+    val instrument: String = "",
 ) {
     companion object {
         fun from(flight: Flight): FlightFormInput =
@@ -36,19 +36,26 @@ data class FlightFormInput(
                 takeOffSite = flight.details.takeOffSite.orEmpty(),
                 landingSite = flight.details.landingSite.orEmpty(),
                 notes = flight.details.notes.orEmpty(),
-                distanceKm = flight.details.distanceKm,
-                topAltitudeMeters = flight.details.topAltitudeMeters,
-                instrument = flight.details.instrument,
+                distanceKm =
+                    flight.details.distanceKm
+                        ?.toDisplayNumber()
+                        .orEmpty(),
+                topAltitudeMeters =
+                    flight.details.topAltitudeMeters
+                        ?.toString()
+                        .orEmpty(),
+                instrument = flight.details.instrument.orEmpty(),
             )
     }
 }
 
-enum class FlightFormField { Date, Wing, Duration }
+enum class FlightFormField { Date, Wing, Duration, Distance, TopAltitude }
 
 /** Error kinds rather than text, so the screen can show them in the user's language (ADR 0014). */
 enum class FlightFormError {
     Required,
     InvalidDuration,
+    InvalidNumber,
     DateInFuture,
     DateBeforeWingInService,
 }
@@ -75,22 +82,34 @@ fun FlightFormInput.validate(): FlightFormResult {
             if (duration.isBlank()) FlightFormError.Required else FlightFormError.InvalidDuration
     }
 
-    if (date != null && wingId != null && flightDuration != null) {
-        return FlightFormResult.Valid(
-            FlightDetails(
-                date = date,
-                duration = flightDuration,
-                wingId = wingId,
-                takeOffSite = takeOffSite.trim().ifEmpty { null },
-                landingSite = landingSite.trim().ifEmpty { null },
-                notes = notes.trim().ifEmpty { null },
-                distanceKm = distanceKm,
-                topAltitudeMeters = topAltitudeMeters,
-                instrument = instrument,
-            ),
-        )
+    val distance =
+        distanceKm
+            .trim()
+            .replace(',', '.')
+            .toDoubleOrNull()
+            ?.takeIf { it >= 0 && it.isFinite() }
+    if (distanceKm.isNotBlank() && distance == null) errors[FlightFormField.Distance] = FlightFormError.InvalidNumber
+    val altitude = topAltitudeMeters.trim().toIntOrNull()?.takeIf { it >= 0 }
+    if (topAltitudeMeters.isNotBlank() && altitude == null) {
+        errors[FlightFormField.TopAltitude] = FlightFormError.InvalidNumber
     }
-    return FlightFormResult.Invalid(errors)
+
+    if (errors.isNotEmpty()) return FlightFormResult.Invalid(errors)
+
+    // Every missing required value has an error above, so none is null here.
+    return FlightFormResult.Valid(
+        FlightDetails(
+            date = checkNotNull(date),
+            duration = checkNotNull(flightDuration),
+            wingId = checkNotNull(wingId),
+            takeOffSite = takeOffSite.trim().ifEmpty { null },
+            landingSite = landingSite.trim().ifEmpty { null },
+            notes = notes.trim().ifEmpty { null },
+            distanceKm = distance,
+            topAltitudeMeters = altitude,
+            instrument = instrument.trim().ifEmpty { null },
+        ),
+    )
 }
 
 @Composable
@@ -98,6 +117,7 @@ fun FlightFormError.message(): String =
     when (this) {
         FlightFormError.Required -> stringResource(Res.string.error_required)
         FlightFormError.InvalidDuration -> stringResource(Res.string.error_duration)
+        FlightFormError.InvalidNumber -> stringResource(Res.string.error_number)
         FlightFormError.DateInFuture -> stringResource(Res.string.error_date_future)
         FlightFormError.DateBeforeWingInService -> stringResource(Res.string.error_date_before_service)
     }

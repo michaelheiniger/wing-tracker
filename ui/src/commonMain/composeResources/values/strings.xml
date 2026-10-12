@@ -125,6 +125,10 @@
     <string name="flight_wing_retired">%1$s (retired)</string>
 
     <string name="error_duration">Use hours:minutes of at least one minute, e.g. 1:35</string>
+    <string name="error_number">Use a number of zero or more</string>
+    <string name="field_flight_distance">Distance (km)</string>
+    <string name="field_flight_top_altitude">Top altitude (m)</string>
+    <string name="field_flight_instrument">Instrument</string>
     <string name="error_date_future">This day has not happened yet</string>
     <string name="error_date_before_service">The wing was not in service yet on this day</string>
 

@@ -6,6 +6,7 @@ import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import kotlinx.datetime.LocalDate
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.entry
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.minutes
@@ -97,6 +98,72 @@ class FlightFormTest {
 
             // then
             assertThat(errors).containsEntry(FlightFormField.Duration, FlightFormError.InvalidDuration)
+        }
+    }
+
+    @Nested
+    inner class FlightExtras {
+        @Test
+        fun `reads distance, altitude and instrument, accepting a decimal comma`() {
+            // given
+            val input =
+                aFlightFormInput().copy(
+                    distanceKm = "15,5",
+                    topAltitudeMeters = "2464",
+                    instrument = " Nav XL ",
+                )
+
+            // when
+            val details = (input.validate() as FlightFormResult.Valid).details
+
+            // then
+            assertThat(details.distanceKm).isEqualTo(15.5)
+            assertThat(details.topAltitudeMeters).isEqualTo(2464)
+            assertThat(details.instrument).isEqualTo("Nav XL")
+        }
+
+        @Test
+        fun `treats blank extras as absent`() {
+            // given
+            val input = aFlightFormInput().copy(distanceKm = " ", topAltitudeMeters = "", instrument = " ")
+
+            // when
+            val details = (input.validate() as FlightFormResult.Valid).details
+
+            // then
+            assertThat(details.distanceKm).isNull()
+            assertThat(details.topAltitudeMeters).isNull()
+            assertThat(details.instrument).isNull()
+        }
+
+        @Test
+        fun `rejects a distance or altitude that is not a non-negative number`() {
+            // given
+            val input = aFlightFormInput().copy(distanceKm = "far", topAltitudeMeters = "-3")
+
+            // when
+            val errors = errorsOf(input)
+
+            // then
+            assertThat(errors).containsOnly(
+                entry(FlightFormField.Distance, FlightFormError.InvalidNumber),
+                entry(FlightFormField.TopAltitude, FlightFormError.InvalidNumber),
+            )
+        }
+
+        @Test
+        fun `keeps the extras of an imported flight when it is edited`() {
+            // given
+            val base = (aFlightFormInput().validate() as FlightFormResult.Valid).details
+            val details = base.copy(distanceKm = 15.0, topAltitudeMeters = 2464, instrument = "Nav XL")
+            val flight = Flight(FlightId("flight-1"), details, Instant.parse("2026-09-20T17:00:00Z"))
+
+            // when
+            val input = FlightFormInput.from(flight)
+
+            // then
+            assertThat(input.distanceKm).isEqualTo("15")
+            assertThat(input.validate()).usingRecursiveComparison().isEqualTo(FlightFormResult.Valid(details))
         }
     }
 
