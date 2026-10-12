@@ -19,6 +19,8 @@ internal data class SettingsDocument(
     val interfaceScalePercent: Int? = null,
     // Added in schema 4: the Syride account whose flights are imported.
     val syrideUsername: String? = null,
+    // Added in schema 5: where the flight tracks of a device were last imported from.
+    val deviceFolder: String? = null,
 ) {
     fun toDomain(): AppSettings {
         if (schemaVersion > CURRENT_SCHEMA_VERSION) {
@@ -30,11 +32,12 @@ internal data class SettingsDocument(
             lastReminderNotificationOn = lastReminderNotificationOn,
             interfaceScalePercent = interfaceScalePercent,
             syrideUsername = syrideUsername,
+            deviceFolder = deviceFolder,
         )
     }
 
     companion object {
-        const val CURRENT_SCHEMA_VERSION = 4
+        const val CURRENT_SCHEMA_VERSION = 5
 
         fun from(settings: AppSettings) =
             SettingsDocument(
@@ -44,6 +47,7 @@ internal data class SettingsDocument(
                 lastReminderNotificationOn = settings.lastReminderNotificationOn,
                 interfaceScalePercent = settings.interfaceScalePercent,
                 syrideUsername = settings.syrideUsername,
+                deviceFolder = settings.deviceFolder,
             )
     }
 }

@@ -50,6 +50,7 @@ import ch.qscqlmpa.wingtracker.reminders.GetCalendarEntries
 import ch.qscqlmpa.wingtracker.reminders.GetStartNotification
 import ch.qscqlmpa.wingtracker.reminders.MarkStartNotificationShown
 import ch.qscqlmpa.wingtracker.settings.GetAppSettings
+import ch.qscqlmpa.wingtracker.settings.SaveDeviceFolder
 import ch.qscqlmpa.wingtracker.settings.SaveInterfaceScale
 import ch.qscqlmpa.wingtracker.settings.SaveReminderLeadTimes
 import ch.qscqlmpa.wingtracker.settings.SaveSyrideUsername
@@ -146,7 +147,7 @@ private fun flightsModule() =
         factory { GetLogbook(get(), get()) }
         factory { PrepareSyrideImport(get(), get(), get()) }
         factory { ImportSyrideFlights(get(), get(), get(), RegisterWing(get())) }
-        single { LogbookUseCases(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+        single { LogbookUseCases(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
         factory { GetStatistics(get(), get(), get()) }
     }
 
@@ -175,6 +176,7 @@ private fun remindersModule() =
         factory { SaveThemeMode(get()) }
         factory { SaveInterfaceScale(get()) }
         factory { SaveSyrideUsername(get()) }
+        factory { SaveDeviceFolder(get()) }
         single { RemindersUseCases(get(), get(), get(), get()) }
         single { StartupReminder(get(), get(), TrayNotifier()) }
     }

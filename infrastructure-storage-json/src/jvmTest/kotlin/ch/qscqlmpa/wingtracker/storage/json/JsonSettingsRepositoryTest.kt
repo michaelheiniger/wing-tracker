@@ -58,6 +58,7 @@ class JsonSettingsRepositoryTest {
                         reminderLeadTimes = ReminderLeadTimes(days = 14, hours = 5.hours + 30.minutes),
                         lastReminderNotificationOn = LocalDate(2026, 10, 10),
                         interfaceScalePercent = 150,
+                        deviceFolder = "/run/media/michael/SYRIDE1",
                     )
                 repository.save(saved)
 

@@ -27,11 +27,15 @@ import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
+import ch.qscqlmpa.wingtracker.settings.AppSettings
+import ch.qscqlmpa.wingtracker.settings.GetAppSettings
+import ch.qscqlmpa.wingtracker.settings.SaveDeviceFolder
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
 import ch.qscqlmpa.wingtracker.ui.platform.FilePicker
+import ch.qscqlmpa.wingtracker.ui.platform.PickedFolder
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -53,6 +57,7 @@ import kotlin.time.Instant
 private val WING_ID = WingId("wing-1")
 private val FILE = NewAttachment("2026-09-20-niederhorn.igc", byteArrayOf(65, 88))
 private const val CHECKSUM = "3b7e72f0c1d9"
+private const val DEVICE = "/run/media/michael/SYRIDE1"
 
 private fun aWing() =
     Wing(
@@ -88,6 +93,8 @@ class IgcImportPresentersTest {
     private val wings = mockk<WingRepository>().also { coEvery { it.findById(WING_ID) } returns aWing() }
     private val attachments = mockk<AttachmentStore>(relaxUnitFun = true)
     private val picker = mockk<FilePicker>()
+    private val getAppSettings = mockk<GetAppSettings>().also { coEvery { it() } returns AppSettings() }
+    private val saveDeviceFolder = mockk<SaveDeviceFolder>(relaxUnitFun = true)
     private val reader = mockk<TrackReader>()
     private val opener = mockk<FileOpener>(relaxUnitFun = true)
     private val clock =
@@ -122,7 +129,8 @@ class IgcImportPresentersTest {
 
     @Nested
     inner class ChoosingTheFiles {
-        private fun TestScope.importer() = IgcImportPresenter(scope(), picker, "Choose", "Choose folder")
+        private fun TestScope.importer() =
+            IgcImportPresenter(scope(), picker, "Choose", "Choose folder", getAppSettings, saveDeviceFolder)
 
         @Test
         fun `hands over every chosen file`() =
@@ -172,7 +180,8 @@ class IgcImportPresentersTest {
         fun `hands over every track found in the chosen folder`() =
             runTest {
                 // given
-                coEvery { picker.pickFolder("Choose folder", "igc") } returns listOf(FILE, FILE)
+                coEvery { picker.pickFolder("Choose folder", "igc", null) } returns
+                    PickedFolder(DEVICE, listOf(FILE, FILE))
                 var chosen = emptyList<NewAttachment>()
 
                 // when
@@ -186,7 +195,7 @@ class IgcImportPresentersTest {
         fun `does nothing when the folder dialog is cancelled`() =
             runTest {
                 // given
-                coEvery { picker.pickFolder("Choose folder", "igc") } returns null
+                coEvery { picker.pickFolder("Choose folder", "igc", null) } returns null
                 val presenter = importer()
                 var called = false
 
@@ -202,7 +211,7 @@ class IgcImportPresentersTest {
         fun `reports a folder that holds no track`() =
             runTest {
                 // given
-                coEvery { picker.pickFolder("Choose folder", "igc") } returns emptyList()
+                coEvery { picker.pickFolder("Choose folder", "igc", null) } returns PickedFolder(DEVICE, emptyList())
                 val presenter = importer()
 
                 // when
@@ -210,6 +219,46 @@ class IgcImportPresentersTest {
 
                 // then
                 assertThat(presenter.failure).isEqualTo(Failure(FailureKind.NoIgcInFolder, null))
+            }
+
+        @Test
+        fun `remembers the chosen folder`() =
+            runTest {
+                // given
+                coEvery { picker.pickFolder("Choose folder", "igc", null) } returns PickedFolder(DEVICE, listOf(FILE))
+
+                // when
+                importer().chooseFolder {}
+
+                // then
+                coVerify(exactly = 1) { saveDeviceFolder(DEVICE) }
+            }
+
+        @Test
+        fun `opens the folder dialog where the last import came from`() =
+            runTest {
+                // given
+                coEvery { getAppSettings() } returns AppSettings(deviceFolder = DEVICE)
+                coEvery { picker.pickFolder("Choose folder", "igc", DEVICE) } returns null
+
+                // when
+                importer().chooseFolder {}
+
+                // then
+                coVerify(exactly = 1) { picker.pickFolder("Choose folder", "igc", DEVICE) }
+            }
+
+        @Test
+        fun `does not remember anything when the folder dialog is cancelled`() =
+            runTest {
+                // given
+                coEvery { picker.pickFolder("Choose folder", "igc", null) } returns null
+
+                // when
+                importer().chooseFolder {}
+
+                // then
+                coVerify(exactly = 0) { saveDeviceFolder(any()) }
             }
 
         @Test

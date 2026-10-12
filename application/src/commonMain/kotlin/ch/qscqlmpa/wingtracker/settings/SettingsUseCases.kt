@@ -31,6 +31,14 @@ class SaveInterfaceScale(
     }
 }
 
+class SaveDeviceFolder(
+    private val settings: SettingsRepository,
+) {
+    suspend operator fun invoke(folder: String) {
+        settings.save(settings.load().copy(deviceFolder = folder.trim().ifEmpty { null }))
+    }
+}
+
 class SaveSyrideUsername(
     private val settings: SettingsRepository,
 ) {

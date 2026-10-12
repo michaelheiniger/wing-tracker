@@ -53,6 +53,22 @@ class SettingsUseCasesTest {
     }
 
     @Nested
+    inner class SavingTheDeviceFolder {
+        @Test
+        fun `changes the folder and keeps the other settings`() =
+            runTest {
+                // given
+                coEvery { settings.load() } returns stored
+
+                // when
+                SaveDeviceFolder(settings)(" /run/media/michael/SYRIDE1 ")
+
+                // then
+                coVerify(exactly = 1) { settings.save(stored.copy(deviceFolder = "/run/media/michael/SYRIDE1")) }
+            }
+    }
+
+    @Nested
     inner class SavingTheInterfaceScale {
         @Test
         fun `changes the size and keeps the other settings`() =

@@ -14,7 +14,9 @@ import ch.qscqlmpa.wingtracker.ui.platform.FileDrop
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
 import ch.qscqlmpa.wingtracker.ui.platform.FilePicker
 import ch.qscqlmpa.wingtracker.ui.platform.FileSaver
+import ch.qscqlmpa.wingtracker.ui.platform.PickedFolder
 import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.FileKitMode
 import io.github.vinceglb.filekit.dialogs.FileKitType
@@ -55,18 +57,23 @@ class DesktopFilePicker : FilePicker {
     override suspend fun pickFolder(
         title: String,
         extension: String,
-    ): List<NewAttachment>? {
+        startIn: String?,
+    ): PickedFolder? {
+        // A device that is no longer mounted leaves a path that cannot be opened; the dialog then starts anywhere.
+        val start = startIn?.let(::File)?.takeIf { it.isDirectory }?.let { PlatformFile(it) }
         val folder =
-            FileKit.openDirectoryPicker(dialogSettings = FileKitDialogSettings(title = title))
+            FileKit.openDirectoryPicker(directory = start, dialogSettings = FileKitDialogSettings(title = title))
                 ?: return null
         // A logger can hold years of tracks, so walking and reading them must not block the UI thread.
         return withContext(Dispatchers.IO) {
-            folder.file
-                .walkTopDown()
-                .filter { it.isFile && it.extension.equals(extension, ignoreCase = true) }
-                .sortedBy { it.path }
-                .map { NewAttachment(it.name, it.readBytes()) }
-                .toList()
+            val files =
+                folder.file
+                    .walkTopDown()
+                    .filter { it.isFile && it.extension.equals(extension, ignoreCase = true) }
+                    .sortedBy { it.path }
+                    .map { NewAttachment(it.name, it.readBytes()) }
+                    .toList()
+            PickedFolder(folder.file.path, files)
         }
     }
 }

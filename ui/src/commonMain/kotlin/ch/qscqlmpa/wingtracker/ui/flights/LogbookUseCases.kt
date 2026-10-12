@@ -10,6 +10,7 @@ import ch.qscqlmpa.wingtracker.flights.syride.ImportSyrideFlights
 import ch.qscqlmpa.wingtracker.flights.syride.PrepareSyrideImport
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReadAttachment
 import ch.qscqlmpa.wingtracker.settings.GetAppSettings
+import ch.qscqlmpa.wingtracker.settings.SaveDeviceFolder
 import ch.qscqlmpa.wingtracker.settings.SaveSyrideUsername
 
 /** Use cases the logbook section needs; passed in so this module never sees the DI framework. */
@@ -25,4 +26,5 @@ class LogbookUseCases(
     val importSyrideFlights: ImportSyrideFlights,
     val saveSyrideUsername: SaveSyrideUsername,
     val getAppSettings: GetAppSettings,
+    val saveDeviceFolder: SaveDeviceFolder,
 )

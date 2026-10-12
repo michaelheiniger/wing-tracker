@@ -75,7 +75,17 @@ fun LogbookRoute(
         }
     val pickTitle = stringResource(Res.string.igc_pick_title)
     val pickFolderTitle = stringResource(Res.string.igc_pick_folder_title)
-    val importer = remember { IgcImportPresenter(scope, platform.filePicker, pickTitle, pickFolderTitle) }
+    val importer =
+        remember {
+            IgcImportPresenter(
+                scope,
+                platform.filePicker,
+                pickTitle,
+                pickFolderTitle,
+                useCases.getAppSettings,
+                useCases.saveDeviceFolder,
+            )
+        }
     var dropHover by remember { mutableStateOf(false) }
     var dialog by remember { mutableStateOf<LogbookDialog?>(null) }
 

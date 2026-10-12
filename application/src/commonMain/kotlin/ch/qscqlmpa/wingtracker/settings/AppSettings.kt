@@ -12,6 +12,8 @@ data class AppSettings(
     val interfaceScalePercent: Int? = null,
     // Remembered so the next import from Syride starts with the same account.
     val syrideUsername: String? = null,
+    // Remembered so the next import from a device opens the folder chooser where the logger was last found.
+    val deviceFolder: String? = null,
 ) {
     init {
         require(interfaceScalePercent == null || interfaceScalePercent in MIN_SCALE_PERCENT..MAX_SCALE_PERCENT) {
