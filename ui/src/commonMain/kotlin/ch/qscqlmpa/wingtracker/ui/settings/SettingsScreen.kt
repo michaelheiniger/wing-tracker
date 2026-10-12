@@ -18,8 +18,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.settings.ThemeMode
 import ch.qscqlmpa.wingtracker.ui.message
@@ -27,6 +32,11 @@ import ch.qscqlmpa.wingtracker.ui.reminders.ExportOutcome
 import ch.qscqlmpa.wingtracker.ui.reminders.ReminderSettingsField
 import ch.qscqlmpa.wingtracker.ui.reminders.ReminderSettingsPresenter
 import ch.qscqlmpa.wingtracker.ui.resources.Res
+import ch.qscqlmpa.wingtracker.ui.resources.about_changelog
+import ch.qscqlmpa.wingtracker.ui.resources.about_close
+import ch.qscqlmpa.wingtracker.ui.resources.about_open
+import ch.qscqlmpa.wingtracker.ui.resources.about_title
+import ch.qscqlmpa.wingtracker.ui.resources.about_version
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.data_change_body
 import ch.qscqlmpa.wingtracker.ui.resources.data_change_has_data
@@ -72,6 +82,7 @@ fun SettingsScreen(
     scalePreference: InterfaceScalePreference,
     reminders: ReminderSettingsPresenter,
     dataLocation: DataLocationPresenter,
+    appVersion: String,
 ) {
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
@@ -92,6 +103,7 @@ fun SettingsScreen(
         RemindersSection(reminders)
         CalendarSection(reminders)
         DataLocationSection(dataLocation)
+        AboutSection(appVersion)
         reminders.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
     }
 }
@@ -273,5 +285,33 @@ private fun ScaleSection(preference: InterfaceScalePreference) {
                 label = { Text("$percent %") },
             )
         }
+    }
+}
+
+// The published changelog on the main branch, so it also shows what changed in releases newer than the installed one.
+private const val CHANGELOG_URL = "https://github.com/michaelheiniger/wing-tracker/blob/main/CHANGELOG.md"
+
+@Composable
+private fun AboutSection(appVersion: String) {
+    var open by remember { mutableStateOf(false) }
+    val uriHandler = LocalUriHandler.current
+    TextButton(onClick = { open = true }, modifier = Modifier.padding(top = 16.dp)) {
+        Text(stringResource(Res.string.about_open))
+    }
+    if (open) {
+        AlertDialog(
+            onDismissRequest = { open = false },
+            title = { Text(stringResource(Res.string.about_title)) },
+            // Selectable, so the version can be pasted into a bug report.
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    SelectionContainer { Text(stringResource(Res.string.about_version, appVersion)) }
+                    TextButton(onClick = { uriHandler.openUri(CHANGELOG_URL) }) {
+                        Text(stringResource(Res.string.about_changelog))
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { open = false }) { Text(stringResource(Res.string.about_close)) } },
+        )
     }
 }

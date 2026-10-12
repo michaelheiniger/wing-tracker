@@ -84,6 +84,7 @@ fun AppShell(
     themePreference: ThemePreference,
     scalePreference: InterfaceScalePreference,
     undo: UndoCoordinator,
+    appVersion: String,
 ) {
     var destination by rememberSaveable { mutableStateOf(Destination.Logbook.name) }
     val current = Destination.valueOf(destination)
@@ -157,7 +158,7 @@ fun AppShell(
                         }
 
                         Destination.Settings -> {
-                            SettingsScreen(themePreference, scalePreference, reminderSettings, dataLocation)
+                            SettingsScreen(themePreference, scalePreference, reminderSettings, dataLocation, appVersion)
                         }
                     }
                 }

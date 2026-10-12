@@ -391,4 +391,9 @@
     </plurals>
     <string name="flight_distance">%1$s km</string>
     <string name="flight_altitude">%1$d m</string>
+    <string name="about_open">Info</string>
+    <string name="about_title">Über Wing Tracker</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_changelog">Neuerungen (Änderungsprotokoll)</string>
+    <string name="about_close">Schliessen</string>
 </resources>

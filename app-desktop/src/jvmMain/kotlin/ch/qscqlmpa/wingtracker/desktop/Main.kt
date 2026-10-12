@@ -109,6 +109,7 @@ fun main() {
                         themePreference = themePreference,
                         scalePreference = scalePreference,
                         undo = koin.get<UndoCoordinator>(),
+                        appVersion = BuildInfo.VERSION,
                     )
                 }
             }
