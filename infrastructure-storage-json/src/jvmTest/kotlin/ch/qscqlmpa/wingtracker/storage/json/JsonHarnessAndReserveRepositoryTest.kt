@@ -93,7 +93,7 @@ class JsonHarnessAndReserveRepositoryTest {
                 // given
                 harnesses.save(aStoredHarness("h-1"))
                 val file = dataDirectory.resolve("harnesses/h-1.json")
-                file.writeText(file.readText().replace("\"schemaVersion\": 1", "\"schemaVersion\": 999"))
+                file.writeText(file.readText().replace(Regex("\"schemaVersion\": \\d+"), "\"schemaVersion\": 999"))
 
                 // when
                 val result = harnesses.findAll()

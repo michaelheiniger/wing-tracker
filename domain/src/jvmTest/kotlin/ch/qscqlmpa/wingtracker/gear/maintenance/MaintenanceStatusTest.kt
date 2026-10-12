@@ -4,6 +4,7 @@ import ch.qscqlmpa.wingtracker.gear.aHarness
 import ch.qscqlmpa.wingtracker.gear.aHarnessDetails
 import ch.qscqlmpa.wingtracker.gear.aReserve
 import ch.qscqlmpa.wingtracker.gear.wing.aCheck
+import ch.qscqlmpa.wingtracker.gear.wing.aNewAcquisition
 import ch.qscqlmpa.wingtracker.gear.wing.aWing
 import ch.qscqlmpa.wingtracker.gear.wing.aWingDetails
 import kotlinx.datetime.LocalDate
@@ -42,6 +43,56 @@ class MaintenanceStatusTest {
 
             // then
             assertThat(status).isNull()
+        }
+    }
+
+    @Nested
+    inner class WithoutInServiceDate {
+        private fun wingWithoutDate(purchaseDate: LocalDate?) =
+            aWing(
+                details =
+                    aWingDetails(
+                        inServiceDate = null,
+                        acquisition = aNewAcquisition().copy(purchaseDate = purchaseDate),
+                        maintenanceInterval = MaintenanceInterval(months = 12),
+                    ),
+            )
+
+        @Test
+        fun `counts from the purchase date`() {
+            // given
+            val wing = wingWithoutDate(purchaseDate = LocalDate(2024, 2, 1))
+
+            // when
+            val status = wing.maintenanceStatus(emptyList(), LocalDate(2024, 6, 1))!!
+
+            // then
+            assertThat(status.since).isEqualTo(LocalDate(2024, 2, 1))
+            assertThat(status.dueDate).isEqualTo(LocalDate(2025, 2, 1))
+        }
+
+        @Test
+        fun `has no status when neither date is known and no check exists`() {
+            // given
+            val wing = wingWithoutDate(purchaseDate = null)
+
+            // when
+            val status = wing.maintenanceStatus(emptyList(), LocalDate(2030, 1, 1))
+
+            // then
+            assertThat(status).isNull()
+        }
+
+        @Test
+        fun `counts from the last check even when no date is known`() {
+            // given
+            val wing = wingWithoutDate(purchaseDate = null).copy(checks = listOf(aCheck(date = LocalDate(2025, 1, 10))))
+
+            // when
+            val status = wing.maintenanceStatus(emptyList(), LocalDate(2025, 6, 1))!!
+
+            // then
+            assertThat(status.since).isEqualTo(LocalDate(2025, 1, 10))
         }
     }
 

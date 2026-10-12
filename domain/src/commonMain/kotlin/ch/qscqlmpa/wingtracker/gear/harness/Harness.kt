@@ -34,7 +34,7 @@ data class HarnessDetails(
     val size: String? = null,
     val serialNumber: String? = null,
     val acquisition: Acquisition,
-    val inServiceDate: LocalDate,
+    val inServiceDate: LocalDate? = null,
     val maintenanceInterval: MaintenanceInterval? = null,
 ) {
     init {
@@ -52,7 +52,9 @@ data class Harness(
 ) : MaintainedGear {
     init {
         if (status is GearStatus.Retired) {
-            require(status.on >= details.inServiceDate) { "A harness cannot be retired before it entered service" }
+            require(details.inServiceDate == null || status.on >= details.inServiceDate) {
+                "A harness cannot be retired before it entered service"
+            }
         }
         history
     }
@@ -61,7 +63,8 @@ data class Harness(
 
     override val ref: GearRef get() = GearRef(GearKind.Harness, id.value)
     override val displayName: String get() = details.name
-    override val inServiceDate: LocalDate get() = details.inServiceDate
+    override val inServiceDate: LocalDate? get() = details.inServiceDate
+    override val purchaseDate: LocalDate? get() = details.acquisition.purchaseDate
     override val maintenanceInterval get() = details.maintenanceInterval
     override val history: MaintenanceHistory get() = MaintenanceHistory(GearKind.Harness, checks, plannedChecks)
 

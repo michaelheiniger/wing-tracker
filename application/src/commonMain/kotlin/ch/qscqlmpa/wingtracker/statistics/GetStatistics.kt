@@ -22,9 +22,10 @@ class GetStatistics(
 
         val ordered =
             loadedWings.items.sortedWith(
-                compareBy({
-                    it.details.inServiceDate
-                }, { it.details.name }, { it.id.value }),
+                // Wings without an in-service date come last, as the oldest series should stay first.
+                compareBy<Wing, LocalDate?>(nullsLast()) { wing -> wing.details.inServiceDate }
+                    .thenBy { wing -> wing.details.name }
+                    .thenBy { wing -> wing.id.value },
             )
         val named = ordered.take(MAX_NAMED_SERIES)
         val folded = ordered.drop(MAX_NAMED_SERIES)
@@ -80,12 +81,10 @@ class GetStatistics(
         wingFlights: List<Flight>,
         today: LocalDate,
     ): List<CumulativePoint> {
-        // Flights can predate the in-service date, so the line starts at whichever comes first.
+        // Flights can predate the in-service date, and a wing may have no such date, so the line starts at whichever
+        // comes first; a wing with neither starts today.
         val start =
-            minOf(
-                wing.details.inServiceDate,
-                wingFlights.minOfOrNull { it.details.date } ?: wing.details.inServiceDate,
-            )
+            listOfNotNull(wing.details.inServiceDate, wingFlights.minOfOrNull { it.details.date }).minOrNull() ?: today
         val points = mutableListOf(CumulativePoint(start, wing.details.hoursBeforeTracking))
         var running = wing.details.hoursBeforeTracking
         wingFlights.groupBy { it.details.date }.entries.sortedBy { it.key }.forEach { (date, sameDay) ->

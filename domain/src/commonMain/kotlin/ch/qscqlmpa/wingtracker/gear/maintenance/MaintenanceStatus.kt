@@ -19,7 +19,7 @@ enum class DueState { Ok, DueSoon, Due }
  * "due soon" means it will be within the lead times.
  */
 data class MaintenanceStatus(
-    // The clock starts at the last periodic check, or at the in-service date when there is none.
+    // See [maintenanceClockStart].
     val since: LocalDate,
     val dueDate: LocalDate?,
     val hoursSince: Duration,
@@ -32,14 +32,25 @@ data class MaintenanceStatus(
     val hoursRemaining: Duration? get() = hoursLimit?.let { (it - hoursSince).coerceAtLeast(Duration.ZERO) }
 }
 
-/** Returns null for a wing without an interval rule, because there is nothing to be due against. */
+/**
+ * The clock starts at the last periodic check; without one, at the in-service date, else at the purchase date.
+ * Null when none of them is known.
+ */
+val MaintainedGear.maintenanceClockStart: LocalDate? get() =
+    history.lastPeriodicCheck?.date ?: inServiceDate
+        ?: purchaseDate
+
+/**
+ * Returns null for gear without an interval rule, or whose clock has no start yet (no check, no in-service date
+ * and no purchase date): there is nothing to be due against.
+ */
 fun MaintainedGear.maintenanceStatus(
     flown: List<FlownHours>,
     today: LocalDate,
     leadTimes: ReminderLeadTimes = ReminderLeadTimes.DEFAULT,
 ): MaintenanceStatus? {
     val interval = maintenanceInterval ?: return null
-    val since = history.lastPeriodicCheck?.date ?: inServiceDate
+    val since = maintenanceClockStart ?: return null
     // Hours count from the start of the clock day: a flight on the day of a check happened after the check.
     val hoursSince = flown.filter { it.date >= since }.fold(Duration.ZERO) { sum, f -> sum + f.duration }
     val dueDate = interval.months?.let { since.plus(it, DateTimeUnit.MONTH) }

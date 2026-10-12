@@ -43,7 +43,9 @@
     <string name="field_price">Preis</string>
     <string name="field_currency">Währung</string>
     <string name="section_usage">Nutzung</string>
-    <string name="field_in_service_date">In Betrieb seit *</string>
+    <string name="help_in_service_date">Der Tag, an dem du diese Ausrüstung in Gebrauch genommen hast. Solange es keine Kontrolle gibt, zählt das Wartungsintervall ab diesem Datum (ersatzweise ab dem Kaufdatum, wenn es leer ist), und das Stundendiagramm beginnt hier. Leer lassen, wenn unbekannt.</string>
+    <string name="help_tooltip_icon">Weitere Informationen</string>
+    <string name="field_in_service_date">In Betrieb seit</string>
     <string name="field_hours_before_tracking">Flugstunden vor der Erfassung (h oder h:mm)</string>
     <string name="action_save">Speichern</string>
     <string name="action_cancel">Abbrechen</string>
@@ -171,6 +173,7 @@
     <string name="maintenance_back">Zurück zu den Gleitschirmen</string>
     <string name="maintenance_total_hours">%1$s insgesamt geflogen</string>
     <string name="maintenance_no_interval">Kein Intervall festgelegt. Bearbeite den Gleitschirm, um eines hinzuzufügen.</string>
+    <string name="maintenance_no_start">Das Intervall hat noch keinen Startpunkt. Gib ein Datum der Inbetriebnahme oder des Kaufs an, oder erfasse eine Kontrolle.</string>
     <string name="maintenance_interval_months">Alle %1$d Monate</string>
     <string name="maintenance_interval_hours">Alle %1$s</string>
     <string name="maintenance_interval_both">Alle %1$d Monate oder %2$s, je nachdem was zuerst eintritt</string>

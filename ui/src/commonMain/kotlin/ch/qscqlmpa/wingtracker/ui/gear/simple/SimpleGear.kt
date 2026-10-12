@@ -38,7 +38,7 @@ data class SimpleGearDetails(
     // Only reserves have one; ignored for harnesses.
     val manufactureDate: LocalDate? = null,
     val acquisition: Acquisition,
-    val inServiceDate: LocalDate,
+    val inServiceDate: LocalDate? = null,
     val intervalMonths: Int? = null,
 )
 

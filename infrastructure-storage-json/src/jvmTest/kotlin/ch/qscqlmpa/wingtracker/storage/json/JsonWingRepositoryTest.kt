@@ -46,6 +46,20 @@ class JsonWingRepositoryTest {
             }
 
         @Test
+        fun `restores a wing without an in-service date`() =
+            runTest {
+                // given
+                val wing = aStoredWing(inServiceDate = null)
+                repository.save(wing)
+
+                // when
+                val found = repository.findById(wing.id)
+
+                // then
+                assertThat(found).usingRecursiveComparison().isEqualTo(wing)
+            }
+
+        @Test
         fun `restores the interval, the check history with its reports and the planned checks`() =
             runTest {
                 // given

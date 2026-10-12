@@ -25,7 +25,7 @@ fun aWingDetails(
     serialNumber: String? = "ADV-2023-04817",
     certificationClass: CertificationClass? = CertificationClass.B,
     acquisition: Acquisition = aNewAcquisition(),
-    inServiceDate: LocalDate = LocalDate(2023, 5, 1),
+    inServiceDate: LocalDate? = LocalDate(2023, 5, 1),
     hoursBeforeTracking: Duration = Duration.ZERO,
     maintenanceInterval: MaintenanceInterval? = null,
 ) = WingDetails(

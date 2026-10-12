@@ -60,6 +60,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.maintenance_interval_both
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_interval_hours
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_interval_months
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_no_interval
+import ch.qscqlmpa.wingtracker.ui.resources.maintenance_no_start
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_open_report
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_plan_check
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_planned_empty
@@ -281,6 +282,13 @@ private fun SummaryCard(data: GearMaintenance) {
                             stringResource(Res.string.maintenance_interval_hours, hours.orEmpty())
                         }
                     },
+                )
+            }
+            if (interval != null && data.status == null) {
+                Text(
+                    stringResource(Res.string.maintenance_no_start),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             data.status?.let { status ->

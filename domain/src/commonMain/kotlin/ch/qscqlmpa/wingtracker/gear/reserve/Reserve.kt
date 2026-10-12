@@ -35,7 +35,7 @@ data class ReserveDetails(
     // Recorded for reference: manuals count a reserve's service life from it.
     val manufactureDate: LocalDate? = null,
     val acquisition: Acquisition,
-    val inServiceDate: LocalDate,
+    val inServiceDate: LocalDate? = null,
     val maintenanceInterval: MaintenanceInterval? = null,
 ) {
     init {
@@ -53,7 +53,9 @@ data class Reserve(
 ) : MaintainedGear {
     init {
         if (status is GearStatus.Retired) {
-            require(status.on >= details.inServiceDate) { "A reserve cannot be retired before it entered service" }
+            require(details.inServiceDate == null || status.on >= details.inServiceDate) {
+                "A reserve cannot be retired before it entered service"
+            }
         }
         history
     }
@@ -62,7 +64,8 @@ data class Reserve(
 
     override val ref: GearRef get() = GearRef(GearKind.Reserve, id.value)
     override val displayName: String get() = details.name
-    override val inServiceDate: LocalDate get() = details.inServiceDate
+    override val inServiceDate: LocalDate? get() = details.inServiceDate
+    override val purchaseDate: LocalDate? get() = details.acquisition.purchaseDate
     override val maintenanceInterval get() = details.maintenanceInterval
     override val history: MaintenanceHistory get() = MaintenanceHistory(GearKind.Reserve, checks, plannedChecks)
 

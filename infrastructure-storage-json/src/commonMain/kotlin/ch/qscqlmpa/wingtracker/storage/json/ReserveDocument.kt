@@ -23,7 +23,8 @@ internal data class ReserveDocument(
     val purchaseDate: LocalDate? = null,
     val priceMinorUnits: Long? = null,
     val priceCurrency: String? = null,
-    val inServiceDate: LocalDate,
+    // Optional since the next schema version; older versions treat such files as newer data.
+    val inServiceDate: LocalDate? = null,
     val maintenanceIntervalMonths: Int? = null,
     val retiredOn: LocalDate? = null,
     val retirementReason: String? = null,
@@ -55,7 +56,7 @@ internal data class ReserveDocument(
     }
 
     companion object {
-        const val CURRENT_SCHEMA_VERSION = 1
+        const val CURRENT_SCHEMA_VERSION = 2
 
         fun from(reserve: Reserve): ReserveDocument {
             val details = reserve.details

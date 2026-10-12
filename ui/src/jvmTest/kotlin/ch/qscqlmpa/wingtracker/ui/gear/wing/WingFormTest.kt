@@ -206,9 +206,20 @@ class WingFormTest {
                 WingFormField.Name,
                 WingFormField.Manufacturer,
                 WingFormField.Model,
-                WingFormField.InServiceDate,
             )
             assertThat(errors.values).containsOnly(FormError.Required)
+        }
+
+        @Test
+        fun `accepts a wing without an in-service date`() {
+            // given
+            val input = aFormInput().copy(inServiceDate = null)
+
+            // when
+            val result = input.validate()
+
+            // then
+            assertThat((result as WingFormResult.Valid).details.inServiceDate).isNull()
         }
 
         @Test

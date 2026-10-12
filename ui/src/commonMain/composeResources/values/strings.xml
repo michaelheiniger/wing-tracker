@@ -43,7 +43,9 @@
     <string name="field_price">Price</string>
     <string name="field_currency">Currency</string>
     <string name="section_usage">Usage</string>
-    <string name="field_in_service_date">In service since *</string>
+    <string name="help_in_service_date">The day you started using this gear. If there is no check yet, the maintenance interval counts from this date (from the purchase date if this is empty), and the hours chart starts here. Leave it empty if unknown.</string>
+    <string name="help_tooltip_icon">More information</string>
+    <string name="field_in_service_date">In service since</string>
     <string name="field_hours_before_tracking">Hours flown before tracking (h or h:mm)</string>
     <string name="action_save">Save</string>
     <string name="action_cancel">Cancel</string>
@@ -171,6 +173,7 @@
     <string name="maintenance_back">Back to wings</string>
     <string name="maintenance_total_hours">%1$s flown in total</string>
     <string name="maintenance_no_interval">No interval set. Edit the wing to add one.</string>
+    <string name="maintenance_no_start">The interval has no start yet. Add an in-service or purchase date, or record a check.</string>
     <string name="maintenance_interval_months">Every %1$d months</string>
     <string name="maintenance_interval_hours">Every %1$s</string>
     <string name="maintenance_interval_both">Every %1$d months or %2$s, whichever comes first</string>

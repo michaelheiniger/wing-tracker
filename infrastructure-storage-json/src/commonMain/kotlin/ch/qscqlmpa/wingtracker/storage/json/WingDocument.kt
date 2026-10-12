@@ -32,7 +32,8 @@ internal data class WingDocument(
     val purchaseDate: LocalDate? = null,
     val priceMinorUnits: Long? = null,
     val priceCurrency: String? = null,
-    val inServiceDate: LocalDate,
+    // Optional since the next schema version; older versions treat such files as newer data.
+    val inServiceDate: LocalDate? = null,
     val hoursBeforeTrackingMinutes: Long = 0,
     val retiredOn: LocalDate? = null,
     val retirementReason: String? = null,
@@ -75,8 +76,9 @@ internal data class WingDocument(
         }
 
     companion object {
-        // Version 2 added maintenance. Older application versions treat it as newer data and leave it untouched.
-        const val CURRENT_SCHEMA_VERSION = 2
+        // Version 2 added maintenance, version 3 made the in-service date optional. Older application versions treat
+        // newer files as newer data and leave them untouched.
+        const val CURRENT_SCHEMA_VERSION = 3
 
         fun from(wing: Wing): WingDocument {
             val details = wing.details

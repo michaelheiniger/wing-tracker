@@ -101,9 +101,20 @@ class SimpleGearFormTest {
                 SimpleGearField.Name,
                 SimpleGearField.Manufacturer,
                 SimpleGearField.Model,
-                SimpleGearField.InServiceDate,
             )
             assertThat(errors.values).containsOnly(FormError.Required)
+        }
+
+        @Test
+        fun `accepts gear without an in-service date`() {
+            // given
+            val input = aFormInput().copy(inServiceDate = null)
+
+            // when
+            val result = input.validate()
+
+            // then
+            assertThat((result as SimpleGearFormResult.Valid).details.inServiceDate).isNull()
         }
 
         @Test

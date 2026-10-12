@@ -36,7 +36,8 @@ class FlightSeeder(
     suspend fun seed(wings: List<SeededWing>): Int {
         var count = 0
         wings.forEach { seeded ->
-            val first = seeded.wing.details.inServiceDate
+            // Sample wings always have a date, so the seeded flights have a first day to start from.
+            val first = checkNotNull(seeded.wing.details.inServiceDate)
             val last = seeded.retiredOn ?: today
             repeat(first.daysUntil(last) + 1) { offset ->
                 val date = first.plus(offset, DateTimeUnit.DAY)

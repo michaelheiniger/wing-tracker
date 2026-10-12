@@ -13,11 +13,12 @@ import org.junit.jupiter.api.Test
 class WingTest {
     @Nested
     inner class WasInServiceOn {
+        private val inService = LocalDate(2023, 5, 1)
+
         @Test
         fun `is true on the in-service date and after it`() {
             // given
-            val wing = aWing()
-            val inService = wing.details.inServiceDate
+            val wing = aWing().let { it.withDetails(it.details.copy(inServiceDate = inService)) }
 
             // when / then
             assertThat(wing.wasInServiceOn(inService)).isTrue()
@@ -27,10 +28,19 @@ class WingTest {
         @Test
         fun `is false before the in-service date`() {
             // given
-            val wing = aWing()
+            val wing = aWing().let { it.withDetails(it.details.copy(inServiceDate = inService)) }
 
             // when / then
-            assertThat(wing.wasInServiceOn(wing.details.inServiceDate.minus(1, DateTimeUnit.DAY))).isFalse()
+            assertThat(wing.wasInServiceOn(inService.minus(1, DateTimeUnit.DAY))).isFalse()
+        }
+
+        @Test
+        fun `is always true without an in-service date`() {
+            // given
+            val wing = aWing().let { it.withDetails(it.details.copy(inServiceDate = null)) }
+
+            // when / then
+            assertThat(wing.wasInServiceOn(LocalDate(1990, 1, 1))).isTrue()
         }
     }
 

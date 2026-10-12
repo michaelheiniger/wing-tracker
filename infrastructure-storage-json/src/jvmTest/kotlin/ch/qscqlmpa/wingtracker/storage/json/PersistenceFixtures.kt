@@ -33,6 +33,7 @@ fun aStoredWing(
     interval: MaintenanceInterval? = null,
     checks: List<MaintenanceCheck> = emptyList(),
     plannedChecks: List<PlannedCheck> = emptyList(),
+    inServiceDate: LocalDate? = LocalDate(2024, 3, 9),
 ) = Wing(
     id = WingId(id),
     details =
@@ -49,7 +50,7 @@ fun aStoredWing(
                     purchaseDate = LocalDate(2024, 3, 2),
                     price = Price(minorUnits = 215_000, currency = CurrencyCode("CHF")),
                 ),
-            inServiceDate = LocalDate(2024, 3, 9),
+            inServiceDate = inServiceDate,
             hoursBeforeTracking = 42.hours + 30.minutes,
             maintenanceInterval = interval,
         ),

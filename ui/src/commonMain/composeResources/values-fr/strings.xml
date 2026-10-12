@@ -43,7 +43,9 @@
     <string name="field_price">Prix</string>
     <string name="field_currency">Devise</string>
     <string name="section_usage">Utilisation</string>
-    <string name="field_in_service_date">En service depuis *</string>
+    <string name="help_in_service_date">Le jour où tu as commencé à utiliser cet équipement. Tant qu'il n'y a pas de contrôle, l'intervalle d'entretien se compte depuis cette date (depuis la date d'achat si elle est vide), et le graphique des heures commence ici. Laisse vide si elle est inconnue.</string>
+    <string name="help_tooltip_icon">Plus d'informations</string>
+    <string name="field_in_service_date">En service depuis</string>
     <string name="field_hours_before_tracking">Heures de vol avant le suivi (h ou h:mm)</string>
     <string name="action_save">Enregistrer</string>
     <string name="action_cancel">Annuler</string>
@@ -171,6 +173,7 @@
     <string name="maintenance_back">Retour aux voiles</string>
     <string name="maintenance_total_hours">%1$s de vol au total</string>
     <string name="maintenance_no_interval">Aucun intervalle défini. Modifie la voile pour en ajouter un.</string>
+    <string name="maintenance_no_start">L'intervalle n'a pas encore de point de départ. Indique une date de mise en service ou d'achat, ou enregistre un contrôle.</string>
     <string name="maintenance_interval_months">Tous les %1$d mois</string>
     <string name="maintenance_interval_hours">Toutes les %1$s</string>
     <string name="maintenance_interval_both">Tous les %1$d mois ou toutes les %2$s, selon ce qui arrive en premier</string>

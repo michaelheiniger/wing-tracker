@@ -37,6 +37,7 @@ import ch.qscqlmpa.wingtracker.gear.GearStatus
 import ch.qscqlmpa.wingtracker.gear.maintenance.DueState
 import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceStatus
 import ch.qscqlmpa.wingtracker.ui.components.AppCard
+import ch.qscqlmpa.wingtracker.ui.components.HelpTooltip
 import ch.qscqlmpa.wingtracker.ui.components.Severity
 import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.components.UnreadableBanner
@@ -46,6 +47,7 @@ import ch.qscqlmpa.wingtracker.ui.gear.RetireDialog
 import ch.qscqlmpa.wingtracker.ui.gear.maintenance.chipText
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
+import ch.qscqlmpa.wingtracker.ui.resources.help_in_service_date
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_planned_on
 import ch.qscqlmpa.wingtracker.ui.resources.undo_item_deleted
 import ch.qscqlmpa.wingtracker.ui.resources.wing_delete
@@ -209,11 +211,19 @@ private fun ItemCard(
                         details.size,
                     ).joinToString(" · ")
                 Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(
-                    stringResource(Res.string.wing_in_service_since, details.inServiceDate.toDisplay()),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                details.inServiceDate?.let { inService ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        Text(
+                            stringResource(Res.string.wing_in_service_since, inService.toDisplay()),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        HelpTooltip(stringResource(Res.string.help_in_service_date), iconSize = 16)
+                    }
+                }
                 MaintenanceLine(item, status)
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {

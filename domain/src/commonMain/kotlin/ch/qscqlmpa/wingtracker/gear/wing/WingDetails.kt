@@ -14,7 +14,8 @@ data class WingDetails(
     val serialNumber: String? = null,
     val certificationClass: CertificationClass? = null,
     val acquisition: Acquisition,
-    val inServiceDate: LocalDate,
+    // Optional: a second-hand wing often has no known start. Flights and maintenance then work from other dates.
+    val inServiceDate: LocalDate? = null,
     // Hours flown before tracking started; keeps hour-based due rules right for used wings.
     val hoursBeforeTracking: Duration = Duration.ZERO,
     // Null means no rule yet, so the wing is never reported as due.

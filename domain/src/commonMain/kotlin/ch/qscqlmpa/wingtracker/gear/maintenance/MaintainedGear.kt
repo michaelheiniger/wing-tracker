@@ -6,7 +6,10 @@ import kotlinx.datetime.LocalDate
 interface MaintainedGear {
     val ref: GearRef
     val displayName: String
-    val inServiceDate: LocalDate
+    val inServiceDate: LocalDate?
+
+    // Where the maintenance clock starts when there is no check yet and no in-service date.
+    val purchaseDate: LocalDate?
 
     // Retired gear leaves reminders, but keeps its history.
     val isActive: Boolean

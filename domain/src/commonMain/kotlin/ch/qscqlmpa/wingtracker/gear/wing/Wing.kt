@@ -19,7 +19,9 @@ data class Wing(
 ) : MaintainedGear {
     init {
         if (status is GearStatus.Retired) {
-            require(status.on >= details.inServiceDate) { "A wing cannot be retired before it entered service" }
+            require(details.inServiceDate == null || status.on >= details.inServiceDate) {
+                "A wing cannot be retired before it entered service"
+            }
         }
         // Builds the history once to validate the checks against what a wing accepts.
         history
@@ -29,10 +31,11 @@ data class Wing(
 
     override val ref: GearRef get() = GearRef(GearKind.Wing, id.value)
     override val displayName: String get() = details.name
-    override val inServiceDate: LocalDate get() = details.inServiceDate
+    override val inServiceDate: LocalDate? get() = details.inServiceDate
+    override val purchaseDate: LocalDate? get() = details.acquisition.purchaseDate
 
-    /** Flights before this date are allowed but suspicious: the date or the wing may have been entered wrongly. */
-    fun wasInServiceOn(date: LocalDate): Boolean = date >= details.inServiceDate
+    /** Flights before the in-service date are allowed but suspicious. A wing without a date was always in service. */
+    fun wasInServiceOn(date: LocalDate): Boolean = details.inServiceDate.let { it == null || date >= it }
 
     override val maintenanceInterval get() = details.maintenanceInterval
     override val history: MaintenanceHistory get() = MaintenanceHistory(GearKind.Wing, checks, plannedChecks)

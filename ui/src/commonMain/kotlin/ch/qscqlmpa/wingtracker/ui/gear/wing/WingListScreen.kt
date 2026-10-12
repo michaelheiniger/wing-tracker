@@ -41,6 +41,7 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceStatus
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.components.AppCard
+import ch.qscqlmpa.wingtracker.ui.components.HelpTooltip
 import ch.qscqlmpa.wingtracker.ui.components.Severity
 import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.components.UnreadableBanner
@@ -56,6 +57,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.action_dismiss
 import ch.qscqlmpa.wingtracker.ui.resources.delete_body
 import ch.qscqlmpa.wingtracker.ui.resources.delete_confirm
 import ch.qscqlmpa.wingtracker.ui.resources.delete_title
+import ch.qscqlmpa.wingtracker.ui.resources.help_in_service_date
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_planned_on
 import ch.qscqlmpa.wingtracker.ui.resources.retire_body
 import ch.qscqlmpa.wingtracker.ui.resources.retire_reason_label
@@ -231,14 +233,21 @@ private fun WingCard(
                         details.certificationClass?.let { stringResource(Res.string.wing_certification, it.name) },
                     ).joinToString(" · ")
                 Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                val since = stringResource(Res.string.wing_in_service_since, details.inServiceDate.toDisplay())
+                val since =
+                    details.inServiceDate?.let { stringResource(Res.string.wing_in_service_since, it.toDisplay()) }
                 val before =
                     stringResource(Res.string.wing_hours_before_tracking, formatDuration(details.hoursBeforeTracking))
-                Text(
-                    "$since · $before",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    Text(
+                        listOfNotNull(since, before).joinToString(" · "),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (since != null) HelpTooltip(stringResource(Res.string.help_in_service_date), iconSize = 16)
+                }
                 MaintenanceLine(wing, status)
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {

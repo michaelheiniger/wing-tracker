@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.wing.CertificationClass
 import ch.qscqlmpa.wingtracker.ui.components.DateField
+import ch.qscqlmpa.wingtracker.ui.components.HelpTooltip
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.acquisition_new
@@ -42,6 +43,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.field_serial_number
 import ch.qscqlmpa.wingtracker.ui.resources.field_size
 import ch.qscqlmpa.wingtracker.ui.resources.form_title_add
 import ch.qscqlmpa.wingtracker.ui.resources.form_title_edit
+import ch.qscqlmpa.wingtracker.ui.resources.help_in_service_date
 import ch.qscqlmpa.wingtracker.ui.resources.interval_hint
 import ch.qscqlmpa.wingtracker.ui.resources.section_acquisition
 import ch.qscqlmpa.wingtracker.ui.resources.section_certification
@@ -187,13 +189,16 @@ fun WingFormScreen(
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.padding(top = 8.dp),
         )
-        DateField(
-            label = stringResource(Res.string.field_in_service_date),
-            value = input.inServiceDate,
-            onValueChange = { v -> presenter.change { it.copy(inServiceDate = v) } },
-            errorText = errors[WingFormField.InServiceDate]?.message(),
-            modifier = Modifier.fillMaxWidth(),
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            DateField(
+                label = stringResource(Res.string.field_in_service_date),
+                value = input.inServiceDate,
+                onValueChange = { v -> presenter.change { it.copy(inServiceDate = v) } },
+                clearable = true,
+                modifier = Modifier.weight(1f),
+            )
+            HelpTooltip(stringResource(Res.string.help_in_service_date))
+        }
         Field(
             stringResource(Res.string.field_hours_before_tracking),
             input.hoursBeforeTracking,

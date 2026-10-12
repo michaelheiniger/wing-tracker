@@ -64,10 +64,11 @@ class FlightUseCasesTest {
                 givenTheWingExists()
 
                 // when
-                val flight = logFlight(aFlightDetails(date = wing.details.inServiceDate))
+                val inService = checkNotNull(wing.details.inServiceDate)
+                val flight = logFlight(aFlightDetails(date = inService))
 
                 // then
-                assertThat(flight.details.date).isEqualTo(wing.details.inServiceDate)
+                assertThat(flight.details.date).isEqualTo(inService)
             }
 
         @Test

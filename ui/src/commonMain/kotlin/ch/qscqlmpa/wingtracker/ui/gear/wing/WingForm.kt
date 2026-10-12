@@ -81,7 +81,6 @@ enum class WingFormField {
     Name,
     Manufacturer,
     Model,
-    InServiceDate,
     PriceAmount,
     PriceCurrency,
     HoursBeforeTracking,
@@ -115,13 +114,12 @@ fun WingFormInput.validate(): WingFormResult {
     if (name.isBlank()) errors[WingFormField.Name] = FormError.Required
     if (manufacturer.isBlank()) errors[WingFormField.Manufacturer] = FormError.Required
     if (model.isBlank()) errors[WingFormField.Model] = FormError.Required
-    if (inServiceDate == null) errors[WingFormField.InServiceDate] = FormError.Required
 
     val price = parsePrice(errors)
     val hours = parseHours(errors)
     val interval = parseInterval(errors)
 
-    if (errors.isNotEmpty() || inServiceDate == null || hours == null) return WingFormResult.Invalid(errors)
+    if (errors.isNotEmpty() || hours == null) return WingFormResult.Invalid(errors)
 
     return WingFormResult.Valid(
         WingDetails(

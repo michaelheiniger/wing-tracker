@@ -46,7 +46,7 @@ data class SimpleGearFormInput(
     }
 }
 
-enum class SimpleGearField { Name, Manufacturer, Model, InServiceDate, PriceAmount, PriceCurrency, IntervalMonths }
+enum class SimpleGearField { Name, Manufacturer, Model, PriceAmount, PriceCurrency, IntervalMonths }
 
 sealed interface SimpleGearFormResult {
     data class Valid(
@@ -65,7 +65,6 @@ fun SimpleGearFormInput.validate(): SimpleGearFormResult {
     if (name.isBlank()) errors[SimpleGearField.Name] = FormError.Required
     if (manufacturer.isBlank()) errors[SimpleGearField.Manufacturer] = FormError.Required
     if (model.isBlank()) errors[SimpleGearField.Model] = FormError.Required
-    if (inServiceDate == null) errors[SimpleGearField.InServiceDate] = FormError.Required
 
     val price =
         when (val parsed = parsePrice(priceAmount, priceCurrency)) {
@@ -88,7 +87,7 @@ fun SimpleGearFormInput.validate(): SimpleGearFormResult {
             ?.takeIf { it > 0 }
     if (months.isNotEmpty() && intervalValue == null) errors[SimpleGearField.IntervalMonths] = FormError.InvalidMonths
 
-    if (inServiceDate == null || errors.isNotEmpty()) return SimpleGearFormResult.Invalid(errors)
+    if (errors.isNotEmpty()) return SimpleGearFormResult.Invalid(errors)
     return SimpleGearFormResult.Valid(
         SimpleGearDetails(
             name = name.trim(),
