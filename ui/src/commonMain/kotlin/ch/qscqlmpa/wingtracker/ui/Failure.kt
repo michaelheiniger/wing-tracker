@@ -28,6 +28,10 @@ enum class FailureKind {
     DataFolderSame,
     DataFolderUnusable,
     DataFolderOverlaps,
+    SyrideUserNotFound,
+    SyrideUnreachable,
+    SyridePagesChanged,
+    ImportSyride,
 }
 
 /** A technical [detail] travels with the kind; the screen wraps it in a message in the user's language. */

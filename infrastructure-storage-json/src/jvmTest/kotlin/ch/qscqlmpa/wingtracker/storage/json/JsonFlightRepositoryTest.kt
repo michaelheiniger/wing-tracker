@@ -2,6 +2,7 @@ package ch.qscqlmpa.wingtracker.storage.json
 
 import ch.qscqlmpa.wingtracker.attachments.Attachment
 import ch.qscqlmpa.wingtracker.attachments.AttachmentId
+import ch.qscqlmpa.wingtracker.flights.ExternalReference
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.IgcFile
 import kotlinx.coroutines.test.runTest
@@ -78,6 +79,49 @@ class JsonFlightRepositoryTest {
 
                 // then
                 assertThat(found).usingRecursiveComparison().isEqualTo(imported)
+            }
+
+        @Test
+        fun `restores the details and origin of a flight imported from another service`() =
+            runTest {
+                // given
+                val base = aStoredFlight()
+                val imported =
+                    base.copy(
+                        details = base.details.copy(distanceKm = 15.0, topAltitudeMeters = 2464, instrument = "Nav XL"),
+                        importedFrom = ExternalReference("syride", "flight:3720061"),
+                    )
+                repository.save(imported)
+
+                // when
+                val found = repository.findById(imported.id)
+
+                // then
+                assertThat(found).usingRecursiveComparison().isEqualTo(imported)
+            }
+
+        @Test
+        fun `reads a flight written before details could be imported`() =
+            runTest {
+                // given
+                val flight = aStoredFlight()
+                repository.save(flight)
+                val file = dataDirectory.resolve("flights/${flight.id.value}.json")
+                val newerKeys =
+                    setOf("distanceKm", "topAltitudeMeters", "instrument", "importedFromSystem", "importedFromId")
+                val document = Json.parseToJsonElement(file.readText()).jsonObject
+                file.writeText(
+                    JsonObject(
+                        document.filterKeys { it !in newerKeys } + ("schemaVersion" to JsonPrimitive(2)),
+                    ).toString(),
+                )
+
+                // when
+                val found = repository.findById(flight.id)
+
+                // then
+                assertThat(found).usingRecursiveComparison().isEqualTo(flight)
+                assertThat(found?.importedFrom).isNull()
             }
 
         @Test
@@ -187,7 +231,8 @@ class JsonFlightRepositoryTest {
                 // given
                 repository.save(aStoredFlight(id = "flight-1"))
                 val file = dataDirectory.resolve("flights/flight-1.json")
-                file.writeText(file.readText().replace("\"schemaVersion\": 2", "\"schemaVersion\": 999"))
+                // Whatever the current version is, 999 is newer.
+                file.writeText(file.readText().replace(Regex("\"schemaVersion\": \\d+"), "\"schemaVersion\": 999"))
 
                 // when
                 val result = repository.findAll()

@@ -6,6 +6,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+- Import your flights from Syride: enter your Syride pilot name in the logbook, and the flights are read from your public profile. For each wing used on Syride you pick the matching wing in the app (suggested when the name matches) or create it on the spot, then import. Flights keep their site, flight name, distance, top altitude and instrument, and running the import again skips what was already imported. Tracks are not downloaded.
+- Flights can carry a distance, top altitude and instrument, shown in the logbook.
+
 ## [0.0.1] - 2026-10-11
 
 ### Fixed

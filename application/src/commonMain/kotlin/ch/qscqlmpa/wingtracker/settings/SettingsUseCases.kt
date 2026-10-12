@@ -30,3 +30,11 @@ class SaveInterfaceScale(
         settings.save(settings.load().copy(interfaceScalePercent = percent))
     }
 }
+
+class SaveSyrideUsername(
+    private val settings: SettingsRepository,
+) {
+    suspend operator fun invoke(username: String) {
+        settings.save(settings.load().copy(syrideUsername = username.trim().ifEmpty { null }))
+    }
+}

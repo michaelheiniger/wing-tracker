@@ -22,6 +22,7 @@ Modules by layer (ADR 0004); dependencies point inwards:
 - `ui`: shared Compose Multiplatform UI and theme. Gear is split into tabs per kind; maintenance screens are generic over `GearKind`.
 - `app-desktop`: composition root (Koin wiring) and desktop entry point. The only module that sees everything.
 - `infrastructure-igc`: JVM-only adapter for the `TrackReader` port (igc4j, ADR 0018).
+- `infrastructure-syride`: JVM-only adapter for the `SyrideFlightSource` port; reads public Syride pages (ADR 0021).
 - `architecture-test`: Konsist rules enforcing the layering.
 
 Bounded contexts (gear, flights, maintenance) are packages inside each module. Base package equals the Gradle `group` (ADR 0005). Domain and application never reference Koin, Compose or serialization frameworks.

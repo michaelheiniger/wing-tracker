@@ -21,6 +21,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_delete_in_use
 import ch.qscqlmpa.wingtracker.ui.resources.failure_drop_no_igc
 import ch.qscqlmpa.wingtracker.ui.resources.failure_export_calendar
 import ch.qscqlmpa.wingtracker.ui.resources.failure_import_igc
+import ch.qscqlmpa.wingtracker.ui.resources.failure_import_syride
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_attention
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_logbook
@@ -36,6 +37,9 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_save_check
 import ch.qscqlmpa.wingtracker.ui.resources.failure_save_flight
 import ch.qscqlmpa.wingtracker.ui.resources.failure_save_plan
 import ch.qscqlmpa.wingtracker.ui.resources.failure_save_settings
+import ch.qscqlmpa.wingtracker.ui.resources.failure_syride_changed
+import ch.qscqlmpa.wingtracker.ui.resources.failure_syride_unreachable
+import ch.qscqlmpa.wingtracker.ui.resources.failure_syride_user
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -52,6 +56,10 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.DataFolderSame to Res.string.failure_data_same,
         FailureKind.DataFolderUnusable to Res.string.failure_data_unusable,
         FailureKind.DataFolderOverlaps to Res.string.failure_data_overlaps,
+        FailureKind.SyrideUserNotFound to Res.string.failure_syride_user,
+        FailureKind.SyrideUnreachable to Res.string.failure_syride_unreachable,
+        FailureKind.SyridePagesChanged to Res.string.failure_syride_changed,
+        FailureKind.ImportSyride to Res.string.failure_import_syride,
         FailureKind.SaveSettings to Res.string.failure_save_settings,
         FailureKind.LoadSettings to Res.string.failure_load_settings,
         FailureKind.Load to Res.string.failure_load,

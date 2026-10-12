@@ -12,8 +12,14 @@ data class FlightDetails(
     val takeOffSite: String? = null,
     val landingSite: String? = null,
     val notes: String? = null,
+    // Known when the flight comes from a tracking service; not entered by hand.
+    val distanceKm: Double? = null,
+    val topAltitudeMeters: Int? = null,
+    val instrument: String? = null,
 ) {
     init {
         require(duration.isPositive()) { "A flight must last longer than zero" }
+        require(distanceKm == null || distanceKm >= 0) { "A distance cannot be negative" }
+        require(topAltitudeMeters == null || topAltitudeMeters >= 0) { "An altitude cannot be negative" }
     }
 }

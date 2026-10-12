@@ -10,6 +10,8 @@ data class AppSettings(
     val lastReminderNotificationOn: LocalDate? = null,
     // Null means "follow the desktop's scaling"; a number is a fixed size in percent.
     val interfaceScalePercent: Int? = null,
+    // Remembered so the next import from Syride starts with the same account.
+    val syrideUsername: String? = null,
 ) {
     init {
         require(interfaceScalePercent == null || interfaceScalePercent in MIN_SCALE_PERCENT..MAX_SCALE_PERCENT) {

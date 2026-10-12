@@ -37,6 +37,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.Flight
+import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.Logbook
 import ch.qscqlmpa.wingtracker.flights.LogbookMonth
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
@@ -54,9 +55,11 @@ import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.action_dismiss
 import ch.qscqlmpa.wingtracker.ui.resources.delete_confirm
+import ch.qscqlmpa.wingtracker.ui.resources.flight_altitude
 import ch.qscqlmpa.wingtracker.ui.resources.flight_delete
 import ch.qscqlmpa.wingtracker.ui.resources.flight_delete_body
 import ch.qscqlmpa.wingtracker.ui.resources.flight_delete_title
+import ch.qscqlmpa.wingtracker.ui.resources.flight_distance
 import ch.qscqlmpa.wingtracker.ui.resources.flight_edit
 import ch.qscqlmpa.wingtracker.ui.resources.flight_sites
 import ch.qscqlmpa.wingtracker.ui.resources.flight_unknown_wing
@@ -75,6 +78,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.logbook_no_wings_body
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_no_wings_title
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_title
 import ch.qscqlmpa.wingtracker.ui.resources.month_names
+import ch.qscqlmpa.wingtracker.ui.resources.syride_import
 import ch.qscqlmpa.wingtracker.ui.resources.undo_flight_deleted
 import ch.qscqlmpa.wingtracker.ui.resources.unreadable_kept
 import ch.qscqlmpa.wingtracker.ui.resources.unreadable_quarantined
@@ -95,6 +99,7 @@ fun LogbookScreen(
     onLogFlight: () -> Unit,
     onEditFlight: (Flight) -> Unit,
     onImportIgc: () -> Unit,
+    onImportSyride: () -> Unit,
     attention: Attention,
     onOpenAttention: (GearRef) -> Unit,
     onGoToGear: () -> Unit,
@@ -126,9 +131,15 @@ fun LogbookScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(stringResource(Res.string.logbook_title), style = MaterialTheme.typography.headlineMedium)
-                // Importing needs a wing to log the flight on, like logging by hand.
-                if (logbook != null && logbook.wings.isNotEmpty()) {
-                    OutlinedButton(onClick = onImportIgc) { Text(stringResource(Res.string.igc_import)) }
+                if (logbook != null) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        // The Syride import can create the wings it needs, so it is offered before any wing exists.
+                        OutlinedButton(onClick = onImportSyride) { Text(stringResource(Res.string.syride_import)) }
+                        // Importing a track needs a wing to log the flight on, like logging by hand.
+                        if (logbook.wings.isNotEmpty()) {
+                            OutlinedButton(onClick = onImportIgc) { Text(stringResource(Res.string.igc_import)) }
+                        }
+                    }
                 }
             }
             importFailure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
@@ -298,6 +309,13 @@ private fun FlightCard(
                         }
                     }
                 sites?.let { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                importedFacts(details)?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 details.notes?.let {
                     Text(
                         it,
@@ -342,3 +360,17 @@ private fun EmptyState(
         Button(onClick = onAction) { Text(action) }
     }
 }
+
+/** Distance, top altitude and instrument, when the flight came with them (e.g. from Syride). */
+@Composable
+private fun importedFacts(details: FlightDetails): String? {
+    val parts =
+        listOfNotNull(
+            details.distanceKm?.let { stringResource(Res.string.flight_distance, it.toDisplayNumber()) },
+            details.topAltitudeMeters?.let { stringResource(Res.string.flight_altitude, it) },
+            details.instrument,
+        )
+    return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
+}
+
+private fun Double.toDisplayNumber(): String = if (this % 1.0 == 0.0) toInt().toString() else toString()

@@ -1,0 +1,101 @@
+package ch.qscqlmpa.wingtracker.syride
+
+import ch.qscqlmpa.wingtracker.flights.syride.SyrideException
+import ch.qscqlmpa.wingtracker.flights.syride.SyrideProblem
+import kotlinx.coroutines.test.runTest
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+private val SAMPLE = SyrideWebFlightSourceTest::class.java.getResource("/activities-sample.html")!!.readText()
+
+class SyrideWebFlightSourceTest {
+    private val requested = mutableListOf<String>()
+
+    private fun source(
+        profile: String,
+        pages: List<String>,
+    ) = SyrideWebFlightSource(
+        fetchPage = { url, _ ->
+            requested += url
+            if ("activites.php" !in
+                url
+            ) {
+                profile
+            } else {
+                pages.getOrElse(requested.count { "activites.php" in it } - 1) { "" }
+            }
+        },
+        pause = {},
+    )
+
+    @Nested
+    inner class Fetching {
+        @Test
+        fun `follows the feed page by page until it is empty`() =
+            runTest {
+                // given
+                val source =
+                    source("<a href='x?idRider=28153'>", listOf(SAMPLE, SAMPLE.replace("activite", "activite9")))
+
+                // when
+                val flights = source.fetch("QSCQLMPA")
+
+                // then
+                assertThat(flights).hasSize(4)
+                assertThat(requested.filter { "activites.php" in it }).hasSize(3)
+                assertThat(requested.last()).contains("idRider=28153").contains("append=1&beforeId=")
+            }
+
+        @Test
+        fun `asks for the profile of the given pilot`() =
+            runTest {
+                // when
+                source("idRider=1", emptyList()).fetch("QSCQLMPA")
+
+                // then
+                assertThat(requested.first()).isEqualTo("https://syride.com/en/pilots/QSCQLMPA")
+            }
+    }
+
+    @Nested
+    inner class Problems {
+        @Test
+        fun `reports an unknown pilot, which Syride answers with pilot id 0`() =
+            runTest {
+                assertThatThrownBy {
+                    kotlinx.coroutines.runBlocking {
+                        source(
+                            "idRider=0",
+                            emptyList(),
+                        ).fetch("nobody")
+                    }
+                }.isInstanceOfSatisfying(SyrideException::class.java) {
+                    assertThat(it.problem).isEqualTo(SyrideProblem.UserNotFound)
+                }
+            }
+
+        @Test
+        fun `reports a profile page without a pilot id as changed pages`() =
+            runTest {
+                assertThatThrownBy { kotlinx.coroutines.runBlocking { source("<html>", emptyList()).fetch("x") } }
+                    .isInstanceOfSatisfying(SyrideException::class.java) {
+                        assertThat(it.problem).isEqualTo(SyrideProblem.PagesChanged)
+                    }
+            }
+
+        @Test
+        fun `reports changed pages when most flight cards cannot be read`() =
+            runTest {
+                // given
+                val broken = "<div id='activite1'><ul>Flight name : <font>X</font></ul></div>"
+
+                // when / then
+                assertThatThrownBy { kotlinx.coroutines.runBlocking { source("idRider=5", listOf(broken)).fetch("x") } }
+                    .isInstanceOfSatisfying(SyrideException::class.java) {
+                        assertThat(it.problem).isEqualTo(SyrideProblem.PagesChanged)
+                    }
+            }
+    }
+}

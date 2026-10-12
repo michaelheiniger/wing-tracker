@@ -27,6 +27,7 @@ kotlin {
             implementation(project(":application"))
             implementation(project(":infrastructure-storage-json"))
             implementation(project(":infrastructure-igc"))
+            implementation(project(":infrastructure-syride"))
             implementation(libs.compose.material3)
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)

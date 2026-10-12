@@ -22,6 +22,10 @@ data class FlightFormInput(
     val takeOffSite: String = "",
     val landingSite: String = "",
     val notes: String = "",
+    // Not edited here, but kept so editing an imported flight never drops what the import brought.
+    val distanceKm: Double? = null,
+    val topAltitudeMeters: Int? = null,
+    val instrument: String? = null,
 ) {
     companion object {
         fun from(flight: Flight): FlightFormInput =
@@ -32,6 +36,9 @@ data class FlightFormInput(
                 takeOffSite = flight.details.takeOffSite.orEmpty(),
                 landingSite = flight.details.landingSite.orEmpty(),
                 notes = flight.details.notes.orEmpty(),
+                distanceKm = flight.details.distanceKm,
+                topAltitudeMeters = flight.details.topAltitudeMeters,
+                instrument = flight.details.instrument,
             )
     }
 }
@@ -77,6 +84,9 @@ fun FlightFormInput.validate(): FlightFormResult {
                 takeOffSite = takeOffSite.trim().ifEmpty { null },
                 landingSite = landingSite.trim().ifEmpty { null },
                 notes = notes.trim().ifEmpty { null },
+                distanceKm = distanceKm,
+                topAltitudeMeters = topAltitudeMeters,
+                instrument = instrument,
             ),
         )
     }

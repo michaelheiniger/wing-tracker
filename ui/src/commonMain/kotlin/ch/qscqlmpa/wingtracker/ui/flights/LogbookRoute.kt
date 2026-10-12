@@ -26,6 +26,8 @@ import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.igc_drop_hint
 import ch.qscqlmpa.wingtracker.ui.resources.igc_pick_title
 import ch.qscqlmpa.wingtracker.ui.resources.undo_flight_discarded
+import ch.qscqlmpa.wingtracker.ui.syride.SyrideImportDialog
+import ch.qscqlmpa.wingtracker.ui.syride.SyrideImportPresenter
 import ch.qscqlmpa.wingtracker.ui.today
 import ch.qscqlmpa.wingtracker.ui.undo.LocalUndo
 import ch.qscqlmpa.wingtracker.ui.undo.undoText
@@ -41,6 +43,8 @@ private sealed interface LogbookDialog {
     data class Edit(
         val flight: Flight,
     ) : LogbookDialog
+
+    data object Syride : LogbookDialog
 
     data class Import(
         val files: List<NewAttachment>,
@@ -93,6 +97,7 @@ fun LogbookRoute(
             onLogFlight = { dialog = LogbookDialog.New() },
             onEditFlight = { dialog = LogbookDialog.Edit(it) },
             onImportIgc = { importer.choose { files -> dialog = LogbookDialog.Import(files) } },
+            onImportSyride = { dialog = LogbookDialog.Syride },
             attention = attention,
             onOpenAttention = onOpenGear,
             onGoToGear = onGoToGear,
@@ -108,6 +113,22 @@ fun LogbookRoute(
     }
     when (val current = dialog) {
         null -> {}
+
+        LogbookDialog.Syride -> {
+            val syride =
+                remember {
+                    SyrideImportPresenter(
+                        scope,
+                        useCases.prepareSyrideImport,
+                        useCases.importSyrideFlights,
+                        useCases.saveSyrideUsername,
+                        initialUsername = "",
+                    )
+                }
+            // The account used last time is filled in once the settings are read.
+            LaunchedEffect(syride) { syride.suggestUsername(useCases.getAppSettings().syrideUsername) }
+            SyrideImportDialog(syride, onClose = closeDialog)
+        }
 
         is LogbookDialog.Import -> {
             val batch =

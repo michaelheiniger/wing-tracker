@@ -336,4 +336,46 @@
     <string name="failure_data_same">That is the folder already in use.</string>
     <string name="failure_data_unusable">That folder cannot be used: it must be a folder you can write to.</string>
     <string name="failure_data_overlaps">Choose a folder that is not inside the current data folder and does not contain it.</string>
+    <string name="syride_import">Import from Syride</string>
+    <string name="syride_title">Import flights from Syride</string>
+    <string name="syride_account_hint">Enter your Syride pilot name (the last part of syride.com/en/pilots/NAME). Only your public flight list is read; nothing is changed on Syride.</string>
+    <string name="syride_username">Syride pilot name</string>
+    <string name="syride_read">Read flights</string>
+    <string name="syride_reading">Reading your flights from Syride…</string>
+    <string name="syride_wings_title">Which wing is which?</string>
+    <string name="syride_wings_hint">Choose the wing in the app for each wing used on Syride, or create it here. Flights of a skipped wing are not imported.</string>
+    <string name="syride_wing_name">%1$s (%2$s)</string>
+    <string name="syride_wing_period">%1$s to %2$s · %3$s</string>
+    <string name="syride_choice_new">New wing: %1$s</string>
+    <string name="syride_choice_create">Create a new wing…</string>
+    <string name="syride_choice_skip">Skip these flights</string>
+    <string name="syride_new_incomplete">Complete the new wing first</string>
+    <string name="syride_edit_new">Edit</string>
+    <string name="syride_already">%1$d flights were already imported earlier and are left out.</string>
+    <string name="syride_nothing_new">There are no new flights to import.</string>
+    <string name="syride_back">Back</string>
+    <string name="syride_newwing_title">New wing</string>
+    <string name="syride_newwing_hint">It is in service from its first imported flight. You can complete the other details later under Gear.</string>
+    <string name="syride_done_title">Import finished</string>
+    <string name="syride_done_summary">%1$d flights imported, %2$d wings created, %3$d left out.</string>
+    <string name="syride_failed_title">These flights could not be imported:</string>
+    <string name="syride_failed_row">%1$s · %2$s</string>
+    <string name="syride_failure_future">the date is in the future</string>
+    <string name="syride_failure_before_service">flown before the wing was in service</string>
+    <string name="syride_failure_save">could not be saved: %1$s</string>
+    <string name="action_close">Close</string>
+    <string name="failure_syride_user">No Syride pilot with this name was found.</string>
+    <string name="failure_syride_unreachable">Syride could not be reached: %1$s</string>
+    <string name="failure_syride_changed">Syride's pages look different than expected, so the flights cannot be read (%1$s). The application needs an update.</string>
+    <string name="failure_import_syride">The flights could not be imported: %1$s</string>
+    <plurals name="syride_import_count">
+        <item quantity="one">Import %1$d flight</item>
+        <item quantity="other">Import %1$d flights</item>
+    </plurals>
+    <plurals name="syride_wing_flights">
+        <item quantity="one">%1$d flight</item>
+        <item quantity="other">%1$d flights</item>
+    </plurals>
+    <string name="flight_distance">%1$s km</string>
+    <string name="flight_altitude">%1$d m</string>
 </resources>

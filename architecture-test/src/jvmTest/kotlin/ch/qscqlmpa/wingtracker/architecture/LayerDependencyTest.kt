@@ -87,4 +87,18 @@ class LayerDependencyTest {
             )
         }
     }
+
+    @Nested
+    inner class InfrastructureSyride {
+        @Test
+        fun `does not depend on ui, storage or the composition root`() {
+            assertNoImportStartsWith(
+                "infrastructure-syride",
+                "$base.ui",
+                "$base.desktop",
+                "$base.storage",
+                "androidx.compose",
+            )
+        }
+    }
 }

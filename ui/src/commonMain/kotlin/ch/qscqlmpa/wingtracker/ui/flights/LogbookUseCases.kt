@@ -6,7 +6,11 @@ import ch.qscqlmpa.wingtracker.flights.LogFlight
 import ch.qscqlmpa.wingtracker.flights.UpdateFlight
 import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
 import ch.qscqlmpa.wingtracker.flights.igc.PrepareIgcImport
+import ch.qscqlmpa.wingtracker.flights.syride.ImportSyrideFlights
+import ch.qscqlmpa.wingtracker.flights.syride.PrepareSyrideImport
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReadAttachment
+import ch.qscqlmpa.wingtracker.settings.GetAppSettings
+import ch.qscqlmpa.wingtracker.settings.SaveSyrideUsername
 
 /** Use cases the logbook section needs; passed in so this module never sees the DI framework. */
 class LogbookUseCases(
@@ -17,4 +21,8 @@ class LogbookUseCases(
     val prepareIgcImport: PrepareIgcImport,
     val importIgcFlight: ImportIgcFlight,
     val readAttachment: ReadAttachment,
+    val prepareSyrideImport: PrepareSyrideImport,
+    val importSyrideFlights: ImportSyrideFlights,
+    val saveSyrideUsername: SaveSyrideUsername,
+    val getAppSettings: GetAppSettings,
 )

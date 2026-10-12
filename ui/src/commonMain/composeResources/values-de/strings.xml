@@ -336,4 +336,46 @@
     <string name="failure_data_same">Das ist der Ordner, der bereits verwendet wird.</string>
     <string name="failure_data_unusable">Dieser Ordner kann nicht verwendet werden: Es muss ein Ordner sein, in den du schreiben darfst.</string>
     <string name="failure_data_overlaps">Wähle einen Ordner, der nicht im aktuellen Datenordner liegt und ihn nicht enthält.</string>
+    <string name="syride_import">Von Syride importieren</string>
+    <string name="syride_title">Flüge von Syride importieren</string>
+    <string name="syride_account_hint">Gib deinen Syride-Pilotennamen ein (der letzte Teil von syride.com/en/pilots/NAME). Es wird nur deine öffentliche Flugliste gelesen; bei Syride wird nichts verändert.</string>
+    <string name="syride_username">Syride-Pilotenname</string>
+    <string name="syride_read">Flüge lesen</string>
+    <string name="syride_reading">Deine Flüge werden von Syride gelesen…</string>
+    <string name="syride_wings_title">Welcher Schirm ist welcher?</string>
+    <string name="syride_wings_hint">Wähle für jeden bei Syride verwendeten Schirm den Schirm in der App oder lege ihn hier an. Flüge eines übersprungenen Schirms werden nicht importiert.</string>
+    <string name="syride_wing_name">%1$s (%2$s)</string>
+    <string name="syride_wing_period">%1$s bis %2$s · %3$s</string>
+    <string name="syride_choice_new">Neuer Schirm: %1$s</string>
+    <string name="syride_choice_create">Neuen Schirm anlegen…</string>
+    <string name="syride_choice_skip">Diese Flüge überspringen</string>
+    <string name="syride_new_incomplete">Vervollständige zuerst den neuen Schirm</string>
+    <string name="syride_edit_new">Bearbeiten</string>
+    <string name="syride_already">%1$d Flüge wurden schon früher importiert und werden ausgelassen.</string>
+    <string name="syride_nothing_new">Es gibt keine neuen Flüge zu importieren.</string>
+    <string name="syride_back">Zurück</string>
+    <string name="syride_newwing_title">Neuer Schirm</string>
+    <string name="syride_newwing_hint">Er ist ab seinem ersten importierten Flug in Betrieb. Die übrigen Angaben kannst du später unter Ausrüstung ergänzen.</string>
+    <string name="syride_done_title">Import abgeschlossen</string>
+    <string name="syride_done_summary">%1$d Flüge importiert, %2$d Schirme angelegt, %3$d ausgelassen.</string>
+    <string name="syride_failed_title">Diese Flüge konnten nicht importiert werden:</string>
+    <string name="syride_failed_row">%1$s · %2$s</string>
+    <string name="syride_failure_future">das Datum liegt in der Zukunft</string>
+    <string name="syride_failure_before_service">vor der Inbetriebnahme des Schirms geflogen</string>
+    <string name="syride_failure_save">konnte nicht gespeichert werden: %1$s</string>
+    <string name="action_close">Schliessen</string>
+    <string name="failure_syride_user">Es wurde kein Syride-Pilot mit diesem Namen gefunden.</string>
+    <string name="failure_syride_unreachable">Syride ist nicht erreichbar: %1$s</string>
+    <string name="failure_syride_changed">Die Seiten von Syride sehen anders aus als erwartet, deshalb können die Flüge nicht gelesen werden (%1$s). Die Anwendung braucht ein Update.</string>
+    <string name="failure_import_syride">Die Flüge konnten nicht importiert werden: %1$s</string>
+    <plurals name="syride_import_count">
+        <item quantity="one">%1$d Flug importieren</item>
+        <item quantity="other">%1$d Flüge importieren</item>
+    </plurals>
+    <plurals name="syride_wing_flights">
+        <item quantity="one">%1$d Flug</item>
+        <item quantity="other">%1$d Flüge</item>
+    </plurals>
+    <string name="flight_distance">%1$s km</string>
+    <string name="flight_altitude">%1$d m</string>
 </resources>

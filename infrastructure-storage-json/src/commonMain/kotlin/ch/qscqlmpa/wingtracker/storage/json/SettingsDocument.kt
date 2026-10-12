@@ -17,6 +17,8 @@ internal data class SettingsDocument(
     val lastReminderNotificationOn: LocalDate? = null,
     // Added in schema 3; null follows the desktop.
     val interfaceScalePercent: Int? = null,
+    // Added in schema 4: the Syride account whose flights are imported.
+    val syrideUsername: String? = null,
 ) {
     fun toDomain(): AppSettings {
         if (schemaVersion > CURRENT_SCHEMA_VERSION) {
@@ -27,11 +29,12 @@ internal data class SettingsDocument(
             reminderLeadTimes = ReminderLeadTimes(reminderLeadDays, reminderLeadHoursMinutes.minutes),
             lastReminderNotificationOn = lastReminderNotificationOn,
             interfaceScalePercent = interfaceScalePercent,
+            syrideUsername = syrideUsername,
         )
     }
 
     companion object {
-        const val CURRENT_SCHEMA_VERSION = 3
+        const val CURRENT_SCHEMA_VERSION = 4
 
         fun from(settings: AppSettings) =
             SettingsDocument(
@@ -40,6 +43,7 @@ internal data class SettingsDocument(
                 reminderLeadHoursMinutes = settings.reminderLeadTimes.hours.inWholeMinutes,
                 lastReminderNotificationOn = settings.lastReminderNotificationOn,
                 interfaceScalePercent = settings.interfaceScalePercent,
+                syrideUsername = settings.syrideUsername,
             )
     }
 }

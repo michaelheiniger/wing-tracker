@@ -11,6 +11,9 @@ import ch.qscqlmpa.wingtracker.flights.UpdateFlight
 import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
 import ch.qscqlmpa.wingtracker.flights.igc.PrepareIgcImport
 import ch.qscqlmpa.wingtracker.flights.igc.TrackReader
+import ch.qscqlmpa.wingtracker.flights.syride.ImportSyrideFlights
+import ch.qscqlmpa.wingtracker.flights.syride.PrepareSyrideImport
+import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlightSource
 import ch.qscqlmpa.wingtracker.gear.harness.DeleteHarness
 import ch.qscqlmpa.wingtracker.gear.harness.HarnessRepository
 import ch.qscqlmpa.wingtracker.gear.harness.ListHarnesses
@@ -49,6 +52,7 @@ import ch.qscqlmpa.wingtracker.reminders.MarkStartNotificationShown
 import ch.qscqlmpa.wingtracker.settings.GetAppSettings
 import ch.qscqlmpa.wingtracker.settings.SaveInterfaceScale
 import ch.qscqlmpa.wingtracker.settings.SaveReminderLeadTimes
+import ch.qscqlmpa.wingtracker.settings.SaveSyrideUsername
 import ch.qscqlmpa.wingtracker.settings.SaveThemeMode
 import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
@@ -58,6 +62,7 @@ import ch.qscqlmpa.wingtracker.storage.json.JsonHarnessRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonReserveRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonSettingsRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonWingRepository
+import ch.qscqlmpa.wingtracker.syride.SyrideWebFlightSource
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.GearUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
@@ -92,6 +97,7 @@ private fun storageModule(dataDirectory: Path) =
     module {
         single { AppClock() }
         single<TrackReader> { Igc4jTrackReader() }
+        single<SyrideFlightSource> { SyrideWebFlightSource() }
         single<WingRepository> { JsonWingRepository(dataDirectory) }
         single<HarnessRepository> { JsonHarnessRepository(dataDirectory) }
         single<ReserveRepository> { JsonReserveRepository(dataDirectory) }
@@ -138,7 +144,9 @@ private fun flightsModule() =
         factory { PrepareIgcImport(get(), get()) }
         factory { ImportIgcFlight(get(), get(), get(), get()) }
         factory { GetLogbook(get(), get()) }
-        single { LogbookUseCases(get(), get(), get(), get(), get(), get(), get()) }
+        factory { PrepareSyrideImport(get(), get(), get()) }
+        factory { ImportSyrideFlights(get(), get(), get(), RegisterWing(get())) }
+        single { LogbookUseCases(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
         factory { GetStatistics(get(), get(), get()) }
     }
 
@@ -166,6 +174,7 @@ private fun remindersModule() =
         factory { SaveReminderLeadTimes(get()) }
         factory { SaveThemeMode(get()) }
         factory { SaveInterfaceScale(get()) }
+        factory { SaveSyrideUsername(get()) }
         single { RemindersUseCases(get(), get(), get(), get()) }
         single { StartupReminder(get(), get(), TrayNotifier()) }
     }

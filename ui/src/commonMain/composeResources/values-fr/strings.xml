@@ -336,4 +336,46 @@
     <string name="failure_data_same">C'est déjà le dossier utilisé.</string>
     <string name="failure_data_unusable">Ce dossier ne peut pas être utilisé : ce doit être un dossier dans lequel tu peux écrire.</string>
     <string name="failure_data_overlaps">Choisis un dossier qui n'est pas dans le dossier de données actuel et qui ne le contient pas.</string>
+    <string name="syride_import">Importer depuis Syride</string>
+    <string name="syride_title">Importer des vols depuis Syride</string>
+    <string name="syride_account_hint">Saisis ton nom de pilote Syride (la dernière partie de syride.com/en/pilots/NOM). Seule ta liste de vols publique est lue ; rien n'est modifié sur Syride.</string>
+    <string name="syride_username">Nom de pilote Syride</string>
+    <string name="syride_read">Lire les vols</string>
+    <string name="syride_reading">Lecture de tes vols depuis Syride…</string>
+    <string name="syride_wings_title">Quelle voile est laquelle ?</string>
+    <string name="syride_wings_hint">Choisis pour chaque voile utilisée sur Syride la voile de l'application, ou crée-la ici. Les vols d'une voile ignorée ne sont pas importés.</string>
+    <string name="syride_wing_name">%1$s (%2$s)</string>
+    <string name="syride_wing_period">%1$s au %2$s · %3$s</string>
+    <string name="syride_choice_new">Nouvelle voile : %1$s</string>
+    <string name="syride_choice_create">Créer une nouvelle voile…</string>
+    <string name="syride_choice_skip">Ignorer ces vols</string>
+    <string name="syride_new_incomplete">Complète d'abord la nouvelle voile</string>
+    <string name="syride_edit_new">Modifier</string>
+    <string name="syride_already">%1$d vols avaient déjà été importés et sont laissés de côté.</string>
+    <string name="syride_nothing_new">Il n'y a aucun nouveau vol à importer.</string>
+    <string name="syride_back">Retour</string>
+    <string name="syride_newwing_title">Nouvelle voile</string>
+    <string name="syride_newwing_hint">Elle est en service dès son premier vol importé. Tu pourras compléter les autres informations plus tard sous Matériel.</string>
+    <string name="syride_done_title">Import terminé</string>
+    <string name="syride_done_summary">%1$d vols importés, %2$d voiles créées, %3$d laissés de côté.</string>
+    <string name="syride_failed_title">Ces vols n'ont pas pu être importés :</string>
+    <string name="syride_failed_row">%1$s · %2$s</string>
+    <string name="syride_failure_future">la date est dans le futur</string>
+    <string name="syride_failure_before_service">volé avant la mise en service de la voile</string>
+    <string name="syride_failure_save">enregistrement impossible : %1$s</string>
+    <string name="action_close">Fermer</string>
+    <string name="failure_syride_user">Aucun pilote Syride de ce nom n'a été trouvé.</string>
+    <string name="failure_syride_unreachable">Syride est injoignable : %1$s</string>
+    <string name="failure_syride_changed">Les pages de Syride ne ressemblent pas à ce qui est attendu, les vols ne peuvent donc pas être lus (%1$s). L'application a besoin d'une mise à jour.</string>
+    <string name="failure_import_syride">Les vols n'ont pas pu être importés : %1$s</string>
+    <plurals name="syride_import_count">
+        <item quantity="one">Importer %1$d vol</item>
+        <item quantity="other">Importer %1$d vols</item>
+    </plurals>
+    <plurals name="syride_wing_flights">
+        <item quantity="one">%1$d vol</item>
+        <item quantity="other">%1$d vols</item>
+    </plurals>
+    <string name="flight_distance">%1$s km</string>
+    <string name="flight_altitude">%1$d m</string>
 </resources>
