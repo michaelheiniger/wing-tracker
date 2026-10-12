@@ -23,6 +23,7 @@ enum class FailureKind {
     ImportIgc,
     OpenTrack,
     DropNoIgc,
+    NoIgcInFolder,
     OpenDataFolder,
     ChangeDataFolder,
     DataFolderSame,

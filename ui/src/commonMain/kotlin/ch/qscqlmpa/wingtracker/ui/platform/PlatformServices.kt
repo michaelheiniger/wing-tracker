@@ -11,6 +11,15 @@ interface FilePicker {
         title: String,
         extension: String,
     ): List<NewAttachment>
+
+    /**
+     * Lets the user choose a folder, e.g. a logger mounted as a drive, and returns every file with the given
+     * [extension] (without the dot) found in it and its subfolders, or null when the dialog was cancelled.
+     */
+    suspend fun pickFolder(
+        title: String,
+        extension: String,
+    ): List<NewAttachment>?
 }
 
 /** Opens a file in the platform's default viewer. */

@@ -53,6 +53,8 @@ class IgcBatchPresenter(
     private val prepareIgcImport: PrepareIgcImport,
     private val importIgcFlight: ImportIgcFlight,
     defaultWingId: WingId,
+    // A logger holds every track ever recorded; listing the known ones again on each import would bury the new ones.
+    private val hideAlreadyImported: Boolean = false,
 ) {
     var rows by mutableStateOf<List<IgcBatchRow>>(emptyList())
         private set
@@ -64,6 +66,8 @@ class IgcBatchPresenter(
         private set
     var importedCount by mutableStateOf(0)
         private set
+    var skippedCount by mutableStateOf(0)
+        private set
 
     val importableCount: Int get() = rows.count { it.selected && it.selectable }
     val failedCount: Int get() = rows.count { it.failedToImport }
@@ -72,7 +76,17 @@ class IgcBatchPresenter(
 
     fun load(files: List<NewAttachment>) {
         scope.launch {
-            rows = prepare(files)
+            val prepared = prepare(files)
+            val skipped =
+                if (hideAlreadyImported) {
+                    prepared.filter {
+                        it.problem == IgcRowProblem.AlreadyImported
+                    }
+                } else {
+                    emptyList()
+                }
+            skippedCount = skipped.size
+            rows = prepared - skipped.toSet()
             loading = false
         }
     }

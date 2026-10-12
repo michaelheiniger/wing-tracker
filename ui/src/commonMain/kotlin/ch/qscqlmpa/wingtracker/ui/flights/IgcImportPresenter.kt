@@ -16,17 +16,41 @@ class IgcImportPresenter(
     private val scope: CoroutineScope,
     private val filePicker: FilePicker,
     private val pickTitle: String,
+    private val pickFolderTitle: String,
 ) {
     var failure by mutableStateOf<Failure?>(null)
         private set
 
-    fun choose(onChosen: (List<NewAttachment>) -> Unit) {
+    fun choose(onChosen: (List<NewAttachment>) -> Unit) =
+        collect(onChosen) { filePicker.pick(pickTitle, IGC_EXTENSION) }
+
+    /** For a logger mounted as a drive: all its tracks at once, wherever it keeps them. */
+    fun chooseFolder(onChosen: (List<NewAttachment>) -> Unit) =
+        collect(onChosen, emptyFolder = FailureKind.NoIgcInFolder) {
+            filePicker.pickFolder(pickFolderTitle, IGC_EXTENSION)
+        }
+
+    private fun collect(
+        onChosen: (List<NewAttachment>) -> Unit,
+        emptyFolder: FailureKind? = null,
+        pick: suspend () -> List<NewAttachment>?,
+    ) {
         scope.launch {
             try {
                 failure = null
-                // Cancelling the file dialog is not an error.
-                val files = filePicker.pick(pickTitle, IGC_EXTENSION)
-                if (files.isNotEmpty()) onChosen(files)
+                // Cancelling the dialog is not an error.
+                val files = pick()
+                when {
+                    files == null -> {}
+
+                    files.isNotEmpty() -> {
+                        onChosen(files)
+                    }
+
+                    emptyFolder != null -> {
+                        failure = Failure(emptyFolder, null)
+                    }
+                }
             } catch (e: CancellationException) {
                 throw e
                 // A file that cannot be read must show a message, never crash the window.

@@ -122,7 +122,7 @@ class IgcImportPresentersTest {
 
     @Nested
     inner class ChoosingTheFiles {
-        private fun TestScope.importer() = IgcImportPresenter(scope(), picker, "Choose")
+        private fun TestScope.importer() = IgcImportPresenter(scope(), picker, "Choose", "Choose folder")
 
         @Test
         fun `hands over every chosen file`() =
@@ -166,6 +166,50 @@ class IgcImportPresentersTest {
 
                 // then
                 assertThat(presenter.failure).isEqualTo(Failure(FailureKind.ImportIgc, "Permission denied"))
+            }
+
+        @Test
+        fun `hands over every track found in the chosen folder`() =
+            runTest {
+                // given
+                coEvery { picker.pickFolder("Choose folder", "igc") } returns listOf(FILE, FILE)
+                var chosen = emptyList<NewAttachment>()
+
+                // when
+                importer().chooseFolder { chosen = it }
+
+                // then
+                assertThat(chosen).hasSize(2)
+            }
+
+        @Test
+        fun `does nothing when the folder dialog is cancelled`() =
+            runTest {
+                // given
+                coEvery { picker.pickFolder("Choose folder", "igc") } returns null
+                val presenter = importer()
+                var called = false
+
+                // when
+                presenter.chooseFolder { called = true }
+
+                // then
+                assertThat(called).isFalse()
+                assertThat(presenter.failure).isNull()
+            }
+
+        @Test
+        fun `reports a folder that holds no track`() =
+            runTest {
+                // given
+                coEvery { picker.pickFolder("Choose folder", "igc") } returns emptyList()
+                val presenter = importer()
+
+                // when
+                presenter.chooseFolder {}
+
+                // then
+                assertThat(presenter.failure).isEqualTo(Failure(FailureKind.NoIgcInFolder, null))
             }
 
         @Test
@@ -233,6 +277,37 @@ class IgcImportPresentersTest {
                 assertThat(presenter.rows.single().problem).isEqualTo(IgcRowProblem.AlreadyImported)
                 assertThat(presenter.rows.single().selected).isFalse()
                 assertThat(presenter.rows.single().selectable).isTrue()
+            }
+
+        @Test
+        fun `leaves known tracks out of the list and counts them when asked to`() =
+            runTest {
+                // given
+                val known = track("a.igc", CHECKSUM)
+                val fresh = track("b.igc", "sum-b", LocalDate(2026, 9, 21))
+                val earlier =
+                    Flight(
+                        FlightId("flight-0"),
+                        FlightDetails(LocalDate(2026, 9, 20), 95.minutes, WING_ID),
+                        Instant.parse("2026-09-20T17:00:00Z"),
+                        IgcFile(Attachment(AttachmentId("igc-0"), "old.igc"), CHECKSUM),
+                    )
+                coEvery { flights.findAll() } returns LoadResult(listOf(earlier))
+                val presenter =
+                    IgcBatchPresenter(
+                        scope(),
+                        PrepareIgcImport(reader, flights),
+                        ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported-${counter++}") },
+                        WING_ID,
+                        hideAlreadyImported = true,
+                    )
+
+                // when
+                presenter.load(listOf(known, fresh))
+
+                // then
+                assertThat(presenter.rows.map { it.file.fileName }).containsExactly("b.igc")
+                assertThat(presenter.skippedCount).isEqualTo(1)
             }
 
         @Test

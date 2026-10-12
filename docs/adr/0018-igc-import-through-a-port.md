@@ -21,3 +21,4 @@ Replacing the library, or writing our own reader for other targets, only touches
 ## Amendments
 
 - 2026-10-11: Several tracks are imported at once, from the file chooser or by dropping files on the logbook, through one review list (ticked tracks, wing for all tracks with a per-track override). The review shows what the track says but no longer edits the date or duration, so a track without a detectable flight cannot be imported; such a flight is logged by hand. Tracks already imported, or repeated in the same selection, are unticked rather than asked about one by one. Detection, the checksum check and the flight rules are unchanged.
+- 2026-10-12: Tracks can also come from a folder, such as a logger mounted as a drive, and go through the same review list. Tracks already imported are left out of that list and only counted, since a logger keeps every track ever recorded. Detection, the checksum check and the flight rules are unchanged.

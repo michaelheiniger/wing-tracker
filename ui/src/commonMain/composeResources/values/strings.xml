@@ -287,6 +287,13 @@
     <string name="calendar_calendar_name">Wing Tracker</string>
 
     <string name="igc_import">Import IGC</string>
+    <string name="igc_import_device">Import from device</string>
+    <string name="igc_pick_folder_title">Choose the device or folder with the flight tracks</string>
+    <plurals name="igc_batch_skipped">
+        <item quantity="one">%1$d track was already imported and is not listed.</item>
+        <item quantity="other">%1$d tracks were already imported and are not listed.</item>
+    </plurals>
+    <string name="igc_batch_nothing_new">There is nothing new to import.</string>
     <string name="igc_pick_title">Choose a flight track</string>
     <string name="igc_detected">Found in the track: take-off %1$s, landing %2$s (UTC)</string>
     <string name="igc_batch_title">Import flight tracks</string>
@@ -307,6 +314,7 @@
     <string name="failure_drop_no_igc">Only IGC flight tracks can be imported. Nothing was imported.</string>
     <string name="igc_track_chip">Track</string>
     <string name="igc_open_track">Open the track of this flight</string>
+    <string name="failure_no_igc_in_folder">No IGC flight tracks were found in this folder.</string>
     <string name="failure_import_igc">The track could not be read: %1$s</string>
     <string name="failure_open_track">The track could not be opened: %1$s</string>
 

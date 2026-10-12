@@ -65,6 +65,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.flight_sites
 import ch.qscqlmpa.wingtracker.ui.resources.flight_unknown_wing
 import ch.qscqlmpa.wingtracker.ui.resources.flights_count
 import ch.qscqlmpa.wingtracker.ui.resources.igc_import
+import ch.qscqlmpa.wingtracker.ui.resources.igc_import_device
 import ch.qscqlmpa.wingtracker.ui.resources.igc_open_track
 import ch.qscqlmpa.wingtracker.ui.resources.igc_track_chip
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_empty_action
@@ -99,6 +100,7 @@ fun LogbookScreen(
     onLogFlight: () -> Unit,
     onEditFlight: (Flight) -> Unit,
     onImportIgc: () -> Unit,
+    onImportDevice: () -> Unit,
     onImportSyride: () -> Unit,
     attention: Attention,
     onOpenAttention: (GearRef) -> Unit,
@@ -137,6 +139,9 @@ fun LogbookScreen(
                         OutlinedButton(onClick = onImportSyride) { Text(stringResource(Res.string.syride_import)) }
                         // Importing a track needs a wing to log the flight on, like logging by hand.
                         if (logbook.wings.isNotEmpty()) {
+                            OutlinedButton(onClick = onImportDevice) {
+                                Text(stringResource(Res.string.igc_import_device))
+                            }
                             OutlinedButton(onClick = onImportIgc) { Text(stringResource(Res.string.igc_import)) }
                         }
                     }

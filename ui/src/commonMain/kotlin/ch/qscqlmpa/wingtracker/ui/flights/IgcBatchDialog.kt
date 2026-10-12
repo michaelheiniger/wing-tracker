@@ -38,7 +38,9 @@ import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_import
+import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_nothing_new
 import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_result
+import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_skipped
 import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_title
 import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_wing_for_all
 import ch.qscqlmpa.wingtracker.ui.resources.igc_detected
@@ -75,8 +77,23 @@ fun IgcBatchDialog(
                 if (presenter.loading) {
                     CircularProgressIndicator(modifier = Modifier.padding(24.dp).align(Alignment.CenterHorizontally))
                 } else {
-                    WingForAll(presenter, wings)
-                    TrackList(presenter, wings)
+                    if (presenter.rows.isEmpty()) {
+                        Text(stringResource(Res.string.igc_batch_nothing_new))
+                    } else {
+                        WingForAll(presenter, wings)
+                        TrackList(presenter, wings)
+                    }
+                    if (presenter.skippedCount > 0) {
+                        Text(
+                            pluralStringResource(
+                                Res.plurals.igc_batch_skipped,
+                                presenter.skippedCount,
+                                presenter.skippedCount,
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                     if (presenter.failedCount > 0) {
                         Text(
                             stringResource(Res.string.igc_batch_result, presenter.importedCount, presenter.failedCount),

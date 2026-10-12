@@ -28,6 +28,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_load_logbook
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_maintenance
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_settings
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_statistics
+import ch.qscqlmpa.wingtracker.ui.resources.failure_no_igc_in_folder
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_data_folder
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_report
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_track
@@ -51,6 +52,7 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.ImportIgc to Res.string.failure_import_igc,
         FailureKind.OpenTrack to Res.string.failure_open_track,
         FailureKind.DropNoIgc to Res.string.failure_drop_no_igc,
+        FailureKind.NoIgcInFolder to Res.string.failure_no_igc_in_folder,
         FailureKind.OpenDataFolder to Res.string.failure_open_data_folder,
         FailureKind.ChangeDataFolder to Res.string.failure_change_data_folder,
         FailureKind.DataFolderSame to Res.string.failure_data_same,

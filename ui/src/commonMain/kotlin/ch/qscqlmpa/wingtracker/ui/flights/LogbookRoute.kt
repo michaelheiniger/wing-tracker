@@ -24,6 +24,7 @@ import ch.qscqlmpa.wingtracker.reminders.Attention
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.igc_drop_hint
+import ch.qscqlmpa.wingtracker.ui.resources.igc_pick_folder_title
 import ch.qscqlmpa.wingtracker.ui.resources.igc_pick_title
 import ch.qscqlmpa.wingtracker.ui.resources.undo_flight_discarded
 import ch.qscqlmpa.wingtracker.ui.syride.SyrideImportDialog
@@ -48,6 +49,8 @@ private sealed interface LogbookDialog {
 
     data class Import(
         val files: List<NewAttachment>,
+        // Tracks read from a device are mostly known already, so those are left out of the review.
+        val fromDevice: Boolean = false,
     ) : LogbookDialog
 }
 
@@ -71,7 +74,8 @@ fun LogbookRoute(
             )
         }
     val pickTitle = stringResource(Res.string.igc_pick_title)
-    val importer = remember { IgcImportPresenter(scope, platform.filePicker, pickTitle) }
+    val pickFolderTitle = stringResource(Res.string.igc_pick_folder_title)
+    val importer = remember { IgcImportPresenter(scope, platform.filePicker, pickTitle, pickFolderTitle) }
     var dropHover by remember { mutableStateOf(false) }
     var dialog by remember { mutableStateOf<LogbookDialog?>(null) }
 
@@ -97,6 +101,11 @@ fun LogbookRoute(
             onLogFlight = { dialog = LogbookDialog.New() },
             onEditFlight = { dialog = LogbookDialog.Edit(it) },
             onImportIgc = { importer.choose { files -> dialog = LogbookDialog.Import(files) } },
+            onImportDevice = {
+                importer.chooseFolder { files ->
+                    dialog = LogbookDialog.Import(files, fromDevice = true)
+                }
+            },
             onImportSyride = { dialog = LogbookDialog.Syride },
             attention = attention,
             onOpenAttention = onOpenGear,
@@ -139,6 +148,7 @@ fun LogbookRoute(
                         useCases.importIgcFlight,
                         // The wing flown last, like for a flight entered by hand.
                         checkNotNull(presenter.state.newFlightInput(today()).wingId ?: wings.firstOrNull()?.id),
+                        hideAlreadyImported = current.fromDevice,
                     )
                 }
             IgcBatchDialog(batch, current.files, wings, onClose = closeDialog)
