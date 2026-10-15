@@ -82,17 +82,19 @@ fun main() {
     val errorHandling = UnexpectedErrorHandling(UnexpectedErrors()).also { it.install() }
 
     application {
-        // Followed live, so switching the desktop between light and dark needs no restart.
         var systemDark by remember { mutableStateOf(initialSystemDark) }
         LaunchedEffect(Unit) {
-            while (true) {
-                delay(SYSTEM_THEME_POLL_MILLIS)
-                systemDark = withContext(Dispatchers.IO) { systemTheme.isDark() }
-            }
-        }
-        LaunchedEffect(Unit) {
             // Supervised, so a failure is shown to the pilot instead of ending the app.
-            supervisorScope { launch(errorHandling.coroutineExceptionHandler) { koin.get<StartupReminder>()() } }
+            supervisorScope {
+                launch(errorHandling.coroutineExceptionHandler) { koin.get<StartupReminder>()() }
+                // Followed live, so switching the desktop between light and dark needs no restart.
+                launch(errorHandling.coroutineExceptionHandler) {
+                    while (true) {
+                        delay(SYSTEM_THEME_POLL_MILLIS)
+                        systemDark = withContext(Dispatchers.IO) { systemTheme.isDark() }
+                    }
+                }
+            }
         }
         val themed: @Composable (@Composable () -> Unit) -> Unit = { content ->
             WithInterfaceScale(DesktopScale.factor(scalePreference.percent, detectedScale, jvmScale)) {
