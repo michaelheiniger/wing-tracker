@@ -304,9 +304,6 @@
     <string name="calendar_due_description">L'intervalle de contrôle de %1$s se termine aujourd'hui.</string>
     <string name="calendar_planned">%1$s : %2$s</string>
     <string name="calendar_calendar_name">Wing Tracker</string>
-
-    <string name="igc_import">Importer un IGC</string>
-    <string name="igc_import_device">Importer depuis l'appareil</string>
     <string name="igc_pick_folder_title">Choisir l'appareil ou le dossier contenant les traces de vol</string>
     <plurals name="igc_batch_skipped">
         <item quantity="one">%1$d trace était déjà importée et n'est pas listée.</item>
@@ -367,7 +364,6 @@
     <string name="failure_data_same">C'est déjà le dossier utilisé.</string>
     <string name="failure_data_unusable">Ce dossier ne peut pas être utilisé : ce doit être un dossier dans lequel tu peux écrire.</string>
     <string name="failure_data_overlaps">Choisis un dossier qui n'est pas dans le dossier de données actuel et qui ne le contient pas.</string>
-    <string name="syride_import">Importer depuis Syride</string>
     <string name="syride_title">Importer des vols depuis Syride</string>
     <string name="syride_account_hint">Saisis ton nom de pilote Syride (la dernière partie de syride.com/en/pilots/NOM). Seule ta liste de vols publique est lue ; rien n'est modifié sur Syride.</string>
     <string name="syride_username">Nom de pilote Syride</string>
@@ -413,4 +409,9 @@
     <string name="about_version">Version %1$s</string>
     <string name="about_changelog">Nouveautés (journal des modifications)</string>
     <string name="about_close">Fermer</string>
+    <string name="import_menu">Importer</string>
+    <string name="import_menu_igc">Fichiers IGC…</string>
+    <string name="import_menu_device">Depuis un appareil…</string>
+    <string name="import_menu_syride">Depuis Syride…</string>
+    <string name="import_menu_needs_wing">Ajoute d'abord une voile</string>
 </resources>

@@ -304,9 +304,6 @@
     <string name="calendar_due_description">The check interval of %1$s ends today.</string>
     <string name="calendar_planned">%1$s: %2$s</string>
     <string name="calendar_calendar_name">Wing Tracker</string>
-
-    <string name="igc_import">Import IGC</string>
-    <string name="igc_import_device">Import from device</string>
     <string name="igc_pick_folder_title">Choose the device or folder with the flight tracks</string>
     <plurals name="igc_batch_skipped">
         <item quantity="one">%1$d track was already imported and is not listed.</item>
@@ -367,7 +364,6 @@
     <string name="failure_data_same">That is the folder already in use.</string>
     <string name="failure_data_unusable">That folder cannot be used: it must be a folder you can write to.</string>
     <string name="failure_data_overlaps">Choose a folder that is not inside the current data folder and does not contain it.</string>
-    <string name="syride_import">Import from Syride</string>
     <string name="syride_title">Import flights from Syride</string>
     <string name="syride_account_hint">Enter your Syride pilot name (the last part of syride.com/en/pilots/NAME). Only your public flight list is read; nothing is changed on Syride.</string>
     <string name="syride_username">Syride pilot name</string>
@@ -413,4 +409,9 @@
     <string name="about_version">Version %1$s</string>
     <string name="about_changelog">What's new (changelog)</string>
     <string name="about_close">Close</string>
+    <string name="import_menu">Import</string>
+    <string name="import_menu_igc">IGC files…</string>
+    <string name="import_menu_device">From a device…</string>
+    <string name="import_menu_syride">From Syride…</string>
+    <string name="import_menu_needs_wing">Add a wing first</string>
 </resources>

@@ -64,8 +64,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.flight_edit
 import ch.qscqlmpa.wingtracker.ui.resources.flight_sites
 import ch.qscqlmpa.wingtracker.ui.resources.flight_unknown_wing
 import ch.qscqlmpa.wingtracker.ui.resources.flights_count
-import ch.qscqlmpa.wingtracker.ui.resources.igc_import
-import ch.qscqlmpa.wingtracker.ui.resources.igc_import_device
 import ch.qscqlmpa.wingtracker.ui.resources.igc_open_track
 import ch.qscqlmpa.wingtracker.ui.resources.igc_track_chip
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_empty_action
@@ -79,7 +77,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.logbook_no_wings_body
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_no_wings_title
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_title
 import ch.qscqlmpa.wingtracker.ui.resources.month_names
-import ch.qscqlmpa.wingtracker.ui.resources.syride_import
 import ch.qscqlmpa.wingtracker.ui.resources.undo_flight_deleted
 import ch.qscqlmpa.wingtracker.ui.resources.unreadable_kept
 import ch.qscqlmpa.wingtracker.ui.resources.unreadable_quarantined
@@ -134,17 +131,7 @@ fun LogbookScreen(
             ) {
                 Text(stringResource(Res.string.logbook_title), style = MaterialTheme.typography.headlineMedium)
                 if (logbook != null) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        // The Syride import can create the wings it needs, so it is offered before any wing exists.
-                        OutlinedButton(onClick = onImportSyride) { Text(stringResource(Res.string.syride_import)) }
-                        // Importing a track needs a wing to log the flight on, like logging by hand.
-                        if (logbook.wings.isNotEmpty()) {
-                            OutlinedButton(onClick = onImportDevice) {
-                                Text(stringResource(Res.string.igc_import_device))
-                            }
-                            OutlinedButton(onClick = onImportIgc) { Text(stringResource(Res.string.igc_import)) }
-                        }
-                    }
+                    ImportMenu(logbook.wings.isNotEmpty(), onImportIgc, onImportDevice, onImportSyride)
                 }
             }
             importFailure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }

@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Changed
+- The logbook's import buttons are now one "Import" menu: IGC files, from a device, from Syride. Imports that need a wing say so instead of disappearing.
+
 ### Added
 - The statistics charts show flights per year and cumulative flights; an "Hours / Flights" switch at the top changes both charts, and the table view shows both. A new section lists for each active wing the flights and hours since its last check.
 - Wings have an optional "flights before tracking" count, next to the hours flown before tracking, for used wings.
