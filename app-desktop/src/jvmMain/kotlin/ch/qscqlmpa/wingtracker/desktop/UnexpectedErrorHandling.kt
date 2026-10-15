@@ -8,10 +8,13 @@ import androidx.compose.ui.window.WindowExceptionHandler
 import androidx.compose.ui.window.WindowExceptionHandlerFactory
 import ch.qscqlmpa.wingtracker.ui.errors.UnexpectedError
 import ch.qscqlmpa.wingtracker.ui.errors.UnexpectedErrors
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineExceptionHandler
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import javax.swing.SwingUtilities
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Sends every exception nothing else handled to [errors], so the pilot sees it instead of the app dying or
@@ -59,9 +62,9 @@ internal class UnexpectedErrorHandling(
         }
 
     private fun report(error: Throwable) {
-        // Still printed as before, so it reaches the console and the system log even after the dialog is closed;
-        // once only, as a failure while drawing repeats on every frame.
-        if (errors.report(error).occurrences == 1) System.err.println(error.stackTraceToString())
+        // Logged so it can be read after the dialog is closed; once only, as a failure while drawing repeats on every
+        // frame.
+        if (errors.report(error).occurrences == 1) logger.error(error) { "Unexpected error" }
     }
 
     fun dismiss() {

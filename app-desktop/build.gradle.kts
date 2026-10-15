@@ -62,6 +62,9 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.filekit.dialogs)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlin.logging)
+            // The logging backend is chosen here only; every other module sees just the facade (ADR 0023).
+            implementation(libs.logback.classic)
         }
     }
 }
@@ -72,8 +75,10 @@ val appVersion = providers.gradleProperty("appVersion").orElse("1.0.0")
 compose.desktop {
     application {
         mainClass = "ch.qscqlmpa.wingtracker.desktop.MainKt"
-        // Dev runs pass -Dwingtracker.dev=true; see the IntelliJ run configuration.
+        // Dev runs pass -Dwingtracker.dev=true (DevMode); see the IntelliJ run configuration.
         jvmArgs += listOf("-Dwingtracker.dev=${providers.gradleProperty("wingtracker.dev").orElse("false").get()}")
+        // Its banner would only clutter the console and the log.
+        jvmArgs += listOf("-Dkotlin-logging.logStartupMessage=false")
         nativeDistributions {
             targetFormats(TargetFormat.Deb)
             packageName = "wing-tracker"

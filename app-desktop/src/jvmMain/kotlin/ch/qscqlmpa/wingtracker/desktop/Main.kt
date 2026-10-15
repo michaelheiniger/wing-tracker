@@ -42,6 +42,7 @@ import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import ch.qscqlmpa.wingtracker.ui.theme.WingTrackerTheme
 import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.vinceglb.filekit.FileKit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -63,11 +64,20 @@ private const val WINDOW_HEIGHT = 950
 private const val ERROR_WIDTH = 760
 private const val ERROR_HEIGHT = 520
 
+private val logger = KotlinLogging.logger {}
+
 fun main() {
+    val devMode = DevMode.isOn()
     // The application id names FileKit's own per-user folders and identifies the dialogs to the desktop portal.
     FileKit.init(appId = APP_ID)
-    val devMode = System.getProperty("wingtracker.dev").toBoolean()
-    val koin = startKoin { modules(appModules(DataDirectory.configured(devMode), devMode)) }.koin
+    val dataDirectory = DataDirectory.configured(devMode)
+    // Enough context to read a pilot's log without asking which version and setup produced it.
+    logger.info {
+        "Starting Wing Tracker ${BuildInfo.VERSION} (dev mode: $devMode) on ${System.getProperty("os.name")} " +
+            "${System.getProperty("os.version")}, Java ${System.getProperty("java.version")}; " +
+            "data folder $dataDirectory, log folder ${DesktopLogging.directory(devMode)}"
+    }
+    val koin = startKoin { modules(appModules(dataDirectory, devMode)) }.koin
 
     // Loaded before the first frame so the window never flashes the wrong theme or size.
     val settings = runBlocking { koin.get<SettingsRepository>().load() }

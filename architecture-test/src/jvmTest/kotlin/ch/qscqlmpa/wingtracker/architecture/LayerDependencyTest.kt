@@ -13,6 +13,9 @@ import org.junit.jupiter.api.Test
 class LayerDependencyTest {
     private val base = "ch.qscqlmpa.wingtracker"
 
+    // Only the composition root picks the logging backend; everything else logs through the facade (ADR 0023).
+    private val loggingBackends = arrayOf("org.slf4j", "ch.qos.logback")
+
     private fun importsOf(module: String) = Konsist.scopeFromDirectory("$module/src").files.imports
 
     private fun assertNoImportStartsWith(
@@ -39,6 +42,8 @@ class LayerDependencyTest {
                 "androidx.compose",
                 "org.koin",
                 "kotlinx.serialization",
+                "io.github.oshai.kotlinlogging",
+                *loggingBackends,
             )
         }
     }
@@ -54,6 +59,7 @@ class LayerDependencyTest {
                 "$base.desktop",
                 "androidx.compose",
                 "org.koin",
+                *loggingBackends,
             )
         }
     }
@@ -62,7 +68,7 @@ class LayerDependencyTest {
     inner class Ui {
         @Test
         fun `does not depend on infrastructure or the composition root`() {
-            assertNoImportStartsWith("ui", "$base.infrastructure", "$base.desktop")
+            assertNoImportStartsWith("ui", "$base.infrastructure", "$base.desktop", *loggingBackends)
         }
     }
 
@@ -70,7 +76,13 @@ class LayerDependencyTest {
     inner class InfrastructureStorageJson {
         @Test
         fun `does not depend on ui or the composition root`() {
-            assertNoImportStartsWith("infrastructure-storage-json", "$base.ui", "$base.desktop", "androidx.compose")
+            assertNoImportStartsWith(
+                "infrastructure-storage-json",
+                "$base.ui",
+                "$base.desktop",
+                "androidx.compose",
+                *loggingBackends,
+            )
         }
     }
 
@@ -84,6 +96,7 @@ class LayerDependencyTest {
                 "$base.desktop",
                 "$base.storage",
                 "androidx.compose",
+                *loggingBackends,
             )
         }
     }
@@ -98,6 +111,7 @@ class LayerDependencyTest {
                 "$base.desktop",
                 "$base.storage",
                 "androidx.compose",
+                *loggingBackends,
             )
         }
     }
@@ -112,6 +126,7 @@ class LayerDependencyTest {
                 "$base.desktop",
                 "$base.storage",
                 "androidx.compose",
+                *loggingBackends,
             )
         }
     }

@@ -15,6 +15,8 @@ konsist = "0.18.1"
 detekt = "2.0.0-alpha.6"
 igc4j = "1.1.0"
 fastexcel = "0.20.2"
+kotlin-logging = "8.0.4"
+logback = "1.6.5"
 kover = "0.9.11"
 spotless = "8.10.4"
 ktlint = "1.8.0"
@@ -27,6 +29,8 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 igc4j = { module = "com.github.smirnovegorv:igc4j", version.ref = "igc4j" }
 fastexcel-reader = { module = "org.dhatim:fastexcel-reader", version.ref = "fastexcel" }
+kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kotlin-logging" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
