@@ -5,23 +5,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.ApplicationScope
+import androidx.compose.ui.window.DialogWindow
+import androidx.compose.ui.window.LocalWindowExceptionHandlerFactory
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.ui.window.rememberWindowState
 import ch.qscqlmpa.wingtracker.settings.SaveInterfaceScale
 import ch.qscqlmpa.wingtracker.settings.SaveThemeMode
 import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
+import ch.qscqlmpa.wingtracker.ui.errors.UnexpectedErrorContent
+import ch.qscqlmpa.wingtracker.ui.errors.UnexpectedErrors
+import ch.qscqlmpa.wingtracker.ui.errors.unexpectedErrorTitle
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.GearUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
@@ -38,6 +48,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import org.koin.core.Koin
 import org.koin.core.context.startKoin
 import java.awt.GraphicsEnvironment
 import java.awt.HeadlessException
@@ -47,6 +58,8 @@ private const val SYSTEM_THEME_POLL_MILLIS = 5_000L
 private const val APP_ID = "ch.qscqlmpa.wingtracker"
 private const val WINDOW_WIDTH = 1100
 private const val WINDOW_HEIGHT = 950
+private const val ERROR_WIDTH = 760
+private const val ERROR_HEIGHT = 520
 
 fun main() {
     // The application id names FileKit's own per-user folders and identifies the dialogs to the desktop portal.
@@ -66,6 +79,7 @@ fun main() {
 
     val systemTheme = SystemTheme()
     val initialSystemDark = systemTheme.isDark()
+    val errorHandling = UnexpectedErrorHandling(UnexpectedErrors()).also { it.install() }
 
     application {
         // Followed live, so switching the desktop between light and dark needs no restart.
@@ -83,36 +97,88 @@ fun main() {
             snapshotFlow { scalePreference.percent }.drop(1).collect { saveInterfaceScale(it) }
         }
         LaunchedEffect(Unit) { koin.get<StartupReminder>()() }
-        Window(
-            onCloseRequest = {
-                // A delete the pilot could still have undone must not be lost when the window closes.
-                runBlocking { koin.get<UndoCoordinator>().flush() }
-                exitApplication()
-            },
-            title = if (devMode) "Wing Tracker (dev)" else "Wing Tracker",
-            // The window is sized in the JVM's own units, so it grows with the interface.
-            state =
-                rememberWindowState(
-                    size = DpSize((WINDOW_WIDTH * initialFactor).dp, (WINDOW_HEIGHT * initialFactor).dp),
-                ),
-            icon = applicationIcon(),
-        ) {
+        val themed: @Composable (@Composable () -> Unit) -> Unit = { content ->
             WithInterfaceScale(DesktopScale.factor(scalePreference.percent, detectedScale, jvmScale)) {
-                WingTrackerTheme(themePreference.mode, systemDark ?: isSystemInDarkTheme()) {
-                    AppShell(
-                        logbookUseCases = koin.get<LogbookUseCases>(),
-                        getStatistics = koin.get<GetStatistics>(),
-                        gearUseCases = koin.get<GearUseCases>(),
-                        maintenanceUseCases = koin.get<MaintenanceUseCases>(),
-                        reminders = koin.get<RemindersUseCases>(),
-                        platform = koin.get<PlatformServices>(),
-                        themePreference = themePreference,
-                        scalePreference = scalePreference,
-                        undo = koin.get<UndoCoordinator>(),
-                        appVersion = BuildInfo.VERSION,
-                    )
-                }
+                WingTrackerTheme(themePreference.mode, systemDark ?: isSystemInDarkTheme(), content)
             }
+        }
+        // Outside the rebuilt part, so a rebuilt window opens where and as large as the old one was.
+        // The window is sized in the JVM's own units, so it grows with the interface.
+        val windowState =
+            rememberWindowState(size = DpSize((WINDOW_WIDTH * initialFactor).dp, (WINDOW_HEIGHT * initialFactor).dp))
+        key(errorHandling.windowGeneration) {
+            @OptIn(ExperimentalComposeUiApi::class)
+            CompositionLocalProvider(
+                LocalWindowExceptionHandlerFactory provides errorHandling.windowExceptionHandlerFactory,
+            ) {
+                MainWindow(koin, devMode, windowState, themePreference, scalePreference, themed)
+            }
+        }
+        UnexpectedErrorWindow(
+            errorHandling,
+            DesktopScale.factor(scalePreference.percent, detectedScale, jvmScale),
+            themed,
+        )
+    }
+}
+
+@Composable
+private fun ApplicationScope.MainWindow(
+    koin: Koin,
+    devMode: Boolean,
+    state: WindowState,
+    themePreference: ThemePreference,
+    scalePreference: InterfaceScalePreference,
+    themed: @Composable (@Composable () -> Unit) -> Unit,
+) {
+    Window(
+        onCloseRequest = {
+            // A delete the pilot could still have undone must not be lost when the window closes.
+            runBlocking { koin.get<UndoCoordinator>().flush() }
+            exitApplication()
+        },
+        title = if (devMode) "Wing Tracker (dev)" else "Wing Tracker",
+        state = state,
+        icon = applicationIcon(),
+    ) {
+        themed {
+            AppShell(
+                logbookUseCases = koin.get<LogbookUseCases>(),
+                getStatistics = koin.get<GetStatistics>(),
+                gearUseCases = koin.get<GearUseCases>(),
+                maintenanceUseCases = koin.get<MaintenanceUseCases>(),
+                reminders = koin.get<RemindersUseCases>(),
+                platform = koin.get<PlatformServices>(),
+                themePreference = themePreference,
+                scalePreference = scalePreference,
+                undo = koin.get<UndoCoordinator>(),
+                appVersion = BuildInfo.VERSION,
+            )
+        }
+    }
+}
+
+/** Its own window, not a dialog of the main one, so it still shows when the main window is what failed. */
+@Composable
+private fun UnexpectedErrorWindow(
+    errorHandling: UnexpectedErrorHandling,
+    scale: Float,
+    themed: @Composable (@Composable () -> Unit) -> Unit,
+) {
+    val error = errorHandling.errors.current ?: return
+    DialogWindow(
+        onCloseRequest = errorHandling::dismiss,
+        // Like the main window, sized in the JVM's own units, so it grows with the interface.
+        state = rememberDialogState(size = DpSize((ERROR_WIDTH * scale).dp, (ERROR_HEIGHT * scale).dp)),
+        title = unexpectedErrorTitle(),
+        icon = applicationIcon(),
+    ) {
+        themed {
+            UnexpectedErrorContent(
+                error = error,
+                onCopy = { errorHandling.copy(error) },
+                onDismiss = errorHandling::dismiss,
+            )
         }
     }
 }

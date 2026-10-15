@@ -483,4 +483,12 @@
         <item quantity="other">%1$d Flüge</item>
     </plurals>
     <string name="statistics_total">Total</string>
+    <string name="unexpected_error_title">Unerwarteter Fehler</string>
+    <string name="unexpected_error_body">Ein unerwarteter Fehler ist aufgetreten. Falls er wieder auftritt, melde ihn bitte mit den Details unten.</string>
+    <plurals name="unexpected_error_occurrences">
+        <item quantity="one">Er ist %1$d Mal aufgetreten.</item>
+        <item quantity="other">Er ist %1$d Mal aufgetreten.</item>
+    </plurals>
+    <string name="unexpected_error_copy">Details kopieren</string>
+    <string name="unexpected_error_ok">OK</string>
 </resources>

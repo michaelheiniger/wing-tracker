@@ -483,4 +483,12 @@
         <item quantity="other">%1$d vols</item>
     </plurals>
     <string name="statistics_total">Total</string>
+    <string name="unexpected_error_title">Erreur inattendue</string>
+    <string name="unexpected_error_body">Une erreur inattendue s'est produite. Si elle se reproduit, signale-la avec les détails ci-dessous.</string>
+    <plurals name="unexpected_error_occurrences">
+        <item quantity="one">Elle s'est produite %1$d fois.</item>
+        <item quantity="other">Elle s'est produite %1$d fois.</item>
+    </plurals>
+    <string name="unexpected_error_copy">Copier les détails</string>
+    <string name="unexpected_error_ok">OK</string>
 </resources>
