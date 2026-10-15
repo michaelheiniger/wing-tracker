@@ -14,26 +14,19 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-enum class ChartCardKind {
-    Yearly,
-    Cumulative,
-}
-
 data class StatisticsState(
     val statistics: Statistics? = null,
     // Which wings are hidden is remembered only while the screen lives; it is a view choice, not data.
     val hidden: Set<SeriesKey> = emptySet(),
     val showTable: Boolean = false,
-    // Each card picks its own unit, so yearly flights can sit above cumulative hours.
-    val units: Map<ChartCardKind, ChartUnit> = emptyMap(),
+    // One unit for all charts, so the yearly and cumulative views always tell the same story.
+    val unit: ChartUnit = ChartUnit.Flights,
     val unreadable: List<UnreadableRecord> = emptyList(),
     val failure: Failure? = null,
 ) {
     val loading: Boolean get() = statistics == null && failure == null
 
     val visibleSeries: List<Series> get() = statistics?.series.orEmpty().filter { it.key !in hidden }
-
-    fun unitOf(card: ChartCardKind): ChartUnit = units[card] ?: ChartUnit.Hours
 
     /** The slot is the position among all series, not among visible ones, so colors never shift. */
     fun slotOf(key: SeriesKey): Int = statistics?.series?.indexOfFirst { it.key == key } ?: 0
@@ -75,11 +68,8 @@ class StatisticsPresenter(
         state = state.copy(showTable = !state.showTable)
     }
 
-    fun selectUnit(
-        card: ChartCardKind,
-        unit: ChartUnit,
-    ) {
-        state = state.copy(units = state.units + (card to unit))
+    fun selectUnit(unit: ChartUnit) {
+        state = state.copy(unit = unit)
     }
 
     fun dismissUnreadable() {

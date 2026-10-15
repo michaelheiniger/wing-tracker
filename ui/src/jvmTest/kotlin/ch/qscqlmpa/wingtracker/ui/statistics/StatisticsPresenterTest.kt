@@ -150,27 +150,26 @@ class StatisticsPresenterTest {
     @Nested
     inner class SelectUnit {
         @Test
-        fun `shows hours on every card by default`() =
+        fun `shows flights by default`() =
             runTest {
                 // given / when
                 val presenter = presenter()
 
                 // then
-                assertThat(ChartCardKind.entries.map { presenter.state.unitOf(it) }).containsOnly(ChartUnit.Hours)
+                assertThat(presenter.state.unit).isEqualTo(ChartUnit.Flights)
             }
 
         @Test
-        fun `switches only the chosen card to flights`() =
+        fun `switches all charts to hours`() =
             runTest {
                 // given
                 val presenter = presenter()
 
                 // when
-                presenter.selectUnit(ChartCardKind.Yearly, ChartUnit.Flights)
+                presenter.selectUnit(ChartUnit.Hours)
 
                 // then
-                assertThat(presenter.state.unitOf(ChartCardKind.Yearly)).isEqualTo(ChartUnit.Flights)
-                assertThat(presenter.state.unitOf(ChartCardKind.Cumulative)).isEqualTo(ChartUnit.Hours)
+                assertThat(presenter.state.unit).isEqualTo(ChartUnit.Hours)
             }
     }
 }

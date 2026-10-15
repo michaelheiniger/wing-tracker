@@ -7,7 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
-- The statistics charts have an "Hours / Flights" switch on each card to show flights per year and cumulative flights; the table view shows both. A new section lists for each active wing the flights and hours since its last check.
+- The statistics charts show flights per year and cumulative flights; an "Hours / Flights" switch at the top changes both charts, and the table view shows both. A new section lists for each active wing the flights and hours since its last check.
 - Wings have an optional "flights before tracking" count, next to the hours flown before tracking, for used wings.
 - An "About" button at the bottom of the settings shows the version of the app and links to the changelog.
 

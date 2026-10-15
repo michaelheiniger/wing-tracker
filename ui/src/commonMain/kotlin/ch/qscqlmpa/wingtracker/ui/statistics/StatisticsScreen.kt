@@ -59,16 +59,13 @@ fun StatisticsScreen(
         ) {
             Text(stringResource(Res.string.statistics_title), style = MaterialTheme.typography.headlineMedium)
             if (statistics != null && !statistics.isEmpty) {
-                OutlinedButton(onClick = presenter::toggleTable) {
-                    Text(
-                        stringResource(
-                            if (state.showTable) {
-                                Res.string.statistics_show_charts
-                            } else {
-                                Res.string.statistics_show_table
-                            },
-                        ),
-                    )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    // The tables show both units, so the switch only makes sense for the charts.
+                    if (!state.showTable) UnitToggle(state.unit, presenter::selectUnit)
+                    StatisticsViewButton(state.showTable, presenter::toggleTable)
                 }
             }
         }
@@ -128,12 +125,26 @@ private fun StatisticsContent(
         }
 
         else -> {
-            StatisticsCharts(state, statistics, chartSeries, theme, presenter::selectUnit)
+            StatisticsCharts(state.unit, statistics, chartSeries, theme)
         }
     }
 
     // Not tied to the legend: it is about checks of each active wing, not about the charted series.
     SinceLastCheckCard(statistics.sinceLastCheck, theme)
+}
+
+@Composable
+private fun StatisticsViewButton(
+    showTable: Boolean,
+    onToggle: () -> Unit,
+) {
+    OutlinedButton(onClick = onToggle) {
+        Text(
+            stringResource(
+                if (showTable) Res.string.statistics_show_charts else Res.string.statistics_show_table,
+            ),
+        )
+    }
 }
 
 @Composable
