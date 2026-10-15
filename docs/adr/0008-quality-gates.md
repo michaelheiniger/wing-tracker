@@ -17,3 +17,7 @@ A long-lived codebase needs automated guards for style, design and architecture 
 ## Consequences
 
 One command gives the same verdict locally and in CI. detekt is on a pre-release line because no stable release supports current Kotlin, so its configuration may need adjusting on upgrades; revisit when a stable release exists.
+
+## Amendments
+
+- 2026-10-16: `check` also runs `verifyRuntimeModules` in `app-desktop`, which compares the JDK modules the application and its libraries use (found with `jdeps`) with those in the packaged runtime. A missing module otherwise only fails in the installed app, as the Syride import did. Every module found is packaged, so the check has no exceptions to keep up to date.
