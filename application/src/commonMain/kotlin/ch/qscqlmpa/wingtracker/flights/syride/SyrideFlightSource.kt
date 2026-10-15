@@ -26,6 +26,8 @@ data class SyrideFlight(
     val distanceKm: Double?,
     val topAltitudeMeters: Int?,
     val instrument: String?,
+    // Null when the earlier reader would have read the flight the same way, or could not tell.
+    val earlierReading: EarlierReading? = null,
 ) : ImportableFlight {
     override val externalReference: ExternalReference get() = ExternalReference(SYRIDE_SYSTEM, id)
 
@@ -41,6 +43,16 @@ data class SyrideFlight(
             instrument = instrument,
         )
 }
+
+/**
+ * How the reader used until 2026-10-16 read a flight's name and site: it cut them at the first parenthesis and left
+ * most accents as HTML entities. Flights it imported still carry those texts; knowing them tells such a text from one
+ * the pilot wrote, so only the former is corrected.
+ */
+data class EarlierReading(
+    val name: String?,
+    val siteName: String?,
+)
 
 enum class SyrideProblem {
     UserNotFound,

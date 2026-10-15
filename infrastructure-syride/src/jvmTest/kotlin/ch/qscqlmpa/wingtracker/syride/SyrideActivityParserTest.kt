@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.syride
 
 import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
+import ch.qscqlmpa.wingtracker.flights.syride.EarlierReading
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import org.assertj.core.api.Assertions.assertThat
@@ -57,6 +58,11 @@ class SyrideActivityParserTest {
         }
 
         @Test
+        fun `carries no earlier reading when the earlier reader got it right`() {
+            assertThat(flight.earlierReading).isNull()
+        }
+
+        @Test
         fun `identifies the flight by its Syride flight id`() {
             assertThat(flight.id).isEqualTo("flight:3720061")
         }
@@ -109,6 +115,11 @@ class SyrideActivityParserTest {
         fun `keeps parentheses that belong to the name`() {
             assertThat(flight.name).isEqualTo("Open de Jaman (RVL)")
             assertThat(flight.wing).isEqualTo(SourceWing("Ultralite 4", "Ozone"))
+        }
+
+        @Test
+        fun `remembers how the earlier reader garbled them`() {
+            assertThat(flight.earlierReading).isEqualTo(EarlierReading(name = "Open de Jaman", siteName = "Sonchaux"))
         }
     }
 

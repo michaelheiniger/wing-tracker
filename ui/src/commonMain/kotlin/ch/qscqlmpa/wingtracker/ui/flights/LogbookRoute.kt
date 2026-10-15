@@ -148,6 +148,7 @@ fun LogbookRoute(
                         scope,
                         useCases.prepareSyrideImport,
                         useCases.importSyrideFlights,
+                        useCases.correctSyrideImports,
                         useCases.saveSyrideUsername,
                         initialUsername = "",
                     )

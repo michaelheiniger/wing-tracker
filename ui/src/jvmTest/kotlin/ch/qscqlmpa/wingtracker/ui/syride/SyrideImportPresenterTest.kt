@@ -1,16 +1,20 @@
 package ch.qscqlmpa.wingtracker.ui.syride
 
+import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.importing.ImportResult
 import ch.qscqlmpa.wingtracker.flights.importing.NewWingSpec
 import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
 import ch.qscqlmpa.wingtracker.flights.importing.WingGroup
 import ch.qscqlmpa.wingtracker.flights.importing.WingTarget
+import ch.qscqlmpa.wingtracker.flights.syride.CorrectSyrideImports
 import ch.qscqlmpa.wingtracker.flights.syride.ImportSyrideFlights
 import ch.qscqlmpa.wingtracker.flights.syride.PrepareSyrideImport
+import ch.qscqlmpa.wingtracker.flights.syride.SyrideCorrection
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideException
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlight
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideImportDraft
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideProblem
+import ch.qscqlmpa.wingtracker.flights.syride.TextCorrection
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.settings.SaveSyrideUsername
 import ch.qscqlmpa.wingtracker.ui.FailureKind
@@ -45,13 +49,23 @@ private fun aGroup(
     ids: List<String> = listOf("${wing.name}-1"),
 ) = WingGroup(wing, ids.map { aFlight(it, wing) }, suggested)
 
-private fun aDraft(vararg groups: WingGroup<SyrideFlight>) =
-    SyrideImportDraft("QSCQLMPA", groups.toList(), 0, emptyList())
+private fun aDraft(
+    vararg groups: WingGroup<SyrideFlight>,
+    corrections: List<SyrideCorrection> = emptyList(),
+) = SyrideImportDraft("QSCQLMPA", groups.toList(), 0, emptyList(), corrections)
+
+private val A_CORRECTION =
+    SyrideCorrection(
+        FlightId("imported-1"),
+        notes = TextCorrection("Open de Jaman", "Open de Jaman (RVL)"),
+        takeOffSite = TextCorrection("Pl&eacute;iades", "Pléiades"),
+    )
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SyrideImportPresenterTest {
     private val prepare = mockk<PrepareSyrideImport>()
     private val import = mockk<ImportSyrideFlights>()
+    private val correct = mockk<CorrectSyrideImports>()
     private val saveUsername = mockk<SaveSyrideUsername>(relaxUnitFun = true)
 
     private fun TestScope.presenter(username: String = "QSCQLMPA") =
@@ -59,6 +73,7 @@ class SyrideImportPresenterTest {
             TestScope(UnconfinedTestDispatcher(testScheduler)),
             prepare,
             import,
+            correct,
             saveUsername,
             username,
         )
@@ -277,6 +292,61 @@ class SyrideImportPresenterTest {
                 // then
                 assertThat(presenter.failure?.kind).isEqualTo(FailureKind.ImportSyride)
                 assertThat(presenter.stage).isEqualTo(SyrideStage.Wings)
+            }
+    }
+
+    @Nested
+    inner class CorrectingEarlierFlights {
+        @Test
+        fun `corrects the flights and tells how many`() =
+            runTest {
+                // given
+                coEvery { prepare("QSCQLMPA") } returns aDraft(corrections = listOf(A_CORRECTION))
+                coEvery { correct(listOf(A_CORRECTION)) } returns 1
+                val presenter = presenter()
+                presenter.read()
+
+                // when
+                presenter.correct()
+
+                // then
+                assertThat(presenter.corrected).isEqualTo(1)
+                assertThat(presenter.correcting).isFalse()
+            }
+
+        @Test
+        fun `shows why the flights could not be corrected`() =
+            runTest {
+                // given
+                coEvery { prepare("QSCQLMPA") } returns aDraft(corrections = listOf(A_CORRECTION))
+                coEvery { correct(any()) } throws IOException("Disk full")
+                val presenter = presenter()
+                presenter.read()
+
+                // when
+                presenter.correct()
+
+                // then
+                assertThat(presenter.failure?.kind).isEqualTo(FailureKind.CorrectSyride)
+                assertThat(presenter.corrected).isNull()
+            }
+
+        @Test
+        fun `starts over when the account is read again`() =
+            runTest {
+                // given
+                coEvery { prepare("QSCQLMPA") } returns aDraft(corrections = listOf(A_CORRECTION))
+                coEvery { correct(any()) } returns 1
+                val presenter = presenter()
+                presenter.read()
+                presenter.correct()
+                presenter.back()
+
+                // when
+                presenter.read()
+
+                // then
+                assertThat(presenter.corrected).isNull()
             }
     }
 }

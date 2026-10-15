@@ -21,3 +21,4 @@ The integration is fragile by nature: a change in Syride's pages breaks it until
 ## Amendments
 
 - 2026-10-16: The pages are read with the jsoup HTML parser (version in the version catalog) instead of regular expressions, so markup details such as quoting or entities no longer matter and only the selectors describe the page. It stays confined to `infrastructure-syride`.
+- 2026-10-16: The regular-expression reader cut names and sites at the first parenthesis and left most accents as HTML entities. The adapter still computes what it read for each flight (`EarlierReading`), so the application can offer to correct imported flights whose text is still exactly that, and leave texts the pilot changed alone. The pilot confirms before anything is saved. That legacy reading can be removed once such flights no longer matter.
