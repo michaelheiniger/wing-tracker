@@ -432,7 +432,7 @@
     <string name="spreadsheet_field_landing">Landeplatz</string>
     <string name="spreadsheet_field_distance">Distanz (km)</string>
     <string name="spreadsheet_field_notes">Notizen</string>
-    <string name="spreadsheet_duration_hint">Stunden und Minuten werden zusammengezählt. Eine Zelle wie 1:30 oder 1h30 wird in beiden Spalten als Stunden und Minuten gelesen.</string>
+    <string name="spreadsheet_duration_hint">Jede Spalte enthält eine ganze Zahl: Stunden in der einen, Minuten in der anderen. Sie werden zusammengezählt, also ergeben 1 und 30 1 h 30.</string>
     <string name="spreadsheet_incomplete">Wähle die Spalten für Datum, Schirm und mindestens eine Dauer.</string>
     <string name="spreadsheet_ignored">Nicht importiert: %1$s</string>
     <string name="spreadsheet_preview_title">Erste Flüge</string>

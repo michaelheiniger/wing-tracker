@@ -64,7 +64,7 @@ data class ColumnMapping(
             }
         }
 
-        // Without a unit, minutes: a hand-written duration is more often "20" than "0.33". 1:30 reads either way.
+        // Without a unit, minutes: a hand-written duration is far more often "20" than an hour count.
         private fun durationField(words: Set<String>) =
             if (words.any { it in HOUR_WORDS }) FlightField.DurationHours else FlightField.DurationMinutes
 

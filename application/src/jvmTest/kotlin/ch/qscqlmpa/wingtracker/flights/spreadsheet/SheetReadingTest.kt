@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.MethodSource
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -40,24 +41,6 @@ class SheetReadingTest {
             assertThat(reading.headers).isEqualTo(LOGBOOK_HEADERS)
             assertThat(reading.headerRowNumber).isEqualTo(2)
             assertThat(reading.flights.single().rowNumber).isEqualTo(3)
-        }
-
-        @Test
-        fun `adds the hours and the minutes up`() {
-            // given
-            val sheet = aLogbookSheet(aLogbookRow(hours = number(1.0), minutes = number(30.0)))
-
-            // when / then
-            assertThat(readSheet(sheet, LOGBOOK_MAPPING).flights.single().duration).isEqualTo(90.minutes)
-        }
-
-        @Test
-        fun `takes a cell formatted as a time as it is`() {
-            // given
-            val sheet = aLogbookSheet(aLogbookRow(minutes = Cell.Time(75.minutes)))
-
-            // when / then
-            assertThat(readSheet(sheet, LOGBOOK_MAPPING).flights.single().duration).isEqualTo(75.minutes)
         }
 
         @Test
@@ -129,42 +112,52 @@ class SheetReadingTest {
     }
 
     @Nested
-    inner class DurationText {
-        @ParameterizedTest(name = "\"{0}\" in the minutes column is {1} minutes")
-        @CsvSource("20, 20", "1:30, 90", "1h30, 90", "2h, 120", "'12,5', 12.5")
-        fun `reads hand-written durations`(
-            written: String,
-            minutes: Double,
+    inner class Durations {
+        @ParameterizedTest(name = "{0} h and {1} min make {2} min")
+        @CsvSource("'', 20, 20", "1, 30, 90", "1, '', 60", "'', 60, 60", "2, 75, 195")
+        fun `adds whole hours and whole minutes up, minutes past an hour included`(
+            hours: String,
+            minutes: String,
+            total: Int,
         ) {
             // given
-            val sheet = aLogbookSheet(aLogbookRow(minutes = text(written)))
+            val sheet = aLogbookSheet(aLogbookRow(hours = hours.asCell(), minutes = minutes.asCell()))
 
             // when
             val duration = readSheet(sheet, LOGBOOK_MAPPING).flights.single().duration
 
             // then
-            assertThat(duration).isEqualTo(minutes.minutes)
+            assertThat(duration).isEqualTo(total.minutes)
         }
 
         @Test
-        fun `reads a fraction of an hour to the second`() {
+        fun `reads whole numbers typed as text`() {
             // given
-            val sheet = aLogbookSheet(aLogbookRow(hours = number(1.0 / 3), minutes = Cell.Empty))
+            val sheet = aLogbookSheet(aLogbookRow(hours = text(" 1 "), minutes = text("30")))
 
             // when / then
-            assertThat(readSheet(sheet, LOGBOOK_MAPPING).flights.single().duration).isEqualTo(20.minutes)
+            assertThat(readSheet(sheet, LOGBOOK_MAPPING).flights.single().duration).isEqualTo(90.minutes)
         }
 
-        @Test
-        fun `reads a plain number in the hours column as hours`() {
+        @ParameterizedTest(name = "{0}")
+        @MethodSource("ch.qscqlmpa.wingtracker.flights.spreadsheet.SheetReadingTest#notWholeUnits")
+        fun `reports anything but a whole number instead of guessing`(cell: Cell) {
             // given
-            val sheet = aLogbookSheet(aLogbookRow(hours = text("1.5"), minutes = Cell.Empty))
+            val sheet = aLogbookSheet(aLogbookRow(minutes = cell))
 
             // when
-            val duration: Duration = readSheet(sheet, LOGBOOK_MAPPING).flights.single().duration
+            val reading = readSheet(sheet, LOGBOOK_MAPPING)
 
             // then
-            assertThat(duration).isEqualTo(1.5.hours)
+            assertThat(reading.problems).containsExactly(RowProblem(2, RowProblemKind.UnreadableDuration))
         }
+
+        private fun String.asCell(): Cell = if (isEmpty()) Cell.Empty else number(toDouble())
+    }
+
+    companion object {
+        @JvmStatic
+        fun notWholeUnits() =
+            listOf(number(12.5), number(-10.0), text("1:30"), text("1h30"), text("long"), Cell.Time(90.minutes))
     }
 }

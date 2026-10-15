@@ -6,11 +6,9 @@ import ch.qscqlmpa.wingtracker.flights.importing.ImportableFlight
 import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import kotlinx.datetime.LocalDate
-import kotlin.math.roundToLong
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 
 /** What one row of a logbook spreadsheet turned out to be. */
 sealed interface SheetRow {
@@ -158,35 +156,35 @@ private data class Read(
 
 private data object Unreadable : DurationRead
 
-/** An empty cell counts as zero, so a row may give only hours or only minutes. */
-private fun Cell.asDuration(unit: Duration): DurationRead =
-    when (this) {
-        Cell.Empty -> Read(Duration.ZERO)
-        is Cell.Time -> Read(value)
-        is Cell.Number -> if (value >= 0) Read(unit * value) else Unreadable
-        is Cell.Text -> parseDuration(value.trim(), unit)?.let(::Read) ?: Unreadable
-        is Cell.Date -> Unreadable
-    }.let { read -> if (read is Read) Read(read.value.roundedToSeconds()) else read }
+/**
+ * A whole number of the column's unit; the two columns are added up, as a paper logbook writes "1 | 30" for 1 h 30.
+ * Anything else (a fraction, a time like 1:30) is reported rather than guessed. An empty cell counts as zero, so a row
+ * may give only hours or only minutes.
+ */
+private fun Cell.asDuration(unit: Duration): DurationRead {
+    val count =
+        when (this) {
+            Cell.Empty -> {
+                0
+            }
 
-// Hours given as a fraction rarely come out even; a flight time never needs more than seconds.
-private fun Duration.roundedToSeconds(): Duration =
-    inWholeMilliseconds
-        .toDouble()
-        .div(MILLIS_PER_SECOND)
-        .roundToLong()
-        .seconds
+            is Cell.Number -> {
+                value.takeIf { it >= 0 && it % 1.0 == 0.0 }?.toInt()
+            }
 
-// "1:30" and "1h30" are hours and minutes whatever the column; a plain number is in the column's unit.
-private fun parseDuration(
-    text: String,
-    unit: Duration,
-): Duration? {
-    if (text.isEmpty()) return Duration.ZERO
-    HOURS_MINUTES.matchEntire(text.lowercase())?.let { match ->
-        val (h, m) = match.destructured
-        return h.toInt().hours + (m.ifEmpty { "0" }).toInt().minutes
-    }
-    return parseNumber(text)?.takeIf { it >= 0 }?.let { unit * it }
+            is Cell.Text -> {
+                value
+                    .trim()
+                    .ifEmpty { "0" }
+                    .takeIf { text -> text.all { it.isDigit() } }
+                    ?.toIntOrNull()
+            }
+
+            is Cell.Time, is Cell.Date -> {
+                null
+            }
+        }
+    return count?.let { Read(unit * it) } ?: Unreadable
 }
 
 private fun Cell.asText(): String? =
@@ -253,8 +251,6 @@ private fun dateOrNull(
     day: Int,
 ): LocalDate? = runCatching { LocalDate(year, month, day) }.getOrNull()
 
-private const val MILLIS_PER_SECOND = 1000.0
 private const val CENTURY = 2000
-private val HOURS_MINUTES = Regex("""(\d{1,2})\s*[:h]\s*(\d{0,2})(?::\d{2})?\s*(?:min)?""")
 private val ISO_DATE = Regex("""(\d{4})-(\d{1,2})-(\d{1,2})""")
 private val DAY_FIRST_DATE = Regex("""(\d{1,2})[./-](\d{1,2})[./-](\d{2}|\d{4})""")

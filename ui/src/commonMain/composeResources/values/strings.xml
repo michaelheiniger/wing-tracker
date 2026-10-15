@@ -432,7 +432,7 @@
     <string name="spreadsheet_field_landing">Landing site</string>
     <string name="spreadsheet_field_distance">Distance (km)</string>
     <string name="spreadsheet_field_notes">Notes</string>
-    <string name="spreadsheet_duration_hint">Hours and minutes are added up. A cell like 1:30 or 1h30 is read as hours and minutes in either column.</string>
+    <string name="spreadsheet_duration_hint">Each column holds a whole number: hours in one, minutes in the other. They are added up, so 1 and 30 make 1 h 30.</string>
     <string name="spreadsheet_incomplete">Choose the columns for the date, the wing and at least one duration.</string>
     <string name="spreadsheet_ignored">Not imported: %1$s</string>
     <string name="spreadsheet_preview_title">First flights</string>

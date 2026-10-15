@@ -432,7 +432,7 @@
     <string name="spreadsheet_field_landing">Atterrissage</string>
     <string name="spreadsheet_field_distance">Distance (km)</string>
     <string name="spreadsheet_field_notes">Notes</string>
-    <string name="spreadsheet_duration_hint">Les heures et les minutes sont additionnées. Une cellule comme 1:30 ou 1h30 est lue en heures et minutes dans les deux colonnes.</string>
+    <string name="spreadsheet_duration_hint">Chaque colonne contient un nombre entier : les heures dans l'une, les minutes dans l'autre. Ils sont additionnés, donc 1 et 30 font 1 h 30.</string>
     <string name="spreadsheet_incomplete">Choisis les colonnes de la date, de la voile et d'au moins une durée.</string>
     <string name="spreadsheet_ignored">Non importé : %1$s</string>
     <string name="spreadsheet_preview_title">Premiers vols</string>
