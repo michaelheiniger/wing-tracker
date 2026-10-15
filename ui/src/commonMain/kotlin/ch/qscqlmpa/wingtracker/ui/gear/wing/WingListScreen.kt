@@ -68,6 +68,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.unreadable_quarantined
 import ch.qscqlmpa.wingtracker.ui.resources.wing_certification
 import ch.qscqlmpa.wingtracker.ui.resources.wing_delete
 import ch.qscqlmpa.wingtracker.ui.resources.wing_edit
+import ch.qscqlmpa.wingtracker.ui.resources.wing_flights_before_tracking
 import ch.qscqlmpa.wingtracker.ui.resources.wing_hours_before_tracking
 import ch.qscqlmpa.wingtracker.ui.resources.wing_in_service_since
 import ch.qscqlmpa.wingtracker.ui.resources.wing_open_maintenance
@@ -237,12 +238,16 @@ private fun WingCard(
                     details.inServiceDate?.let { stringResource(Res.string.wing_in_service_since, it.toDisplay()) }
                 val before =
                     stringResource(Res.string.wing_hours_before_tracking, formatDuration(details.hoursBeforeTracking))
+                val flightsBefore =
+                    details.flightsBeforeTracking.takeIf { it > 0 }?.let {
+                        stringResource(Res.string.wing_flights_before_tracking, it)
+                    }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     Text(
-                        listOfNotNull(since, before).joinToString(" · "),
+                        listOfNotNull(since, before, flightsBefore).joinToString(" · "),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

@@ -54,5 +54,13 @@ class WingDetailsTest {
                 .isInstanceOf(IllegalArgumentException::class.java)
                 .hasMessageContaining("negative")
         }
+
+        @Test
+        fun `rejects negative flights before tracking`() {
+            // given / when / then
+            assertThatThrownBy { aWingDetails(flightsBeforeTracking = -1) }
+                .isInstanceOf(IllegalArgumentException::class.java)
+                .hasMessageContaining("negative")
+        }
     }
 }

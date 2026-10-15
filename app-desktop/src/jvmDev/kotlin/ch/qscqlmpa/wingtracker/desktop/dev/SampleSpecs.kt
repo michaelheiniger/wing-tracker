@@ -30,6 +30,7 @@ data class WingSpec(
     val priceChf: Long,
     val inServiceMonthsAgo: Int,
     val hoursBeforeTracking: Int,
+    val flightsBeforeTracking: Int = 0,
     val interval: MaintenanceInterval,
     val retiredMonthsAgo: Int? = null,
     val checks: List<CheckSpec> = emptyList(),
@@ -94,6 +95,7 @@ val SAMPLE_WINGS =
             priceChf = 215_000,
             inServiceMonthsAgo = 30,
             hoursBeforeTracking = 42,
+            flightsBeforeTracking = 61,
             interval = MaintenanceInterval(months = 12),
             checks =
                 listOf(
@@ -118,6 +120,7 @@ val SAMPLE_WINGS =
             priceChf = 168_000,
             inServiceMonthsAgo = 40,
             hoursBeforeTracking = 120,
+            flightsBeforeTracking = 170,
             interval = MaintenanceInterval(months = 12),
             checks =
                 listOf(

@@ -27,6 +27,7 @@ fun aWingDetails(
     acquisition: Acquisition = aNewAcquisition(),
     inServiceDate: LocalDate? = LocalDate(2023, 5, 1),
     hoursBeforeTracking: Duration = Duration.ZERO,
+    flightsBeforeTracking: Int = 0,
     maintenanceInterval: MaintenanceInterval? = null,
 ) = WingDetails(
     name = name,
@@ -38,6 +39,7 @@ fun aWingDetails(
     acquisition = acquisition,
     inServiceDate = inServiceDate,
     hoursBeforeTracking = hoursBeforeTracking,
+    flightsBeforeTracking = flightsBeforeTracking,
     maintenanceInterval = maintenanceInterval,
 )
 

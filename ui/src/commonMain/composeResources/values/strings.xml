@@ -12,6 +12,7 @@
 
     <string name="wing_in_service_since">In service since %1$s</string>
     <string name="wing_hours_before_tracking">%1$s before tracking</string>
+    <string name="wing_flights_before_tracking">%1$d flights before tracking</string>
     <string name="wing_certification">EN/LTF %1$s</string>
     <string name="wing_status_active">In service</string>
     <string name="wing_status_retired">Retired %1$s</string>
@@ -47,6 +48,7 @@
     <string name="help_tooltip_icon">More information</string>
     <string name="field_in_service_date">In service since</string>
     <string name="field_hours_before_tracking">Hours flown before tracking (h or h:mm)</string>
+    <string name="field_flights_before_tracking">Flights made before tracking (whole number)</string>
     <string name="action_save">Save</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_dismiss">Dismiss</string>
@@ -59,6 +61,7 @@
     <string name="error_amount">Use a number such as 2150 or 2150.50</string>
     <string name="error_currency">Use a 3-letter code such as CHF</string>
     <string name="error_hours">Use hours or hours:minutes, e.g. 42 or 42:30</string>
+    <string name="error_count">Use a whole number of flights, e.g. 120</string>
 
     <string name="failure_load">The gear could not be loaded: %1$s</string>
     <string name="failure_save">The item could not be saved: %1$s</string>

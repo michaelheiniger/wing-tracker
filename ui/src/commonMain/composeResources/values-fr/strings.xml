@@ -12,6 +12,7 @@
 
     <string name="wing_in_service_since">En service depuis le %1$s</string>
     <string name="wing_hours_before_tracking">%1$s avant le suivi</string>
+    <string name="wing_flights_before_tracking">%1$d vols avant le suivi</string>
     <string name="wing_certification">EN/LTF %1$s</string>
     <string name="wing_status_active">En service</string>
     <string name="wing_status_retired">Retirée le %1$s</string>
@@ -47,6 +48,7 @@
     <string name="help_tooltip_icon">Plus d'informations</string>
     <string name="field_in_service_date">En service depuis</string>
     <string name="field_hours_before_tracking">Heures de vol avant le suivi (h ou h:mm)</string>
+    <string name="field_flights_before_tracking">Vols effectués avant le suivi (nombre entier)</string>
     <string name="action_save">Enregistrer</string>
     <string name="action_cancel">Annuler</string>
     <string name="action_dismiss">Fermer</string>
@@ -59,6 +61,7 @@
     <string name="error_amount">Utiliser un nombre comme 2150 ou 2150.50</string>
     <string name="error_currency">Utiliser un code à 3 lettres comme CHF</string>
     <string name="error_hours">Utiliser des heures ou heures:minutes, p. ex. 42 ou 42:30</string>
+    <string name="error_count">Utiliser un nombre entier de vols, p. ex. 120</string>
 
     <string name="failure_load">Le matériel n'a pas pu être chargé : %1$s</string>
     <string name="failure_save">L'élément n'a pas pu être enregistré : %1$s</string>

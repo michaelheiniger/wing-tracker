@@ -52,6 +52,7 @@ fun aStoredWing(
                 ),
             inServiceDate = inServiceDate,
             hoursBeforeTracking = 42.hours + 30.minutes,
+            flightsBeforeTracking = 61,
             maintenanceInterval = interval,
         ),
     status = status,

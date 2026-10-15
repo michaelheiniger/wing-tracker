@@ -30,6 +30,7 @@ data class WingFormInput(
     val priceCurrency: String = DEFAULT_CURRENCY,
     val inServiceDate: LocalDate? = null,
     val hoursBeforeTracking: String = "",
+    val flightsBeforeTracking: String = "",
     val intervalMonths: String = "",
     val intervalHours: String = "",
     // Until the pilot types a name, it follows manufacturer and model; afterwards it is theirs to keep.
@@ -62,6 +63,11 @@ data class WingFormInput(
                 priceCurrency = price?.currency?.value ?: DEFAULT_CURRENCY,
                 inServiceDate = details.inServiceDate,
                 hoursBeforeTracking = formatHoursAndMinutes(details.hoursBeforeTracking.inWholeMinutes),
+                flightsBeforeTracking =
+                    details.flightsBeforeTracking
+                        .takeIf { it > 0 }
+                        ?.toString()
+                        .orEmpty(),
                 intervalMonths =
                     details.maintenanceInterval
                         ?.months
@@ -84,6 +90,7 @@ enum class WingFormField {
     PriceAmount,
     PriceCurrency,
     HoursBeforeTracking,
+    FlightsBeforeTracking,
     IntervalMonths,
     IntervalHours,
 }
@@ -94,6 +101,7 @@ enum class FormError {
     InvalidAmount,
     InvalidCurrency,
     InvalidHours,
+    InvalidCount,
     InvalidMonths,
     InvalidDays,
 }
@@ -117,9 +125,10 @@ fun WingFormInput.validate(): WingFormResult {
 
     val price = parsePrice(errors)
     val hours = parseHours(errors)
+    val flightCount = parseFlightCount(errors)
     val interval = parseInterval(errors)
 
-    if (errors.isNotEmpty() || hours == null) return WingFormResult.Invalid(errors)
+    if (errors.isNotEmpty() || hours == null || flightCount == null) return WingFormResult.Invalid(errors)
 
     return WingFormResult.Valid(
         WingDetails(
@@ -132,6 +141,7 @@ fun WingFormInput.validate(): WingFormResult {
             acquisition = Acquisition(condition, purchaseDate, price),
             inServiceDate = inServiceDate,
             hoursBeforeTracking = hours,
+            flightsBeforeTracking = flightCount,
             maintenanceInterval = interval,
         ),
     )
@@ -156,6 +166,15 @@ private fun WingFormInput.parseHours(errors: MutableMap<WingFormField, FormError
     if (hours == null) errors[WingFormField.HoursBeforeTracking] = FormError.InvalidHours
     return hours
 }
+
+private fun WingFormInput.parseFlightCount(errors: MutableMap<WingFormField, FormError>): Int? {
+    if (flightsBeforeTracking.isBlank()) return 0
+    val count = flightsBeforeTracking.trim().takeIf { COUNT.matches(it) }?.toInt()
+    if (count == null) errors[WingFormField.FlightsBeforeTracking] = FormError.InvalidCount
+    return count
+}
+
+private val COUNT = Regex("""\d{1,6}""")
 
 private val MONTHS = Regex("""\d{1,3}""")
 

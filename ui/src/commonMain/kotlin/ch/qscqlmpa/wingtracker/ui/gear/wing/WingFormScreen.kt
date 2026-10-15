@@ -30,6 +30,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.action_save
 import ch.qscqlmpa.wingtracker.ui.resources.certification_unknown
 import ch.qscqlmpa.wingtracker.ui.resources.field_currency
+import ch.qscqlmpa.wingtracker.ui.resources.field_flights_before_tracking
 import ch.qscqlmpa.wingtracker.ui.resources.field_hours_before_tracking
 import ch.qscqlmpa.wingtracker.ui.resources.field_in_service_date
 import ch.qscqlmpa.wingtracker.ui.resources.field_interval_hours
@@ -204,6 +205,11 @@ fun WingFormScreen(
             input.hoursBeforeTracking,
             WingFormField.HoursBeforeTracking,
         ) { v -> presenter.change { it.copy(hoursBeforeTracking = v) } }
+        Field(
+            stringResource(Res.string.field_flights_before_tracking),
+            input.flightsBeforeTracking,
+            WingFormField.FlightsBeforeTracking,
+        ) { v -> presenter.change { it.copy(flightsBeforeTracking = v) } }
 
         Text(
             stringResource(Res.string.section_maintenance),

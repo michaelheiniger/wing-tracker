@@ -31,6 +31,7 @@ private fun aFormInput() =
         priceCurrency = "chf",
         inServiceDate = LocalDate(2024, 3, 9),
         hoursBeforeTracking = "42:30",
+        flightsBeforeTracking = "61",
     )
 
 private fun errorsOf(input: WingFormInput) = (input.validate() as WingFormResult.Invalid).errors
@@ -136,6 +137,7 @@ class WingFormTest {
                         ),
                     inServiceDate = LocalDate(2024, 3, 9),
                     hoursBeforeTracking = 42.hours + 30.minutes,
+                    flightsBeforeTracking = 61,
                 )
             assertThat(result).usingRecursiveComparison().isEqualTo(WingFormResult.Valid(expected))
         }
@@ -178,6 +180,18 @@ class WingFormTest {
 
             // then
             assertThat(details.hoursBeforeTracking).isEqualTo(Duration.ZERO)
+        }
+
+        @Test
+        fun `treats empty flights before tracking as zero`() {
+            // given
+            val input = aFormInput().copy(flightsBeforeTracking = "")
+
+            // when
+            val details = (input.validate() as WingFormResult.Valid).details
+
+            // then
+            assertThat(details.flightsBeforeTracking).isZero()
         }
 
         @Test
@@ -232,6 +246,18 @@ class WingFormTest {
 
             // then
             assertThat(errors).containsEntry(WingFormField.HoursBeforeTracking, FormError.InvalidHours)
+        }
+
+        @Test
+        fun `rejects a flight count that is not a whole number`() {
+            // given
+            val input = aFormInput().copy(flightsBeforeTracking = "12.5")
+
+            // when
+            val errors = errorsOf(input)
+
+            // then
+            assertThat(errors).containsEntry(WingFormField.FlightsBeforeTracking, FormError.InvalidCount)
         }
 
         @Test

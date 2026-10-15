@@ -140,6 +140,7 @@ class GearSeeder(
             acquisition = acquisition(spec.condition, spec.priceChf, spec.inServiceMonthsAgo),
             inServiceDate = monthsAgo(spec.inServiceMonthsAgo),
             hoursBeforeTracking = spec.hoursBeforeTracking.hours,
+            flightsBeforeTracking = spec.flightsBeforeTracking,
             maintenanceInterval = spec.interval,
         )
 

@@ -18,6 +18,8 @@ data class WingDetails(
     val inServiceDate: LocalDate? = null,
     // Hours flown before tracking started; keeps hour-based due rules right for used wings.
     val hoursBeforeTracking: Duration = Duration.ZERO,
+    // Flights made before tracking started; lets the flight count match the hours for used wings.
+    val flightsBeforeTracking: Int = 0,
     // Null means no rule yet, so the wing is never reported as due.
     val maintenanceInterval: MaintenanceInterval? = null,
 ) {
@@ -26,5 +28,6 @@ data class WingDetails(
         require(manufacturer.isNotBlank()) { "A wing needs a manufacturer" }
         require(model.isNotBlank()) { "A wing needs a model" }
         require(!hoursBeforeTracking.isNegative()) { "Hours before tracking cannot be negative" }
+        require(flightsBeforeTracking >= 0) { "Flights before tracking cannot be negative" }
     }
 }

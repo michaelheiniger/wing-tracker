@@ -90,7 +90,13 @@ class JsonWingRepositoryTest {
                 repository.save(wing)
                 val file = dataDirectory.resolve("wings/${wing.id.value}.json")
                 val newerKeys =
-                    setOf("maintenanceIntervalMonths", "maintenanceIntervalHoursMinutes", "checks", "plannedChecks")
+                    setOf(
+                        "maintenanceIntervalMonths",
+                        "maintenanceIntervalHoursMinutes",
+                        "checks",
+                        "plannedChecks",
+                        "flightsBeforeTracking",
+                    )
                 val document = Json.parseToJsonElement(file.readText()).jsonObject
                 val legacy =
                     JsonObject(
@@ -102,7 +108,8 @@ class JsonWingRepositoryTest {
                 val found = repository.findById(wing.id)
 
                 // then
-                assertThat(found).usingRecursiveComparison().isEqualTo(wing)
+                val expected = wing.withDetails(wing.details.copy(flightsBeforeTracking = 0))
+                assertThat(found).usingRecursiveComparison().isEqualTo(expected)
             }
 
         @Test

@@ -35,6 +35,8 @@ internal data class WingDocument(
     // Optional since the next schema version; older versions treat such files as newer data.
     val inServiceDate: LocalDate? = null,
     val hoursBeforeTrackingMinutes: Long = 0,
+    // Added in schema 4; files written before it simply have none.
+    val flightsBeforeTracking: Int = 0,
     val retiredOn: LocalDate? = null,
     val retirementReason: String? = null,
     // Added in schema 2; files written before it simply have none.
@@ -60,6 +62,7 @@ internal data class WingDocument(
                     acquisition = acquisition(acquisitionCondition, purchaseDate, priceMinorUnits, priceCurrency),
                     inServiceDate = inServiceDate,
                     hoursBeforeTracking = hoursBeforeTrackingMinutes.minutes,
+                    flightsBeforeTracking = flightsBeforeTracking,
                     maintenanceInterval = interval(),
                 ),
             status = retiredOn?.let { GearStatus.Retired(it, retirementReason) } ?: GearStatus.Active,
@@ -76,9 +79,10 @@ internal data class WingDocument(
         }
 
     companion object {
-        // Version 2 added maintenance, version 3 made the in-service date optional. Older application versions treat
+        // Version 2 added maintenance, version 3 made the in-service date optional, version 4 added the flights before
+        // tracking. Older application versions treat
         // newer files as newer data and leave them untouched.
-        const val CURRENT_SCHEMA_VERSION = 3
+        const val CURRENT_SCHEMA_VERSION = 4
 
         fun from(wing: Wing): WingDocument {
             val details = wing.details
@@ -100,6 +104,7 @@ internal data class WingDocument(
                         ?.value,
                 inServiceDate = details.inServiceDate,
                 hoursBeforeTrackingMinutes = details.hoursBeforeTracking.inWholeMinutes,
+                flightsBeforeTracking = details.flightsBeforeTracking,
                 retiredOn = retired?.on,
                 retirementReason = retired?.reason,
                 maintenanceIntervalMonths = details.maintenanceInterval?.months,

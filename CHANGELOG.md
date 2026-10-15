@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
+- Wings have an optional "flights before tracking" count, next to the hours flown before tracking, for used wings.
 - An "About" button at the bottom of the settings shows the version of the app and links to the changelog.
 
 ## [0.0.3] - 2026-10-12
