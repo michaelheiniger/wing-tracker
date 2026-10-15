@@ -36,6 +36,7 @@ import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
 import ch.qscqlmpa.wingtracker.ui.platform.FilePicker
 import ch.qscqlmpa.wingtracker.ui.platform.PickedFolder
+import ch.qscqlmpa.wingtracker.ui.platform.UnsupportedPathException
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -177,6 +178,21 @@ class IgcImportPresentersTest {
             }
 
         @Test
+        fun `explains a folder whose name the system cannot handle`() =
+            runTest {
+                // given
+                val folder = "/run/media/michael/SYRIDE-été"
+                coEvery { picker.pickFolder("Choose folder", "igc", null) } throws UnsupportedPathException(folder)
+                val presenter = importer()
+
+                // when
+                presenter.chooseFolder {}
+
+                // then
+                assertThat(presenter.failure).isEqualTo(Failure(FailureKind.UnsupportedPath, folder))
+            }
+
+        @Test
         fun `hands over every track found in the chosen folder`() =
             runTest {
                 // given
@@ -259,6 +275,19 @@ class IgcImportPresentersTest {
 
                 // then
                 coVerify(exactly = 0) { saveDeviceFolder(any()) }
+            }
+
+        @Test
+        fun `shows why dropped tracks could not be read`() =
+            runTest {
+                // given
+                val presenter = importer()
+
+                // when
+                presenter.dropFailed(IOException("Permission denied"))
+
+                // then
+                assertThat(presenter.failure).isEqualTo(Failure(FailureKind.ImportIgc, "Permission denied"))
             }
 
         @Test

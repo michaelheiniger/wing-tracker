@@ -32,6 +32,7 @@ import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
 import ch.qscqlmpa.wingtracker.ui.platform.FilePicker
+import ch.qscqlmpa.wingtracker.ui.platform.UnsupportedPathException
 import ch.qscqlmpa.wingtracker.ui.undo.TEXT
 import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
 import ch.qscqlmpa.wingtracker.ui.undo.expire
@@ -245,6 +246,21 @@ class MaintenancePresentersTest {
                         },
                     )
                 }
+            }
+
+        @Test
+        fun `explains a picked file whose name the system cannot handle`() =
+            runTest {
+                // given
+                val path = "/mnt/storage/Fiches de contrôles matériel/report.pdf"
+                coEvery { picker.pick("Choose", setOf("pdf")) } throws UnsupportedPathException(path)
+                val presenter = presenter(CheckFormMode.Record, CheckFormInput(date = "10-04-2026"))
+
+                // when
+                presenter.addReports()
+
+                // then
+                assertThat(presenter.failure).isEqualTo(Failure(FailureKind.UnsupportedPath, path))
             }
 
         @Test

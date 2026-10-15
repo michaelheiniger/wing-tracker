@@ -7,6 +7,7 @@ import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.DataLocation
 import ch.qscqlmpa.wingtracker.ui.platform.FolderCheck
+import ch.qscqlmpa.wingtracker.ui.toFailure
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -96,7 +97,7 @@ class DataLocationPresenter(
             } catch (
                 @Suppress("TooGenericExceptionCaught") e: Exception,
             ) {
-                failure = Failure(kind, e.message)
+                failure = e.toFailure(kind)
             }
         }
     }

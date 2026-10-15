@@ -46,6 +46,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_spreadsheet_unreadable
 import ch.qscqlmpa.wingtracker.ui.resources.failure_syride_changed
 import ch.qscqlmpa.wingtracker.ui.resources.failure_syride_unreachable
 import ch.qscqlmpa.wingtracker.ui.resources.failure_syride_user
+import ch.qscqlmpa.wingtracker.ui.resources.failure_unsupported_path
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -70,6 +71,7 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.SpreadsheetUnreadable to Res.string.failure_spreadsheet_unreadable,
         FailureKind.SpreadsheetOldFormat to Res.string.failure_spreadsheet_old_format,
         FailureKind.ImportSpreadsheet to Res.string.failure_import_spreadsheet,
+        FailureKind.UnsupportedPath to Res.string.failure_unsupported_path,
         FailureKind.SaveSettings to Res.string.failure_save_settings,
         FailureKind.LoadSettings to Res.string.failure_load_settings,
         FailureKind.Load to Res.string.failure_load,

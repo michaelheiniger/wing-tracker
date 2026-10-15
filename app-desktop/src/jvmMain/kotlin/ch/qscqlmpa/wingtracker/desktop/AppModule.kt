@@ -219,6 +219,7 @@ private fun uiModule(
             DesktopFileSaver(),
             DesktopFileDrop(),
             dataLocation(dataDirectory, devMode),
+            supportsAllFileNames(),
         )
     }
     single { ThemePreference() }

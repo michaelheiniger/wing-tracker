@@ -51,15 +51,26 @@ interface FileSaver {
 interface FileDrop {
     /**
      * A modifier that accepts dropped files. [onHover] tells whether files are currently held over the area;
-     * [onDropped] gets the files with the given [extension] and how many dropped files were left out.
+     * [onDropped] gets the files with the given [extension] and how many dropped files were left out; [onFailed] gets
+     * why the files could not be read.
      */
     @Composable
     fun target(
         extension: String,
         onHover: (Boolean) -> Unit,
         onDropped: (files: List<NewAttachment>, ignored: Int) -> Unit,
+        onFailed: (Exception) -> Unit,
     ): Modifier
 }
+
+/**
+ * Thrown by the ports when the system cannot name [path], e.g. a Linux system whose configured locale is not
+ * installed and so cannot express accents in file names; the user can fix that, so it is not a generic failure.
+ */
+class UnsupportedPathException(
+    val path: String,
+    cause: Throwable? = null,
+) : Exception("The system cannot name $path", cause)
 
 /** What a folder chosen as the new data location turned out to be. */
 enum class FolderCheck {
@@ -109,4 +120,6 @@ class PlatformServices(
     val fileSaver: FileSaver,
     val fileDrop: FileDrop,
     val dataLocation: DataLocation,
+    // False when some file names cannot be opened on this system at all, which the user should hear about up front.
+    val supportsAllFileNames: Boolean = true,
 )

@@ -1,5 +1,7 @@
 package ch.qscqlmpa.wingtracker.ui
 
+import ch.qscqlmpa.wingtracker.ui.platform.UnsupportedPathException
+
 enum class FailureKind {
     Load,
     Save,
@@ -36,6 +38,7 @@ enum class FailureKind {
     SpreadsheetUnreadable,
     SpreadsheetOldFormat,
     ImportSpreadsheet,
+    UnsupportedPath,
 }
 
 /** A technical [detail] travels with the kind; the screen wraps it in a message in the user's language. */
@@ -43,3 +46,10 @@ data class Failure(
     val kind: FailureKind,
     val detail: String? = null,
 )
+
+/** A path the system cannot name gets its own message, whatever was being done; anything else reports as [kind]. */
+fun Exception.toFailure(kind: FailureKind): Failure =
+    when (this) {
+        is UnsupportedPathException -> Failure(FailureKind.UnsupportedPath, path)
+        else -> Failure(kind, message)
+    }

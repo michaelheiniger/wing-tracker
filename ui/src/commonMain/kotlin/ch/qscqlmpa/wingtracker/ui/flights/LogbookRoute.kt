@@ -105,6 +105,7 @@ fun LogbookRoute(
                 // Dropping only unrelated files would otherwise seem to do nothing.
                 if (files.isEmpty()) importer.dropRejected() else dialog = LogbookDialog.Import(files)
             },
+            onFailed = importer::dropFailed,
         )
     val wings =
         presenter.state.shown

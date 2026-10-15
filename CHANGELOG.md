@@ -18,6 +18,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - Wings have an optional "flights before tracking" count, next to the hours flown before tracking, for used wings.
 - An "About" button at the bottom of the settings shows the version of the app and links to the changelog.
 
+### Fixed
+- On a system whose configured language (locale) is not installed, choosing, dropping or saving a file whose name or folder contains accents (e.g. "matériel") failed with an unclear error. The app now says which file it cannot open and how to fix the system's language settings. It also warns at startup when the system is in this state, and opens stored reports with such names anyway.
+
 ## [0.0.3] - 2026-10-12
 
 ### Changed

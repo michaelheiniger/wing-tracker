@@ -1,8 +1,10 @@
 package ch.qscqlmpa.wingtracker.ui.shell
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
@@ -35,6 +37,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
+import ch.qscqlmpa.wingtracker.ui.components.FileNamesBanner
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookRoute
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.GearRoute
@@ -102,6 +105,8 @@ fun AppShell(
     val chooseTitle = stringResource(Res.string.settings_data_choose_title)
     val dataLocation =
         remember { DataLocationPresenter(scope, platform.dataLocation, chooseTitle, beforeChange = undo::flush) }
+    // Shown once per start: the pilot can only fix it outside the application, then restart it.
+    var fileNamesWarning by rememberSaveable { mutableStateOf(!platform.supportsAllFileNames) }
     // Set when the attention panel opens a piece of gear, consumed by the gear section.
     var pendingGear by remember { mutableStateOf<GearRef?>(null) }
 
@@ -129,36 +134,55 @@ fun AppShell(
                             )
                         }
                     }
-                    when (current) {
-                        Destination.Logbook -> {
-                            LogbookRoute(
-                                useCases = logbookUseCases,
-                                platform = platform,
-                                attention = attentionPresenter.state.attention,
-                                onOpenGear = { ref ->
-                                    pendingGear = ref
-                                    destination = Destination.Gear.name
-                                },
-                                onGoToGear = { destination = Destination.Gear.name },
+                    Column(modifier = Modifier.weight(1f)) {
+                        if (fileNamesWarning) {
+                            FileNamesBanner(
+                                onDismiss = { fileNamesWarning = false },
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
                             )
                         }
+                        Box(modifier = Modifier.weight(1f)) {
+                            when (current) {
+                                Destination.Logbook -> {
+                                    LogbookRoute(
+                                        useCases = logbookUseCases,
+                                        platform = platform,
+                                        attention = attentionPresenter.state.attention,
+                                        onOpenGear = { ref ->
+                                            pendingGear = ref
+                                            destination = Destination.Gear.name
+                                        },
+                                        onGoToGear = { destination = Destination.Gear.name },
+                                    )
+                                }
 
-                        Destination.Statistics -> {
-                            StatisticsRoute(getStatistics, onGoToLogbook = { destination = Destination.Logbook.name })
-                        }
+                                Destination.Statistics -> {
+                                    StatisticsRoute(getStatistics, onGoToLogbook = {
+                                        destination =
+                                            Destination.Logbook.name
+                                    })
+                                }
 
-                        Destination.Gear -> {
-                            GearRoute(
-                                useCases = gearUseCases,
-                                maintenanceUseCases = maintenanceUseCases,
-                                platform = platform,
-                                initialRef = pendingGear,
-                                onInitialConsumed = { pendingGear = null },
-                            )
-                        }
+                                Destination.Gear -> {
+                                    GearRoute(
+                                        useCases = gearUseCases,
+                                        maintenanceUseCases = maintenanceUseCases,
+                                        platform = platform,
+                                        initialRef = pendingGear,
+                                        onInitialConsumed = { pendingGear = null },
+                                    )
+                                }
 
-                        Destination.Settings -> {
-                            SettingsScreen(themePreference, scalePreference, reminderSettings, dataLocation, appVersion)
+                                Destination.Settings -> {
+                                    SettingsScreen(
+                                        themePreference,
+                                        scalePreference,
+                                        reminderSettings,
+                                        dataLocation,
+                                        appVersion,
+                                    )
+                                }
+                            }
                         }
                     }
                 }

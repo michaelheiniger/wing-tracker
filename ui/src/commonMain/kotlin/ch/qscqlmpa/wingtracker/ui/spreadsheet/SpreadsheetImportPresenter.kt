@@ -23,6 +23,7 @@ import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.flights.importing.WingChoice
 import ch.qscqlmpa.wingtracker.ui.flights.importing.WingMapping
 import ch.qscqlmpa.wingtracker.ui.platform.FilePicker
+import ch.qscqlmpa.wingtracker.ui.toFailure
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -88,7 +89,7 @@ class SpreadsheetImportPresenter(
             } catch (
                 @Suppress("TooGenericExceptionCaught") e: Exception,
             ) {
-                failure = Failure(FailureKind.SpreadsheetUnreadable, e.message)
+                failure = e.toFailure(FailureKind.SpreadsheetUnreadable)
             }
         }
     }

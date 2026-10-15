@@ -48,7 +48,8 @@ class DesktopDataLocation(
             .openDirectoryPicker(
                 directory = PlatformFile(current.parent?.toFile() ?: current.toFile()),
                 dialogSettings = FileKitDialogSettings(title = title),
-            )?.path
+            )?.also { it.file.checkedPath() }
+            ?.path
 
     override suspend fun inspect(folder: String): FolderCheck =
         withContext(Dispatchers.IO) {

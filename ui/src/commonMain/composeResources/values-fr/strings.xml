@@ -453,6 +453,8 @@
     <string name="failure_spreadsheet_unreadable">Le fichier n'a pas pu être lu comme un tableur (ODS ou XLSX) : %1$s</string>
     <string name="failure_spreadsheet_old_format">Les fichiers Excel 97-2003 (.xls) ne peuvent pas être lus. Enregistre le fichier en .xlsx ou .ods et réessaie.</string>
     <string name="failure_import_spreadsheet">Les vols n'ont pas pu être importés : %1$s</string>
+    <string name="failure_unsupported_path">%1$s ne peut pas être ouvert : son nom contient des caractères que les réglages de langue du système ne gèrent pas. Installe la langue système configurée (sous Linux, `locale` indique celle qui manque) ou renomme le fichier ou le dossier.</string>
+    <string name="file_names_limited">Les réglages de langue du système sont incomplets : les fichiers et dossiers dont le nom contient des accents ou des lettres non latines ne peuvent pas être ouverts. Installe la langue système configurée (sous Linux, `locale` indique celle qui manque) et redémarre l'application.</string>
     <plurals name="spreadsheet_flights_found">
         <item quantity="one">%1$d vol peut être importé.</item>
         <item quantity="other">%1$d vols peuvent être importés.</item>

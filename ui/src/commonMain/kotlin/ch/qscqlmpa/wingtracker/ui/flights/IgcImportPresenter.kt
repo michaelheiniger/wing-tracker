@@ -9,6 +9,7 @@ import ch.qscqlmpa.wingtracker.settings.SaveDeviceFolder
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.FilePicker
+import ch.qscqlmpa.wingtracker.ui.toFailure
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -66,7 +67,7 @@ class IgcImportPresenter(
             } catch (
                 @Suppress("TooGenericExceptionCaught") e: Exception,
             ) {
-                failure = Failure(FailureKind.ImportIgc, e.message)
+                failure = e.toFailure(FailureKind.ImportIgc)
             }
         }
     }
@@ -74,6 +75,11 @@ class IgcImportPresenter(
     /** Dropping something that is not a track is reported instead of silently doing nothing. */
     fun dropRejected() {
         failure = Failure(FailureKind.DropNoIgc, null)
+    }
+
+    /** Dropped tracks that could not be read are reported like a failed import. */
+    fun dropFailed(e: Exception) {
+        failure = e.toFailure(FailureKind.ImportIgc)
     }
 
     fun dismissFailure() {

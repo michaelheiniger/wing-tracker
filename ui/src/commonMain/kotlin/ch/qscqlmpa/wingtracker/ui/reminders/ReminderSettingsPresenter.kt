@@ -11,6 +11,7 @@ import ch.qscqlmpa.wingtracker.ui.platform.FileSaver
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.calendar_calendar_name
 import ch.qscqlmpa.wingtracker.ui.resources.settings_calendar_pick_title
+import ch.qscqlmpa.wingtracker.ui.toFailure
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -118,7 +119,7 @@ class ReminderSettingsPresenter(
             } catch (
                 @Suppress("TooGenericExceptionCaught") e: Exception,
             ) {
-                failure = Failure(kind, e.message)
+                failure = e.toFailure(kind)
             }
         }
     }

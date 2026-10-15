@@ -453,6 +453,8 @@
     <string name="failure_spreadsheet_unreadable">Die Datei konnte nicht als Tabelle (ODS oder XLSX) gelesen werden: %1$s</string>
     <string name="failure_spreadsheet_old_format">Excel-97-2003-Dateien (.xls) können nicht gelesen werden. Speichere die Datei als .xlsx oder .ods und versuche es erneut.</string>
     <string name="failure_import_spreadsheet">Die Flüge konnten nicht importiert werden: %1$s</string>
+    <string name="failure_unsupported_path">%1$s kann nicht geöffnet werden: Der Name enthält Zeichen, die die Spracheinstellungen des Systems nicht verarbeiten können. Installiere die eingestellte Systemsprache (unter Linux nennt `locale` die fehlende) oder benenne die Datei oder den Ordner um.</string>
+    <string name="file_names_limited">Die Spracheinstellungen des Systems sind unvollständig, deshalb können Dateien und Ordner mit Akzenten oder nicht lateinischen Buchstaben im Namen nicht geöffnet werden. Installiere die eingestellte Systemsprache (unter Linux nennt `locale` die fehlende) und starte die Anwendung neu.</string>
     <plurals name="spreadsheet_flights_found">
         <item quantity="one">%1$d Flug kann importiert werden.</item>
         <item quantity="other">%1$d Flüge können importiert werden.</item>
