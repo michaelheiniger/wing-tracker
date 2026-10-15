@@ -171,6 +171,8 @@
     <string name="statistics_since_check_none">Pas encore de contrôle</string>
     <string name="series_other">Autres voiles (%1$d)</string>
     <string name="chart_axis_hours">%1$s h</string>
+    <string name="chart_unit_hours">Heures</string>
+    <string name="chart_unit_flights">Vols</string>
     <string name="failure_load_statistics">Les statistiques n'ont pas pu être chargées : %1$s</string>
 
     <string name="section_maintenance">Intervalle de contrôle</string>

@@ -171,6 +171,8 @@
     <string name="statistics_since_check_none">Noch keine Kontrolle</string>
     <string name="series_other">Übrige Gleitschirme (%1$d)</string>
     <string name="chart_axis_hours">%1$s h</string>
+    <string name="chart_unit_hours">Stunden</string>
+    <string name="chart_unit_flights">Flüge</string>
     <string name="failure_load_statistics">Die Statistik konnte nicht geladen werden: %1$s</string>
 
     <string name="section_maintenance">Kontrollintervall</string>

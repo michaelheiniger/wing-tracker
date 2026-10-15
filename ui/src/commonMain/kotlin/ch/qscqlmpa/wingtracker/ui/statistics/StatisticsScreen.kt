@@ -128,7 +128,7 @@ private fun StatisticsContent(
         }
 
         else -> {
-            StatisticsCharts(statistics, chartSeries, theme)
+            StatisticsCharts(state, statistics, chartSeries, theme, presenter::selectUnit)
         }
     }
 

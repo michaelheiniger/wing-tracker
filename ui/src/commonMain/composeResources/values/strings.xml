@@ -171,6 +171,8 @@
     <string name="statistics_since_check_none">No check yet</string>
     <string name="series_other">Other wings (%1$d)</string>
     <string name="chart_axis_hours">%1$s h</string>
+    <string name="chart_unit_hours">Hours</string>
+    <string name="chart_unit_flights">Flights</string>
     <string name="failure_load_statistics">The statistics could not be loaded: %1$s</string>
 
     <string name="section_maintenance">Maintenance interval</string>
