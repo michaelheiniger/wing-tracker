@@ -25,7 +25,8 @@ class JsonHarnessRepository(
 
     override suspend fun delete(id: HarnessId) = store.delete(id.value)
 
-    private fun decode(text: String): Harness = json.decodeFromString<HarnessDocument>(text).toDomain()
+    private fun decode(text: String): Harness =
+        decodeDocument<HarnessDocument>(text, HarnessDocument.CURRENT_SCHEMA_VERSION).toDomain()
 }
 
 /** One file per reserve parachute under the `reserves` directory (ADR 0010). */
@@ -44,5 +45,6 @@ class JsonReserveRepository(
 
     override suspend fun delete(id: ReserveId) = store.delete(id.value)
 
-    private fun decode(text: String): Reserve = json.decodeFromString<ReserveDocument>(text).toDomain()
+    private fun decode(text: String): Reserve =
+        decodeDocument<ReserveDocument>(text, ReserveDocument.CURRENT_SCHEMA_VERSION).toDomain()
 }

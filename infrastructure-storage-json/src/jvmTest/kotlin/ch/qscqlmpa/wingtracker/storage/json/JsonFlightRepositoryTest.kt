@@ -231,8 +231,7 @@ class JsonFlightRepositoryTest {
                 // given
                 repository.save(aStoredFlight(id = "flight-1"))
                 val file = dataDirectory.resolve("flights/flight-1.json")
-                // Whatever the current version is, 999 is newer.
-                file.writeText(file.readText().replace(Regex("\"schemaVersion\": \\d+"), "\"schemaVersion\": 999"))
+                file.rewriteAsNewerVersion()
 
                 // when
                 val result = repository.findAll()

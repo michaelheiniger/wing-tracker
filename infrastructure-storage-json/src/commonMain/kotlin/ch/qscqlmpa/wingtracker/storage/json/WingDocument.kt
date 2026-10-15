@@ -45,11 +45,8 @@ internal data class WingDocument(
     val checks: List<CheckDocument> = emptyList(),
     val plannedChecks: List<PlannedCheckDocument> = emptyList(),
 ) {
-    fun toDomain(): Wing {
-        if (schemaVersion > CURRENT_SCHEMA_VERSION) {
-            throw UnsupportedSchemaException("Wing $id was written by a newer version of the application")
-        }
-        return Wing(
+    fun toDomain(): Wing =
+        Wing(
             id = WingId(id),
             details =
                 WingDetails(
@@ -69,7 +66,6 @@ internal data class WingDocument(
             checks = checks.map { it.toDomain() },
             plannedChecks = plannedChecks.map { it.toDomain() },
         )
-    }
 
     private fun interval(): MaintenanceInterval? =
         if (maintenanceIntervalMonths == null && maintenanceIntervalHoursMinutes == null) {

@@ -37,11 +37,8 @@ internal data class FlightDocument(
     val importedFromSystem: String? = null,
     val importedFromId: String? = null,
 ) {
-    fun toDomain(): Flight {
-        if (schemaVersion > CURRENT_SCHEMA_VERSION) {
-            throw UnsupportedSchemaException("Flight $id was written by a newer version of the application")
-        }
-        return Flight(
+    fun toDomain(): Flight =
+        Flight(
             id = FlightId(id),
             details =
                 FlightDetails(
@@ -59,7 +56,6 @@ internal data class FlightDocument(
             igcFile = igcFile(),
             importedFrom = importedFrom(),
         )
-    }
 
     private fun importedFrom(): ExternalReference? {
         if (importedFromSystem == null || importedFromId == null) return null

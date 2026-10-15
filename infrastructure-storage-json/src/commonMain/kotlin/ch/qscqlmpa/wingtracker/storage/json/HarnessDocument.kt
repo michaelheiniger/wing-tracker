@@ -34,11 +34,8 @@ internal data class HarnessDocument(
     val checks: List<CheckDocument> = emptyList(),
     val plannedChecks: List<PlannedCheckDocument> = emptyList(),
 ) {
-    fun toDomain(): Harness {
-        if (schemaVersion > CURRENT_SCHEMA_VERSION) {
-            throw UnsupportedSchemaException("Harness $id was written by a newer version of the application")
-        }
-        return Harness(
+    fun toDomain(): Harness =
+        Harness(
             id = HarnessId(id),
             details =
                 HarnessDetails(
@@ -55,7 +52,6 @@ internal data class HarnessDocument(
             checks = checks.map { it.toDomain() },
             plannedChecks = plannedChecks.map { it.toDomain() },
         )
-    }
 
     companion object {
         const val CURRENT_SCHEMA_VERSION = 2

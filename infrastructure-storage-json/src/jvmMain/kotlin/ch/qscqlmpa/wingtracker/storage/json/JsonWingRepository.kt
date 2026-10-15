@@ -23,7 +23,8 @@ class JsonWingRepository(
 
     override suspend fun delete(id: WingId) = store.delete(id.value)
 
-    private fun decode(text: String): Wing = json.decodeFromString<WingDocument>(text).toDomain()
+    private fun decode(text: String): Wing =
+        decodeDocument<WingDocument>(text, WingDocument.CURRENT_SCHEMA_VERSION).toDomain()
 }
 
 // encodeDefaults is required: schemaVersion equals its default and must still be written to disk.

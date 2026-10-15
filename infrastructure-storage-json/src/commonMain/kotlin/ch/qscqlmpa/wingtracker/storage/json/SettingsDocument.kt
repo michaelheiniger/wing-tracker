@@ -22,11 +22,8 @@ internal data class SettingsDocument(
     // Added in schema 5: where the flight tracks of a device were last imported from.
     val deviceFolder: String? = null,
 ) {
-    fun toDomain(): AppSettings {
-        if (schemaVersion > CURRENT_SCHEMA_VERSION) {
-            throw UnsupportedSchemaException("Settings were written by a newer version of the application")
-        }
-        return AppSettings(
+    fun toDomain(): AppSettings =
+        AppSettings(
             themeMode = ThemeMode.valueOf(themeMode),
             reminderLeadTimes = ReminderLeadTimes(reminderLeadDays, reminderLeadHoursMinutes.minutes),
             lastReminderNotificationOn = lastReminderNotificationOn,
@@ -34,7 +31,6 @@ internal data class SettingsDocument(
             syrideUsername = syrideUsername,
             deviceFolder = deviceFolder,
         )
-    }
 
     companion object {
         const val CURRENT_SCHEMA_VERSION = 5

@@ -19,7 +19,7 @@ class JsonSettingsRepository(
     override suspend fun load(): AppSettings {
         val text = store.read(FILE_NAME) ?: return AppSettings()
         return try {
-            json.decodeFromString<SettingsDocument>(text).toDomain()
+            decodeDocument<SettingsDocument>(text, SettingsDocument.CURRENT_SCHEMA_VERSION).toDomain()
         } catch (e: UnsupportedSchemaException) {
             logger.info { "Settings are from a newer version, defaults apply: ${e.message}" }
             AppSettings()

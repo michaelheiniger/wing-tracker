@@ -39,6 +39,23 @@ class JsonSettingsRepositoryTest {
             }
 
         @Test
+        fun `falls back to the defaults and keeps a settings file from a newer version in place`() =
+            runTest {
+                // given
+                repository.save(AppSettings(themeMode = ThemeMode.Dark))
+                val file = dataDirectory.resolve("settings.json")
+                file.rewriteAsNewerVersion()
+
+                // when
+                val settings = repository.load()
+
+                // then
+                assertThat(settings).isEqualTo(AppSettings())
+                assertThat(file.exists()).isTrue()
+                assertThat(dataDirectory.resolve("quarantine").exists()).isFalse()
+            }
+
+        @Test
         fun `returns the defaults when no settings were saved yet`() =
             runTest {
                 // given / when

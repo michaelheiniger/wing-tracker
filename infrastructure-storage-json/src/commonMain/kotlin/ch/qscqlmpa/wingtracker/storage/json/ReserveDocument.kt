@@ -31,11 +31,8 @@ internal data class ReserveDocument(
     val checks: List<CheckDocument> = emptyList(),
     val plannedChecks: List<PlannedCheckDocument> = emptyList(),
 ) {
-    fun toDomain(): Reserve {
-        if (schemaVersion > CURRENT_SCHEMA_VERSION) {
-            throw UnsupportedSchemaException("Reserve $id was written by a newer version of the application")
-        }
-        return Reserve(
+    fun toDomain(): Reserve =
+        Reserve(
             id = ReserveId(id),
             details =
                 ReserveDetails(
@@ -53,7 +50,6 @@ internal data class ReserveDocument(
             checks = checks.map { it.toDomain() },
             plannedChecks = plannedChecks.map { it.toDomain() },
         )
-    }
 
     companion object {
         const val CURRENT_SCHEMA_VERSION = 2

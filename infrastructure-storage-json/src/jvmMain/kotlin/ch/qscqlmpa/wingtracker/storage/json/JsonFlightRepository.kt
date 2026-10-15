@@ -22,5 +22,6 @@ class JsonFlightRepository(
 
     override suspend fun delete(id: FlightId) = store.delete(id.value)
 
-    private fun decode(text: String): Flight = json.decodeFromString<FlightDocument>(text).toDomain()
+    private fun decode(text: String): Flight =
+        decodeDocument<FlightDocument>(text, FlightDocument.CURRENT_SCHEMA_VERSION).toDomain()
 }

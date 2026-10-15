@@ -194,7 +194,7 @@ class JsonWingRepositoryTest {
                 // given
                 repository.save(aStoredWing())
                 val file = dataDirectory.resolve("wings/3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47.json")
-                file.writeText(file.readText().replace(Regex("\"schemaVersion\": \\d+"), "\"schemaVersion\": 999"))
+                file.rewriteAsNewerVersion()
 
                 // when
                 val failure = runCatching { repository.findById(WingId("3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47")) }
@@ -290,7 +290,7 @@ class JsonWingRepositoryTest {
                 // given
                 repository.save(aStoredWing(id = "wing-1"))
                 val file = dataDirectory.resolve("wings/wing-1.json")
-                file.writeText(file.readText().replace(Regex("\"schemaVersion\": \\d+"), "\"schemaVersion\": 999"))
+                file.rewriteAsNewerVersion()
 
                 // when
                 val result = repository.findAll()

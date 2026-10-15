@@ -22,6 +22,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - An "About" button at the bottom of the settings shows the version of the app and links to the changelog.
 
 ### Fixed
+- Opening your data with an older version of the app no longer moves gear it cannot read yet to the quarantine folder: it is left in place, and the newer version reads it again. If gear went missing this way, move its files from the quarantine folder back into the data folder.
 - The Syride import works again in the installed app; it failed with an unexpected error because a part of Java it needs was not packaged.
 - The Syride import keeps accents (e.g. "Pléiades" instead of "Pl&eacute;iades") and the part of flight names and sites in parentheses (e.g. "Sonchaux (déco nord)"), which it used to cut off. When you read your Syride account again, the import offers to correct the flights it imported before, showing a few examples first; names and sites you changed yourself are kept.
 - An unexpected error no longer closes the app or goes unnoticed: a window shows what went wrong, with the technical details to copy into a bug report. If the error broke the main window, it is rebuilt when you click OK. This also covers failing to save the theme or interface size, to show the reminder at startup, or to follow the desktop's light or dark mode.

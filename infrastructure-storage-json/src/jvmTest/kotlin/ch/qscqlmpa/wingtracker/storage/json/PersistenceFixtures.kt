@@ -21,6 +21,9 @@ import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import kotlinx.datetime.LocalDate
+import java.nio.file.Path
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
@@ -152,3 +155,16 @@ fun aStoredReserve(
     status = status,
     checks = checks,
 )
+
+/**
+ * Rewrites a stored file as a newer version of the application would: a higher schema version and a
+ * field this version does not know, which is what newer files hold in practice.
+ */
+fun Path.rewriteAsNewerVersion() =
+    writeText(
+        readText().replace(
+            Regex("\"schemaVersion\": \\d+"),
+            // Whatever the current version is, 999 is newer.
+            "\"schemaVersion\": 999, \"addedByANewerVersion\": true",
+        ),
+    )
