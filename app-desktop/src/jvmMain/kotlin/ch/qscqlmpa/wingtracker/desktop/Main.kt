@@ -67,8 +67,6 @@ fun main() {
     val devMode = System.getProperty("wingtracker.dev").toBoolean()
     val koin = startKoin { modules(appModules(DataDirectory.configured(devMode), devMode)) }.koin
 
-    val saveThemeMode = koin.get<SaveThemeMode>()
-    val saveInterfaceScale = koin.get<SaveInterfaceScale>()
     // Loaded before the first frame so the window never flashes the wrong theme or size.
     val settings = runBlocking { koin.get<SettingsRepository>().load() }
     val themePreference = koin.get<ThemePreference>().also { it.mode = settings.themeMode }
@@ -89,12 +87,6 @@ fun main() {
                 delay(SYSTEM_THEME_POLL_MILLIS)
                 systemDark = withContext(Dispatchers.IO) { systemTheme.isDark() }
             }
-        }
-        LaunchedEffect(themePreference) {
-            snapshotFlow { themePreference.mode }.drop(1).collect { saveThemeMode(it) }
-        }
-        LaunchedEffect(scalePreference) {
-            snapshotFlow { scalePreference.percent }.drop(1).collect { saveInterfaceScale(it) }
         }
         LaunchedEffect(Unit) { koin.get<StartupReminder>()() }
         val themed: @Composable (@Composable () -> Unit) -> Unit = { content ->
@@ -141,6 +133,15 @@ private fun ApplicationScope.MainWindow(
         state = state,
         icon = applicationIcon(),
     ) {
+        // Inside the window, so a failure to save is shown to the pilot instead of ending the app.
+        LaunchedEffect(themePreference) {
+            val saveThemeMode = koin.get<SaveThemeMode>()
+            snapshotFlow { themePreference.mode }.drop(1).collect { saveThemeMode(it) }
+        }
+        LaunchedEffect(scalePreference) {
+            val saveInterfaceScale = koin.get<SaveInterfaceScale>()
+            snapshotFlow { scalePreference.percent }.drop(1).collect { saveInterfaceScale(it) }
+        }
         themed {
             AppShell(
                 logbookUseCases = koin.get<LogbookUseCases>(),
