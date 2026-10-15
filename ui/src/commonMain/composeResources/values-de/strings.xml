@@ -350,6 +350,9 @@
     <string name="settings_data_change">Ändern…</string>
     <string name="settings_data_default">Standardordner verwenden</string>
     <string name="settings_data_choose_title">Datenordner auswählen</string>
+    <string name="settings_log_title">Protokoll</string>
+    <string name="settings_log_hint">Wing Tracker hält in diesem Ordner fest, was es tut und welche unerwarteten Fehler auftreten. Wenn etwas schiefgeht, hilft es, diese Dateien deiner Fehlermeldung anzuhängen. Sie können die Namen deiner Dateien und Ordner enthalten.</string>
+    <string name="settings_log_open">Ordner öffnen</string>
     <string name="data_change_title">Datenordner ändern</string>
     <string name="data_change_body">Neuer Ordner: %1$s</string>
     <string name="data_change_move_hint">Deine bisherigen Daten können dorthin verschoben werden: alles wird kopiert, geprüft und erst dann aus dem alten Ordner entfernt.</string>
@@ -361,6 +364,7 @@
     <string name="data_restart_body">Der Datenordner wurde geändert. Wing Tracker startet jetzt neu, um ihn zu verwenden.</string>
     <string name="data_restart_now">Jetzt neu starten</string>
     <string name="failure_open_data_folder">Der Ordner konnte nicht geöffnet werden: %1$s</string>
+    <string name="failure_open_log_folder">Der Protokollordner konnte nicht geöffnet werden: %1$s</string>
     <string name="failure_change_data_folder">Der Datenordner konnte nicht geändert werden: %1$s</string>
     <string name="failure_data_same">Das ist der Ordner, der bereits verwendet wird.</string>
     <string name="failure_data_unusable">Dieser Ordner kann nicht verwendet werden: Es muss ein Ordner sein, in den du schreiben darfst.</string>

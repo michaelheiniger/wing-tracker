@@ -219,6 +219,7 @@ private fun uiModule(
             DesktopFileSaver(),
             DesktopFileDrop(),
             dataLocation(dataDirectory, devMode),
+            DesktopLogLocation(DesktopLogging.directory(devMode)),
             supportsAllFileNames(),
         )
     }

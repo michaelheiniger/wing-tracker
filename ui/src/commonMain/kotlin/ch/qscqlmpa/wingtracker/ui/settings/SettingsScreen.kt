@@ -61,6 +61,9 @@ import ch.qscqlmpa.wingtracker.ui.resources.settings_data_default
 import ch.qscqlmpa.wingtracker.ui.resources.settings_data_hint
 import ch.qscqlmpa.wingtracker.ui.resources.settings_data_open
 import ch.qscqlmpa.wingtracker.ui.resources.settings_data_title
+import ch.qscqlmpa.wingtracker.ui.resources.settings_log_hint
+import ch.qscqlmpa.wingtracker.ui.resources.settings_log_open
+import ch.qscqlmpa.wingtracker.ui.resources.settings_log_title
 import ch.qscqlmpa.wingtracker.ui.resources.settings_reminders_hint
 import ch.qscqlmpa.wingtracker.ui.resources.settings_reminders_title
 import ch.qscqlmpa.wingtracker.ui.resources.settings_save
@@ -82,6 +85,7 @@ fun SettingsScreen(
     scalePreference: InterfaceScalePreference,
     reminders: ReminderSettingsPresenter,
     dataLocation: DataLocationPresenter,
+    logLocation: LogLocationPresenter,
     appVersion: String,
 ) {
     Column(
@@ -103,6 +107,7 @@ fun SettingsScreen(
         RemindersSection(reminders)
         CalendarSection(reminders)
         DataLocationSection(dataLocation)
+        LogLocationSection(logLocation)
         AboutSection(appVersion)
         reminders.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
     }
@@ -136,6 +141,24 @@ private fun DataLocationSection(presenter: DataLocationPresenter) {
     presenter.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
     presenter.proposal?.let { ChangeDialog(it, presenter) }
     if (presenter.restartRequired) RestartDialog(presenter)
+}
+
+@Composable
+private fun LogLocationSection(presenter: LogLocationPresenter) {
+    Text(
+        stringResource(Res.string.settings_log_title),
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(top = 16.dp),
+    )
+    Text(
+        stringResource(Res.string.settings_log_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    // Selectable, so the pilot can paste the path into a bug report or a mail attachment dialog.
+    SelectionContainer { Text(presenter.path, style = MaterialTheme.typography.bodyLarge) }
+    OutlinedButton(onClick = presenter::open) { Text(stringResource(Res.string.settings_log_open)) }
+    presenter.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
 }
 
 @Composable

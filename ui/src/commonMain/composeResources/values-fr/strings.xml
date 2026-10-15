@@ -350,6 +350,9 @@
     <string name="settings_data_change">Changer…</string>
     <string name="settings_data_default">Utiliser le dossier par défaut</string>
     <string name="settings_data_choose_title">Choisir le dossier de données</string>
+    <string name="settings_log_title">Journal</string>
+    <string name="settings_log_hint">Wing Tracker note dans ce dossier ce qu'il fait et les erreurs inattendues. Si quelque chose ne va pas, joindre ces fichiers à ton rapport de bug aide à en trouver la cause. Ils peuvent contenir les noms de tes fichiers et dossiers.</string>
+    <string name="settings_log_open">Ouvrir le dossier</string>
     <string name="data_change_title">Changer le dossier de données</string>
     <string name="data_change_body">Nouveau dossier : %1$s</string>
     <string name="data_change_move_hint">Tes données actuelles peuvent y être déplacées : tout est copié, vérifié, puis seulement retiré de l'ancien dossier.</string>
@@ -361,6 +364,7 @@
     <string name="data_restart_body">Le dossier de données a été changé. Wing Tracker redémarre maintenant pour l'utiliser.</string>
     <string name="data_restart_now">Redémarrer maintenant</string>
     <string name="failure_open_data_folder">Le dossier n'a pas pu être ouvert : %1$s</string>
+    <string name="failure_open_log_folder">Le dossier du journal n'a pas pu être ouvert : %1$s</string>
     <string name="failure_change_data_folder">Le dossier de données n'a pas pu être changé : %1$s</string>
     <string name="failure_data_same">C'est déjà le dossier utilisé.</string>
     <string name="failure_data_unusable">Ce dossier ne peut pas être utilisé : ce doit être un dossier dans lequel tu peux écrire.</string>

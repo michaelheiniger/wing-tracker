@@ -27,6 +27,7 @@ enum class FailureKind {
     DropNoIgc,
     NoIgcInFolder,
     OpenDataFolder,
+    OpenLogFolder,
     ChangeDataFolder,
     DataFolderSame,
     DataFolderUnusable,

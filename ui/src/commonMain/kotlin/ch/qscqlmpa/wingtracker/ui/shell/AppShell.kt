@@ -56,6 +56,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.nav_settings
 import ch.qscqlmpa.wingtracker.ui.resources.nav_statistics
 import ch.qscqlmpa.wingtracker.ui.resources.settings_data_choose_title
 import ch.qscqlmpa.wingtracker.ui.settings.DataLocationPresenter
+import ch.qscqlmpa.wingtracker.ui.settings.LogLocationPresenter
 import ch.qscqlmpa.wingtracker.ui.settings.SettingsScreen
 import ch.qscqlmpa.wingtracker.ui.statistics.StatisticsRoute
 import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
@@ -105,6 +106,7 @@ fun AppShell(
     val chooseTitle = stringResource(Res.string.settings_data_choose_title)
     val dataLocation =
         remember { DataLocationPresenter(scope, platform.dataLocation, chooseTitle, beforeChange = undo::flush) }
+    val logLocation = remember { LogLocationPresenter(scope, platform.logLocation) }
     // Shown once per start: the pilot can only fix it outside the application, then restart it.
     var fileNamesWarning by rememberSaveable { mutableStateOf(!platform.supportsAllFileNames) }
     // Set when the attention panel opens a piece of gear, consumed by the gear section.
@@ -179,6 +181,7 @@ fun AppShell(
                                         scalePreference,
                                         reminderSettings,
                                         dataLocation,
+                                        logLocation,
                                         appVersion,
                                     )
                                 }

@@ -114,12 +114,21 @@ interface DataLocation {
     fun restart()
 }
 
+/** Where the application writes its log, so a pilot can attach it to a bug report; each platform decides where. */
+interface LogLocation {
+    val path: String
+
+    /** Shows the log folder in the system's file manager. */
+    suspend fun open()
+}
+
 class PlatformServices(
     val filePicker: FilePicker,
     val fileOpener: FileOpener,
     val fileSaver: FileSaver,
     val fileDrop: FileDrop,
     val dataLocation: DataLocation,
+    val logLocation: LogLocation,
     // False when some file names cannot be opened on this system at all, which the user should hear about up front.
     val supportsAllFileNames: Boolean = true,
 )

@@ -12,6 +12,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ### Added
 - The app keeps a log of what it does and of unexpected errors, so a bug report can include what happened. It is kept in your system's usual folder for logs, and old logs are removed automatically.
+- The settings show where the log is kept, with a button to open its folder, so you can attach it to a bug report.
 - Dates can be typed as well as picked from the calendar: day-month-year, with dashes, dots or slashes (e.g. 5.3.2026), shown as 05-03-2026 once you leave the field. A day that does not exist is flagged instead of saved.
 - The statistics start with a "Totals" card: your flights and hours over all years, every wing together, then year by year. Flights and hours entered as "before tracking" count in the overall total, and the card says how many. In the table view, the yearly tables end with an "All years" row, and their last column ("All wings") always counts every wing, even hidden ones.
 - Import flights from a spreadsheet (ODS or XLSX), e.g. a digitized paper logbook: choose the file under Import, check which column holds the date, wing, duration (whole hours, whole minutes or both, added up), sites, distance and notes, with the first flights shown as you choose, then pick or create the wing for each wing named in the file. Rows that cannot be read are listed with the reason, and rows already in the logbook are left out, so importing a longer version of the same file adds only the new flights.

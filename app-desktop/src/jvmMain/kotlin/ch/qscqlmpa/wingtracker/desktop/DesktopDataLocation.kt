@@ -10,7 +10,6 @@ import io.github.vinceglb.filekit.path
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.swing.Swing
 import kotlinx.coroutines.withContext
-import java.awt.Desktop
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -81,16 +80,7 @@ class DesktopDataLocation(
         if (moveData) runCatching { removeContentsOf(current) }
     }
 
-    override suspend fun open() =
-        withContext(Dispatchers.IO) {
-            val opened =
-                Desktop.isDesktopSupported() &&
-                    Desktop.getDesktop().isSupported(Desktop.Action.OPEN) &&
-                    runCatching { Desktop.getDesktop().open(current.toFile()) }.isSuccess
-            // Some Linux desktops have no AWT support for opening folders.
-            if (!opened) ProcessBuilder("xdg-open", current.toString()).start()
-            Unit
-        }
+    override suspend fun open() = openInFileManager(current)
 
     override fun restart() {
         // Started before exiting: a failed start must still leave the pilot with the application closed, not half-open.

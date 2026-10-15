@@ -350,6 +350,9 @@
     <string name="settings_data_change">Change…</string>
     <string name="settings_data_default">Use the default folder</string>
     <string name="settings_data_choose_title">Choose the data folder</string>
+    <string name="settings_log_title">Log</string>
+    <string name="settings_log_hint">Wing Tracker notes what it does and any unexpected errors in this folder. If something goes wrong, attaching these files to your bug report helps find out why. They can contain the names of your files and folders.</string>
+    <string name="settings_log_open">Open folder</string>
     <string name="data_change_title">Change the data folder</string>
     <string name="data_change_body">New folder: %1$s</string>
     <string name="data_change_move_hint">Your current data can be moved there: everything is copied, checked and only then removed from the old folder.</string>
@@ -361,6 +364,7 @@
     <string name="data_restart_body">The data folder was changed. Wing Tracker restarts now to use it.</string>
     <string name="data_restart_now">Restart now</string>
     <string name="failure_open_data_folder">The folder could not be opened: %1$s</string>
+    <string name="failure_open_log_folder">The log folder could not be opened: %1$s</string>
     <string name="failure_change_data_folder">The data folder could not be changed: %1$s</string>
     <string name="failure_data_same">That is the folder already in use.</string>
     <string name="failure_data_unusable">That folder cannot be used: it must be a folder you can write to.</string>
