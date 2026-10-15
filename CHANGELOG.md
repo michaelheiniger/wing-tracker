@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-15
+
 ### Changed
 - The logbook's import buttons are now one "Import" menu: IGC files, from a device, from Syride. Imports that need a wing say so instead of disappearing.
 - Imports also suggest an existing wing when the source names it by its model or by manufacturer and model (e.g. "Ozone Ultralite 4").
