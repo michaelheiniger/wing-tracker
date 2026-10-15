@@ -165,6 +165,7 @@ fun WingFormScreen(
             label = stringResource(Res.string.field_purchase_date),
             value = input.purchaseDate,
             onValueChange = { v -> presenter.change { it.copy(purchaseDate = v) } },
+            errorText = errors[WingFormField.PurchaseDate]?.message(),
             clearable = true,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -195,6 +196,7 @@ fun WingFormScreen(
                 label = stringResource(Res.string.field_in_service_date),
                 value = input.inServiceDate,
                 onValueChange = { v -> presenter.change { it.copy(inServiceDate = v) } },
+                errorText = errors[WingFormField.InServiceDate]?.message(),
                 clearable = true,
                 modifier = Modifier.weight(1f),
             )

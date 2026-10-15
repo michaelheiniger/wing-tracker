@@ -23,6 +23,7 @@ import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
+import ch.qscqlmpa.wingtracker.ui.toDisplay
 import ch.qscqlmpa.wingtracker.ui.undo.TEXT
 import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
 import ch.qscqlmpa.wingtracker.ui.undo.expire
@@ -200,7 +201,9 @@ class LogbookPresentersTest {
                 val input = presenter.state.newFlightInput(TODAY)
 
                 // then
-                assertThat(input).usingRecursiveComparison().isEqualTo(FlightFormInput(TODAY, WingId("wing-2")))
+                assertThat(
+                    input,
+                ).usingRecursiveComparison().isEqualTo(FlightFormInput(TODAY.toDisplay(), WingId("wing-2")))
             }
 
         @Test
@@ -312,7 +315,7 @@ class LogbookPresentersTest {
                 initial = initial,
             )
 
-        private val fresh = FlightFormInput(date = LocalDate(2026, 10, 11), wingId = WingId("wing-1"))
+        private val fresh = FlightFormInput(date = "11-10-2026", wingId = WingId("wing-1"))
 
         @Test
         fun `has nothing to take back while the form is untouched`() =
@@ -366,7 +369,7 @@ class LogbookPresentersTest {
         )
 
         private val validInput =
-            FlightFormInput(date = LocalDate(2026, 9, 20), wingId = WingId("wing-1"), duration = "1:35")
+            FlightFormInput(date = "20-09-2026", wingId = WingId("wing-1"), duration = "1:35")
 
         @Test
         fun `does not save and exposes errors when the form is invalid`() =
@@ -405,7 +408,7 @@ class LogbookPresentersTest {
             runTest {
                 // given
                 coEvery { wings.findById(skyDancer.id) } returns skyDancer
-                val presenter = formPresenter(validInput.copy(date = LocalDate(2026, 10, 12)))
+                val presenter = formPresenter(validInput.copy(date = "12-10-2026"))
                 var saved = false
 
                 // when

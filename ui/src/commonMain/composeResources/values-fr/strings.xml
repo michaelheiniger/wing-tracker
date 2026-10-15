@@ -56,6 +56,8 @@
     <string name="date_pick">Choisir une date</string>
     <string name="date_clear">Effacer la date</string>
     <string name="date_ok">OK</string>
+    <string name="date_placeholder">jj-mm-aaaa</string>
+    <string name="error_date">Utiliser un jour valide au format jour-mois-année, p. ex. 05-03-2026</string>
 
     <string name="error_required">Obligatoire</string>
     <string name="error_amount">Utiliser un nombre comme 2150 ou 2150.50</string>

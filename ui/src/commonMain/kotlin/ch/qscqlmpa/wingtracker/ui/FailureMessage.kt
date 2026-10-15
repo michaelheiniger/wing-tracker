@@ -6,6 +6,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.error_amount
 import ch.qscqlmpa.wingtracker.ui.resources.error_count
 import ch.qscqlmpa.wingtracker.ui.resources.error_currency
+import ch.qscqlmpa.wingtracker.ui.resources.error_date
 import ch.qscqlmpa.wingtracker.ui.resources.error_days
 import ch.qscqlmpa.wingtracker.ui.resources.error_hours
 import ch.qscqlmpa.wingtracker.ui.resources.error_months
@@ -100,6 +101,7 @@ fun Failure.message(): String =
 fun FormError.message(): String =
     when (this) {
         FormError.Required -> stringResource(Res.string.error_required)
+        FormError.InvalidDate -> stringResource(Res.string.error_date)
         FormError.InvalidAmount -> stringResource(Res.string.error_amount)
         FormError.InvalidCurrency -> stringResource(Res.string.error_currency)
         FormError.InvalidHours -> stringResource(Res.string.error_hours)

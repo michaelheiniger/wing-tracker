@@ -11,9 +11,10 @@ import ch.qscqlmpa.wingtracker.ui.formatHoursAndMinutes
 import ch.qscqlmpa.wingtracker.ui.gear.DEFAULT_CURRENCY
 import ch.qscqlmpa.wingtracker.ui.gear.PriceParse
 import ch.qscqlmpa.wingtracker.ui.gear.formatAmount
+import ch.qscqlmpa.wingtracker.ui.gear.parseOptionalDate
 import ch.qscqlmpa.wingtracker.ui.gear.parsePrice
 import ch.qscqlmpa.wingtracker.ui.parseHoursAndMinutes
-import kotlinx.datetime.LocalDate
+import ch.qscqlmpa.wingtracker.ui.toDisplay
 import kotlin.time.Duration
 
 /** What the pilot typed or picked; parsing lives in [validate] so it is testable without any UI. */
@@ -25,10 +26,10 @@ data class WingFormInput(
     val serialNumber: String = "",
     val certificationClass: CertificationClass? = null,
     val condition: AcquisitionCondition = AcquisitionCondition.New,
-    val purchaseDate: LocalDate? = null,
+    val purchaseDate: String = "",
     val priceAmount: String = "",
     val priceCurrency: String = DEFAULT_CURRENCY,
-    val inServiceDate: LocalDate? = null,
+    val inServiceDate: String = "",
     val hoursBeforeTracking: String = "",
     val flightsBeforeTracking: String = "",
     val intervalMonths: String = "",
@@ -58,10 +59,13 @@ data class WingFormInput(
                 serialNumber = details.serialNumber.orEmpty(),
                 certificationClass = details.certificationClass,
                 condition = details.acquisition.condition,
-                purchaseDate = details.acquisition.purchaseDate,
+                purchaseDate =
+                    details.acquisition.purchaseDate
+                        ?.toDisplay()
+                        .orEmpty(),
                 priceAmount = price?.let { formatAmount(it.minorUnits) }.orEmpty(),
                 priceCurrency = price?.currency?.value ?: DEFAULT_CURRENCY,
-                inServiceDate = details.inServiceDate,
+                inServiceDate = details.inServiceDate?.toDisplay().orEmpty(),
                 hoursBeforeTracking = formatHoursAndMinutes(details.hoursBeforeTracking.inWholeMinutes),
                 flightsBeforeTracking =
                     details.flightsBeforeTracking
@@ -87,8 +91,10 @@ enum class WingFormField {
     Name,
     Manufacturer,
     Model,
+    PurchaseDate,
     PriceAmount,
     PriceCurrency,
+    InServiceDate,
     HoursBeforeTracking,
     FlightsBeforeTracking,
     IntervalMonths,
@@ -98,6 +104,7 @@ enum class WingFormField {
 /** Error kinds rather than text, so the screen can show them in the user's language. */
 enum class FormError {
     Required,
+    InvalidDate,
     InvalidAmount,
     InvalidCurrency,
     InvalidHours,
@@ -123,7 +130,9 @@ fun WingFormInput.validate(): WingFormResult {
     if (manufacturer.isBlank()) errors[WingFormField.Manufacturer] = FormError.Required
     if (model.isBlank()) errors[WingFormField.Model] = FormError.Required
 
+    val purchased = parseOptionalDate(purchaseDate) { errors[WingFormField.PurchaseDate] = FormError.InvalidDate }
     val price = parsePrice(errors)
+    val inService = parseOptionalDate(inServiceDate) { errors[WingFormField.InServiceDate] = FormError.InvalidDate }
     val hours = parseHours(errors)
     val flightCount = parseFlightCount(errors)
     val interval = parseInterval(errors)
@@ -138,8 +147,8 @@ fun WingFormInput.validate(): WingFormResult {
             size = size.trim().ifEmpty { null },
             serialNumber = serialNumber.trim().ifEmpty { null },
             certificationClass = certificationClass,
-            acquisition = Acquisition(condition, purchaseDate, price),
-            inServiceDate = inServiceDate,
+            acquisition = Acquisition(condition, purchased, price),
+            inServiceDate = inService,
             hoursBeforeTracking = hours,
             flightsBeforeTracking = flightCount,
             maintenanceInterval = interval,

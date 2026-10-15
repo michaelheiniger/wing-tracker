@@ -8,11 +8,13 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceCheck
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import ch.qscqlmpa.wingtracker.gear.maintenance.PlannedCheck
 import ch.qscqlmpa.wingtracker.gear.maintenance.PlannedCheckDetails
+import ch.qscqlmpa.wingtracker.ui.parseDate
+import ch.qscqlmpa.wingtracker.ui.toDisplay
 import kotlinx.datetime.LocalDate
 
 /** Form for a performed check. Files already stored are kept or removed; new ones are added. */
 data class CheckFormInput(
-    val date: LocalDate? = null,
+    val date: String = "",
     val type: CheckType = CheckType.Full,
     val company: String = "",
     val notes: String = "",
@@ -29,7 +31,7 @@ data class CheckFormInput(
     companion object {
         fun from(check: MaintenanceCheck) =
             CheckFormInput(
-                date = check.date,
+                date = check.date.toDisplay(),
                 type = check.type,
                 company = check.company.orEmpty(),
                 notes = check.notes.orEmpty(),
@@ -43,7 +45,7 @@ data class CheckFormInput(
             planned: PlannedCheck,
             today: LocalDate,
         ) = CheckFormInput(
-            date = today,
+            date = today.toDisplay(),
             type = planned.type,
             company = planned.company.orEmpty(),
             notes = planned.notes.orEmpty(),
@@ -54,7 +56,7 @@ data class CheckFormInput(
 
 enum class CheckFormField { Date }
 
-enum class CheckFormError { Required, DateInFuture }
+enum class CheckFormError { Required, InvalidDate, DateInFuture }
 
 /** Valid input also carries which stored files to add and remove, because saving is one operation. */
 sealed interface CheckFormResult {
@@ -70,7 +72,10 @@ sealed interface CheckFormResult {
 }
 
 fun CheckFormInput.validate(): CheckFormResult {
-    val checkDate = date ?: return CheckFormResult.Invalid(mapOf(CheckFormField.Date to CheckFormError.Required))
+    val checkDate =
+        parseDate(date) ?: return CheckFormResult.Invalid(
+            mapOf(CheckFormField.Date to if (date.isBlank()) CheckFormError.Required else CheckFormError.InvalidDate),
+        )
     return CheckFormResult.Valid(
         details =
             CheckDetails(
@@ -86,18 +91,18 @@ fun CheckFormInput.validate(): CheckFormResult {
 }
 
 data class PlanFormInput(
-    val date: LocalDate? = null,
+    val date: String = "",
     val type: CheckType = CheckType.Full,
     val company: String = "",
     val notes: String = "",
 ) {
     companion object {
         fun from(planned: PlannedCheck) =
-            PlanFormInput(planned.date, planned.type, planned.company.orEmpty(), planned.notes.orEmpty())
+            PlanFormInput(planned.date.toDisplay(), planned.type, planned.company.orEmpty(), planned.notes.orEmpty())
     }
 }
 
-enum class PlanFormError { Required, DateInPast }
+enum class PlanFormError { Required, InvalidDate, DateInPast }
 
 sealed interface PlanFormResult {
     data class Valid(
@@ -110,7 +115,10 @@ sealed interface PlanFormResult {
 }
 
 fun PlanFormInput.validate(): PlanFormResult {
-    val plannedDate = date ?: return PlanFormResult.Invalid(mapOf(CheckFormField.Date to PlanFormError.Required))
+    val plannedDate =
+        parseDate(date) ?: return PlanFormResult.Invalid(
+            mapOf(CheckFormField.Date to if (date.isBlank()) PlanFormError.Required else PlanFormError.InvalidDate),
+        )
     return PlanFormResult.Valid(
         PlannedCheckDetails(plannedDate, type, company.ifBlank { null }, notes.ifBlank { null }),
     )

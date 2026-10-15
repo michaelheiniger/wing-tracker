@@ -5,9 +5,10 @@ import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.ui.gear.DEFAULT_CURRENCY
 import ch.qscqlmpa.wingtracker.ui.gear.PriceParse
 import ch.qscqlmpa.wingtracker.ui.gear.formatAmount
+import ch.qscqlmpa.wingtracker.ui.gear.parseOptionalDate
 import ch.qscqlmpa.wingtracker.ui.gear.parsePrice
 import ch.qscqlmpa.wingtracker.ui.gear.wing.FormError
-import kotlinx.datetime.LocalDate
+import ch.qscqlmpa.wingtracker.ui.toDisplay
 
 /** What the pilot typed or picked for a harness or reserve; parsing lives in [validate] (testable without UI). */
 data class SimpleGearFormInput(
@@ -16,12 +17,12 @@ data class SimpleGearFormInput(
     val model: String = "",
     val size: String = "",
     val serialNumber: String = "",
-    val manufactureDate: LocalDate? = null,
+    val manufactureDate: String = "",
     val condition: AcquisitionCondition = AcquisitionCondition.New,
-    val purchaseDate: LocalDate? = null,
+    val purchaseDate: String = "",
     val priceAmount: String = "",
     val priceCurrency: String = DEFAULT_CURRENCY,
-    val inServiceDate: LocalDate? = null,
+    val inServiceDate: String = "",
     val intervalMonths: String = "",
 ) {
     companion object {
@@ -34,19 +35,32 @@ data class SimpleGearFormInput(
                 model = details.model,
                 size = details.size.orEmpty(),
                 serialNumber = details.serialNumber.orEmpty(),
-                manufactureDate = details.manufactureDate,
+                manufactureDate = details.manufactureDate?.toDisplay().orEmpty(),
                 condition = details.acquisition.condition,
-                purchaseDate = details.acquisition.purchaseDate,
+                purchaseDate =
+                    details.acquisition.purchaseDate
+                        ?.toDisplay()
+                        .orEmpty(),
                 priceAmount = price?.let { formatAmount(it.minorUnits) }.orEmpty(),
                 priceCurrency = price?.currency?.value ?: DEFAULT_CURRENCY,
-                inServiceDate = details.inServiceDate,
+                inServiceDate = details.inServiceDate?.toDisplay().orEmpty(),
                 intervalMonths = details.intervalMonths?.toString().orEmpty(),
             )
         }
     }
 }
 
-enum class SimpleGearField { Name, Manufacturer, Model, PriceAmount, PriceCurrency, IntervalMonths }
+enum class SimpleGearField {
+    Name,
+    Manufacturer,
+    Model,
+    ManufactureDate,
+    PurchaseDate,
+    PriceAmount,
+    PriceCurrency,
+    InServiceDate,
+    IntervalMonths,
+}
 
 sealed interface SimpleGearFormResult {
     data class Valid(
@@ -66,6 +80,9 @@ fun SimpleGearFormInput.validate(): SimpleGearFormResult {
     if (manufacturer.isBlank()) errors[SimpleGearField.Manufacturer] = FormError.Required
     if (model.isBlank()) errors[SimpleGearField.Model] = FormError.Required
 
+    val manufactured =
+        parseOptionalDate(manufactureDate) { errors[SimpleGearField.ManufactureDate] = FormError.InvalidDate }
+    val purchased = parseOptionalDate(purchaseDate) { errors[SimpleGearField.PurchaseDate] = FormError.InvalidDate }
     val price =
         when (val parsed = parsePrice(priceAmount, priceCurrency)) {
             is PriceParse.Parsed -> {
@@ -78,6 +95,7 @@ fun SimpleGearFormInput.validate(): SimpleGearFormResult {
                 null
             }
         }
+    val inService = parseOptionalDate(inServiceDate) { errors[SimpleGearField.InServiceDate] = FormError.InvalidDate }
     val months = intervalMonths.trim()
     val intervalValue =
         months
@@ -95,9 +113,9 @@ fun SimpleGearFormInput.validate(): SimpleGearFormResult {
             model = model.trim(),
             size = size.trim().ifEmpty { null },
             serialNumber = serialNumber.trim().ifEmpty { null },
-            manufactureDate = manufactureDate,
-            acquisition = Acquisition(condition, purchaseDate, price),
-            inServiceDate = inServiceDate,
+            manufactureDate = manufactured,
+            acquisition = Acquisition(condition, purchased, price),
+            inServiceDate = inService,
             intervalMonths = intervalValue,
         ),
     )

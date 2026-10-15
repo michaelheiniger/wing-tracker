@@ -56,6 +56,8 @@
     <string name="date_pick">Choose a date</string>
     <string name="date_clear">Clear date</string>
     <string name="date_ok">OK</string>
+    <string name="date_placeholder">dd-mm-yyyy</string>
+    <string name="error_date">Use a real day as day-month-year, e.g. 05-03-2026</string>
 
     <string name="error_required">Required</string>
     <string name="error_amount">Use a number such as 2150 or 2150.50</string>

@@ -11,6 +11,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.check_type_other
 import ch.qscqlmpa.wingtracker.ui.resources.check_type_partial
 import ch.qscqlmpa.wingtracker.ui.resources.check_type_repack
 import ch.qscqlmpa.wingtracker.ui.resources.error_check_date_future
+import ch.qscqlmpa.wingtracker.ui.resources.error_date
 import ch.qscqlmpa.wingtracker.ui.resources.error_plan_date_past
 import ch.qscqlmpa.wingtracker.ui.resources.error_required
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_due
@@ -35,6 +36,7 @@ fun CheckType.label(): String =
 fun CheckFormError.message(): String =
     when (this) {
         CheckFormError.Required -> stringResource(Res.string.error_required)
+        CheckFormError.InvalidDate -> stringResource(Res.string.error_date)
         CheckFormError.DateInFuture -> stringResource(Res.string.error_check_date_future)
     }
 
@@ -42,6 +44,7 @@ fun CheckFormError.message(): String =
 fun PlanFormError.message(): String =
     when (this) {
         PlanFormError.Required -> stringResource(Res.string.error_required)
+        PlanFormError.InvalidDate -> stringResource(Res.string.error_date)
         PlanFormError.DateInPast -> stringResource(Res.string.error_plan_date_past)
     }
 

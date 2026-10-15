@@ -15,7 +15,7 @@ import kotlin.time.Instant
 // Own factory: UI tests do not share fixtures with the domain or persistence tests.
 private fun aFlightFormInput() =
     FlightFormInput(
-        date = LocalDate(2026, 9, 20),
+        date = "20-09-2026",
         wingId = WingId("3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47"),
         duration = "1:35",
         takeOffSite = "Niederhorn",
@@ -74,6 +74,30 @@ class FlightFormTest {
             // then
             assertThat(errors).containsOnlyKeys(FlightFormField.Date, FlightFormField.Wing, FlightFormField.Duration)
             assertThat(errors.values).containsOnly(FlightFormError.Required)
+        }
+
+        @Test
+        fun `rejects a typed date that is not a real day`() {
+            // given
+            val input = aFlightFormInput().copy(date = "31-02-2026")
+
+            // when
+            val errors = errorsOf(input)
+
+            // then
+            assertThat(errors).containsExactly(entry(FlightFormField.Date, FlightFormError.InvalidDate))
+        }
+
+        @Test
+        fun `reads a date typed with dots`() {
+            // given
+            val input = aFlightFormInput().copy(date = "20.9.2026")
+
+            // when
+            val result = input.validate()
+
+            // then
+            assertThat((result as FlightFormResult.Valid).details.date).isEqualTo(LocalDate(2026, 9, 20))
         }
 
         @Test

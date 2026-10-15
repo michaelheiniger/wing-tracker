@@ -10,6 +10,7 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.ui.gear.wing.FormError
 import kotlinx.datetime.LocalDate
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.entry
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -21,12 +22,12 @@ private fun aFormInput() =
         model = "Yeti Cross",
         size = "XL",
         serialNumber = "GIN-R-7731",
-        manufactureDate = LocalDate(2023, 11, 5),
+        manufactureDate = "05-11-2023",
         condition = AcquisitionCondition.SecondHand,
-        purchaseDate = LocalDate(2024, 2, 20),
+        purchaseDate = "20-02-2024",
         priceAmount = "480.50",
         priceCurrency = "chf",
-        inServiceDate = LocalDate(2024, 3, 1),
+        inServiceDate = "01-03-2024",
         intervalMonths = "12",
     )
 
@@ -108,13 +109,30 @@ class SimpleGearFormTest {
         @Test
         fun `accepts gear without an in-service date`() {
             // given
-            val input = aFormInput().copy(inServiceDate = null)
+            val input = aFormInput().copy(inServiceDate = "")
 
             // when
             val result = input.validate()
 
             // then
             assertThat((result as SimpleGearFormResult.Valid).details.inServiceDate).isNull()
+        }
+
+        @Test
+        fun `rejects typed dates that are not real days`() {
+            // given
+            val input =
+                aFormInput().copy(manufactureDate = "5-11", purchaseDate = "20.02.2024x", inServiceDate = "00-03-2024")
+
+            // when
+            val result = input.validate()
+
+            // then
+            assertThat((result as SimpleGearFormResult.Invalid).errors).containsOnly(
+                entry(SimpleGearField.ManufactureDate, FormError.InvalidDate),
+                entry(SimpleGearField.PurchaseDate, FormError.InvalidDate),
+                entry(SimpleGearField.InServiceDate, FormError.InvalidDate),
+            )
         }
 
         @Test

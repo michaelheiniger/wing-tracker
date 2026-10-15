@@ -56,6 +56,8 @@
     <string name="date_pick">Datum wählen</string>
     <string name="date_clear">Datum entfernen</string>
     <string name="date_ok">OK</string>
+    <string name="date_placeholder">tt-mm-jjjj</string>
+    <string name="error_date">Einen gültigen Tag als Tag-Monat-Jahr verwenden, z. B. 05-03-2026</string>
 
     <string name="error_required">Pflichtfeld</string>
     <string name="error_amount">Eine Zahl wie 2150 oder 2150.50 verwenden</string>

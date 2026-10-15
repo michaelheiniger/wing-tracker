@@ -219,7 +219,7 @@ class WingPresentersTest {
                 name = "Sky Dancer",
                 manufacturer = "Advance",
                 model = "Iota 3",
-                inServiceDate = LocalDate(2023, 5, 1),
+                inServiceDate = "01-05-2023",
             )
 
         @Test

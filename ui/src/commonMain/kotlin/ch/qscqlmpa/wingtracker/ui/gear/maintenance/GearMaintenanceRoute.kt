@@ -8,6 +8,7 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.check_pick_title
+import ch.qscqlmpa.wingtracker.ui.toDisplay
 import ch.qscqlmpa.wingtracker.ui.today
 import org.jetbrains.compose.resources.stringResource
 
@@ -28,7 +29,7 @@ fun GearMaintenanceRoute(
                     when (mode) {
                         CheckFormMode.Record -> {
                             CheckFormInput(
-                                date = today(),
+                                date = today().toDisplay(),
                                 type = ref.kind.allowedChecks.first(),
                                 restartsInterval = true,
                             )

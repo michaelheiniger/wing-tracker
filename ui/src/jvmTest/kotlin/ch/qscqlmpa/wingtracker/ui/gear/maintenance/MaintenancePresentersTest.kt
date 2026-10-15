@@ -224,7 +224,7 @@ class MaintenancePresentersTest {
                 // given
                 givenStored()
                 coEvery { picker.pick("Choose", setOf("pdf")) } returns listOf(NewAttachment("a.pdf", byteArrayOf(1)))
-                val presenter = presenter(CheckFormMode.Record, CheckFormInput(date = LocalDate(2026, 4, 10)))
+                val presenter = presenter(CheckFormMode.Record, CheckFormInput(date = "10-04-2026"))
                 presenter.addReports()
                 var saved = false
 
@@ -291,7 +291,7 @@ class MaintenancePresentersTest {
             runTest {
                 // given
                 givenStored()
-                val presenter = presenter(CheckFormMode.Record, CheckFormInput(date = LocalDate(2026, 10, 12)))
+                val presenter = presenter(CheckFormMode.Record, CheckFormInput(date = "12-10-2026"))
 
                 // when
                 presenter.submit {}
@@ -306,7 +306,7 @@ class MaintenancePresentersTest {
                 // given
                 givenStored()
                 coEvery { wings.save(any()) } throws IOException("Disk full")
-                val presenter = presenter(CheckFormMode.Record, CheckFormInput(date = LocalDate(2026, 4, 10)))
+                val presenter = presenter(CheckFormMode.Record, CheckFormInput(date = "10-04-2026"))
                 var saved = false
 
                 // when
@@ -330,7 +330,7 @@ class MaintenancePresentersTest {
             runTest {
                 // given
                 givenStored()
-                val presenter = presenter(input = PlanFormInput(date = LocalDate(2026, 12, 1)))
+                val presenter = presenter(input = PlanFormInput(date = "01-12-2026"))
                 var saved = false
 
                 // when
@@ -355,7 +355,7 @@ class MaintenancePresentersTest {
             runTest {
                 // given
                 givenStored()
-                val presenter = presenter(input = PlanFormInput(date = LocalDate(2026, 10, 10)))
+                val presenter = presenter(input = PlanFormInput(date = "10-10-2026"))
 
                 // when
                 presenter.submit {}

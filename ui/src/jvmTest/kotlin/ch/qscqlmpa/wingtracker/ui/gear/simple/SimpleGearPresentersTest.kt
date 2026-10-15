@@ -166,7 +166,7 @@ class SimpleGearPresentersTest {
                 name = "Cockpit",
                 manufacturer = "Advance",
                 model = "Impress 4",
-                inServiceDate = LocalDate(2024, 3, 1),
+                inServiceDate = "01-03-2024",
             )
 
         @Test

@@ -13,6 +13,7 @@ import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
+import ch.qscqlmpa.wingtracker.ui.toDisplay
 import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
 import ch.qscqlmpa.wingtracker.ui.undo.UndoText
 import kotlinx.coroutines.CancellationException
@@ -50,7 +51,7 @@ data class LogbookState(
             lastFlown?.takeIf { id -> wings.any { it.id == id } }
                 ?: wings.firstOrNull { it.isActive }?.id
                 ?: wings.firstOrNull()?.id
-        return FlightFormInput(date = today, wingId = wingId)
+        return FlightFormInput(date = today.toDisplay(), wingId = wingId)
     }
 }
 

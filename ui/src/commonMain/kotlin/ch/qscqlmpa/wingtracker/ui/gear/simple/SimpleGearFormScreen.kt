@@ -118,6 +118,7 @@ fun SimpleGearFormScreen(
                 label = stringResource(Res.string.field_manufacture_date),
                 value = input.manufactureDate,
                 onValueChange = { v -> presenter.change { it.copy(manufactureDate = v) } },
+                errorText = errors[SimpleGearField.ManufactureDate]?.message(),
                 clearable = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -144,6 +145,7 @@ fun SimpleGearFormScreen(
             label = stringResource(Res.string.field_purchase_date),
             value = input.purchaseDate,
             onValueChange = { v -> presenter.change { it.copy(purchaseDate = v) } },
+            errorText = errors[SimpleGearField.PurchaseDate]?.message(),
             clearable = true,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -172,6 +174,7 @@ fun SimpleGearFormScreen(
                 label = stringResource(Res.string.field_in_service_date),
                 value = input.inServiceDate,
                 onValueChange = { v -> presenter.change { it.copy(inServiceDate = v) } },
+                errorText = errors[SimpleGearField.InServiceDate]?.message(),
                 clearable = true,
                 modifier = Modifier.weight(1f),
             )

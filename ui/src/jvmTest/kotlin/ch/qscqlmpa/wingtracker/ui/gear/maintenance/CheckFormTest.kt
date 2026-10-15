@@ -20,7 +20,7 @@ private val REPORT = Attachment(AttachmentId("report-1"), "check-report-2025.pdf
 
 private fun aCheckInput() =
     CheckFormInput(
-        date = LocalDate(2026, 4, 10),
+        date = "10-04-2026",
         type = CheckType.Full,
         company = "Swiss Paragliding Service",
         notes = "Lines within tolerance",
@@ -84,7 +84,7 @@ class CheckFormTest {
         @Test
         fun `requires a date`() {
             // given
-            val input = aCheckInput().copy(date = null)
+            val input = aCheckInput().copy(date = "")
 
             // when
             val result = input.validate()
@@ -92,6 +92,19 @@ class CheckFormTest {
             // then
             assertThat((result as CheckFormResult.Invalid).errors)
                 .containsEntry(CheckFormField.Date, CheckFormError.Required)
+        }
+
+        @Test
+        fun `rejects a typed date that is not a real day`() {
+            // given
+            val input = aCheckInput().copy(date = "10-13-2026")
+
+            // when
+            val result = input.validate()
+
+            // then
+            assertThat((result as CheckFormResult.Invalid).errors)
+                .containsEntry(CheckFormField.Date, CheckFormError.InvalidDate)
         }
 
         @Test
@@ -162,7 +175,7 @@ class CheckFormTest {
             val input = CheckFormInput.completing(planned, today = LocalDate(2026, 12, 3))
 
             // then
-            assertThat(input.date).isEqualTo(LocalDate(2026, 12, 3))
+            assertThat(input.date).isEqualTo("03-12-2026")
             assertThat(input.type).isEqualTo(CheckType.Partial)
             assertThat(input.company).isEqualTo("Swiss Paragliding Service")
             assertThat(input.notes).isEqualTo("Trim")
@@ -174,7 +187,7 @@ class CheckFormTest {
         @Test
         fun `builds the planned check details`() {
             // given
-            val input = PlanFormInput(LocalDate(2026, 12, 1), CheckType.Partial, "Swiss Paragliding Service", "")
+            val input = PlanFormInput("01-12-2026", CheckType.Partial, "Swiss Paragliding Service", "")
 
             // when
             val result = input.validate()
@@ -196,6 +209,19 @@ class CheckFormTest {
             // then
             assertThat((result as PlanFormResult.Invalid).errors)
                 .containsEntry(CheckFormField.Date, PlanFormError.Required)
+        }
+
+        @Test
+        fun `rejects a typed date that is not a real day`() {
+            // given
+            val input = PlanFormInput(date = "1 December")
+
+            // when
+            val result = input.validate()
+
+            // then
+            assertThat((result as PlanFormResult.Invalid).errors)
+                .containsEntry(CheckFormField.Date, PlanFormError.InvalidDate)
         }
     }
 }

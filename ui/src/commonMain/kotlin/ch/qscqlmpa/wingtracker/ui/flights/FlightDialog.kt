@@ -36,6 +36,7 @@ import ch.qscqlmpa.wingtracker.ui.components.DateField
 import ch.qscqlmpa.wingtracker.ui.components.Severity
 import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.message
+import ch.qscqlmpa.wingtracker.ui.parseDate
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.action_save
@@ -92,7 +93,7 @@ fun FlightDialog(
                     errorText = errors[FlightFormField.Date]?.message(),
                     modifier = Modifier.fillMaxWidth(),
                 )
-                val date = input.date
+                val date = parseDate(input.date)
                 val chosenWing = input.wingId?.let { id -> wings.firstOrNull { it.id == id } }
                 if (date != null && chosenWing?.wasInServiceOn(date) == false) {
                     StatusBadge(stringResource(Res.string.flight_warning_before_service), Severity.Warning)

@@ -5,18 +5,20 @@ import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.ui.formatHoursAndMinutes
+import ch.qscqlmpa.wingtracker.ui.parseDate
 import ch.qscqlmpa.wingtracker.ui.parseHoursAndMinutes
 import ch.qscqlmpa.wingtracker.ui.resources.Res
+import ch.qscqlmpa.wingtracker.ui.resources.error_date
 import ch.qscqlmpa.wingtracker.ui.resources.error_date_future
 import ch.qscqlmpa.wingtracker.ui.resources.error_duration
 import ch.qscqlmpa.wingtracker.ui.resources.error_number
 import ch.qscqlmpa.wingtracker.ui.resources.error_required
-import kotlinx.datetime.LocalDate
+import ch.qscqlmpa.wingtracker.ui.toDisplay
 import org.jetbrains.compose.resources.stringResource
 
 /** What the pilot typed or picked; parsing lives in [validate] so it is testable without any UI. */
 data class FlightFormInput(
-    val date: LocalDate? = null,
+    val date: String = "",
     val wingId: WingId? = null,
     val duration: String = "",
     val takeOffSite: String = "",
@@ -29,7 +31,7 @@ data class FlightFormInput(
     companion object {
         fun from(flight: Flight): FlightFormInput =
             FlightFormInput(
-                date = flight.details.date,
+                date = flight.details.date.toDisplay(),
                 wingId = flight.details.wingId,
                 duration = formatHoursAndMinutes(flight.details.duration.inWholeMinutes),
                 takeOffSite = flight.details.takeOffSite.orEmpty(),
@@ -53,6 +55,7 @@ enum class FlightFormField { Date, Wing, Duration, Distance, TopAltitude }
 /** Error kinds rather than text, so the screen can show them in the user's language (ADR 0014). */
 enum class FlightFormError {
     Required,
+    InvalidDate,
     InvalidDuration,
     InvalidNumber,
     DateInFuture,
@@ -70,7 +73,10 @@ sealed interface FlightFormResult {
 
 fun FlightFormInput.validate(): FlightFormResult {
     val errors = linkedMapOf<FlightFormField, FlightFormError>()
-    if (date == null) errors[FlightFormField.Date] = FlightFormError.Required
+    val flightDate = parseDate(date)
+    if (flightDate == null) {
+        errors[FlightFormField.Date] = if (date.isBlank()) FlightFormError.Required else FlightFormError.InvalidDate
+    }
     if (wingId == null) errors[FlightFormField.Wing] = FlightFormError.Required
 
     val parsed = parseHoursAndMinutes(duration)
@@ -97,7 +103,7 @@ fun FlightFormInput.validate(): FlightFormResult {
     // Every missing required value has an error above, so none is null here.
     return FlightFormResult.Valid(
         FlightDetails(
-            date = checkNotNull(date),
+            date = checkNotNull(flightDate),
             duration = checkNotNull(flightDuration),
             wingId = checkNotNull(wingId),
             takeOffSite = takeOffSite.trim().ifEmpty { null },
@@ -114,6 +120,7 @@ fun FlightFormInput.validate(): FlightFormResult {
 fun FlightFormError.message(): String =
     when (this) {
         FlightFormError.Required -> stringResource(Res.string.error_required)
+        FlightFormError.InvalidDate -> stringResource(Res.string.error_date)
         FlightFormError.InvalidDuration -> stringResource(Res.string.error_duration)
         FlightFormError.InvalidNumber -> stringResource(Res.string.error_number)
         FlightFormError.DateInFuture -> stringResource(Res.string.error_date_future)

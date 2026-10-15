@@ -10,6 +10,7 @@ import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import kotlinx.datetime.LocalDate
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.entry
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlin.time.Duration
@@ -26,10 +27,10 @@ private fun aFormInput() =
         serialNumber = "ADV-2023-04817",
         certificationClass = CertificationClass.B,
         condition = AcquisitionCondition.SecondHand,
-        purchaseDate = LocalDate(2024, 3, 2),
+        purchaseDate = "02-03-2024",
         priceAmount = "2150.50",
         priceCurrency = "chf",
-        inServiceDate = LocalDate(2024, 3, 9),
+        inServiceDate = "09-03-2024",
         hoursBeforeTracking = "42:30",
         flightsBeforeTracking = "61",
     )
@@ -146,7 +147,7 @@ class WingFormTest {
         fun `turns blank optional text into absent values`() {
             // given
             val input =
-                aFormInput().copy(size = " ", serialNumber = "", purchaseDate = null).copy(priceAmount = "")
+                aFormInput().copy(size = " ", serialNumber = "", purchaseDate = "").copy(priceAmount = "")
 
             // when
             val details = (input.validate() as WingFormResult.Valid).details
@@ -227,13 +228,28 @@ class WingFormTest {
         @Test
         fun `accepts a wing without an in-service date`() {
             // given
-            val input = aFormInput().copy(inServiceDate = null)
+            val input = aFormInput().copy(inServiceDate = "")
 
             // when
             val result = input.validate()
 
             // then
             assertThat((result as WingFormResult.Valid).details.inServiceDate).isNull()
+        }
+
+        @Test
+        fun `rejects typed purchase and in-service dates that are not real days`() {
+            // given
+            val input = aFormInput().copy(purchaseDate = "02/03/24", inServiceDate = "30-02-2024")
+
+            // when
+            val errors = errorsOf(input)
+
+            // then
+            assertThat(errors).containsOnly(
+                entry(WingFormField.PurchaseDate, FormError.InvalidDate),
+                entry(WingFormField.InServiceDate, FormError.InvalidDate),
+            )
         }
 
         @Test
