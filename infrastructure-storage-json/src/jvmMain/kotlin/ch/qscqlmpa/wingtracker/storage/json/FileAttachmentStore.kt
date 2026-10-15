@@ -2,11 +2,14 @@ package ch.qscqlmpa.wingtracker.storage.json
 
 import ch.qscqlmpa.wingtracker.attachments.AttachmentId
 import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Keeps attached files in the data folder, named by id so the original name never touches the file system
@@ -27,6 +30,7 @@ class FileAttachmentStore(
         try {
             Files.write(temporary, bytes)
             Files.move(temporary, directory.resolve(id.value), StandardCopyOption.REPLACE_EXISTING)
+            logger.debug { "Saved attachment ${id.value} (${bytes.size} bytes)" }
         } finally {
             Files.deleteIfExists(temporary)
         }
@@ -41,6 +45,6 @@ class FileAttachmentStore(
     override suspend fun delete(id: AttachmentId) =
         withContext(Dispatchers.IO) {
             Files.deleteIfExists(directory.resolve(id.value))
-            Unit
+            logger.debug { "Deleted attachment ${id.value}" }
         }
 }

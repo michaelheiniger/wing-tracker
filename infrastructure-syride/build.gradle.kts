@@ -8,6 +8,7 @@ kotlin {
         jvmMain.dependencies {
             implementation(project(":application"))
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlin.logging)
         }
         jvmTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)

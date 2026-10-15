@@ -5,6 +5,7 @@ import ch.qscqlmpa.wingtracker.flights.igc.InvalidTrackException
 import ch.qscqlmpa.wingtracker.flights.igc.ReadTrack
 import ch.qscqlmpa.wingtracker.flights.igc.TrackFix
 import ch.qscqlmpa.wingtracker.flights.igc.TrackReader
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -19,6 +20,8 @@ import kotlin.time.Instant
 
 private const val MILLENNIUM = 2000
 
+private val logger = KotlinLogging.logger {}
+
 // The header writes the date as day, month and two-digit year.
 private val DATE_FORMAT = Regex("""(\d{2})(\d{2})(\d{2})""")
 
@@ -27,7 +30,20 @@ private val DATE_FORMAT = Regex("""(\d{2})(\d{2})(\d{2})""")
  * of the day; turning those into points in time, including a flight that crosses midnight UTC, is done here.
  */
 class Igc4jTrackReader : TrackReader {
-    override fun read(bytes: ByteArray): ReadTrack {
+    override fun read(bytes: ByteArray): ReadTrack =
+        try {
+            readValid(bytes).also {
+                logger.debug {
+                    "Read a track of ${it.track.date} with ${it.track.fixes.size} fixes (${bytes.size} bytes)"
+                }
+            }
+        } catch (e: InvalidTrackException) {
+            // Expected for a wrong file, so the pilot gets a message; logged for the case where the reader is wrong.
+            logger.info { "Refused a track of ${bytes.size} bytes: ${e.message}" }
+            throw e
+        }
+
+    private fun readValid(bytes: ByteArray): ReadTrack {
         val parsed =
             try {
                 IGCParser.parse(ByteArrayInputStream(bytes))

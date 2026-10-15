@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.storage.json
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.nio.file.AtomicMoveNotSupportedException
@@ -11,6 +12,8 @@ import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
+
+private val logger = KotlinLogging.logger {}
 
 /** A stored document's name (without extension) and raw text. */
 internal data class RawDocument(
@@ -37,6 +40,7 @@ internal class JsonDocumentStore(
                 .filter { it.extension == "json" }
                 .sorted()
                 .map { RawDocument(it.nameWithoutExtension, it.readText()) }
+                .also { logger.debug { "Read ${it.size} documents from $directory" } }
         }
 
     /** Writes to a temporary file first so a crash never leaves a half-written document behind. */
@@ -49,6 +53,7 @@ internal class JsonDocumentStore(
         try {
             temporary.writeText(content)
             moveReplacing(temporary, directory.resolve("$name.json"))
+            logger.debug { "Wrote $name to $directory" }
         } finally {
             Files.deleteIfExists(temporary)
         }
@@ -57,7 +62,7 @@ internal class JsonDocumentStore(
     suspend fun delete(name: String) =
         withContext(Dispatchers.IO) {
             Files.deleteIfExists(directory.resolve("$name.json"))
-            Unit
+            logger.debug { "Deleted $name from $directory" }
         }
 
     /** Moves an unreadable document aside instead of deleting it, so the user can still repair it by hand. */
@@ -68,7 +73,7 @@ internal class JsonDocumentStore(
             var attempt = 1
             while (Files.exists(target)) target = quarantineDirectory.resolve("$name-${attempt++}.json")
             Files.move(directory.resolve("$name.json"), target)
-            Unit
+            logger.warn { "Moved unreadable $name from $directory to $target" }
         }
 
     private fun moveReplacing(

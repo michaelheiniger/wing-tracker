@@ -4,11 +4,14 @@ import ch.qscqlmpa.wingtracker.flights.spreadsheet.Sheet
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.SpreadsheetException
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.SpreadsheetProblem
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.SpreadsheetReader
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayInputStream
 import java.util.zip.ZipInputStream
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Reads OpenDocument and Office Open XML spreadsheets (ADR 0022). The format is told from the content, not from the
@@ -18,18 +21,23 @@ class FileSpreadsheetReader : SpreadsheetReader {
     override suspend fun read(bytes: ByteArray): List<Sheet> =
         withContext(Dispatchers.IO) {
             try {
-                when (formatOf(bytes)) {
+                val format = formatOf(bytes)
+                when (format) {
                     Format.Ods -> OdsSheets.read(entry(bytes, ODS_CONTENT))
                     Format.Xlsx -> XlsxSheets.read(ByteArrayInputStream(bytes))
+                }.also { sheets ->
+                    logger.debug { "Read ${sheets.size} sheets from a $format file of ${bytes.size} bytes" }
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: SpreadsheetException) {
+                logger.info { "Refused a spreadsheet of ${bytes.size} bytes (${e.problem}): ${e.message}" }
                 throw e
                 // Whatever the parsers stumble on, the pilot gets one message about the file, never a crash.
             } catch (
                 @Suppress("TooGenericExceptionCaught") e: Exception,
             ) {
+                logger.warn(e) { "Could not read a spreadsheet of ${bytes.size} bytes" }
                 throw SpreadsheetException(SpreadsheetProblem.Unreadable, e.message, e)
             }
         }

@@ -2,7 +2,10 @@ package ch.qscqlmpa.wingtracker.storage.json
 
 import ch.qscqlmpa.wingtracker.settings.AppSettings
 import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.nio.file.Path
+
+private val logger = KotlinLogging.logger {}
 
 class JsonSettingsRepository(
     dataDirectory: Path,
@@ -17,12 +20,15 @@ class JsonSettingsRepository(
         val text = store.read(FILE_NAME) ?: return AppSettings()
         return try {
             json.decodeFromString<SettingsDocument>(text).toDomain()
-        } catch (_: UnsupportedSchemaException) {
+        } catch (e: UnsupportedSchemaException) {
+            logger.info { "Settings are from a newer version, defaults apply: ${e.message}" }
             AppSettings()
-        } catch (_: IllegalArgumentException) {
+        } catch (e: IllegalArgumentException) {
+            logger.warn(e) { "Settings could not be read, defaults apply" }
             store.quarantine(FILE_NAME)
             AppSettings()
-        } catch (_: IllegalStateException) {
+        } catch (e: IllegalStateException) {
+            logger.warn(e) { "Settings could not be read, defaults apply" }
             store.quarantine(FILE_NAME)
             AppSettings()
         }

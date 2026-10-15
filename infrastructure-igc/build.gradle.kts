@@ -8,6 +8,7 @@ kotlin {
         jvmMain.dependencies {
             implementation(project(":application"))
             implementation(libs.igc4j)
+            implementation(libs.kotlin.logging)
         }
     }
 }
