@@ -8,8 +8,14 @@ import androidx.compose.ui.window.WindowExceptionHandler
 import androidx.compose.ui.window.WindowExceptionHandlerFactory
 import ch.qscqlmpa.wingtracker.ui.errors.UnexpectedError
 import ch.qscqlmpa.wingtracker.ui.errors.UnexpectedErrors
+import ch.qscqlmpa.wingtracker.ui.platform.LogLocation
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.swing.Swing
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import javax.swing.SwingUtilities
@@ -22,6 +28,7 @@ private val logger = KotlinLogging.logger {}
  */
 internal class UnexpectedErrorHandling(
     val errors: UnexpectedErrors,
+    private val logLocation: LogLocation,
 ) {
     /** Changes when the main window must be built again; its content keys on it. */
     var windowGeneration by mutableIntStateOf(0)
@@ -73,6 +80,14 @@ internal class UnexpectedErrorHandling(
             windowBroken = false
             windowGeneration++
         }
+    }
+
+    // Outside every window, so the log still opens when the main window is what failed.
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Swing)
+
+    /** A failure to open the folder is one more unexpected error, shown after the current one. */
+    fun openLog() {
+        scope.launch(coroutineExceptionHandler) { logLocation.open() }
     }
 
     fun copy(error: UnexpectedError) {

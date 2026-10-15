@@ -22,8 +22,10 @@ import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.unexpected_error_body
 import ch.qscqlmpa.wingtracker.ui.resources.unexpected_error_copy
+import ch.qscqlmpa.wingtracker.ui.resources.unexpected_error_logged
 import ch.qscqlmpa.wingtracker.ui.resources.unexpected_error_occurrences
 import ch.qscqlmpa.wingtracker.ui.resources.unexpected_error_ok
+import ch.qscqlmpa.wingtracker.ui.resources.unexpected_error_open_log
 import ch.qscqlmpa.wingtracker.ui.resources.unexpected_error_title
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -34,12 +36,14 @@ fun unexpectedErrorTitle(): String = stringResource(Res.string.unexpected_error_
 
 /**
  * What an unexpected error shows. It fills its own window rather than being a dialog of the main window, so it
- * still shows when that window is what failed. Copying is the platform's, so it comes in as [onCopy].
+ * still shows when that window is what failed. Copying and opening the log are the platform's, so they come in as
+ * [onCopy] and [onOpenLog]; without a log, [onOpenLog] is null.
  */
 @Composable
 fun UnexpectedErrorContent(
     error: UnexpectedError,
     onCopy: () -> Unit,
+    onOpenLog: (() -> Unit)?,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -47,6 +51,8 @@ fun UnexpectedErrorContent(
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(unexpectedErrorTitle(), style = MaterialTheme.typography.headlineSmall)
             Text(stringResource(Res.string.unexpected_error_body))
+            // The log also holds what happened before the error, which the trace alone does not tell.
+            if (onOpenLog != null) Text(stringResource(Res.string.unexpected_error_logged))
             if (error.occurrences > 1) {
                 Text(
                     pluralStringResource(
@@ -60,6 +66,9 @@ fun UnexpectedErrorContent(
             }
             StackTrace(error.stackTrace, Modifier.weight(1f).fillMaxWidth())
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)) {
+                onOpenLog?.let {
+                    TextButton(onClick = it) { Text(stringResource(Res.string.unexpected_error_open_log)) }
+                }
                 TextButton(onClick = onCopy) { Text(stringResource(Res.string.unexpected_error_copy)) }
                 Button(onClick = onDismiss) { Text(stringResource(Res.string.unexpected_error_ok)) }
             }

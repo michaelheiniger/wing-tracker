@@ -493,6 +493,8 @@
         <item quantity="one">Er ist %1$d Mal aufgetreten.</item>
         <item quantity="other">Er ist %1$d Mal aufgetreten.</item>
     </plurals>
+    <string name="unexpected_error_logged">Die Details wurden auch im Protokoll gespeichert, das du deiner Meldung anhängen kannst.</string>
+    <string name="unexpected_error_open_log">Protokollordner öffnen</string>
     <string name="unexpected_error_copy">Details kopieren</string>
     <string name="unexpected_error_ok">OK</string>
 </resources>

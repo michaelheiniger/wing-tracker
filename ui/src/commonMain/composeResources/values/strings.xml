@@ -493,6 +493,8 @@
         <item quantity="one">It happened %1$d time.</item>
         <item quantity="other">It happened %1$d times.</item>
     </plurals>
+    <string name="unexpected_error_logged">The details were also saved in the log, which you can attach to your report.</string>
+    <string name="unexpected_error_open_log">Open log folder</string>
     <string name="unexpected_error_copy">Copy details</string>
     <string name="unexpected_error_ok">OK</string>
 </resources>

@@ -493,6 +493,8 @@
         <item quantity="one">Elle s'est produite %1$d fois.</item>
         <item quantity="other">Elle s'est produite %1$d fois.</item>
     </plurals>
+    <string name="unexpected_error_logged">Les détails ont aussi été enregistrés dans le journal, que tu peux joindre à ton rapport.</string>
+    <string name="unexpected_error_open_log">Ouvrir le dossier du journal</string>
     <string name="unexpected_error_copy">Copier les détails</string>
     <string name="unexpected_error_ok">OK</string>
 </resources>

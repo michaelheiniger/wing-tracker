@@ -89,7 +89,8 @@ fun main() {
 
     val systemTheme = SystemTheme()
     val initialSystemDark = systemTheme.isDark()
-    val errorHandling = UnexpectedErrorHandling(UnexpectedErrors()).also { it.install() }
+    val errorHandling =
+        UnexpectedErrorHandling(UnexpectedErrors(), koin.get<PlatformServices>().logLocation).also { it.install() }
 
     application {
         var systemDark by remember { mutableStateOf(initialSystemDark) }
@@ -195,6 +196,7 @@ private fun UnexpectedErrorWindow(
             UnexpectedErrorContent(
                 error = error,
                 onCopy = { errorHandling.copy(error) },
+                onOpenLog = errorHandling::openLog,
                 onDismiss = errorHandling::dismiss,
             )
         }
