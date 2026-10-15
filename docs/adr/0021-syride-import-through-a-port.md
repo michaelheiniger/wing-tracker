@@ -17,3 +17,7 @@ The application layer defines a `SyrideFlightSource` port and does everything el
 ## Consequences
 
 The integration is fragile by nature: a change in Syride's pages breaks it until the reader is updated, which is why it is isolated behind a port and covered by tests on saved pages. Tracks of Syride flights are not imported; they can be attached later with the IGC import. The stored flight format gains optional fields (schema version 3) that older application versions treat as newer data and leave untouched.
+
+## Amendments
+
+- 2026-10-16: The pages are read with the jsoup HTML parser (version in the version catalog) instead of regular expressions, so markup details such as quoting or entities no longer matter and only the selectors describe the page. It stays confined to `infrastructure-syride`.

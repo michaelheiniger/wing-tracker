@@ -9,6 +9,7 @@ kotlin {
             implementation(project(":application"))
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlin.logging)
+            implementation(libs.jsoup)
         }
         jvmTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)

@@ -88,6 +88,31 @@ class SyrideActivityParserTest {
     }
 
     @Nested
+    inner class Text {
+        // As Syride writes them: accents as named entities, and parentheses that belong to the name.
+        private val card =
+            "<div id='activite3770736' class=\"boxno\"><div id=flightStatsNoSys>" +
+                "<ul>Flying site : <font id='site3523881'>Sonchaux (d&eacute;co nord)</font></ul>" +
+                "<ul>Flight name : <font id='nom3523881'>Open de Jaman (RVL)</font></ul>" +
+                "<ul>Date : <font>31/05/2026 - 11h35</font></ul><ul>Flight time : <font>10min</font></ul>" +
+                "<ul id='voile3523881'>Used wing : <font>Ultralite 4</font> (Ozone <img src='/v/24.gif'>)</ul>" +
+                "</div></div>"
+
+        private val flight get() = SyrideActivityParser.parsePage(card).flights.single()
+
+        @Test
+        fun `decodes accents written as named entities`() {
+            assertThat(flight.siteName).isEqualTo("Sonchaux (déco nord)")
+        }
+
+        @Test
+        fun `keeps parentheses that belong to the name`() {
+            assertThat(flight.name).isEqualTo("Open de Jaman (RVL)")
+            assertThat(flight.wing).isEqualTo(SourceWing("Ultralite 4", "Ozone"))
+        }
+    }
+
+    @Nested
     inner class AChangedPage {
         @Test
         fun `counts a flight card it cannot read instead of failing`() {
@@ -96,6 +121,21 @@ class SyrideActivityParserTest {
 
             // when
             val page = SyrideActivityParser.parsePage(broken)
+
+            // then
+            assertThat(page.flights).isEmpty()
+            assertThat(page.unreadableFlights).isEqualTo(1)
+        }
+
+        @Test
+        fun `counts a flight card whose fields changed markup instead of skipping it`() {
+            // given
+            val changed =
+                "<div id='activite1' class=\"boxno\"><li>Flight name : <font>X</font></li>" +
+                    "<li>Date : <font>26/09/2026 - 13h43</font></li></div>"
+
+            // when
+            val page = SyrideActivityParser.parsePage(changed)
 
             // then
             assertThat(page.flights).isEmpty()
