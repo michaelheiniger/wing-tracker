@@ -7,6 +7,10 @@ import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.aFixedClock
 import ch.qscqlmpa.wingtracker.flights.aFlight
 import ch.qscqlmpa.wingtracker.flights.aWingInService
+import ch.qscqlmpa.wingtracker.flights.importing.ImportFailure
+import ch.qscqlmpa.wingtracker.flights.importing.NewWingSpec
+import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
+import ch.qscqlmpa.wingtracker.flights.importing.WingTarget
 import ch.qscqlmpa.wingtracker.gear.wing.RegisterWing
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
@@ -24,13 +28,13 @@ import org.junit.jupiter.api.Test
 import java.io.IOException
 import kotlin.time.Duration.Companion.minutes
 
-private val BIRDY = SyrideWing("Birdy", "Niviuk")
-private val HIKO = SyrideWing("Hiko P", "Niviuk")
+private val BIRDY = SourceWing("Birdy", "Niviuk")
+private val HIKO = SourceWing("Hiko P", "Niviuk")
 
 private fun aSyrideFlight(
     id: String = "flight:1",
     date: LocalDate = LocalDate(2026, 9, 26),
-    wing: SyrideWing = BIRDY,
+    wing: SourceWing = BIRDY,
     startTime: LocalTime = LocalTime(13, 43),
 ) = SyrideFlight(
     id = id,
@@ -286,7 +290,7 @@ class SyrideImportTest {
                     )
 
                 // then
-                assertThat(result.failed.single().failure).isEqualTo(SyrideFailure.DateInFuture)
+                assertThat(result.failed.single().failure).isEqualTo(ImportFailure.DateInFuture)
             }
 
         @Test
@@ -305,7 +309,7 @@ class SyrideImportTest {
                 val result = import(selection, emptyMap())
 
                 // then
-                assertThat(result.failed.single().failure).isEqualTo(SyrideFailure.SaveFailed)
+                assertThat(result.failed.single().failure).isEqualTo(ImportFailure.SaveFailed)
                 assertThat(result.failed.single().detail).isEqualTo("Disk full")
                 assertThat(result.imported).isEqualTo(1)
             }

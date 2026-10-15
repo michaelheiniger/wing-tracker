@@ -1,4 +1,4 @@
-package ch.qscqlmpa.wingtracker.ui.syride
+package ch.qscqlmpa.wingtracker.ui.flights.importing
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,15 +21,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import ch.qscqlmpa.wingtracker.flights.syride.NewWingSpec
+import ch.qscqlmpa.wingtracker.flights.importing.NewWingSpec
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.action_save
 import ch.qscqlmpa.wingtracker.ui.resources.field_manufacturer
 import ch.qscqlmpa.wingtracker.ui.resources.field_model
 import ch.qscqlmpa.wingtracker.ui.resources.field_name
-import ch.qscqlmpa.wingtracker.ui.resources.syride_newwing_hint
-import ch.qscqlmpa.wingtracker.ui.resources.syride_newwing_title
+import ch.qscqlmpa.wingtracker.ui.resources.import_newwing_hint
+import ch.qscqlmpa.wingtracker.ui.resources.import_newwing_title
 import org.jetbrains.compose.resources.stringResource
 
 /** The few things needed to create a wing during the import; the rest can be completed later under Gear. */
@@ -43,9 +43,9 @@ internal fun NewWingDialog(
     Dialog(onDismissRequest = onDismiss) {
         Card(modifier = Modifier.width(480.dp)) {
             Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.syride_newwing_title), style = MaterialTheme.typography.headlineSmall)
+                Text(stringResource(Res.string.import_newwing_title), style = MaterialTheme.typography.headlineSmall)
                 Text(
-                    stringResource(Res.string.syride_newwing_hint),
+                    stringResource(Res.string.import_newwing_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

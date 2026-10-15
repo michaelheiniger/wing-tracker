@@ -1,19 +1,20 @@
 package ch.qscqlmpa.wingtracker.ui.syride
 
+import ch.qscqlmpa.wingtracker.flights.importing.ImportResult
+import ch.qscqlmpa.wingtracker.flights.importing.NewWingSpec
+import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
+import ch.qscqlmpa.wingtracker.flights.importing.WingGroup
+import ch.qscqlmpa.wingtracker.flights.importing.WingTarget
 import ch.qscqlmpa.wingtracker.flights.syride.ImportSyrideFlights
-import ch.qscqlmpa.wingtracker.flights.syride.NewWingSpec
 import ch.qscqlmpa.wingtracker.flights.syride.PrepareSyrideImport
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideException
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlight
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideImportDraft
-import ch.qscqlmpa.wingtracker.flights.syride.SyrideImportResult
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideProblem
-import ch.qscqlmpa.wingtracker.flights.syride.SyrideWing
-import ch.qscqlmpa.wingtracker.flights.syride.SyrideWingGroup
-import ch.qscqlmpa.wingtracker.flights.syride.WingTarget
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.settings.SaveSyrideUsername
 import ch.qscqlmpa.wingtracker.ui.FailureKind
+import ch.qscqlmpa.wingtracker.ui.flights.importing.WingChoice
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -29,22 +30,23 @@ import org.junit.jupiter.api.Test
 import java.io.IOException
 import kotlin.time.Duration.Companion.minutes
 
-private val BIRDY = SyrideWing("Birdy", "Niviuk")
-private val HIKO = SyrideWing("Hiko P", "Niviuk")
-private val NO_BRAND = SyrideWing("Test", null)
+private val BIRDY = SourceWing("Birdy", "Niviuk")
+private val HIKO = SourceWing("Hiko P", "Niviuk")
+private val NO_BRAND = SourceWing("Test", null)
 
 private fun aFlight(
     id: String,
-    wing: SyrideWing,
+    wing: SourceWing,
 ) = SyrideFlight(id, true, null, LocalDate(2026, 9, 26), null, 98.minutes, "Dent De Jaman", wing, null, null, null)
 
 private fun aGroup(
-    wing: SyrideWing,
+    wing: SourceWing,
     suggested: WingId? = null,
     ids: List<String> = listOf("${wing.name}-1"),
-) = SyrideWingGroup(wing, ids.map { aFlight(it, wing) }, suggested)
+) = WingGroup(wing, ids.map { aFlight(it, wing) }, suggested)
 
-private fun aDraft(vararg groups: SyrideWingGroup) = SyrideImportDraft("QSCQLMPA", groups.toList(), 0, emptyList())
+private fun aDraft(vararg groups: WingGroup<SyrideFlight>) =
+    SyrideImportDraft("QSCQLMPA", groups.toList(), 0, emptyList())
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SyrideImportPresenterTest {
@@ -61,7 +63,7 @@ class SyrideImportPresenterTest {
             username,
         )
 
-    private fun givenAccount(vararg groups: SyrideWingGroup) {
+    private fun givenAccount(vararg groups: WingGroup<SyrideFlight>) {
         coEvery { prepare("QSCQLMPA") } returns aDraft(*groups)
     }
 
@@ -248,7 +250,7 @@ class SyrideImportPresenterTest {
                 presenter.read()
                 presenter.mapping.choose(presenter.draft!!.groups[2], WingChoice.Skip)
                 val selection = slot<List<Pair<SyrideFlight, WingTarget>>>()
-                coEvery { import(capture(selection), any()) } returns SyrideImportResult(2, emptyList(), 0, emptyList())
+                coEvery { import(capture(selection), any()) } returns ImportResult(2, emptyList(), 0, emptyList())
 
                 // when
                 presenter.import {}

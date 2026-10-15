@@ -1,21 +1,22 @@
-package ch.qscqlmpa.wingtracker.ui.syride
+package ch.qscqlmpa.wingtracker.ui.flights.importing
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import ch.qscqlmpa.wingtracker.flights.syride.NewWingSpec
-import ch.qscqlmpa.wingtracker.flights.syride.SyrideWing
-import ch.qscqlmpa.wingtracker.flights.syride.SyrideWingGroup
-import ch.qscqlmpa.wingtracker.flights.syride.WingTarget
+import ch.qscqlmpa.wingtracker.flights.importing.ImportableFlight
+import ch.qscqlmpa.wingtracker.flights.importing.NewWingSpec
+import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
+import ch.qscqlmpa.wingtracker.flights.importing.WingGroup
+import ch.qscqlmpa.wingtracker.flights.importing.WingTarget
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 
-/** What to do with the flights of one Syride wing. */
+/** What to do with the flights of one source wing. */
 sealed interface WingChoice {
     data class Existing(
         val wingId: WingId,
     ) : WingChoice
 
-    // [key] names a wing that is created when the import runs, so several Syride wings can share it.
+    // [key] names a wing that is created when the import runs, so several source wings can share it.
     data class New(
         val key: String,
     ) : WingChoice
@@ -25,9 +26,9 @@ sealed interface WingChoice {
 
 fun NewWingSpec.isComplete(): Boolean = name.isNotBlank() && manufacturer.isNotBlank() && model.isNotBlank()
 
-/** The pilot's decisions about the wings: which wing each Syride wing is, and which new wings to create. */
+/** The pilot's decisions about the wings: which wing each source wing is, and which new wings to create. */
 class WingMapping {
-    var choices by mutableStateOf<Map<SyrideWing, WingChoice>>(emptyMap())
+    var choices by mutableStateOf<Map<SourceWing, WingChoice>>(emptyMap())
         private set
     var newWings by mutableStateOf<Map<String, NewWingSpec>>(emptyMap())
         private set
@@ -35,11 +36,11 @@ class WingMapping {
     private var nextKey = 0
 
     /**
-     * Wings that match an existing one are pre-selected; the others start as a new wing named like on Syride, so
+     * Wings that match an existing one are pre-selected; the others start as a new wing named like in the source, so
      * the usual case needs no typing at all.
      */
-    fun start(groups: List<SyrideWingGroup>) {
-        val initial = mutableMapOf<SyrideWing, WingChoice>()
+    fun start(groups: List<WingGroup<*>>) {
+        val initial = mutableMapOf<SourceWing, WingChoice>()
         val created = mutableMapOf<String, NewWingSpec>()
         groups.forEach { group ->
             val suggested = group.suggestedWingId
@@ -55,9 +56,9 @@ class WingMapping {
         newWings = created
     }
 
-    fun choiceOf(group: SyrideWingGroup): WingChoice = choices[group.wing] ?: WingChoice.Skip
+    fun choiceOf(group: WingGroup<*>): WingChoice = choices[group.wing] ?: WingChoice.Skip
 
-    fun isReady(group: SyrideWingGroup): Boolean =
+    fun isReady(group: WingGroup<*>): Boolean =
         when (val choice = choiceOf(group)) {
             is WingChoice.Existing -> true
             is WingChoice.New -> newWings[choice.key]?.isComplete() == true
@@ -65,7 +66,7 @@ class WingMapping {
         }
 
     fun choose(
-        group: SyrideWingGroup,
+        group: WingGroup<*>,
         choice: WingChoice,
     ) {
         choices = choices + (group.wing to choice)
@@ -73,7 +74,7 @@ class WingMapping {
 
     /** Defines a wing to create, and sends the flights of [group] to it. */
     fun createWingFor(
-        group: SyrideWingGroup,
+        group: WingGroup<*>,
         spec: NewWingSpec,
     ) {
         val key = newKey()
@@ -88,14 +89,21 @@ class WingMapping {
         newWings = newWings + (key to spec)
     }
 
-    fun suggestedSpec(wing: SyrideWing) =
+    fun suggestedSpec(wing: SourceWing) =
         NewWingSpec(name = wing.name, manufacturer = wing.brand.orEmpty(), model = wing.name)
 
-    fun targetOf(group: SyrideWingGroup): WingTarget =
+    fun targetOf(group: WingGroup<*>): WingTarget =
         when (val choice = choiceOf(group)) {
             is WingChoice.Existing -> WingTarget.Existing(choice.wingId)
             is WingChoice.New -> WingTarget.New(choice.key)
             WingChoice.Skip -> WingTarget.Skip
+        }
+
+    /** The chosen flights of every group that is ready, each with where it goes. */
+    fun <F : ImportableFlight> selection(groups: List<WingGroup<F>>): List<Pair<F, WingTarget>> =
+        groups.filter { isReady(it) }.flatMap { group ->
+            val target = targetOf(group)
+            group.flights.map { it to target }
         }
 
     private fun newKey() = "new-${nextKey++}"

@@ -1,6 +1,6 @@
 package ch.qscqlmpa.wingtracker.syride
 
-import ch.qscqlmpa.wingtracker.flights.syride.SyrideWing
+import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import org.assertj.core.api.Assertions.assertThat
@@ -46,7 +46,7 @@ class SyrideActivityParserTest {
 
         @Test
         fun `reads the wing with its brand`() {
-            assertThat(flight.wing).isEqualTo(SyrideWing("Hiko P", "Niviuk"))
+            assertThat(flight.wing).isEqualTo(SourceWing("Hiko P", "Niviuk"))
         }
 
         @Test
@@ -82,7 +82,7 @@ class SyrideActivityParserTest {
         @Test
         fun `reads the site from the plain label`() {
             assertThat(flight.siteName).isEqualTo("Sonchaux")
-            assertThat(flight.wing).isEqualTo(SyrideWing("Ultralite 4", "Ozone"))
+            assertThat(flight.wing).isEqualTo(SourceWing("Ultralite 4", "Ozone"))
             assertThat(flight.duration).isEqualTo(10.minutes)
         }
     }

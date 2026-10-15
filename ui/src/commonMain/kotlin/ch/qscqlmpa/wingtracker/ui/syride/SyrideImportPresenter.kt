@@ -3,15 +3,18 @@ package ch.qscqlmpa.wingtracker.ui.syride
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import ch.qscqlmpa.wingtracker.flights.importing.ImportResult
 import ch.qscqlmpa.wingtracker.flights.syride.ImportSyrideFlights
 import ch.qscqlmpa.wingtracker.flights.syride.PrepareSyrideImport
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideException
+import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlight
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideImportDraft
-import ch.qscqlmpa.wingtracker.flights.syride.SyrideImportResult
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideProblem
 import ch.qscqlmpa.wingtracker.settings.SaveSyrideUsername
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
+import ch.qscqlmpa.wingtracker.ui.flights.importing.WingChoice
+import ch.qscqlmpa.wingtracker.ui.flights.importing.WingMapping
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -37,7 +40,7 @@ class SyrideImportPresenter(
     var draft by mutableStateOf<SyrideImportDraft?>(null)
         private set
     val mapping = WingMapping()
-    var result by mutableStateOf<SyrideImportResult?>(null)
+    var result by mutableStateOf<ImportResult<SyrideFlight>?>(null)
         private set
     var failure by mutableStateOf<Failure?>(null)
         private set
@@ -99,12 +102,7 @@ class SyrideImportPresenter(
         stage = SyrideStage.Importing
         scope.launch {
             try {
-                val selection =
-                    current.groups.filter { mapping.isReady(it) }.flatMap { group ->
-                        val target = mapping.targetOf(group)
-                        group.flights.map { it to target }
-                    }
-                result = import(selection, mapping.newWings)
+                result = import(mapping.selection(current.groups), mapping.newWings)
                 stage = SyrideStage.Done
                 onFinished()
             } catch (e: CancellationException) {

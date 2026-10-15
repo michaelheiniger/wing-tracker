@@ -1,7 +1,7 @@
 package ch.qscqlmpa.wingtracker.syride
 
+import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlight
-import ch.qscqlmpa.wingtracker.flights.syride.SyrideWing
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlin.time.Duration.Companion.minutes
@@ -59,7 +59,7 @@ internal object SyrideActivityParser {
             startTime = moment.second,
             duration = duration.minutes,
             siteName = SITE_LINK.find(card)?.let { text(it.groupValues[1]) } ?: value("Flying site"),
-            wing = SyrideWing(wingName, values["Used wing"]?.let { BRAND.find(it) }?.let { text(it.groupValues[1]) }),
+            wing = SourceWing(wingName, values["Used wing"]?.let { BRAND.find(it) }?.let { text(it.groupValues[1]) }),
             distanceKm = number(value("Distance"), "km"),
             topAltitudeMeters = number(value("Top altitude"), "m")?.toInt(),
             instrument = value("Used instrument"),

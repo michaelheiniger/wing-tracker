@@ -1,5 +1,10 @@
 package ch.qscqlmpa.wingtracker.flights.syride
 
+import ch.qscqlmpa.wingtracker.flights.ExternalReference
+import ch.qscqlmpa.wingtracker.flights.FlightDetails
+import ch.qscqlmpa.wingtracker.flights.importing.ImportableFlight
+import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
+import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlin.time.Duration
@@ -7,27 +12,35 @@ import kotlin.time.Duration
 /** The name Syride flights carry in [ch.qscqlmpa.wingtracker.flights.ExternalReference.system]. */
 const val SYRIDE_SYSTEM = "syride"
 
-/** The wing a flight was flown with, as named on Syride; the pairing of name and brand identifies it. */
-data class SyrideWing(
-    val name: String,
-    val brand: String?,
-)
-
 /** One flight of a Syride pilot. Flights logged without an instrument have no track ([hasTrack] is false). */
 data class SyrideFlight(
     // Stable on Syride, so a flight is recognised when the import is run again.
     val id: String,
     val hasTrack: Boolean,
     val name: String?,
-    val date: LocalDate,
+    override val date: LocalDate,
     val startTime: LocalTime?,
-    val duration: Duration,
+    override val duration: Duration,
     val siteName: String?,
-    val wing: SyrideWing,
+    override val wing: SourceWing,
     val distanceKm: Double?,
     val topAltitudeMeters: Int?,
     val instrument: String?,
-)
+) : ImportableFlight {
+    override val externalReference: ExternalReference get() = ExternalReference(SYRIDE_SYSTEM, id)
+
+    override fun toDetails(wingId: WingId) =
+        FlightDetails(
+            date = date,
+            duration = duration,
+            wingId = wingId,
+            takeOffSite = siteName,
+            notes = name,
+            distanceKm = distanceKm,
+            topAltitudeMeters = topAltitudeMeters,
+            instrument = instrument,
+        )
+}
 
 enum class SyrideProblem {
     UserNotFound,
