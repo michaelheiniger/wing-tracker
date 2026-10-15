@@ -25,21 +25,16 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import ch.qscqlmpa.wingtracker.statistics.CumulativePoint
-import ch.qscqlmpa.wingtracker.statistics.Statistics
-import ch.qscqlmpa.wingtracker.ui.formatDuration
+import ch.qscqlmpa.wingtracker.statistics.SeriesKey
 import ch.qscqlmpa.wingtracker.ui.resources.Res
-import ch.qscqlmpa.wingtracker.ui.resources.chart_axis_hours
 import ch.qscqlmpa.wingtracker.ui.resources.month_names
 import ch.qscqlmpa.wingtracker.ui.toDisplay
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringArrayResource
-import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
-private const val MINUTES_PER_HOUR = 60.0
 private const val DAYS_FOR_MONTH_TICKS = 400
 private const val MIN_TICK_SPACING_DP = 64
 private const val MAX_DIRECT_LABELS = 4
@@ -48,11 +43,9 @@ private const val CROSSHAIR_ALPHA = 0.5f
 private const val MONTH_LABEL_LENGTH = 3
 private const val MONTHS_PER_YEAR = 12
 
-private fun CumulativePoint.hours(): Double = total.inWholeMinutes / MINUTES_PER_HOUR
-
 private fun LocalDate.day(): Int = toEpochDays().toInt()
 
-/** Maps dates and hours onto the plot; shared by the lines, the end labels and the hover layer. */
+/** Maps dates and values onto the plot; shared by the lines, the end labels and the hover layer. */
 private class TimePlot(
     val plot: PlotArea,
     val firstDay: Int,
@@ -63,16 +56,18 @@ private class TimePlot(
 
     fun xOf(day: Int): Float = plot.left + (day - firstDay) / span * plot.width
 
-    fun yOf(hours: Double): Float = plot.yOf(hours, scale)
+    fun yOf(value: Double): Float = plot.yOf(value, scale)
 
     fun dayAt(x: Float): Int = (firstDay + (x - plot.left) / plot.width * span).roundToInt().coerceIn(firstDay, lastDay)
 }
 
-/** One step line per visible wing: hours stay flat between flights, so steps are the honest shape. */
+/** One step line per visible wing: totals stay flat between flights, so steps are the honest shape. */
 @Composable
-fun CumulativeHoursChart(
-    statistics: Statistics,
+fun CumulativeChart(
+    cumulative: Map<SeriesKey, List<ValuePoint>>,
+    today: LocalDate,
     series: List<ChartSeries>,
+    unit: ChartUnit,
     theme: ChartTheme,
     modifier: Modifier = Modifier,
 ) {
@@ -82,13 +77,15 @@ fun CumulativeHoursChart(
     val monthNames = stringArrayResource(Res.array.month_names)
     val minTickSpacingPx = with(LocalDensity.current) { MIN_TICK_SPACING_DP.dp.toPx() }
 
-    val lines = series.associateWith { statistics.cumulative[it.key].orEmpty() }.filterValues { it.isNotEmpty() }
-    val firstDay = lines.values.minOfOrNull { it.first().date.day() } ?: statistics.today.day()
-    val scale = niceScale(lines.values.maxOfOrNull { line -> line.maxOf { it.hours() } } ?: 0.0)
+    val lines = series.associateWith { cumulative[it.key].orEmpty() }.filterValues { it.isNotEmpty() }
+    val firstDay = lines.values.minOfOrNull { it.first().date.day() } ?: today.day()
+    val scale =
+        niceScale(lines.values.maxOfOrNull { line -> line.maxOf { it.value } } ?: 0.0, wholeNumbers = unit.wholeNumbers)
     val time =
-        TimePlot(rememberPlotArea(size, rightPad = 64.dp), firstDay, maxOf(firstDay + 1, statistics.today.day()), scale)
+        TimePlot(rememberPlotArea(size, rightPad = 64.dp), firstDay, maxOf(firstDay + 1, today.day()), scale)
 
-    val tickLabels = scale.ticks.map { stringResource(Res.string.chart_axis_hours, formatTick(it)) }
+    val tickLabels = scale.ticks.map { unit.short(it) }
+    val endLabels = lines.mapValues { (_, points) -> unit.short(points.last().value) }
     val xTicks =
         remember(
             time.firstDay,
@@ -105,18 +102,18 @@ fun CumulativeHoursChart(
             drawValueAxis(time.plot, scale, tickLabels, measurer, labelStyle, theme.grid)
             xTicks.forEach { (day, text) -> drawTimeLabel(text, time.xOf(day), time.plot, measurer, labelStyle) }
             lines.forEach { (s, points) -> drawStepLine(points, s.color, time) }
-            drawEndMarks(lines, time, theme, measurer, endStyle)
-            hoverDay?.let { drawHoverLayer(it, lines, statistics, time, theme) }
+            drawEndMarks(lines, endLabels, time, theme, measurer, endStyle)
+            hoverDay?.let { drawHoverLayer(it, lines, time, theme) }
         }
         val pointer = hover
         if (hoverDay != null && pointer != null) {
-            DayTooltip(hoverDay, lines, statistics, theme, pointer, size)
+            DayTooltip(hoverDay, lines, unit, theme, pointer, size)
         }
     }
 }
 
 private fun DrawScope.drawStepLine(
-    points: List<CumulativePoint>,
+    points: List<ValuePoint>,
     color: androidx.compose.ui.graphics.Color,
     time: TimePlot,
 ) {
@@ -124,11 +121,11 @@ private fun DrawScope.drawStepLine(
     var previousY = 0f
     points.forEachIndexed { index, point ->
         val x = time.xOf(point.date.day())
-        val y = time.yOf(point.hours())
+        val y = time.yOf(point.value)
         if (index == 0) {
             path.moveTo(x, y)
         } else {
-            // Hours are flat between flights: go across first, then up.
+            // Totals are flat between flights: go across first, then up.
             path.lineTo(x, previousY)
             path.lineTo(x, y)
         }
@@ -139,20 +136,21 @@ private fun DrawScope.drawStepLine(
 
 /** End dots carry each wing's current total; direct labels stay few and are never stacked on each other. */
 private fun DrawScope.drawEndMarks(
-    lines: Map<ChartSeries, List<CumulativePoint>>,
+    lines: Map<ChartSeries, List<ValuePoint>>,
+    labels: Map<ChartSeries, String>,
     time: TimePlot,
     theme: ChartTheme,
     measurer: TextMeasurer,
     style: TextStyle,
 ) {
     var lastLabelY = Float.NEGATIVE_INFINITY
-    lines.entries.sortedBy { time.yOf(it.value.last().hours()) }.forEach { (s, points) ->
+    lines.entries.sortedBy { time.yOf(it.value.last().value) }.forEach { (s, points) ->
         val end = points.last()
-        val center = Offset(time.xOf(end.date.day()), time.yOf(end.hours()))
+        val center = Offset(time.xOf(end.date.day()), time.yOf(end.value))
         drawRingedDot(center, s.color, theme.surface)
         val fits = abs(center.y - lastLabelY) >= MIN_LABEL_GAP_DP.dp.toPx()
         if (lines.size <= MAX_DIRECT_LABELS && fits) {
-            val text = measurer.measure(formatTick(end.hours()) + " h", style)
+            val text = measurer.measure(labels.getValue(s), style)
             drawText(text, topLeft = Offset(center.x + 10.dp.toPx(), center.y - text.size.height / 2f))
             lastLabelY = center.y
         }
@@ -161,8 +159,7 @@ private fun DrawScope.drawEndMarks(
 
 private fun DrawScope.drawHoverLayer(
     day: Int,
-    lines: Map<ChartSeries, List<CumulativePoint>>,
-    statistics: Statistics,
+    lines: Map<ChartSeries, List<ValuePoint>>,
     time: TimePlot,
     theme: ChartTheme,
 ) {
@@ -176,8 +173,7 @@ private fun DrawScope.drawHoverLayer(
     val date = LocalDate.fromEpochDays(day)
     lines.forEach { (s, points) ->
         if (points.first().date <= date) {
-            val hours = statistics.cumulativeAt(s.key, date).inWholeMinutes / MINUTES_PER_HOUR
-            drawRingedDot(Offset(x, time.yOf(hours)), s.color, theme.surface)
+            drawRingedDot(Offset(x, time.yOf(points.valueAt(date))), s.color, theme.surface)
         }
     }
 }
@@ -196,8 +192,8 @@ private fun DrawScope.drawTimeLabel(
 @Composable
 private fun DayTooltip(
     day: Int,
-    lines: Map<ChartSeries, List<CumulativePoint>>,
-    statistics: Statistics,
+    lines: Map<ChartSeries, List<ValuePoint>>,
+    unit: ChartUnit,
     theme: ChartTheme,
     pointer: Offset,
     size: IntSize,
@@ -207,9 +203,9 @@ private fun DayTooltip(
     val rows =
         lines
             .filter { (_, points) -> points.first().date <= date }
-            .map { (s, _) -> s to statistics.cumulativeAt(s.key, date) }
+            .map { (s, points) -> s to points.valueAt(date) }
             .sortedByDescending { it.second }
-            .map { (s, total) -> TooltipRow(s.color, s.name, formatDuration(total)) }
+            .map { (s, total) -> TooltipRow(s.color, s.name, unit.full(total)) }
     ChartTooltip(
         title = date.toDisplay(),
         rows = rows,

@@ -27,24 +27,14 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.statistics.SeriesKey
-import ch.qscqlmpa.wingtracker.statistics.YearlyHours
-import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.resources.Res
-import ch.qscqlmpa.wingtracker.ui.resources.chart_axis_hours
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_total
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.ceil
 import kotlin.math.min
-import kotlin.time.Duration
 
-private const val MINUTES_PER_HOUR = 60.0
 private const val MIN_LABELLED_BAND_DP = 40
 private const val HOVER_WASH_ALPHA = 0.08f
-
-private fun YearlyHours.of(key: SeriesKey): Duration = hours[key] ?: Duration.ZERO
-
-private fun YearlyHours.hoursOf(series: List<ChartSeries>): Double =
-    series.sumOf { of(it.key).inWholeMinutes } / MINUTES_PER_HOUR
 
 private class ColumnStyle(
     val labels: TextStyle,
@@ -53,9 +43,10 @@ private class ColumnStyle(
 
 /** Stacked columns, one per year, one segment per visible wing. */
 @Composable
-fun YearlyHoursChart(
-    years: List<YearlyHours>,
+fun YearlyChart(
+    years: List<YearColumn>,
     series: List<ChartSeries>,
+    unit: ChartUnit,
     theme: ChartTheme,
     modifier: Modifier = Modifier,
 ) {
@@ -64,8 +55,8 @@ fun YearlyHoursChart(
     var size by remember { mutableStateOf(IntSize.Zero) }
     val plot = rememberPlotArea(size, rightPad = 8.dp)
 
-    val scale = niceScale(years.maxOfOrNull { it.hoursOf(series) } ?: 0.0)
-    val tickLabels = scale.ticks.map { stringResource(Res.string.chart_axis_hours, formatTick(it)) }
+    val scale = niceScale(years.maxOfOrNull { it.totalOf(series) } ?: 0.0, wholeNumbers = unit.wholeNumbers)
+    val tickLabels = scale.ticks.map { unit.short(it) }
     val style =
         ColumnStyle(
             labels = MaterialTheme.typography.labelSmall.copy(color = theme.textSecondary),
@@ -96,7 +87,7 @@ fun YearlyHoursChart(
                 // Totals sit on the cap, only where a column is wide enough to carry them without clutter.
                 if (band >= MIN_LABELLED_BAND_DP.dp.toPx() && capHeight > 0f) {
                     drawTotal(
-                        formatTick(year.hoursOf(series)),
+                        formatTick(year.totalOf(series)),
                         centerX,
                         plot.bottom - capHeight,
                         measurer,
@@ -107,14 +98,14 @@ fun YearlyHoursChart(
         }
         val pointer = hover
         if (hoveredIndex != null && pointer != null) {
-            YearTooltip(years[hoveredIndex], series, theme, pointer, size)
+            YearTooltip(years[hoveredIndex], series, unit, theme, pointer, size)
         }
     }
 }
 
 /** Draws one stacked column and returns its height, so the caller can place the total on top. */
 private fun DrawScope.drawColumn(
-    year: YearlyHours,
+    year: YearColumn,
     series: List<ChartSeries>,
     scale: AxisScale,
     plot: PlotArea,
@@ -124,10 +115,10 @@ private fun DrawScope.drawColumn(
     val barWidth = min(24.dp.toPx(), band * 0.6f)
     val gap = 2.dp.toPx()
     val radius = 4.dp.toPx()
-    val present = series.filter { year.of(it.key).inWholeMinutes > 0 }
+    val present = series.filter { year.of(it.key) > 0.0 }
     var stacked = 0f
     present.forEachIndexed { position, s ->
-        val height = (year.of(s.key).inWholeMinutes / MINUTES_PER_HOUR / scale.max * plot.height).toFloat()
+        val height = (year.of(s.key) / scale.max * plot.height).toFloat()
         val segmentBottom = plot.bottom - stacked
         stacked += height
         // A 2px gap in the surface color separates stacked segments; no stroke is drawn around marks.
@@ -179,8 +170,9 @@ private fun DrawScope.drawTotal(
 
 @Composable
 private fun YearTooltip(
-    year: YearlyHours,
+    year: YearColumn,
     series: List<ChartSeries>,
+    unit: ChartUnit,
     theme: ChartTheme,
     pointer: Offset,
     size: IntSize,
@@ -188,13 +180,11 @@ private fun YearTooltip(
     val tooltipWidth = with(LocalDensity.current) { TOOLTIP_WIDTH.toPx() }
     val rows =
         series
-            .filter {
-                year.of(it.key).inWholeMinutes > 0
-            }.map { TooltipRow(it.color, it.name, formatDuration(year.of(it.key))) }
-    val total = series.fold(Duration.ZERO) { sum, s -> sum + year.of(s.key) }
+            .filter { year.of(it.key) > 0.0 }
+            .map { TooltipRow(it.color, it.name, unit.full(year.of(it.key))) }
     ChartTooltip(
         title = year.year.toString(),
-        rows = rows + TooltipRow(null, stringResource(Res.string.statistics_total), formatDuration(total)),
+        rows = rows + TooltipRow(null, stringResource(Res.string.statistics_total), unit.full(year.totalOf(series))),
         theme = theme,
         modifier = Modifier.offset { tooltipOffset(pointer, size.width, tooltipWidth) },
     )

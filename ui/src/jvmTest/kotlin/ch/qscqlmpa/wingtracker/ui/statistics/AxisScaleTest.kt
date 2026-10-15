@@ -48,6 +48,16 @@ class AxisScaleTest {
         }
 
         @Test
+        fun `never steps by a fraction when counting whole numbers`() {
+            // given / when
+            val scale = niceScale(3.0, wholeNumbers = true)
+
+            // then
+            assertThat(scale.step).isEqualTo(1.0)
+            assertThat(scale.ticks).containsExactly(0.0, 1.0, 2.0, 3.0)
+        }
+
+        @Test
         fun `falls back to a usable scale for zero`() {
             // given / when
             val scale = niceScale(0.0)

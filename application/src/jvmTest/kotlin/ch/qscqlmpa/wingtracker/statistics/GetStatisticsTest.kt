@@ -8,6 +8,9 @@ import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.gear.Acquisition
 import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.GearStatus
+import ch.qscqlmpa.wingtracker.gear.maintenance.CheckId
+import ch.qscqlmpa.wingtracker.gear.maintenance.CheckType
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceCheck
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
@@ -35,7 +38,9 @@ private fun aWing(
     name: String = "Sky Dancer",
     inService: LocalDate = LocalDate(2024, 3, 9),
     before: Duration = 42.hours,
+    flightsBefore: Int = 61,
     status: GearStatus = GearStatus.Active,
+    checks: List<MaintenanceCheck> = emptyList(),
 ) = Wing(
     id = WingId(id),
     details =
@@ -46,9 +51,16 @@ private fun aWing(
             acquisition = Acquisition(AcquisitionCondition.New),
             inServiceDate = inService,
             hoursBeforeTracking = before,
+            flightsBeforeTracking = flightsBefore,
         ),
     status = status,
+    checks = checks,
 )
+
+private fun aCheck(
+    date: LocalDate,
+    type: CheckType = CheckType.Full,
+) = MaintenanceCheck(id = CheckId("check-$date"), date = date, type = type, company = "Swiss Paragliding Service")
 
 private var flightCounter = 0
 
@@ -247,6 +259,157 @@ class GetStatisticsTest {
                 assertThat(result.cumulativeAt(key, LocalDate(2024, 1, 1))).isEqualTo(Duration.ZERO)
                 assertThat(result.cumulativeAt(key, LocalDate(2025, 4, 30))).isEqualTo(42.hours)
                 assertThat(result.cumulativeAt(key, LocalDate(2025, 5, 1))).isEqualTo(43.hours + 30.minutes)
+            }
+    }
+
+    @Nested
+    inner class YearlyFlights {
+        @Test
+        fun `counts tracked flights per year and per wing`() =
+            runTest {
+                // given
+                val sky = aWing("wing-1")
+                val cloud = aWing("wing-2", name = "Cloud Surfer")
+                givenStored(
+                    listOf(sky, cloud),
+                    aFlight("wing-1", LocalDate(2025, 5, 1)),
+                    aFlight("wing-1", LocalDate(2025, 8, 1)),
+                    aFlight("wing-2", LocalDate(2025, 8, 1)),
+                    aFlight("wing-1", LocalDate(2026, 4, 1)),
+                )
+
+                // when
+                val result = statistics()
+
+                // then
+                assertThat(result.yearlyFlights.map { it.year to it.counts }).containsExactly(
+                    2025 to mapOf(SeriesKey.OfWing(sky.id) to 2, SeriesKey.OfWing(cloud.id) to 1),
+                    2026 to mapOf(SeriesKey.OfWing(sky.id) to 1),
+                )
+            }
+
+        @Test
+        fun `keeps years without flights so the time axis stays honest`() =
+            runTest {
+                // given
+                givenStored(
+                    listOf(aWing("wing-1")),
+                    aFlight("wing-1", LocalDate(2024, 6, 1)),
+                    aFlight("wing-1", LocalDate(2026, 6, 1)),
+                )
+
+                // when
+                val result = statistics()
+
+                // then
+                assertThat(result.yearlyFlights.map { it.year }).containsExactly(2024, 2025, 2026)
+                assertThat(result.yearlyFlights[1].counts).isEmpty()
+            }
+    }
+
+    @Nested
+    inner class CumulativeFlights {
+        @Test
+        fun `starts at the flights before tracking and grows with each flight day`() =
+            runTest {
+                // given
+                val sky = aWing("wing-1", inService = LocalDate(2024, 3, 9), flightsBefore = 61)
+                givenStored(
+                    listOf(sky),
+                    aFlight("wing-1", LocalDate(2025, 5, 1)),
+                    aFlight("wing-1", LocalDate(2025, 5, 1)),
+                    aFlight("wing-1", LocalDate(2026, 4, 1)),
+                )
+
+                // when
+                val points = statistics().cumulativeFlights.getValue(SeriesKey.OfWing(sky.id))
+
+                // then
+                assertThat(points.map { it.date to it.total }).containsExactly(
+                    LocalDate(2024, 3, 9) to 61,
+                    LocalDate(2025, 5, 1) to 63,
+                    LocalDate(2026, 4, 1) to 64,
+                    TODAY to 64,
+                )
+            }
+
+        @Test
+        fun `sums the folded wings into the other series`() =
+            runTest {
+                // given
+                val many =
+                    (1..10).map {
+                        aWing(
+                            "wing-$it",
+                            name = "Wing $it",
+                            inService = LocalDate(2020 + it / 5, it, 1),
+                            flightsBefore = 5,
+                        )
+                    }
+                givenStored(many, aFlight("wing-9", LocalDate(2026, 1, 5)), aFlight("wing-10", LocalDate(2026, 2, 5)))
+
+                // when
+                val result = statistics()
+
+                // then
+                assertThat(result.yearlyFlights.single().counts[SeriesKey.Other]).isEqualTo(2)
+                assertThat(result.cumulativeFlightsAt(SeriesKey.Other, TODAY)).isEqualTo(12)
+            }
+    }
+
+    @Nested
+    inner class SinceLastCheck {
+        @Test
+        fun `counts flights and hours from the day of the latest check of any type`() =
+            runTest {
+                // given
+                val sky =
+                    aWing(
+                        "wing-1",
+                        checks = listOf(aCheck(LocalDate(2026, 6, 1), CheckType.Other), aCheck(LocalDate(2025, 6, 1))),
+                    )
+                givenStored(
+                    listOf(sky),
+                    aFlight("wing-1", LocalDate(2026, 5, 31), 60.minutes),
+                    aFlight("wing-1", LocalDate(2026, 6, 1), 90.minutes),
+                    aFlight("wing-1", LocalDate(2026, 8, 15), 45.minutes),
+                )
+
+                // when
+                val since = statistics().sinceLastCheck.single()
+
+                // then
+                assertThat(since.check?.date).isEqualTo(LocalDate(2026, 6, 1))
+                assertThat(since.flights).isEqualTo(2)
+                assertThat(since.hours).isEqualTo(135.minutes)
+            }
+
+        @Test
+        fun `reports no check and nothing counted for a wing never checked`() =
+            runTest {
+                // given
+                givenStored(listOf(aWing("wing-1")), aFlight("wing-1", LocalDate(2026, 5, 31)))
+
+                // when
+                val since = statistics().sinceLastCheck.single()
+
+                // then
+                assertThat(since.check).isNull()
+                assertThat(since.flights).isZero()
+            }
+
+        @Test
+        fun `leaves out retired wings`() =
+            runTest {
+                // given
+                val retired = aWing("wing-1", status = GearStatus.Retired(LocalDate(2025, 9, 30)))
+                givenStored(listOf(retired, aWing("wing-2", name = "Cloud Surfer")))
+
+                // when
+                val result = statistics()
+
+                // then
+                assertThat(result.sinceLastCheck.map { it.wing.id }).containsExactly(WingId("wing-2"))
             }
     }
 
