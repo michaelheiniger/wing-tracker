@@ -46,7 +46,9 @@ import io.github.vinceglb.filekit.FileKit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import org.koin.core.Koin
 import org.koin.core.context.startKoin
@@ -88,7 +90,10 @@ fun main() {
                 systemDark = withContext(Dispatchers.IO) { systemTheme.isDark() }
             }
         }
-        LaunchedEffect(Unit) { koin.get<StartupReminder>()() }
+        LaunchedEffect(Unit) {
+            // Supervised, so a failure is shown to the pilot instead of ending the app.
+            supervisorScope { launch(errorHandling.coroutineExceptionHandler) { koin.get<StartupReminder>()() } }
+        }
         val themed: @Composable (@Composable () -> Unit) -> Unit = { content ->
             WithInterfaceScale(DesktopScale.factor(scalePreference.percent, detectedScale, jvmScale)) {
                 WingTrackerTheme(themePreference.mode, systemDark ?: isSystemInDarkTheme(), content)

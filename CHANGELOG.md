@@ -19,7 +19,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - An "About" button at the bottom of the settings shows the version of the app and links to the changelog.
 
 ### Fixed
-- An unexpected error no longer closes the app or goes unnoticed: a window shows what went wrong, with the technical details to copy into a bug report. If the error broke the main window, it is rebuilt when you click OK. This also covers failing to save the theme or interface size.
+- An unexpected error no longer closes the app or goes unnoticed: a window shows what went wrong, with the technical details to copy into a bug report. If the error broke the main window, it is rebuilt when you click OK. This also covers failing to save the theme or interface size, or to show the reminder at startup.
 - On a system whose configured language (locale) is not installed, choosing, dropping or saving a file whose name or folder contains accents (e.g. "matériel") failed with an unclear error. The app now says which file it cannot open and how to fix the system's language settings. It also warns at startup when the system is in this state, and opens stored reports with such names anyway.
 
 ## [0.0.3] - 2026-10-12

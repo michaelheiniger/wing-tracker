@@ -8,6 +8,7 @@ import androidx.compose.ui.window.WindowExceptionHandler
 import androidx.compose.ui.window.WindowExceptionHandlerFactory
 import ch.qscqlmpa.wingtracker.ui.errors.UnexpectedError
 import ch.qscqlmpa.wingtracker.ui.errors.UnexpectedErrors
+import kotlinx.coroutines.CoroutineExceptionHandler
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import javax.swing.SwingUtilities
@@ -30,6 +31,18 @@ internal class UnexpectedErrorHandling(
     fun install() {
         Thread.setDefaultUncaughtExceptionHandler { _, error -> SwingUtilities.invokeLater { report(error) } }
     }
+
+    /**
+     * For coroutines outside the main window, which would otherwise end the app when they fail. Only a root
+     * coroutine or a direct child of a supervisor uses it.
+     */
+    val coroutineExceptionHandler =
+        CoroutineExceptionHandler {
+            _,
+            error,
+            ->
+            SwingUtilities.invokeLater { report(error) }
+        }
 
     /**
      * Catches failures inside a window: composition, layout, drawing, input and the window's coroutines. Not
