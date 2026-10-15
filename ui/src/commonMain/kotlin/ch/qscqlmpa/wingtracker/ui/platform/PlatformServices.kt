@@ -6,10 +6,10 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 
 /** Lets the user choose files; each platform has its own picker, so the shared UI only sees this port. */
 interface FilePicker {
-    /** Returns the chosen files with the given [extension] (without the dot), or none when the dialog was cancelled. */
+    /** Returns the chosen files with one of the given [extensions] (without the dot), or none when cancelled. */
     suspend fun pick(
         title: String,
-        extension: String,
+        extensions: Set<String>,
     ): List<NewAttachment>
 
     /**

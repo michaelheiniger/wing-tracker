@@ -99,6 +99,7 @@ fun LogbookScreen(
     onImportIgc: () -> Unit,
     onImportDevice: () -> Unit,
     onImportSyride: () -> Unit,
+    onImportSpreadsheet: () -> Unit,
     attention: Attention,
     onOpenAttention: (GearRef) -> Unit,
     onGoToGear: () -> Unit,
@@ -131,7 +132,13 @@ fun LogbookScreen(
             ) {
                 Text(stringResource(Res.string.logbook_title), style = MaterialTheme.typography.headlineMedium)
                 if (logbook != null) {
-                    ImportMenu(logbook.wings.isNotEmpty(), onImportIgc, onImportDevice, onImportSyride)
+                    ImportMenu(
+                        logbook.wings.isNotEmpty(),
+                        onImportIgc,
+                        onImportDevice,
+                        onImportSyride,
+                        onImportSpreadsheet,
+                    )
                 }
             }
             importFailure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }

@@ -28,6 +28,7 @@ ADRs capture **why** wing-tracker is built the way it is. They use the
 | [0019](0019-theme-and-status-colors.md) | A brand theme with checked contrast and status colours | Accepted |
 | [0020](0020-data-folder-location-is-user-chosen.md) | The data folder is chosen by the pilot and applied on restart | Accepted |
 | [0021](0021-syride-import-through-a-port.md) | Syride flights are imported through a port that reads public pages | Accepted |
+| [0022](0022-spreadsheet-import-through-a-port.md) | Spreadsheet logbooks are imported through a port, matched by content | Accepted |
 
 ## Rules
 

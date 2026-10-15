@@ -55,7 +55,7 @@ class CheckFormPresenter(
     fun addReports() {
         scope.launch {
             try {
-                val picked = filePicker.pick(pickTitle, "pdf")
+                val picked = filePicker.pick(pickTitle, setOf("pdf"))
                 input = input.copy(newReports = input.newReports + picked)
             } catch (e: CancellationException) {
                 throw e

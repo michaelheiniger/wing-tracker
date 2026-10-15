@@ -30,10 +30,16 @@ internal fun suggestWing(
     existing: List<Wing>,
 ): WingId? {
     val sameName = existing.filter { it.details.name.equals(wing.name, ignoreCase = true) }
+    // Sources often name a wing by its model ("Ultralite 4") or its full designation ("Ozone Ultralite 4").
+    val candidates = sameName.ifEmpty { existing.filter { it.isModel(wing.name) } }
     val sameBrand =
-        sameName.filter {
+        candidates.filter {
             wing.brand != null &&
                 it.details.manufacturer.equals(wing.brand, ignoreCase = true)
         }
-    return (sameBrand.firstOrNull() ?: sameName.firstOrNull { it.isActive } ?: sameName.firstOrNull())?.id
+    return (sameBrand.firstOrNull() ?: candidates.firstOrNull { it.isActive } ?: candidates.firstOrNull())?.id
 }
+
+private fun Wing.isModel(name: String): Boolean =
+    details.model.equals(name, ignoreCase = true) ||
+        "${details.manufacturer} ${details.model}".equals(name, ignoreCase = true)

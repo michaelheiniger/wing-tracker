@@ -26,7 +26,10 @@ import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.igc_drop_hint
 import ch.qscqlmpa.wingtracker.ui.resources.igc_pick_folder_title
 import ch.qscqlmpa.wingtracker.ui.resources.igc_pick_title
+import ch.qscqlmpa.wingtracker.ui.resources.spreadsheet_pick_title
 import ch.qscqlmpa.wingtracker.ui.resources.undo_flight_discarded
+import ch.qscqlmpa.wingtracker.ui.spreadsheet.SpreadsheetImportDialog
+import ch.qscqlmpa.wingtracker.ui.spreadsheet.SpreadsheetImportPresenter
 import ch.qscqlmpa.wingtracker.ui.syride.SyrideImportDialog
 import ch.qscqlmpa.wingtracker.ui.syride.SyrideImportPresenter
 import ch.qscqlmpa.wingtracker.ui.today
@@ -46,6 +49,8 @@ private sealed interface LogbookDialog {
     ) : LogbookDialog
 
     data object Syride : LogbookDialog
+
+    data object Spreadsheet : LogbookDialog
 
     data class Import(
         val files: List<NewAttachment>,
@@ -75,6 +80,7 @@ fun LogbookRoute(
         }
     val pickTitle = stringResource(Res.string.igc_pick_title)
     val pickFolderTitle = stringResource(Res.string.igc_pick_folder_title)
+    val spreadsheetPickTitle = stringResource(Res.string.spreadsheet_pick_title)
     val importer =
         remember {
             IgcImportPresenter(
@@ -117,6 +123,7 @@ fun LogbookRoute(
                 }
             },
             onImportSyride = { dialog = LogbookDialog.Syride },
+            onImportSpreadsheet = { dialog = LogbookDialog.Spreadsheet },
             attention = attention,
             onOpenAttention = onOpenGear,
             onGoToGear = onGoToGear,
@@ -147,6 +154,23 @@ fun LogbookRoute(
             // The account used last time is filled in once the settings are read.
             LaunchedEffect(syride) { syride.suggestUsername(useCases.getAppSettings().syrideUsername) }
             SyrideImportDialog(syride, onClose = closeDialog)
+        }
+
+        LogbookDialog.Spreadsheet -> {
+            val spreadsheet =
+                remember {
+                    SpreadsheetImportPresenter(
+                        scope,
+                        platform.filePicker,
+                        spreadsheetPickTitle,
+                        useCases.openSpreadsheet,
+                        useCases.prepareSpreadsheetImport,
+                        useCases.importSpreadsheetFlights,
+                    )
+                }
+            // The file is chosen first; cancelling the chooser closes the import without a word.
+            LaunchedEffect(spreadsheet) { spreadsheet.choose(onCancelled = { dialog = null }) }
+            SpreadsheetImportDialog(spreadsheet, onClose = closeDialog)
         }
 
         is LogbookDialog.Import -> {

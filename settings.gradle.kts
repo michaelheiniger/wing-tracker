@@ -29,6 +29,7 @@ include(
     ":infrastructure-storage-json",
     ":infrastructure-igc",
     ":infrastructure-syride",
+    ":infrastructure-spreadsheet",
     ":ui",
     ":app-desktop",
     ":architecture-test",

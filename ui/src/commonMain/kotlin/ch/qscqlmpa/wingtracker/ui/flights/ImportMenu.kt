@@ -20,6 +20,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.import_menu
 import ch.qscqlmpa.wingtracker.ui.resources.import_menu_device
 import ch.qscqlmpa.wingtracker.ui.resources.import_menu_igc
 import ch.qscqlmpa.wingtracker.ui.resources.import_menu_needs_wing
+import ch.qscqlmpa.wingtracker.ui.resources.import_menu_spreadsheet
 import ch.qscqlmpa.wingtracker.ui.resources.import_menu_syride
 import org.jetbrains.compose.resources.stringResource
 
@@ -30,6 +31,7 @@ internal fun ImportMenu(
     onImportIgc: () -> Unit,
     onImportDevice: () -> Unit,
     onImportSyride: () -> Unit,
+    onImportSpreadsheet: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
@@ -45,10 +47,14 @@ internal fun ImportMenu(
             // A track is logged on a wing, like a flight entered by hand, so these wait until a wing exists.
             NeedsWingItem(stringResource(Res.string.import_menu_igc), hasWings) { choose(onImportIgc) }
             NeedsWingItem(stringResource(Res.string.import_menu_device), hasWings) { choose(onImportDevice) }
-            // Syride can create the wings it needs.
+            // Syride and spreadsheets can create the wings they need.
             DropdownMenuItem(
                 text = { Text(stringResource(Res.string.import_menu_syride)) },
                 onClick = { choose(onImportSyride) },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.import_menu_spreadsheet)) },
+                onClick = { choose(onImportSpreadsheet) },
             )
         }
     }

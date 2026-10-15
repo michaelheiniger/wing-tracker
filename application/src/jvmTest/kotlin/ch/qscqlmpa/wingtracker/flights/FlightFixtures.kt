@@ -6,6 +6,8 @@ import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
+import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
+import ch.qscqlmpa.wingtracker.shared.LoadResult
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlin.time.Clock
@@ -32,16 +34,20 @@ fun aWingInService(
     name: String = "Sky Dancer",
     inServiceDate: LocalDate = LocalDate(2024, 3, 9),
     hoursBeforeTracking: Duration = 42.hours,
+    manufacturer: String = "Advance",
+    model: String = "Iota 3",
+    flightsBeforeTracking: Int = 0,
 ) = Wing(
     id = WingId(id),
     details =
         WingDetails(
             name = name,
-            manufacturer = "Advance",
-            model = "Iota 3",
+            manufacturer = manufacturer,
+            model = model,
             acquisition = Acquisition(AcquisitionCondition.New),
             inServiceDate = inServiceDate,
             hoursBeforeTracking = hoursBeforeTracking,
+            flightsBeforeTracking = flightsBeforeTracking,
         ),
 )
 
@@ -63,3 +69,20 @@ fun aFlight(
     details: FlightDetails = aFlightDetails(),
     loggedAt: Instant = Instant.parse("2026-09-20T17:00:00Z"),
 ) = Flight(FlightId(id), details, loggedAt)
+
+// A mock cannot hold the wings a use case creates, and the flight rules look the wing up again afterwards.
+class InMemoryWings : WingRepository {
+    val stored = linkedMapOf<WingId, Wing>()
+
+    override suspend fun findAll() = LoadResult(stored.values.toList())
+
+    override suspend fun findById(id: WingId) = stored[id]
+
+    override suspend fun save(wing: Wing) {
+        stored[wing.id] = wing
+    }
+
+    override suspend fun delete(id: WingId) {
+        stored.remove(id)
+    }
+}

@@ -136,7 +136,7 @@ class IgcImportPresentersTest {
         fun `hands over every chosen file`() =
             runTest {
                 // given
-                coEvery { picker.pick("Choose", "igc") } returns listOf(FILE, FILE)
+                coEvery { picker.pick("Choose", setOf("igc")) } returns listOf(FILE, FILE)
                 var chosen = emptyList<NewAttachment>()
 
                 // when
@@ -150,7 +150,7 @@ class IgcImportPresentersTest {
         fun `does nothing when the file dialog is cancelled`() =
             runTest {
                 // given
-                coEvery { picker.pick("Choose", "igc") } returns emptyList()
+                coEvery { picker.pick("Choose", setOf("igc")) } returns emptyList()
                 val presenter = importer()
                 var called = false
 
@@ -166,7 +166,7 @@ class IgcImportPresentersTest {
         fun `shows why the files could not be read`() =
             runTest {
                 // given
-                coEvery { picker.pick("Choose", "igc") } throws IOException("Permission denied")
+                coEvery { picker.pick("Choose", setOf("igc")) } throws IOException("Permission denied")
                 val presenter = importer()
 
                 // when

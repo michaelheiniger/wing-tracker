@@ -414,4 +414,58 @@
     <string name="import_menu_device">Depuis un appareil…</string>
     <string name="import_menu_syride">Depuis Syride…</string>
     <string name="import_menu_needs_wing">Ajoute d'abord une voile</string>
+    <string name="import_menu_spreadsheet">Depuis un tableur…</string>
+    <string name="spreadsheet_title">Importer des vols depuis un tableur</string>
+    <string name="spreadsheet_pick_title">Choisis un fichier tableur (ODS ou XLSX)</string>
+    <string name="spreadsheet_reading">Lecture du fichier…</string>
+    <string name="spreadsheet_choose_other">Choisir un autre fichier</string>
+    <string name="spreadsheet_sheet">Feuille</string>
+    <string name="spreadsheet_columns_title">Quelle colonne contient quoi ?</string>
+    <string name="spreadsheet_columns_hint">La première ligne remplie sert d'en-tête, et les colonnes sont associées d'après elle. Corrige celles qui sont fausses.</string>
+    <string name="spreadsheet_column_none">Non importée</string>
+    <string name="spreadsheet_column">%1$s · %2$s</string>
+    <string name="spreadsheet_field_date">Date</string>
+    <string name="spreadsheet_field_wing">Voile</string>
+    <string name="spreadsheet_field_hours">Durée en heures</string>
+    <string name="spreadsheet_field_minutes">Durée en minutes</string>
+    <string name="spreadsheet_field_takeoff">Décollage</string>
+    <string name="spreadsheet_field_landing">Atterrissage</string>
+    <string name="spreadsheet_field_distance">Distance (km)</string>
+    <string name="spreadsheet_field_notes">Notes</string>
+    <string name="spreadsheet_duration_hint">Les heures et les minutes sont additionnées. Une cellule comme 1:30 ou 1h30 est lue en heures et minutes dans les deux colonnes.</string>
+    <string name="spreadsheet_incomplete">Choisis les colonnes de la date, de la voile et d'au moins une durée.</string>
+    <string name="spreadsheet_ignored">Non importé : %1$s</string>
+    <string name="spreadsheet_preview_title">Premiers vols</string>
+    <string name="spreadsheet_preview_row">%1$s · %2$s · %3$s</string>
+    <string name="spreadsheet_sites">%1$s → %2$s</string>
+    <string name="spreadsheet_problem_row">Ligne %1$d : %2$s</string>
+    <string name="spreadsheet_problems_more">…et %1$d de plus</string>
+    <string name="spreadsheet_problem_missing_date">pas de date</string>
+    <string name="spreadsheet_problem_unreadable_date">la date est illisible</string>
+    <string name="spreadsheet_problem_missing_wing">pas de voile</string>
+    <string name="spreadsheet_problem_missing_duration">pas de durée</string>
+    <string name="spreadsheet_problem_unreadable_duration">la durée est illisible</string>
+    <string name="spreadsheet_problem_unreadable_distance">la distance est illisible</string>
+    <string name="spreadsheet_next">Suivant</string>
+    <string name="spreadsheet_wings_hint">Choisis pour chaque voile nommée dans le tableur la voile de l'application, ou crée-la ici. Les vols d'une voile ignorée ne sont pas importés.</string>
+    <string name="spreadsheet_before_tracking">Cette voile compte déjà %1$d vols avant le suivi. Si ces vols en font partie, diminue ce nombre après l'import.</string>
+    <string name="failure_spreadsheet_unreadable">Le fichier n'a pas pu être lu comme un tableur (ODS ou XLSX) : %1$s</string>
+    <string name="failure_spreadsheet_old_format">Les fichiers Excel 97-2003 (.xls) ne peuvent pas être lus. Enregistre le fichier en .xlsx ou .ods et réessaie.</string>
+    <string name="failure_import_spreadsheet">Les vols n'ont pas pu être importés : %1$s</string>
+    <plurals name="spreadsheet_flights_found">
+        <item quantity="one">%1$d vol peut être importé.</item>
+        <item quantity="other">%1$d vols peuvent être importés.</item>
+    </plurals>
+    <plurals name="spreadsheet_problems">
+        <item quantity="one">%1$d ligne ne peut pas être importée :</item>
+        <item quantity="other">%1$d lignes ne peuvent pas être importées :</item>
+    </plurals>
+    <plurals name="spreadsheet_problems_left_out">
+        <item quantity="one">%1$d ligne du tableur ne peut pas être importée et est laissée de côté.</item>
+        <item quantity="other">%1$d lignes du tableur ne peuvent pas être importées et sont laissées de côté.</item>
+    </plurals>
+    <plurals name="spreadsheet_duplicates">
+        <item quantity="one">%1$d déjà dans le carnet de vol, laissé de côté</item>
+        <item quantity="other">%1$d déjà dans le carnet de vol, laissés de côté</item>
+    </plurals>
 </resources>

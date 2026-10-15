@@ -26,7 +26,7 @@ class IgcImportPresenter(
         private set
 
     fun choose(onChosen: (List<NewAttachment>) -> Unit) =
-        collect(onChosen) { filePicker.pick(pickTitle, IGC_EXTENSION) }
+        collect(onChosen) { filePicker.pick(pickTitle, setOf(IGC_EXTENSION)) }
 
     /** For a logger mounted as a drive: all its tracks at once, wherever it keeps them. */
     fun chooseFolder(onChosen: (List<NewAttachment>) -> Unit) =

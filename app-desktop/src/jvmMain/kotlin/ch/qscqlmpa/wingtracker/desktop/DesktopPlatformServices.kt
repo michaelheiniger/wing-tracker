@@ -43,11 +43,11 @@ import kotlin.io.path.writeBytes
 class DesktopFilePicker : FilePicker {
     override suspend fun pick(
         title: String,
-        extension: String,
+        extensions: Set<String>,
     ): List<NewAttachment> {
         val files =
             FileKit.openFilePicker(
-                type = FileKitType.File(extensions = setOf(extension)),
+                type = FileKitType.File(extensions = extensions),
                 mode = FileKitMode.Multiple(),
                 dialogSettings = FileKitDialogSettings(title = title),
             ) ?: return emptyList()

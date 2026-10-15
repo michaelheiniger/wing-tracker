@@ -4,6 +4,7 @@ import ch.qscqlmpa.wingtracker.flights.ExternalReference
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
+import ch.qscqlmpa.wingtracker.flights.InMemoryWings
 import ch.qscqlmpa.wingtracker.flights.aFixedClock
 import ch.qscqlmpa.wingtracker.flights.aFlight
 import ch.qscqlmpa.wingtracker.flights.aWingInService
@@ -49,23 +50,6 @@ private fun aSyrideFlight(
     topAltitudeMeters = 2464,
     instrument = "Nav XL",
 )
-
-// A mock cannot hold the wings a use case creates, and the flight rules look the wing up again afterwards.
-private class InMemoryWings : WingRepository {
-    val stored = linkedMapOf<WingId, Wing>()
-
-    override suspend fun findAll() = LoadResult(stored.values.toList())
-
-    override suspend fun findById(id: WingId) = stored[id]
-
-    override suspend fun save(wing: Wing) {
-        stored[wing.id] = wing
-    }
-
-    override suspend fun delete(id: WingId) {
-        stored.remove(id)
-    }
-}
 
 class SyrideImportTest {
     private val source = mockk<SyrideFlightSource>()

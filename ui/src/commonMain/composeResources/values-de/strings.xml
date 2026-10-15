@@ -414,4 +414,58 @@
     <string name="import_menu_device">Von einem Gerät…</string>
     <string name="import_menu_syride">Von Syride…</string>
     <string name="import_menu_needs_wing">Lege zuerst einen Schirm an</string>
+    <string name="import_menu_spreadsheet">Aus einer Tabelle…</string>
+    <string name="spreadsheet_title">Flüge aus einer Tabelle importieren</string>
+    <string name="spreadsheet_pick_title">Wähle eine Tabellendatei (ODS oder XLSX)</string>
+    <string name="spreadsheet_reading">Die Tabelle wird gelesen…</string>
+    <string name="spreadsheet_choose_other">Andere Datei wählen</string>
+    <string name="spreadsheet_sheet">Blatt</string>
+    <string name="spreadsheet_columns_title">Welche Spalte enthält was?</string>
+    <string name="spreadsheet_columns_hint">Die erste ausgefüllte Zeile gilt als Kopfzeile, und die Spalten werden danach zugeordnet. Korrigiere, was nicht stimmt.</string>
+    <string name="spreadsheet_column_none">Nicht importiert</string>
+    <string name="spreadsheet_column">%1$s · %2$s</string>
+    <string name="spreadsheet_field_date">Datum</string>
+    <string name="spreadsheet_field_wing">Schirm</string>
+    <string name="spreadsheet_field_hours">Dauer in Stunden</string>
+    <string name="spreadsheet_field_minutes">Dauer in Minuten</string>
+    <string name="spreadsheet_field_takeoff">Startplatz</string>
+    <string name="spreadsheet_field_landing">Landeplatz</string>
+    <string name="spreadsheet_field_distance">Distanz (km)</string>
+    <string name="spreadsheet_field_notes">Notizen</string>
+    <string name="spreadsheet_duration_hint">Stunden und Minuten werden zusammengezählt. Eine Zelle wie 1:30 oder 1h30 wird in beiden Spalten als Stunden und Minuten gelesen.</string>
+    <string name="spreadsheet_incomplete">Wähle die Spalten für Datum, Schirm und mindestens eine Dauer.</string>
+    <string name="spreadsheet_ignored">Nicht importiert: %1$s</string>
+    <string name="spreadsheet_preview_title">Erste Flüge</string>
+    <string name="spreadsheet_preview_row">%1$s · %2$s · %3$s</string>
+    <string name="spreadsheet_sites">%1$s → %2$s</string>
+    <string name="spreadsheet_problem_row">Zeile %1$d: %2$s</string>
+    <string name="spreadsheet_problems_more">…und %1$d weitere</string>
+    <string name="spreadsheet_problem_missing_date">kein Datum</string>
+    <string name="spreadsheet_problem_unreadable_date">das Datum ist unlesbar</string>
+    <string name="spreadsheet_problem_missing_wing">kein Schirm</string>
+    <string name="spreadsheet_problem_missing_duration">keine Dauer</string>
+    <string name="spreadsheet_problem_unreadable_duration">die Dauer ist unlesbar</string>
+    <string name="spreadsheet_problem_unreadable_distance">die Distanz ist unlesbar</string>
+    <string name="spreadsheet_next">Weiter</string>
+    <string name="spreadsheet_wings_hint">Wähle für jeden in der Tabelle genannten Schirm den Schirm in der App oder lege ihn hier an. Flüge eines übersprungenen Schirms werden nicht importiert.</string>
+    <string name="spreadsheet_before_tracking">Dieser Schirm zählt schon %1$d Flüge vor der Erfassung. Wenn diese Flüge dazugehören, verringere die Zahl nach dem Import.</string>
+    <string name="failure_spreadsheet_unreadable">Die Datei konnte nicht als Tabelle (ODS oder XLSX) gelesen werden: %1$s</string>
+    <string name="failure_spreadsheet_old_format">Excel-97-2003-Dateien (.xls) können nicht gelesen werden. Speichere die Datei als .xlsx oder .ods und versuche es erneut.</string>
+    <string name="failure_import_spreadsheet">Die Flüge konnten nicht importiert werden: %1$s</string>
+    <plurals name="spreadsheet_flights_found">
+        <item quantity="one">%1$d Flug kann importiert werden.</item>
+        <item quantity="other">%1$d Flüge können importiert werden.</item>
+    </plurals>
+    <plurals name="spreadsheet_problems">
+        <item quantity="one">%1$d Zeile kann nicht importiert werden:</item>
+        <item quantity="other">%1$d Zeilen können nicht importiert werden:</item>
+    </plurals>
+    <plurals name="spreadsheet_problems_left_out">
+        <item quantity="one">%1$d Zeile der Tabelle kann nicht importiert werden und wird ausgelassen.</item>
+        <item quantity="other">%1$d Zeilen der Tabelle können nicht importiert werden und werden ausgelassen.</item>
+    </plurals>
+    <plurals name="spreadsheet_duplicates">
+        <item quantity="one">%1$d schon im Flugbuch, ausgelassen</item>
+        <item quantity="other">%1$d schon im Flugbuch, ausgelassen</item>
+    </plurals>
 </resources>
