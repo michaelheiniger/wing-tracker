@@ -156,7 +156,6 @@
     <string name="statistics_table_year">Année</string>
     <string name="statistics_table_yearly_title">Heures par année (h:mm)</string>
     <string name="statistics_table_cumulative_title">Heures cumulées à la fin de l'année (h:mm)</string>
-    <string name="statistics_total">Total</string>
     <string name="statistics_yearly_flights_title">Vols par année</string>
     <string name="statistics_cumulative_flights_title">Vols cumulés</string>
     <string name="statistics_cumulative_flights_note">Comprend les vols effectués avant le suivi</string>
@@ -468,4 +467,16 @@
         <item quantity="one">%1$d déjà dans le carnet de vol, laissé de côté</item>
         <item quantity="other">%1$d déjà dans le carnet de vol, laissés de côté</item>
     </plurals>
+    <string name="statistics_totals_title">Totaux</string>
+    <string name="statistics_totals_note">Toutes les voiles ensemble, y compris celles retirées</string>
+    <string name="statistics_totals_before_tracking">Dont %1$d vols et %2$s d'avant le suivi, qui n'appartiennent à aucune année</string>
+    <string name="statistics_totals_flights_column">Vols</string>
+    <string name="statistics_totals_hours_column">Heures (h:mm)</string>
+    <string name="statistics_all_wings">Toutes les voiles</string>
+    <string name="statistics_all_years">Toutes les années</string>
+    <plurals name="statistics_totals_flights">
+        <item quantity="one">%1$d vol</item>
+        <item quantity="other">%1$d vols</item>
+    </plurals>
+    <string name="statistics_total">Total</string>
 </resources>

@@ -98,6 +98,9 @@ private fun StatisticsContent(
     val names = statistics.series.associate { it.key to it.displayName() }
     val chartSeries = state.visibleSeries.map { ChartSeries(it.key, names.getValue(it.key), colorOf(it.key)) }
 
+    // Above the legend, as it is about all wings and does not change when some are hidden.
+    TotalsCard(statistics.totals, theme)
+
     // A legend is always shown: it is the dependable identity channel and the control for hiding wings.
     Text(
         stringResource(Res.string.statistics_legend_hint),

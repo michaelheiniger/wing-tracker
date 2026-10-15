@@ -358,6 +358,74 @@ class GetStatisticsTest {
     }
 
     @Nested
+    inner class Totals {
+        @Test
+        fun `adds every wing up per year, gap years included`() =
+            runTest {
+                // given
+                givenStored(
+                    listOf(aWing("w-1"), aWing("w-2", name = "Birdy")),
+                    aFlight("w-1", LocalDate(2024, 5, 1), 90.minutes),
+                    aFlight("w-2", LocalDate(2024, 6, 1), 20.minutes),
+                    aFlight("w-2", LocalDate(2026, 7, 1), 15.minutes),
+                )
+
+                // when
+                val totals = statistics().totals
+
+                // then
+                assertThat(totals.years).containsExactly(
+                    YearTotal(2024, 2, 110.minutes),
+                    YearTotal(2025, 0, Duration.ZERO),
+                    YearTotal(2026, 1, 15.minutes),
+                )
+            }
+
+        @Test
+        fun `counts what was flown before tracking in the overall total but in no year`() =
+            runTest {
+                // given
+                givenStored(
+                    listOf(
+                        aWing("w-1", before = 42.hours, flightsBefore = 61),
+                        aWing("w-2", before = 3.hours, flightsBefore = 4),
+                    ),
+                    aFlight("w-1", LocalDate(2026, 5, 1), 90.minutes),
+                )
+
+                // when
+                val totals = statistics().totals
+
+                // then
+                assertThat(totals.flightsBeforeTracking).isEqualTo(65)
+                assertThat(totals.hoursBeforeTracking).isEqualTo(45.hours)
+                assertThat(totals.flights).isEqualTo(66)
+                assertThat(totals.hours).isEqualTo(46.hours + 30.minutes)
+            }
+
+        @Test
+        fun `includes retired wings and wings folded into the other series`() =
+            runTest {
+                // given
+                val many = (1..MAX_NAMED_SERIES + 1).map { aWing("w-$it", before = Duration.ZERO, flightsBefore = 0) }
+                val retired =
+                    aWing(
+                        "w-retired",
+                        before = Duration.ZERO,
+                        flightsBefore = 0,
+                        status = GearStatus.Retired(LocalDate(2025, 1, 1)),
+                    )
+                givenStored(
+                    many + retired,
+                    *(many + retired).map { aFlight(it.id.value, LocalDate(2024, 8, 1)) }.toTypedArray(),
+                )
+
+                // when / then
+                assertThat(statistics().totals.flights).isEqualTo(MAX_NAMED_SERIES + 2)
+            }
+    }
+
+    @Nested
     inner class SinceLastCheck {
         @Test
         fun `counts flights and hours from the day of the latest check of any type`() =

@@ -17,12 +17,13 @@ import ch.qscqlmpa.wingtracker.statistics.Statistics
 import ch.qscqlmpa.wingtracker.ui.formatHoursAndMinutes
 import ch.qscqlmpa.wingtracker.ui.gear.maintenance.label
 import ch.qscqlmpa.wingtracker.ui.resources.Res
+import ch.qscqlmpa.wingtracker.ui.resources.statistics_all_wings
+import ch.qscqlmpa.wingtracker.ui.resources.statistics_all_years
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_table_cumulative_flights_title
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_table_cumulative_title
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_table_year
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_table_yearly_flights_title
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_table_yearly_title
-import ch.qscqlmpa.wingtracker.ui.resources.statistics_total
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import org.jetbrains.compose.resources.stringResource
@@ -57,6 +58,7 @@ fun StatisticsTables(
         rows: List<Pair<String, List<String>>>,
         withTotal: Boolean,
     ) {
+        // The last column adds up every wing, hidden ones included, like the totals card.
         Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
         Column(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -65,7 +67,7 @@ fun StatisticsTables(
             Row {
                 TableCell(stringResource(Res.string.statistics_table_year), FIRST_COLUMN, bold = true)
                 series.forEach { TableCell(it.name, COLUMN, bold = true) }
-                if (withTotal) TableCell(stringResource(Res.string.statistics_total), COLUMN, bold = true)
+                if (withTotal) TableCell(stringResource(Res.string.statistics_all_wings), COLUMN, bold = true)
             }
             rows.forEach { (label, values) ->
                 Row {
@@ -81,13 +83,21 @@ fun StatisticsTables(
     // The current year ends today, because the lines do not extend into the future.
     fun yearEnd(year: Int) = minOf(LocalDate(year, Month.DECEMBER, LAST_DAY_OF_DECEMBER), statistics.today)
 
+    val allWings = statistics.totals.years.associateBy { it.year }
+    val allYears = stringResource(Res.string.statistics_all_years)
+    val sum = { values: List<Duration> -> values.fold(Duration.ZERO, Duration::plus) }
     Table(
         title = stringResource(Res.string.statistics_table_yearly_title),
         rows =
             statistics.yearly.map { year ->
                 val values = series.map { year.hours[it.key] ?: Duration.ZERO }
-                year.year.toString() to values.map(::hours) + hours(values.fold(Duration.ZERO) { a, b -> a + b })
-            },
+                year.year.toString() to values.map(::hours) + hours(allWings.getValue(year.year).hours)
+            } +
+                (
+                    allYears to
+                        series.map { s -> hours(sum(statistics.yearly.map { it.hours[s.key] ?: Duration.ZERO })) } +
+                        hours(sum(statistics.totals.years.map { it.hours }))
+                ),
         withTotal = true,
     )
     Table(
@@ -95,8 +105,15 @@ fun StatisticsTables(
         rows =
             statistics.yearlyFlights.map { year ->
                 val values = series.map { year.counts[it.key] ?: 0 }
-                year.year.toString() to values.map(Int::toString) + values.sum().toString()
-            },
+                year.year.toString() to values.map(Int::toString) + allWings.getValue(year.year).flights.toString()
+            } +
+                (
+                    allYears to
+                        series.map { s -> statistics.yearlyFlights.sumOf { it.counts[s.key] ?: 0 }.toString() } +
+                        statistics.totals.years
+                            .sumOf { it.flights }
+                            .toString()
+                ),
         withTotal = true,
     )
     Table(

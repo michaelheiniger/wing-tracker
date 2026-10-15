@@ -156,7 +156,6 @@
     <string name="statistics_table_year">Year</string>
     <string name="statistics_table_yearly_title">Hours per year (h:mm)</string>
     <string name="statistics_table_cumulative_title">Cumulative hours at the end of the year (h:mm)</string>
-    <string name="statistics_total">Total</string>
     <string name="statistics_yearly_flights_title">Flights per year</string>
     <string name="statistics_cumulative_flights_title">Cumulative flights</string>
     <string name="statistics_cumulative_flights_note">Includes the flights made before tracking</string>
@@ -468,4 +467,16 @@
         <item quantity="one">%1$d already in the logbook, left out</item>
         <item quantity="other">%1$d already in the logbook, left out</item>
     </plurals>
+    <string name="statistics_totals_title">Totals</string>
+    <string name="statistics_totals_note">All wings together, retired ones included</string>
+    <string name="statistics_totals_before_tracking">Including %1$d flights and %2$s from before tracking, which belong to no year</string>
+    <string name="statistics_totals_flights_column">Flights</string>
+    <string name="statistics_totals_hours_column">Hours (h:mm)</string>
+    <string name="statistics_all_wings">All wings</string>
+    <string name="statistics_all_years">All years</string>
+    <plurals name="statistics_totals_flights">
+        <item quantity="one">%1$d flight</item>
+        <item quantity="other">%1$d flights</item>
+    </plurals>
+    <string name="statistics_total">Total</string>
 </resources>

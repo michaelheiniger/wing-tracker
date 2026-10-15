@@ -11,6 +11,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - Imports also suggest an existing wing when the source names it by its model or by manufacturer and model (e.g. "Ozone Ultralite 4").
 
 ### Added
+- The statistics start with a "Totals" card: your flights and hours over all years, every wing together, then year by year. Flights and hours entered as "before tracking" count in the overall total, and the card says how many. In the table view, the yearly tables end with an "All years" row, and their last column ("All wings") always counts every wing, even hidden ones.
 - Import flights from a spreadsheet (ODS or XLSX), e.g. a digitized paper logbook: choose the file under Import, check which column holds the date, wing, duration (whole hours, whole minutes or both, added up), sites, distance and notes, with the first flights shown as you choose, then pick or create the wing for each wing named in the file. Rows that cannot be read are listed with the reason, and rows already in the logbook are left out, so importing a longer version of the same file adds only the new flights.
 - The statistics charts show flights per year and cumulative flights; an "Hours / Flights" switch at the top changes both charts, and the table view shows both. A new section lists for each active wing the flights and hours since its last check.
 - Wings have an optional "flights before tracking" count, next to the hours flown before tracking, for used wings.

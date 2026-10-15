@@ -41,19 +41,22 @@ class GetStatistics(
 
         val keyOfWing =
             series.flatMap { s -> s.wings.map { it.id to s.key } }.toMap()
+        val yearly = yearlyOf(loadedFlights.items, keyOfWing)
+        val yearlyFlights = yearlyFlightsOf(loadedFlights.items, keyOfWing)
         return Statistics(
             series = series,
-            yearly = yearlyOf(loadedFlights.items, keyOfWing),
+            yearly = yearly,
             cumulative =
                 series.associate { it.key to it.cumulativeIn(hoursByWing, HOURS) }.mapValues { (_, steps) ->
                     steps.map { (date, total) -> CumulativePoint(date, total) }
                 },
-            yearlyFlights = yearlyFlightsOf(loadedFlights.items, keyOfWing),
+            yearlyFlights = yearlyFlights,
             cumulativeFlights =
                 series.associate { it.key to it.cumulativeIn(countsByWing, COUNTS) }.mapValues { (_, steps) ->
                     steps.map { (date, total) -> CumulativeFlightsPoint(date, total) }
                 },
             sinceLastCheck = sinceLastCheckOf(ordered, flightsByWing),
+            totals = totalsOf(yearly, yearlyFlights, ordered),
             today = today,
             unreadable = loadedFlights.unreadable + loadedWings.unreadable,
         )
@@ -102,6 +105,24 @@ class GetStatistics(
             )
         }
     }
+
+    // Built from the yearly figures, which cover the same years, so the totals always match the charts' sums.
+    private fun totalsOf(
+        yearly: List<YearlyHours>,
+        yearlyFlights: List<YearlyFlights>,
+        wings: List<Wing>,
+    ) = Totals(
+        years =
+            yearly.zip(yearlyFlights) { hours, flights ->
+                YearTotal(
+                    hours.year,
+                    flights.counts.values.sum(),
+                    hours.hours.values.fold(Duration.ZERO, Duration::plus),
+                )
+            },
+        flightsBeforeTracking = wings.sumOf { it.details.flightsBeforeTracking },
+        hoursBeforeTracking = wings.fold(Duration.ZERO) { sum, wing -> sum + wing.details.hoursBeforeTracking },
+    )
 
     // Retired wings are left out: nothing is left to check on them.
     private fun sinceLastCheckOf(

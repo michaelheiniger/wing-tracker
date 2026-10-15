@@ -156,7 +156,6 @@
     <string name="statistics_table_year">Jahr</string>
     <string name="statistics_table_yearly_title">Stunden pro Jahr (h:mm)</string>
     <string name="statistics_table_cumulative_title">Kumulierte Stunden am Jahresende (h:mm)</string>
-    <string name="statistics_total">Total</string>
     <string name="statistics_yearly_flights_title">Flüge pro Jahr</string>
     <string name="statistics_cumulative_flights_title">Kumulierte Flüge</string>
     <string name="statistics_cumulative_flights_note">Inklusive der Flüge vor der Erfassung</string>
@@ -468,4 +467,16 @@
         <item quantity="one">%1$d schon im Flugbuch, ausgelassen</item>
         <item quantity="other">%1$d schon im Flugbuch, ausgelassen</item>
     </plurals>
+    <string name="statistics_totals_title">Summen</string>
+    <string name="statistics_totals_note">Alle Schirme zusammen, ausgemusterte inbegriffen</string>
+    <string name="statistics_totals_before_tracking">Davon %1$d Flüge und %2$s vor der Erfassung, die zu keinem Jahr gehören</string>
+    <string name="statistics_totals_flights_column">Flüge</string>
+    <string name="statistics_totals_hours_column">Stunden (h:mm)</string>
+    <string name="statistics_all_wings">Alle Schirme</string>
+    <string name="statistics_all_years">Alle Jahre</string>
+    <plurals name="statistics_totals_flights">
+        <item quantity="one">%1$d Flug</item>
+        <item quantity="other">%1$d Flüge</item>
+    </plurals>
+    <string name="statistics_total">Total</string>
 </resources>

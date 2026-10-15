@@ -55,6 +55,25 @@ data class SinceLastCheck(
     val hours: Duration,
 )
 
+/** The flights and hours of one year, all wings together. */
+data class YearTotal(
+    val year: Int,
+    val flights: Int,
+    val hours: Duration,
+)
+
+/** All wings together, retired ones included: the pilot's own totals, whatever the charts show. */
+data class Totals(
+    // Logged flights only, like [Statistics.yearly].
+    val years: List<YearTotal>,
+    // Entered on the wings without a date, so they count in the overall total but in no year.
+    val flightsBeforeTracking: Int,
+    val hoursBeforeTracking: Duration,
+) {
+    val flights: Int get() = years.sumOf { it.flights } + flightsBeforeTracking
+    val hours: Duration get() = years.fold(hoursBeforeTracking) { sum, year -> sum + year.hours }
+}
+
 data class Statistics(
     // Order is stable (by entering service) so a series keeps its color when others are hidden or added.
     val series: List<Series>,
@@ -67,6 +86,7 @@ data class Statistics(
     // Includes flights made before tracking, like [cumulative] does for hours.
     val cumulativeFlights: Map<SeriesKey, List<CumulativeFlightsPoint>>,
     val sinceLastCheck: List<SinceLastCheck>,
+    val totals: Totals,
     val today: LocalDate,
     val unreadable: List<UnreadableRecord>,
 ) {
