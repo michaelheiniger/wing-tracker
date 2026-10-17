@@ -53,9 +53,9 @@ Versions follow Semantic Versioning (`MAJOR.MINOR.PATCH`); a hotfix is a patch r
 
 1. Make sure the user-facing changes are listed under `Unreleased` in `CHANGELOG.md` and that `./gradlew check` passes on `main`.
 2. Run the **Release** workflow from the Actions tab on `main` and enter the version (or `gh workflow run release.yml -f version=X.Y.Z`).
-3. The workflow dates the `Unreleased` section as the new version and starts a fresh one, builds and checks the Linux package, and only then commits the changelog, creates the `vX.Y.Z` tag and publishes a GitHub Release with that version's changelog section. It fails, changing nothing, when `Unreleased` is empty, the version already exists, or the build fails.
+3. The workflow dates the `Unreleased` section as the new version and starts a fresh one, builds and checks the Linux package, and only then commits the changelog, creates the `vX.Y.Z` tag and publishes a GitHub Release with that version's changelog section, the package and a `SHA256SUMS` file the built-in updater checks downloads against (ADR 0024). It fails, changing nothing, when `Unreleased` is empty, the version already exists, or the build fails.
 
-To rehearse a release, tick **dry run** (`-f dry_run=true`): the package is built and uploaded as a workflow artifact, and nothing is committed, tagged or published.
+To rehearse a release, tick **dry run** (`-f dry_run=true`): the package and its `SHA256SUMS` are built and uploaded as a workflow artifact, and nothing is committed, tagged or published.
 
 To build a package locally: `./gradlew :app-desktop:packageDeb -PappVersion=X.Y.Z`; the result is under `app-desktop/build/compose/binaries`.
 

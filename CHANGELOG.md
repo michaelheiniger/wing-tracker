@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+- Each release lists the SHA-256 checksums of its installers in a `SHA256SUMS` file, so you can check that a download is complete and unaltered (e.g. `sha256sum --check --ignore-missing SHA256SUMS`).
+
 ## [0.1.0] - 2026-10-15
 
 ### Changed

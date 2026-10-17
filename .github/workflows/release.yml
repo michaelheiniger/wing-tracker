@@ -62,11 +62,20 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fakeroot dpkg-dev
       - name: Build and verify
         run: ./gradlew check :app-desktop:packageDeb -PappVersion="$VERSION"
+      - name: Compute checksums
+        # The built-in updater refuses an installer whose checksum does not match this file (ADR 0024). Computed
+        # next to the packages, so the file lists bare file names, the same ones the release assets get.
+        working-directory: app-desktop/build/compose/binaries/main/deb
+        run: |
+          sha256sum *.deb > SHA256SUMS
+          sha256sum --check --strict SHA256SUMS
       - name: Upload the package
         uses: actions/upload-artifact@v7
         with:
           name: wing-tracker-${{ env.VERSION }}-deb
-          path: app-desktop/build/compose/binaries/main/deb/*.deb
+          path: |
+            app-desktop/build/compose/binaries/main/deb/*.deb
+            app-desktop/build/compose/binaries/main/deb/SHA256SUMS
           if-no-files-found: error
       - name: Commit the changelog and tag the release
         if: env.DRY_RUN != 'true'
@@ -87,4 +96,5 @@ jobs:
           gh release create "v$VERSION" \
             --title "v$VERSION" \
             --notes-file release-notes.md \
-            app-desktop/build/compose/binaries/main/deb/*.deb
+            app-desktop/build/compose/binaries/main/deb/*.deb \
+            app-desktop/build/compose/binaries/main/deb/SHA256SUMS
