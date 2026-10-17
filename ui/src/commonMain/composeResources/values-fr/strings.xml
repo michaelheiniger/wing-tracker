@@ -97,6 +97,7 @@
     <string name="logbook_search_clear_text">Effacer le texte</string>
     <string name="logbook_search_from">Du</string>
     <string name="logbook_search_to">Au</string>
+    <string name="logbook_search_to_before_from">Ne peut pas précéder « Du »</string>
     <string name="logbook_search_clear">Effacer la recherche</string>
     <string name="logbook_search_result">Résultat : %1$s · %2$s</string>
     <string name="logbook_search_none_title">Aucun vol correspondant</string>

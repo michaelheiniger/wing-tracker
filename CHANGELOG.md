@@ -7,7 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
-- Search the logbook: type words found in the take-off or landing site, notes, instrument or wing name (upper/lower case and accents don't matter), pick one or more wings, and limit it to a date range. The months and a result line count only the matching flights; the hours per wing stay the totals. The search stays while you look at other sections, until Wing Tracker is closed.
+- Search the logbook: type words found in the take-off or landing site, notes, instrument or wing name (upper/lower case and accents don't matter), pick one or more wings, and limit it to a date range (a "To" day before the "From" day is flagged). The months and a result line count only the matching flights; the hours per wing stay the totals. The search stays while you look at other sections, until Wing Tracker is closed.
 - The version of Wing Tracker is shown at the bottom of the navigation bar; clicking it opens what changed in that version on GitHub.
 
 ### Changed

@@ -16,6 +16,13 @@ data class LogbookSearch(
     // Unlike [isActive], also true for a half-typed date, which the pilot may still want to clear.
     val isBlank: Boolean get() = text.isBlank() && wingIds.isEmpty() && from.isBlank() && to.isBlank()
 
+    // Such a range matches no flight; the pilot has to be told why, or the logbook just looks empty.
+    val isRangeReversed: Boolean get() {
+        val start = parseDate(from) ?: return false
+        val end = parseDate(to) ?: return false
+        return start > end
+    }
+
     fun toFilter(): FlightFilter = FlightFilter(text, wingIds, parseDate(from), parseDate(to))
 
     fun toggle(wingId: WingId): LogbookSearch =

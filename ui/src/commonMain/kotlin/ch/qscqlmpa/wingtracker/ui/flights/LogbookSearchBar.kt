@@ -30,6 +30,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_from
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_label
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_placeholder
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_to
+import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_to_before_from
 import org.jetbrains.compose.resources.stringResource
 
 /** Text, date range and wings narrow the logbook together; each is visible, so a forgotten filter is easy to spot. */
@@ -76,6 +77,7 @@ internal fun LogbookSearchBar(
                 label = stringResource(Res.string.logbook_search_to),
                 value = search.to,
                 onValueChange = { onChange(search.copy(to = it)) },
+                errorText = stringResource(Res.string.logbook_search_to_before_from).takeIf { search.isRangeReversed },
                 clearable = true,
                 modifier = Modifier.width(DATE_FIELD_WIDTH),
             )
