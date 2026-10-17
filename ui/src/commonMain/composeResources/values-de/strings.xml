@@ -698,8 +698,6 @@
     <string name="profile_legend_flight">Flug</string>
     <string name="profile_legend_ground">Vor dem Start und nach der Landung</string>
     <string name="profile_description">Höhenprofil des Tracks, bis %1$d m</string>
-    <string name="map_coloring_flight">Flug</string>
-    <string name="map_coloring_climb">Steigen/Sinken</string>
     <string name="map_climb_sink">Sinken (unter %1$s m/s)</string>
     <string name="map_climb_range">%1$s bis %2$s m/s</string>
     <string name="map_climb_from">%1$s m/s und mehr</string>

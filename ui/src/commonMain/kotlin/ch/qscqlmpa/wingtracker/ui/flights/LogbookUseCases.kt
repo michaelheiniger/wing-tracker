@@ -21,7 +21,6 @@ import ch.qscqlmpa.wingtracker.maps.ReadMapTile
 import ch.qscqlmpa.wingtracker.settings.GetAppSettings
 import ch.qscqlmpa.wingtracker.settings.SaveDeviceFolder
 import ch.qscqlmpa.wingtracker.settings.SaveSyrideUsername
-import ch.qscqlmpa.wingtracker.settings.SaveTrackColoring
 
 /** Use cases the logbook section needs; passed in so this module never sees the DI framework. */
 class LogbookUseCases(
@@ -45,6 +44,5 @@ class LogbookUseCases(
     val saveDeviceFolder: SaveDeviceFolder,
     val readFlightTrack: ReadFlightTrack,
     val readMapTile: ReadMapTile,
-    val saveTrackColoring: SaveTrackColoring,
     val getSyrideFlightPage: GetSyrideFlightPage,
 )

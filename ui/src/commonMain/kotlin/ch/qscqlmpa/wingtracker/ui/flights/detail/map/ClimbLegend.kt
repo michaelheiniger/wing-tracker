@@ -8,53 +8,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ch.qscqlmpa.wingtracker.settings.TrackColoring
 import ch.qscqlmpa.wingtracker.ui.flights.toDisplayNumber
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.map_climb_from
 import ch.qscqlmpa.wingtracker.ui.resources.map_climb_range
 import ch.qscqlmpa.wingtracker.ui.resources.map_climb_sink
-import ch.qscqlmpa.wingtracker.ui.resources.map_coloring_climb
-import ch.qscqlmpa.wingtracker.ui.resources.map_coloring_flight
 import ch.qscqlmpa.wingtracker.ui.theme.MapColors
 import org.jetbrains.compose.resources.stringResource
-
-/** Both choices stay visible, like the unit switch of the statistics. */
-@Composable
-internal fun ColoringSwitch(
-    selected: TrackColoring,
-    onSelect: (TrackColoring) -> Unit,
-) {
-    Surface(shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.surface, shadowElevation = 2.dp) {
-        SingleChoiceSegmentedButtonRow(modifier = Modifier.padding(4.dp)) {
-            TrackColoring.entries.forEachIndexed { index, coloring ->
-                SegmentedButton(
-                    selected = coloring == selected,
-                    onClick = { onSelect(coloring) },
-                    shape = SegmentedButtonDefaults.itemShape(index, TrackColoring.entries.size),
-                ) {
-                    Text(
-                        stringResource(
-                            when (coloring) {
-                                TrackColoring.Flight -> Res.string.map_coloring_flight
-                                TrackColoring.ClimbSink -> Res.string.map_coloring_climb
-                            },
-                        ),
-                    )
-                }
-            }
-        }
-    }
-}
 
 /** What each colour means in metres per second, so the colouring never relies on colour alone (ADR 0019). */
 @Composable

@@ -3,7 +3,6 @@ package ch.qscqlmpa.wingtracker.storage.json
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
 import ch.qscqlmpa.wingtracker.settings.AppSettings
 import ch.qscqlmpa.wingtracker.settings.ThemeMode
-import ch.qscqlmpa.wingtracker.settings.TrackColoring
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration.Companion.minutes
@@ -22,8 +21,6 @@ internal data class SettingsDocument(
     val syrideUsername: String? = null,
     // Added in schema 5: where the flight tracks of a device were last imported from.
     val deviceFolder: String? = null,
-    // Added in schema 6: how a flight's track is coloured on the map.
-    val trackColoring: String = TrackColoring.Flight.name,
 ) {
     fun toDomain(): AppSettings =
         AppSettings(
@@ -33,11 +30,10 @@ internal data class SettingsDocument(
             interfaceScalePercent = interfaceScalePercent,
             syrideUsername = syrideUsername,
             deviceFolder = deviceFolder,
-            trackColoring = TrackColoring.valueOf(trackColoring),
         )
 
     companion object {
-        const val CURRENT_SCHEMA_VERSION = 6
+        const val CURRENT_SCHEMA_VERSION = 5
 
         fun from(settings: AppSettings) =
             SettingsDocument(
@@ -48,7 +44,6 @@ internal data class SettingsDocument(
                 interfaceScalePercent = settings.interfaceScalePercent,
                 syrideUsername = settings.syrideUsername,
                 deviceFolder = settings.deviceFolder,
-                trackColoring = settings.trackColoring.name,
             )
     }
 }

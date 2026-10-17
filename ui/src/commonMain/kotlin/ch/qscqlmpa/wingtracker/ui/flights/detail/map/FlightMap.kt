@@ -3,7 +3,6 @@ package ch.qscqlmpa.wingtracker.ui.flights.detail.map
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,7 +29,6 @@ import ch.qscqlmpa.wingtracker.flights.igc.AnalysedTrack
 import ch.qscqlmpa.wingtracker.flights.igc.TrackFix
 import ch.qscqlmpa.wingtracker.maps.ReadMapTile
 import ch.qscqlmpa.wingtracker.maps.TileCoordinates
-import ch.qscqlmpa.wingtracker.settings.TrackColoring
 import ch.qscqlmpa.wingtracker.ui.components.Severity
 import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.resources.Res
@@ -53,7 +51,6 @@ import ovh.plrapps.mapcompose.api.disableRotation
 import ovh.plrapps.mapcompose.api.hasMarker
 import ovh.plrapps.mapcompose.api.moveMarker
 import ovh.plrapps.mapcompose.api.removeMarker
-import ovh.plrapps.mapcompose.api.removePath
 import ovh.plrapps.mapcompose.api.scrollTo
 import ovh.plrapps.mapcompose.api.snapScrollTo
 import ovh.plrapps.mapcompose.api.updatePath
@@ -70,19 +67,18 @@ private val TRACK_WIDTH = 3.dp
 private val HALO_WIDTH = 6.dp
 
 /**
- * The track on a topographic map (ADR 0027): the flight strong, the recording before and after it faded, with
- * markers at take-off and landing. Without tiles, e.g. offline, the track is still drawn on a plain background. The
- * flight is drawn in one colour or by climb and sink, as the pilot chose with the switch on the map.
+ * The track on a topographic map (ADR 0027): the flight coloured by climb and sink, the recording before and after it
+ * faded, with markers at take-off and landing. Without tiles, e.g. offline, the track is still drawn on a plain
+ * background.
  */
 @Composable
 fun FlightMap(
     track: AnalysedTrack,
-    setup: MapSetup,
+    readMapTile: ReadMapTile,
     // The fix the pilot points at in the altitude profile, shown as a dot on the track.
     highlighted: TrackFix?,
     modifier: Modifier = Modifier,
 ) {
-    val coloring = setup.coloring
     val colors = MaterialTheme.extraColors.map
     val takeOffText = stringResource(Res.string.map_take_off)
     val landingText = stringResource(Res.string.map_landing)
@@ -90,7 +86,7 @@ fun FlightMap(
     val missingTiles = remember(track) { MutableStateFlow(false) }
     val state =
         remember(track) {
-            mapStateFor(track, setup.readMapTile, missingTiles).apply {
+            mapStateFor(track, readMapTile, missingTiles).apply {
                 drawTrack(track, colors)
                 drawMarkers(track, takeOffText, landingText, colors)
             }
@@ -100,20 +96,19 @@ fun FlightMap(
     LaunchedEffect(state) { focus?.let { state.snapScrollTo(it, FIT_PADDING) } }
     LaunchedEffect(state, highlighted) { state.showHighlight(highlighted, colors) }
     val runs = remember(track) { track.climbRuns() }
-    val climbPaths = remember(track) { mutableListOf<String>() }
-    // A track without altitudes has nothing to colour by, so it keeps the one colour and offers no switch.
-    val byClimb = coloring == TrackColoring.ClimbSink && runs.isNotEmpty()
-    LaunchedEffect(state, byClimb) { state.colorFlight(runs.takeIf { byClimb }, colors, climbPaths) }
+    // A track without altitudes has nothing to colour by, so it keeps the one colour and has no legend.
+    val byClimb = runs.isNotEmpty()
+    LaunchedEffect(state) { if (byClimb) state.colorFlight(runs, colors) }
     val offline by missingTiles.collectAsState()
 
     Box(modifier = modifier.background(colors.background, MaterialTheme.shapes.medium)) {
         MapUI(state = state)
-        Column(
-            modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            if (runs.isNotEmpty()) ColoringSwitch(coloring, setup.onColoringChange)
-            if (offline) StatusBadge(stringResource(Res.string.map_offline), Severity.Warning)
+        if (offline) {
+            StatusBadge(
+                stringResource(Res.string.map_offline),
+                Severity.Warning,
+                modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
+            )
         }
         if (byClimb) {
             // Above the attribution, which spans the bottom of narrow maps.
@@ -188,21 +183,16 @@ private fun MapState.drawTrack(
     }
 }
 
-/** Lays the climb runs over the one-coloured flight, or takes them away again; [drawn] keeps their ids. */
+/** Lays the climb runs over the one-coloured flight, which stays only as their outline. */
 private fun MapState.colorFlight(
-    runs: List<ClimbRun>?,
+    runs: List<ClimbRun>,
     colors: MapColors,
-    drawn: MutableList<String>,
 ) {
-    drawn.forEach { removePath(it) }
-    drawn.clear()
-    updatePath(FLOWN, visible = runs == null)
-    runs?.forEachIndexed { index, run ->
-        val id = "climb-$index"
-        addPath(id, width = TRACK_WIDTH, color = colors.colorOf(run.band), zIndex = CLIMB_Z_INDEX) {
+    updatePath(FLOWN, visible = false)
+    runs.forEachIndexed { index, run ->
+        addPath("climb-$index", width = TRACK_WIDTH, color = colors.colorOf(run.band), zIndex = CLIMB_Z_INDEX) {
             addPoints(run.fixes.map { it.toMapPoint().let { p -> p.x to p.y } })
         }
-        drawn += id
     }
 }
 
