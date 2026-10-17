@@ -97,8 +97,11 @@ class IgcBatchPresenter(
         private set
     var importing by mutableStateOf(false)
         private set
-    var importedCount by mutableStateOf(0)
+    var attachedCount by mutableStateOf(0)
         private set
+    var createdCount by mutableStateOf(0)
+        private set
+    val importedCount: Int get() = attachedCount + createdCount
     var skippedCount by mutableStateOf(0)
         private set
 
@@ -237,6 +240,7 @@ class IgcBatchPresenter(
             val target = row.match?.flight
             if (row.attach && target != null) {
                 attachIgcTrack(target.id, row.file, draft.checksum)
+                attachedCount++
             } else {
                 val details =
                     FlightDetails(
@@ -246,8 +250,8 @@ class IgcBatchPresenter(
                         takeOffTime = draft.takeOffTime,
                     )
                 importIgcFlight(details, row.file, draft.checksum)
+                createdCount++
             }
-            importedCount++
             null
         } catch (e: CancellationException) {
             throw e

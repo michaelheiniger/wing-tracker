@@ -15,6 +15,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - The version of Wing Tracker is shown at the bottom of the navigation bar; clicking it opens what changed in that version on GitHub.
 
 ### Changed
+- The Import button opens a step-by-step window instead of a menu. It starts with the four sources as cards, recommends starting with Syride and explains why, and shows the steps of the chosen source above. "Back" returns to the sources until something is saved, and cancelling asks first when choices you made would be lost; a click beside the window no longer closes it. Tracks dropped on the logbook open the same window at the review, and importing tracks ends with a summary of how many were attached to flights, logged as new flights or left out. The import button of the track review counts tracks instead of flights.
 - A flight imported from a track is dated on your local day of the take-off, not on the UTC date in the file, so a flight shortly after midnight lands on the right day.
 - When importing IGC files, the take-off and landing found in a track are shown in your computer's local time instead of UTC, matching the times in the logbook.
 - Without an internet connection, the Syride import and the update check and download now say so and suggest checking the connection, instead of showing an empty technical message.

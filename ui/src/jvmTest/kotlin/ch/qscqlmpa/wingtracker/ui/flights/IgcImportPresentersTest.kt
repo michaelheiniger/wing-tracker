@@ -644,7 +644,8 @@ class IgcImportPresentersTest {
                 presenter.import {}
 
                 // then
-                assertThat(presenter.importedCount).isEqualTo(1)
+                assertThat(presenter.attachedCount).isEqualTo(1)
+                assertThat(presenter.createdCount).isEqualTo(0)
                 coVerify(exactly = 1) {
                     flights.save(match { it.id == FlightId("syride-1") && it.igcFile?.checksum == "sum-a" })
                 }

@@ -42,6 +42,8 @@ import ch.qscqlmpa.wingtracker.ui.flights.importing.Buttons
 import ch.qscqlmpa.wingtracker.ui.flights.importing.Hint
 import ch.qscqlmpa.wingtracker.ui.flights.importing.IMPORT_DIALOG_WIDTH_DP
 import ch.qscqlmpa.wingtracker.ui.flights.importing.ImportDone
+import ch.qscqlmpa.wingtracker.ui.flights.importing.LeaveButtons
+import ch.qscqlmpa.wingtracker.ui.flights.importing.StepActions
 import ch.qscqlmpa.wingtracker.ui.flights.importing.WingGroupList
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.message
@@ -92,32 +94,27 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** The import from a spreadsheet, step by step. */
+/** The steps of the import from a spreadsheet, shown inside the import wizard, which also opens the file chooser. */
 @Composable
-fun SpreadsheetImportDialog(
+internal fun SpreadsheetImportSteps(
     presenter: SpreadsheetImportPresenter,
-    onClose: () -> Unit,
+    actions: StepActions,
+    onChooseAgain: () -> Unit,
 ) {
-    Dialog(onDismissRequest = { if (presenter.stage != SpreadsheetStage.Importing) onClose() }) {
-        Card(modifier = Modifier.width(IMPORT_DIALOG_WIDTH_DP.dp)) {
-            Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(stringResource(Res.string.spreadsheet_title), style = MaterialTheme.typography.headlineSmall)
-                when (presenter.stage) {
-                    SpreadsheetStage.File -> FileStep(presenter, onClose)
-                    SpreadsheetStage.Columns -> ColumnsStep(presenter, onClose)
-                    SpreadsheetStage.Wings -> WingsStep(presenter, onClose)
-                    SpreadsheetStage.Importing -> Busy(null)
-                    SpreadsheetStage.Done -> ImportDone(presenter.result, onClose)
-                }
-            }
-        }
+    when (presenter.stage) {
+        SpreadsheetStage.File -> FileStep(presenter, actions, onChooseAgain)
+        SpreadsheetStage.Columns -> ColumnsStep(presenter, actions)
+        SpreadsheetStage.Wings -> WingsStep(presenter, actions)
+        SpreadsheetStage.Importing -> Busy(null)
+        SpreadsheetStage.Done -> ImportDone(presenter.result, actions.close)
     }
 }
 
 @Composable
 private fun FileStep(
     presenter: SpreadsheetImportPresenter,
-    onClose: () -> Unit,
+    actions: StepActions,
+    onChooseAgain: () -> Unit,
 ) {
     val failure = presenter.failure
     if (failure == null) {
@@ -126,8 +123,8 @@ private fun FileStep(
     }
     Text(failure.message(), color = MaterialTheme.colorScheme.error)
     Buttons {
-        TextButton(onClick = onClose) { Text(stringResource(Res.string.action_cancel)) }
-        Button(onClick = { presenter.choose(onCancelled = onClose) }) {
+        LeaveButtons(actions)
+        Button(onClick = onChooseAgain) {
             Text(stringResource(Res.string.spreadsheet_choose_other))
         }
     }
@@ -136,7 +133,7 @@ private fun FileStep(
 @Composable
 private fun WingsStep(
     presenter: SpreadsheetImportPresenter,
-    onClose: () -> Unit,
+    actions: StepActions,
 ) {
     val draft = checkNotNull(presenter.draft)
     if (draft.problems.isNotEmpty()) {
@@ -171,7 +168,7 @@ private fun WingsStep(
     presenter.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
     Buttons {
         TextButton(onClick = presenter::back) { Text(stringResource(Res.string.import_back)) }
-        TextButton(onClick = onClose) { Text(stringResource(Res.string.action_cancel)) }
+        TextButton(onClick = actions.cancel) { Text(stringResource(Res.string.action_cancel)) }
         Button(
             onClick = { presenter.import(onFinished = {}) },
             enabled = presenter.importableCount > 0 && presenter.allReady,

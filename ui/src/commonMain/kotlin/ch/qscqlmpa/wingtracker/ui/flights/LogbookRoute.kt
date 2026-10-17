@@ -21,7 +21,11 @@ import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightFilter
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
+import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.reminders.Attention
+import ch.qscqlmpa.wingtracker.ui.flights.wizard.ImportSource
+import ch.qscqlmpa.wingtracker.ui.flights.wizard.ImportWizard
+import ch.qscqlmpa.wingtracker.ui.flights.wizard.ImportWizardPresenter
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.igc_drop_hint
@@ -29,13 +33,12 @@ import ch.qscqlmpa.wingtracker.ui.resources.igc_pick_folder_title
 import ch.qscqlmpa.wingtracker.ui.resources.igc_pick_title
 import ch.qscqlmpa.wingtracker.ui.resources.spreadsheet_pick_title
 import ch.qscqlmpa.wingtracker.ui.resources.undo_flight_discarded
-import ch.qscqlmpa.wingtracker.ui.spreadsheet.SpreadsheetImportDialog
 import ch.qscqlmpa.wingtracker.ui.spreadsheet.SpreadsheetImportPresenter
-import ch.qscqlmpa.wingtracker.ui.syride.SyrideImportDialog
 import ch.qscqlmpa.wingtracker.ui.syride.SyrideImportPresenter
 import ch.qscqlmpa.wingtracker.ui.today
 import ch.qscqlmpa.wingtracker.ui.undo.LocalUndo
 import ch.qscqlmpa.wingtracker.ui.undo.undoText
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
@@ -49,14 +52,9 @@ private sealed interface LogbookDialog {
         val flight: Flight,
     ) : LogbookDialog
 
-    data object Syride : LogbookDialog
-
-    data object Spreadsheet : LogbookDialog
-
+    // [dropped] holds the tracks dropped on the logbook, which skip the choice of source.
     data class Import(
-        val files: List<NewAttachment>,
-        // Tracks read from a device are mostly known already, so those are left out of the review.
-        val fromDevice: Boolean = false,
+        val dropped: List<NewAttachment>? = null,
     ) : LogbookDialog
 }
 
@@ -109,7 +107,7 @@ fun LogbookRoute(
             onHover = { dropHover = it },
             onDropped = { files, _ ->
                 // Dropping only unrelated files would otherwise seem to do nothing.
-                if (files.isEmpty()) importer.dropRejected() else dialog = LogbookDialog.Import(files)
+                if (files.isEmpty()) importer.dropRejected() else dialog = LogbookDialog.Import(dropped = files)
             },
             onFailed = importer::dropFailed,
         )
@@ -123,14 +121,7 @@ fun LogbookRoute(
             importFailure = importer.failure,
             onLogFlight = { dialog = LogbookDialog.New() },
             onEditFlight = { dialog = LogbookDialog.Edit(it) },
-            onImportIgc = { importer.choose { files -> dialog = LogbookDialog.Import(files) } },
-            onImportDevice = {
-                importer.chooseFolder { files ->
-                    dialog = LogbookDialog.Import(files, fromDevice = true)
-                }
-            },
-            onImportSyride = { dialog = LogbookDialog.Syride },
-            onImportSpreadsheet = { dialog = LogbookDialog.Spreadsheet },
+            onImport = { dialog = LogbookDialog.Import() },
             onOpenStatistics = { onOpenStatistics(presenter.state.search.toFilter()) },
             attention = attention,
             onOpenAttention = onOpenGear,
@@ -148,54 +139,23 @@ fun LogbookRoute(
     when (val current = dialog) {
         null -> {}
 
-        LogbookDialog.Syride -> {
-            val syride =
-                remember {
-                    SyrideImportPresenter(
-                        scope,
-                        useCases.prepareSyrideImport,
-                        useCases.importSyrideFlights,
-                        useCases.updateSyrideTakeOffTimes,
-                        useCases.saveSyrideUsername,
-                        initialUsername = "",
-                    )
-                }
-            // The account used last time is filled in once the settings are read.
-            LaunchedEffect(syride) { syride.suggestUsername(useCases.getAppSettings().syrideUsername) }
-            SyrideImportDialog(syride, onClose = closeDialog)
-        }
-
-        LogbookDialog.Spreadsheet -> {
-            val spreadsheet =
-                remember {
-                    SpreadsheetImportPresenter(
-                        scope,
-                        platform.filePicker,
-                        spreadsheetPickTitle,
-                        useCases.openSpreadsheet,
-                        useCases.prepareSpreadsheetImport,
-                        useCases.importSpreadsheetFlights,
-                    )
-                }
-            // The file is chosen first; cancelling the chooser closes the import without a word.
-            LaunchedEffect(spreadsheet) { spreadsheet.choose(onCancelled = { dialog = null }) }
-            SpreadsheetImportDialog(spreadsheet, onClose = closeDialog)
-        }
-
         is LogbookDialog.Import -> {
-            val batch =
+            val wizard =
                 remember(current) {
-                    IgcBatchPresenter(
+                    importWizard(
+                        useCases,
+                        platform,
                         scope,
-                        useCases.prepareIgcImport,
-                        useCases.importIgcFlight,
-                        useCases.attachIgcTrack,
+                        importer,
+                        spreadsheetPickTitle,
                         // The wing flown last, like for a flight entered by hand.
-                        checkNotNull(presenter.state.newFlightInput(today()).wingId ?: wings.firstOrNull()?.id),
-                        hideAlreadyImported = current.fromDevice,
-                    )
+                        defaultWing = {
+                            checkNotNull(presenter.state.newFlightInput(today()).wingId ?: wings.firstOrNull()?.id)
+                        },
+                        onClose = closeDialog,
+                    ).also { wizard -> current.dropped?.let { wizard.openTracks(it, ImportSource.IgcFiles) } }
                 }
-            IgcBatchDialog(batch, current.files, wings, onClose = closeDialog)
+            ImportWizard(wizard, wings)
         }
 
         else -> {
@@ -229,6 +189,52 @@ fun LogbookRoute(
         }
     }
 }
+
+private fun importWizard(
+    useCases: LogbookUseCases,
+    platform: PlatformServices,
+    scope: CoroutineScope,
+    importer: IgcImportPresenter,
+    spreadsheetPickTitle: String,
+    defaultWing: () -> WingId,
+    onClose: () -> Unit,
+) = ImportWizardPresenter(
+    importer,
+    newSyride = {
+        SyrideImportPresenter(
+            scope,
+            useCases.prepareSyrideImport,
+            useCases.importSyrideFlights,
+            useCases.updateSyrideTakeOffTimes,
+            useCases.saveSyrideUsername,
+            initialUsername = "",
+        ).also { syride ->
+            // The account used last time is filled in once the settings are read.
+            scope.launch { syride.suggestUsername(useCases.getAppSettings().syrideUsername) }
+        }
+    },
+    newSpreadsheet = {
+        SpreadsheetImportPresenter(
+            scope,
+            platform.filePicker,
+            spreadsheetPickTitle,
+            useCases.openSpreadsheet,
+            useCases.prepareSpreadsheetImport,
+            useCases.importSpreadsheetFlights,
+        )
+    },
+    newTracks = { fromDevice ->
+        IgcBatchPresenter(
+            scope,
+            useCases.prepareIgcImport,
+            useCases.importIgcFlight,
+            useCases.attachIgcTrack,
+            defaultWing(),
+            hideAlreadyImported = fromDevice,
+        )
+    },
+    onClose = onClose,
+)
 
 /** Shown while files are held over the logbook, so the pilot knows the drop will be accepted. */
 @Composable

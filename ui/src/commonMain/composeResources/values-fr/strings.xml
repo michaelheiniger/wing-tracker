@@ -339,8 +339,8 @@
     <string name="igc_batch_title">Importer des traces de vol</string>
     <string name="igc_batch_wing_for_all">Voile pour toutes les traces :</string>
     <plurals name="igc_batch_import">
-        <item quantity="one">Importer %1$d vol</item>
-        <item quantity="other">Importer %1$d vols</item>
+        <item quantity="one">Importer %1$d trace</item>
+        <item quantity="other">Importer %1$d traces</item>
     </plurals>
     <string name="igc_batch_result">%1$d importé(s), %2$d n'ont pas pu être importés</string>
     <string name="igc_problem_unreadable">Illisible : %1$s</string>
@@ -480,11 +480,43 @@
     <string name="about_changelog">Nouveautés (journal des modifications)</string>
     <string name="about_close">Fermer</string>
     <string name="import_menu">Importer</string>
-    <string name="import_menu_igc">Fichiers IGC…</string>
-    <string name="import_menu_device">Depuis un appareil…</string>
-    <string name="import_menu_syride">Depuis Syride…</string>
+    <string name="import_wizard_title">Importer des vols</string>
+    <string name="import_step_source">Source</string>
+    <string name="import_step_details">Détails</string>
+    <string name="import_step_account">Compte</string>
+    <string name="import_step_file">Fichier</string>
+    <string name="import_step_columns">Colonnes</string>
+    <string name="import_step_wings">Voiles</string>
+    <string name="import_step_tracks">Traces</string>
+    <string name="import_step_done">Terminé</string>
+    <string name="import_source_syride">Syride</string>
+    <string name="import_source_syride_text">Tous les vols de ton compte Syride, avec le site, la distance et la voile</string>
+    <string name="import_source_igc">Fichiers IGC</string>
+    <string name="import_source_igc_text">Choisis des fichiers de trace. Tu peux aussi les déposer sur le carnet.</string>
+    <string name="import_source_device">Depuis un appareil</string>
+    <string name="import_source_device_text">Toutes les nouvelles traces de ton enregistreur, lues dans son dossier</string>
+    <string name="import_source_spreadsheet">Tableur</string>
+    <string name="import_source_spreadsheet_text">Un carnet tenu dans un fichier ODS ou XLSX</string>
+    <string name="import_source_start_here">Commence ici</string>
+    <string name="import_tip">Astuce : importe d'abord depuis Syride, puis ajoute tes traces. Chaque trace est rattachée à son vol Syride.</string>
+    <string name="import_tip_why">Syride en sait plus sur un vol que sa trace : le site, la distance et la voile. Les traces importées ensuite sont rattachées à ces vols, retrouvés grâce à l'identifiant Syride dans le nom d'un fichier téléchargé ou à l'heure de décollage, de sorte que chaque vol figure une seule fois dans le carnet. Les traces importées en premier deviennent des vols à part, et un import Syride ultérieur ajouterait les mêmes vols une seconde fois.</string>
+    <string name="import_cancel_title">Arrêter l'import ?</string>
+    <string name="import_cancel_body">Les choix faits à cette étape sont perdus. Ce qui est déjà enregistré reste.</string>
+    <string name="import_cancel_confirm">Arrêter</string>
+    <string name="import_cancel_keep">Continuer l'import</string>
+    <plurals name="igc_done_attached">
+        <item quantity="one">%1$d trace rattachée à son vol</item>
+        <item quantity="other">%1$d traces rattachées à leurs vols</item>
+    </plurals>
+    <plurals name="igc_done_created">
+        <item quantity="one">%1$d nouveau vol</item>
+        <item quantity="other">%1$d nouveaux vols</item>
+    </plurals>
+    <plurals name="igc_done_left_out">
+        <item quantity="one">%1$d trace laissée de côté</item>
+        <item quantity="other">%1$d traces laissées de côté</item>
+    </plurals>
     <string name="import_menu_needs_wing">Ajoute d'abord une voile</string>
-    <string name="import_menu_spreadsheet">Depuis un tableur…</string>
     <string name="spreadsheet_title">Importer des vols depuis un tableur</string>
     <string name="spreadsheet_pick_title">Choisis un fichier tableur (ODS ou XLSX)</string>
     <string name="spreadsheet_reading">Lecture du fichier…</string>

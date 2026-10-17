@@ -339,8 +339,8 @@
     <string name="igc_batch_title">Flugtracks importieren</string>
     <string name="igc_batch_wing_for_all">Schirm für alle Tracks:</string>
     <plurals name="igc_batch_import">
-        <item quantity="one">%1$d Flug importieren</item>
-        <item quantity="other">%1$d Flüge importieren</item>
+        <item quantity="one">%1$d Track importieren</item>
+        <item quantity="other">%1$d Tracks importieren</item>
     </plurals>
     <string name="igc_batch_result">%1$d importiert, %2$d konnten nicht importiert werden</string>
     <string name="igc_problem_unreadable">Nicht lesbar: %1$s</string>
@@ -480,11 +480,43 @@
     <string name="about_changelog">Neuerungen (Änderungsprotokoll)</string>
     <string name="about_close">Schliessen</string>
     <string name="import_menu">Importieren</string>
-    <string name="import_menu_igc">IGC-Dateien…</string>
-    <string name="import_menu_device">Von einem Gerät…</string>
-    <string name="import_menu_syride">Von Syride…</string>
+    <string name="import_wizard_title">Flüge importieren</string>
+    <string name="import_step_source">Quelle</string>
+    <string name="import_step_details">Details</string>
+    <string name="import_step_account">Konto</string>
+    <string name="import_step_file">Datei</string>
+    <string name="import_step_columns">Spalten</string>
+    <string name="import_step_wings">Schirme</string>
+    <string name="import_step_tracks">Tracks</string>
+    <string name="import_step_done">Fertig</string>
+    <string name="import_source_syride">Syride</string>
+    <string name="import_source_syride_text">Alle Flüge deines Syride-Kontos, mit Startplatz, Distanz und Schirm</string>
+    <string name="import_source_igc">IGC-Dateien</string>
+    <string name="import_source_igc_text">Wähle Track-Dateien aus. Du kannst sie auch auf das Flugbuch ziehen.</string>
+    <string name="import_source_device">Von einem Gerät</string>
+    <string name="import_source_device_text">Alle neuen Tracks deines Loggers, aus seinem Ordner gelesen</string>
+    <string name="import_source_spreadsheet">Tabelle</string>
+    <string name="import_source_spreadsheet_text">Ein Flugbuch in einer ODS- oder XLSX-Datei</string>
+    <string name="import_source_start_here">Hier beginnen</string>
+    <string name="import_tip">Tipp: Importiere zuerst von Syride und füge danach deine Tracks hinzu. Jeder Track wird seinem Syride-Flug angehängt.</string>
+    <string name="import_tip_why">Syride weiss mehr über einen Flug als sein Track: den Startplatz, die Distanz und den Schirm. Später importierte Tracks werden diesen Flügen angehängt, erkannt an der Syride-ID im Namen einer heruntergeladenen Datei oder an der Startzeit, sodass jeder Flug einmal im Flugbuch steht. Zuerst importierte Tracks werden zu eigenen Flügen, und ein späterer Syride-Import würde dieselben Flüge noch einmal hinzufügen.</string>
+    <string name="import_cancel_title">Import abbrechen?</string>
+    <string name="import_cancel_body">Deine Auswahl in diesem Schritt geht verloren. Bereits Gespeichertes bleibt erhalten.</string>
+    <string name="import_cancel_confirm">Abbrechen</string>
+    <string name="import_cancel_keep">Weiter importieren</string>
+    <plurals name="igc_done_attached">
+        <item quantity="one">%1$d Track seinem Flug angehängt</item>
+        <item quantity="other">%1$d Tracks ihren Flügen angehängt</item>
+    </plurals>
+    <plurals name="igc_done_created">
+        <item quantity="one">%1$d neuer Flug</item>
+        <item quantity="other">%1$d neue Flüge</item>
+    </plurals>
+    <plurals name="igc_done_left_out">
+        <item quantity="one">%1$d Track ausgelassen</item>
+        <item quantity="other">%1$d Tracks ausgelassen</item>
+    </plurals>
     <string name="import_menu_needs_wing">Lege zuerst einen Schirm an</string>
-    <string name="import_menu_spreadsheet">Aus einer Tabelle…</string>
     <string name="spreadsheet_title">Flüge aus einer Tabelle importieren</string>
     <string name="spreadsheet_pick_title">Wähle eine Tabellendatei (ODS oder XLSX)</string>
     <string name="spreadsheet_reading">Die Tabelle wird gelesen…</string>

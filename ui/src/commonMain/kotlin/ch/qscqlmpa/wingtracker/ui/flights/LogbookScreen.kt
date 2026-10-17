@@ -68,6 +68,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.flight_unknown_wing
 import ch.qscqlmpa.wingtracker.ui.resources.flights_count
 import ch.qscqlmpa.wingtracker.ui.resources.igc_open_track
 import ch.qscqlmpa.wingtracker.ui.resources.igc_track_chip
+import ch.qscqlmpa.wingtracker.ui.resources.import_menu
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_empty_action
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_empty_body
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_empty_title
@@ -103,10 +104,7 @@ fun LogbookScreen(
     importFailure: Failure?,
     onLogFlight: () -> Unit,
     onEditFlight: (Flight) -> Unit,
-    onImportIgc: () -> Unit,
-    onImportDevice: () -> Unit,
-    onImportSyride: () -> Unit,
-    onImportSpreadsheet: () -> Unit,
+    onImport: () -> Unit,
     onOpenStatistics: () -> Unit,
     attention: Attention,
     onOpenAttention: (GearRef) -> Unit,
@@ -140,13 +138,7 @@ fun LogbookScreen(
             ) {
                 Text(stringResource(Res.string.logbook_title), style = MaterialTheme.typography.headlineMedium)
                 if (logbook != null) {
-                    ImportMenu(
-                        logbook.wings.isNotEmpty(),
-                        onImportIgc,
-                        onImportDevice,
-                        onImportSyride,
-                        onImportSpreadsheet,
-                    )
+                    OutlinedButton(onClick = onImport) { Text(stringResource(Res.string.import_menu)) }
                 }
             }
             importFailure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }

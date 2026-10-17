@@ -42,6 +42,8 @@ import ch.qscqlmpa.wingtracker.ui.flights.importing.Buttons
 import ch.qscqlmpa.wingtracker.ui.flights.importing.Hint
 import ch.qscqlmpa.wingtracker.ui.flights.importing.IMPORT_DIALOG_WIDTH_DP
 import ch.qscqlmpa.wingtracker.ui.flights.importing.ImportDone
+import ch.qscqlmpa.wingtracker.ui.flights.importing.LeaveButtons
+import ch.qscqlmpa.wingtracker.ui.flights.importing.StepActions
 import ch.qscqlmpa.wingtracker.ui.flights.importing.WingGroupList
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.message
@@ -101,7 +103,7 @@ private const val LETTERS = 26
 @Composable
 internal fun ColumnsStep(
     presenter: SpreadsheetImportPresenter,
-    onClose: () -> Unit,
+    actions: StepActions,
 ) {
     val opened = checkNotNull(presenter.opened)
     val reading = presenter.reading
@@ -146,7 +148,7 @@ internal fun ColumnsStep(
     }
     presenter.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
     Buttons {
-        TextButton(onClick = onClose) { Text(stringResource(Res.string.action_cancel)) }
+        LeaveButtons(actions)
         Button(onClick = presenter::next, enabled = presenter.canContinue) {
             Text(stringResource(Res.string.spreadsheet_next))
         }

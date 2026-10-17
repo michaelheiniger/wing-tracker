@@ -6,13 +6,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -20,7 +17,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,23 +24,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.ui.components.Severity
 import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
+import ch.qscqlmpa.wingtracker.ui.flights.importing.Busy
+import ch.qscqlmpa.wingtracker.ui.flights.importing.Buttons
+import ch.qscqlmpa.wingtracker.ui.flights.importing.Hint
+import ch.qscqlmpa.wingtracker.ui.flights.importing.LeaveButtons
+import ch.qscqlmpa.wingtracker.ui.flights.importing.StepActions
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.resources.Res
-import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
+import ch.qscqlmpa.wingtracker.ui.resources.action_close
 import ch.qscqlmpa.wingtracker.ui.resources.flight_warning_before_service
 import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_import
 import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_nothing_new
 import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_result
 import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_skipped
-import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_title
 import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_wing_for_all
 import ch.qscqlmpa.wingtracker.ui.resources.igc_detected
+import ch.qscqlmpa.wingtracker.ui.resources.igc_done_attached
+import ch.qscqlmpa.wingtracker.ui.resources.igc_done_created
+import ch.qscqlmpa.wingtracker.ui.resources.igc_done_left_out
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_duplicate
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_future
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_has_track
@@ -53,6 +54,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_no_match
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_repeated
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_save
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_unreadable
+import ch.qscqlmpa.wingtracker.ui.resources.import_done_title
 import ch.qscqlmpa.wingtracker.ui.toDisplay
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -61,67 +63,65 @@ private const val ROWS_MAX_HEIGHT_DP = 360
 
 /** Review of the tracks about to be imported: tick the ones to import, and say on which wing each was flown. */
 @Composable
-fun IgcBatchDialog(
+internal fun IgcReviewStep(
     presenter: IgcBatchPresenter,
-    files: List<NewAttachment>,
     wings: List<Wing>,
+    actions: StepActions,
+    onImport: () -> Unit,
+) {
+    if (presenter.loading) {
+        Busy(null)
+    } else {
+        if (presenter.rows.isEmpty()) {
+            Text(stringResource(Res.string.igc_batch_nothing_new))
+        } else {
+            WingForAll(presenter, wings)
+            MatchSummary(presenter)
+            TrackList(presenter, wings)
+        }
+        SkippedHint(presenter)
+        if (presenter.failedCount > 0) {
+            Text(
+                stringResource(Res.string.igc_batch_result, presenter.importedCount, presenter.failedCount),
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+    }
+    Buttons {
+        LeaveButtons(actions)
+        Button(
+            onClick = onImport,
+            enabled = !presenter.loading && !presenter.importing && presenter.importableCount > 0,
+        ) {
+            val count = presenter.importableCount
+            Text(pluralStringResource(Res.plurals.igc_batch_import, count, count))
+        }
+    }
+}
+
+/** What the import did with the tracks: attached to flights, logged as new ones, or left out. */
+@Composable
+internal fun IgcDoneStep(
+    presenter: IgcBatchPresenter,
     onClose: () -> Unit,
 ) {
-    LaunchedEffect(files) { presenter.load(files) }
+    Text(stringResource(Res.string.import_done_title), style = MaterialTheme.typography.titleMedium)
+    val leftOut = presenter.rows.size
+    Text(
+        listOf(
+            pluralStringResource(Res.plurals.igc_done_attached, presenter.attachedCount, presenter.attachedCount),
+            pluralStringResource(Res.plurals.igc_done_created, presenter.createdCount, presenter.createdCount),
+            pluralStringResource(Res.plurals.igc_done_left_out, leftOut, leftOut),
+        ).joinToString(" · "),
+    )
+    SkippedHint(presenter)
+    Buttons { Button(onClick = onClose) { Text(stringResource(Res.string.action_close)) } }
+}
 
-    Dialog(onDismissRequest = onClose) {
-        Card(modifier = Modifier.width(640.dp)) {
-            Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(stringResource(Res.string.igc_batch_title), style = MaterialTheme.typography.headlineSmall)
-                if (presenter.loading) {
-                    CircularProgressIndicator(modifier = Modifier.padding(24.dp).align(Alignment.CenterHorizontally))
-                } else {
-                    if (presenter.rows.isEmpty()) {
-                        Text(stringResource(Res.string.igc_batch_nothing_new))
-                    } else {
-                        WingForAll(presenter, wings)
-                        MatchSummary(presenter)
-                        TrackList(presenter, wings)
-                    }
-                    if (presenter.skippedCount > 0) {
-                        Text(
-                            pluralStringResource(
-                                Res.plurals.igc_batch_skipped,
-                                presenter.skippedCount,
-                                presenter.skippedCount,
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    if (presenter.failedCount > 0) {
-                        Text(
-                            stringResource(Res.string.igc_batch_result, presenter.importedCount, presenter.failedCount),
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    TextButton(onClick = onClose) { Text(stringResource(Res.string.action_cancel)) }
-                    Button(
-                        onClick = { presenter.import(onDone = onClose) },
-                        enabled = !presenter.loading && !presenter.importing && presenter.importableCount > 0,
-                    ) {
-                        Text(
-                            pluralStringResource(
-                                Res.plurals.igc_batch_import,
-                                presenter.importableCount,
-                                presenter.importableCount,
-                            ),
-                        )
-                    }
-                }
-            }
-        }
+@Composable
+private fun SkippedHint(presenter: IgcBatchPresenter) {
+    if (presenter.skippedCount > 0) {
+        Hint(pluralStringResource(Res.plurals.igc_batch_skipped, presenter.skippedCount, presenter.skippedCount))
     }
 }
 

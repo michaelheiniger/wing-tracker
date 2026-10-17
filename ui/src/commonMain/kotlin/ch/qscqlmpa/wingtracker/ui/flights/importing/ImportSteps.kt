@@ -36,7 +36,9 @@ import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.flights.wingLabel
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.resources.Res
+import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.action_close
+import ch.qscqlmpa.wingtracker.ui.resources.import_back
 import ch.qscqlmpa.wingtracker.ui.resources.import_choice_create
 import ch.qscqlmpa.wingtracker.ui.resources.import_choice_new
 import ch.qscqlmpa.wingtracker.ui.resources.import_choice_skip
@@ -60,6 +62,20 @@ import org.jetbrains.compose.resources.stringResource
 
 internal const val IMPORT_DIALOG_WIDTH_DP = 720
 internal const val IMPORT_LIST_MAX_HEIGHT_DP = 380
+
+/** What a step can do in the import wizard besides its own work. [back] is null when the step cannot go back. */
+internal class StepActions(
+    val back: (() -> Unit)?,
+    val cancel: () -> Unit,
+    val close: () -> Unit,
+)
+
+/** Back to the sources when the wizard allows it, and Cancel; placed before a step's own buttons. */
+@Composable
+internal fun LeaveButtons(actions: StepActions) {
+    actions.back?.let { TextButton(onClick = it) { Text(stringResource(Res.string.import_back)) } }
+    TextButton(onClick = actions.cancel) { Text(stringResource(Res.string.action_cancel)) }
+}
 
 @Composable
 internal fun Busy(text: String?) {

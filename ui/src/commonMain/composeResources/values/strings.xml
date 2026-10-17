@@ -339,8 +339,8 @@
     <string name="igc_batch_title">Import flight tracks</string>
     <string name="igc_batch_wing_for_all">Wing for all tracks:</string>
     <plurals name="igc_batch_import">
-        <item quantity="one">Import %1$d flight</item>
-        <item quantity="other">Import %1$d flights</item>
+        <item quantity="one">Import %1$d track</item>
+        <item quantity="other">Import %1$d tracks</item>
     </plurals>
     <string name="igc_batch_result">%1$d imported, %2$d could not be imported</string>
     <string name="igc_problem_unreadable">Not readable: %1$s</string>
@@ -480,11 +480,43 @@
     <string name="about_changelog">What's new (changelog)</string>
     <string name="about_close">Close</string>
     <string name="import_menu">Import</string>
-    <string name="import_menu_igc">IGC files…</string>
-    <string name="import_menu_device">From a device…</string>
-    <string name="import_menu_syride">From Syride…</string>
+    <string name="import_wizard_title">Import flights</string>
+    <string name="import_step_source">Source</string>
+    <string name="import_step_details">Details</string>
+    <string name="import_step_account">Account</string>
+    <string name="import_step_file">File</string>
+    <string name="import_step_columns">Columns</string>
+    <string name="import_step_wings">Wings</string>
+    <string name="import_step_tracks">Tracks</string>
+    <string name="import_step_done">Done</string>
+    <string name="import_source_syride">Syride</string>
+    <string name="import_source_syride_text">All flights of your Syride account, with site, distance and wing</string>
+    <string name="import_source_igc">IGC files</string>
+    <string name="import_source_igc_text">Choose track files. You can also drop them on the logbook.</string>
+    <string name="import_source_device">From a device</string>
+    <string name="import_source_device_text">Every new track on your logger, read from its folder</string>
+    <string name="import_source_spreadsheet">Spreadsheet</string>
+    <string name="import_source_spreadsheet_text">A logbook kept in an ODS or XLSX file</string>
+    <string name="import_source_start_here">Start here</string>
+    <string name="import_tip">Tip: import from Syride first, then add your tracks. Each track is attached to its Syride flight.</string>
+    <string name="import_tip_why">Syride knows more about a flight than its track: the site, the distance and the wing. Tracks imported afterwards are attached to these flights, found by the Syride id in a downloaded file's name or by the take-off time, so each flight is in the logbook once. Tracks imported first become flights of their own, and a later Syride import would add the same flights again.</string>
+    <string name="import_cancel_title">Stop importing?</string>
+    <string name="import_cancel_body">The choices you made in this step are lost. Nothing that is already saved is undone.</string>
+    <string name="import_cancel_confirm">Stop</string>
+    <string name="import_cancel_keep">Keep importing</string>
+    <plurals name="igc_done_attached">
+        <item quantity="one">%1$d track attached to its flight</item>
+        <item quantity="other">%1$d tracks attached to their flights</item>
+    </plurals>
+    <plurals name="igc_done_created">
+        <item quantity="one">%1$d new flight</item>
+        <item quantity="other">%1$d new flights</item>
+    </plurals>
+    <plurals name="igc_done_left_out">
+        <item quantity="one">%1$d track left out</item>
+        <item quantity="other">%1$d tracks left out</item>
+    </plurals>
     <string name="import_menu_needs_wing">Add a wing first</string>
-    <string name="import_menu_spreadsheet">From a spreadsheet…</string>
     <string name="spreadsheet_title">Import flights from a spreadsheet</string>
     <string name="spreadsheet_pick_title">Choose a spreadsheet (ODS or XLSX)</string>
     <string name="spreadsheet_reading">Reading the spreadsheet…</string>
