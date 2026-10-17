@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +30,7 @@ import ch.qscqlmpa.wingtracker.flights.importing.ImportResult
 import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
 import ch.qscqlmpa.wingtracker.flights.importing.WingGroup
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
+import ch.qscqlmpa.wingtracker.ui.components.AppDropdownMenu
 import ch.qscqlmpa.wingtracker.ui.components.Severity
 import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.flights.wingLabel
@@ -186,7 +186,7 @@ private fun ChoiceMenu(
 ) {
     var expanded by remember { mutableStateOf(false) }
     OutlinedButton(onClick = { expanded = true }) { Text(mapping.choiceLabel(group, existing)) }
-    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+    AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
         existing.forEach { wing ->
             DropdownMenuItem(
                 text = { Text(wingLabel(wing)) },

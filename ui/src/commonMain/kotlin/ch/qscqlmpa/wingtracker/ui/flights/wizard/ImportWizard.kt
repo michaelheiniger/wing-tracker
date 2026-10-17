@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -13,9 +12,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
+import ch.qscqlmpa.wingtracker.ui.components.AppAlertDialog
+import ch.qscqlmpa.wingtracker.ui.components.AppDialog
 import ch.qscqlmpa.wingtracker.ui.flights.IgcDoneStep
 import ch.qscqlmpa.wingtracker.ui.flights.IgcReviewStep
 import ch.qscqlmpa.wingtracker.ui.flights.importing.IMPORT_DIALOG_WIDTH_DP
@@ -42,7 +42,7 @@ fun ImportWizard(
     wings: List<Wing>,
 ) {
     // A click beside the window would otherwise throw away a review the pilot spent time on.
-    Dialog(onDismissRequest = presenter::cancel, properties = DialogProperties(dismissOnClickOutside = false)) {
+    AppDialog(onDismissRequest = presenter::cancel, properties = DialogProperties(dismissOnClickOutside = false)) {
         Card(modifier = Modifier.width(IMPORT_DIALOG_WIDTH_DP.dp)) {
             Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(presenter.flow?.source.title()), style = MaterialTheme.typography.headlineSmall)
@@ -99,7 +99,7 @@ private fun ImportSource?.title(): StringResource =
 
 @Composable
 private fun CancelConfirmation(presenter: ImportWizardPresenter) {
-    AlertDialog(
+    AppAlertDialog(
         onDismissRequest = presenter::keepImporting,
         title = { Text(stringResource(Res.string.import_cancel_title)) },
         text = { Text(stringResource(Res.string.import_cancel_body)) },

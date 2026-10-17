@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.ui.components
 
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,7 +35,8 @@ fun HelpTooltip(
     val scope = rememberCoroutineScope()
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-        tooltip = { PlainTooltip { Text(text, style = MaterialTheme.typography.bodySmall) } },
+        // Laid out apart from the window, so it has its own selection (see Popups.kt).
+        tooltip = { PlainTooltip { SelectionContainer { Text(text, style = MaterialTheme.typography.bodySmall) } } },
         state = state,
         modifier = modifier,
     ) {

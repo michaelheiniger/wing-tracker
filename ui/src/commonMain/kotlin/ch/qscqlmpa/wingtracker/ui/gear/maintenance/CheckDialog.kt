@@ -24,8 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import ch.qscqlmpa.wingtracker.gear.maintenance.CheckType
+import ch.qscqlmpa.wingtracker.ui.components.AppDialog
 import ch.qscqlmpa.wingtracker.ui.components.DateField
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
@@ -107,7 +107,7 @@ fun CheckDialog(
             is CheckFormMode.Edit -> Res.string.check_form_title_edit
             is CheckFormMode.Complete -> Res.string.check_form_title_complete
         }
-    Dialog(onDismissRequest = onClose) {
+    AppDialog(onDismissRequest = onClose) {
         Card(modifier = Modifier.width(DIALOG_WIDTH)) {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()).padding(24.dp),
@@ -198,7 +198,7 @@ fun PlanDialog(
     onClose: () -> Unit,
 ) {
     val input = presenter.input
-    Dialog(onDismissRequest = onClose) {
+    AppDialog(onDismissRequest = onClose) {
         Card(modifier = Modifier.width(DIALOG_WIDTH)) {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()).padding(24.dp),

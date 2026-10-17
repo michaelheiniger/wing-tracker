@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import ch.qscqlmpa.wingtracker.ui.components.AppAlertDialog
 import ch.qscqlmpa.wingtracker.ui.icons.UpdateIcon
 import ch.qscqlmpa.wingtracker.ui.isWorthRetrying
 import ch.qscqlmpa.wingtracker.ui.message
@@ -237,7 +236,7 @@ fun WhatsNewDialog(
     val update = presenter.update
     if (!presenter.showsWhatsNew || update == null) return
     val uriHandler = LocalUriHandler.current
-    AlertDialog(
+    AppAlertDialog(
         onDismissRequest = presenter::closeWhatsNew,
         title = { Text(stringResource(Res.string.update_whats_new_title, update.latest.version.toString())) },
         text = {
@@ -255,7 +254,7 @@ fun WhatsNewDialog(
                     if (release.notes.isBlank()) {
                         Text(stringResource(Res.string.update_no_notes))
                     } else {
-                        SelectionContainer { ReleaseNotes(release.notes) }
+                        ReleaseNotes(release.notes)
                     }
                 }
             }

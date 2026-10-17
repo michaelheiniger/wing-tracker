@@ -5,7 +5,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -97,7 +96,7 @@ fun DateField(
     if (open) {
         // The picker works in UTC milliseconds; UTC on both sides keeps the chosen day from shifting.
         val state = rememberDatePickerState(initialSelectedDateMillis = parseDate(value)?.toUtcMillis())
-        DatePickerDialog(
+        AppDatePickerDialog(
             onDismissRequest = { open = false },
             confirmButton = {
                 TextButton(

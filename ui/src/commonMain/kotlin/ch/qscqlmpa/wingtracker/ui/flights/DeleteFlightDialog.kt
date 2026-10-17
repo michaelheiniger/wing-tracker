@@ -1,12 +1,12 @@
 package ch.qscqlmpa.wingtracker.ui.flights
 
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.Logbook
+import ch.qscqlmpa.wingtracker.ui.components.AppAlertDialog
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.delete_confirm
@@ -30,7 +30,7 @@ internal fun DeleteFlightDialog(
 ) {
     val undo = LocalUndo.current
     val undoText = undoText(Res.string.undo_flight_deleted)
-    AlertDialog(
+    AppAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.flight_delete_title)) },
         text = { Text(stringResource(Res.string.flight_delete_body, flight.details.date.toDisplay(), wingName)) },

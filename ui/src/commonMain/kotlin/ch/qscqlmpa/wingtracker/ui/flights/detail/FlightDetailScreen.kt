@@ -41,7 +41,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.Flight
@@ -87,6 +86,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_track_file
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_wing
 import ch.qscqlmpa.wingtracker.ui.resources.flight_distance
 import ch.qscqlmpa.wingtracker.ui.resources.flight_edit
+import ch.qscqlmpa.wingtracker.ui.shell.PageShortcutsEffect
 import ch.qscqlmpa.wingtracker.ui.toDisplay
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -108,27 +108,38 @@ fun FlightDetailScreen(
     failure: Failure?,
     actions: FlightDetailActions,
 ) {
+    PageShortcutsEffect { event ->
+        if (event.type != KeyEventType.KeyDown) return@PageShortcutsEffect false
+        val target =
+            when (event.key) {
+                Key.Escape -> return@PageShortcutsEffect true.also { actions.onBack() }
+                Key.DirectionLeft -> neighbours.earlier
+                Key.DirectionRight -> neighbours.later
+                else -> return@PageShortcutsEffect false
+            }
+        target?.let(actions.onOpen)
+        target != null
+    }
     val focus = remember { FocusRequester() }
-    // Taken again for every flight, since the buttons that stepped here may hold the focus.
+    // Keys only travel where something has the focus; taken again for every flight, since a button may hold it.
     LaunchedEffect(flight.id) { focus.requestFocus() }
+    Box(modifier = Modifier.fillMaxSize().focusRequester(focus).focusable()) {
+        Page(flight, wingName, neighbours, track, mapSetup, failure, actions)
+    }
+}
+
+@Composable
+private fun Page(
+    flight: Flight,
+    wingName: String,
+    neighbours: FlightNeighbours,
+    track: TrackState,
+    mapSetup: MapSetup,
+    failure: Failure?,
+    actions: FlightDetailActions,
+) {
     Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .focusRequester(focus)
-                .focusable()
-                .onKeyEvent { event ->
-                    if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
-                    val target =
-                        when (event.key) {
-                            Key.Escape -> return@onKeyEvent true.also { actions.onBack() }
-                            Key.DirectionLeft -> neighbours.earlier
-                            Key.DirectionRight -> neighbours.later
-                            else -> return@onKeyEvent false
-                        }
-                    target?.let(actions.onOpen)
-                    target != null
-                }.padding(horizontal = 24.dp, vertical = 16.dp),
+        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Header(flight, wingName, neighbours, actions)

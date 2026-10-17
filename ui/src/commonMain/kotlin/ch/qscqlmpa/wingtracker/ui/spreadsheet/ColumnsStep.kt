@@ -14,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,12 +28,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.FlightField
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.RowProblem
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.RowProblemKind
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.SheetReading
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.SpreadsheetFlight
+import ch.qscqlmpa.wingtracker.ui.components.AppDropdownMenu
 import ch.qscqlmpa.wingtracker.ui.components.Severity
 import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.flights.importing.Busy
@@ -269,7 +268,7 @@ private fun LabelledChoice(
                 Text(selected, modifier = Modifier.weight(1f), maxLines = 1)
                 Icon(Icons.Default.ArrowDropDown, contentDescription = null)
             }
-            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 options.forEachIndexed { index, option ->
                     DropdownMenuItem(
                         text = { Text(option) },

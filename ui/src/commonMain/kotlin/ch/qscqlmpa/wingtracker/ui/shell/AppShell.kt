@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
@@ -35,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -144,106 +146,114 @@ fun AppShell(
     // Once per start (ADR 0012 rules out checking in the background).
     LaunchedEffect(Unit) { updatePresenter.start() }
 
-    CompositionLocalProvider(LocalUndo provides undo) {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            Box {
-                Row {
-                    NavigationRail(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
-                        Destination.entries.forEach { item ->
-                            NavigationRailItem(
-                                selected = item == current,
-                                onClick = {
-                                    if (item == Destination.Statistics) statisticsFilter = null
-                                    destination = item.name
-                                },
-                                icon = {
-                                    RailIcon(item, attentionPresenter.state.attention.count, updatePresenter.showsBadge)
-                                },
-                                colors =
-                                    NavigationRailItemDefaults.colors(
-                                        indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                                        selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                                    ),
-                                label = { Text(stringResource(item.label)) },
-                            )
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        RailVersion(appVersion)
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        if (fileNamesWarning) {
-                            FileNamesBanner(
-                                onDismiss = { fileNamesWarning = false },
-                                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                            )
-                        }
-                        if (updatePresenter.showsBanner) {
-                            UpdateBanner(
-                                updatePresenter,
-                                installPresenter,
-                                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                            )
-                        }
-                        Box(modifier = Modifier.weight(1f)) {
-                            when (current) {
-                                Destination.Logbook -> {
-                                    LogbookRoute(
-                                        useCases = logbookUseCases,
-                                        platform = platform,
-                                        attention = attentionPresenter.state.attention,
-                                        search = logbookSearch,
-                                        onSearchChange = { logbookSearch = it },
-                                        onOpenStatistics = { filter ->
-                                            statisticsFilter = filter
-                                            destination = Destination.Statistics.name
-                                        },
-                                        onOpenGear = { ref ->
-                                            pendingGear = ref
-                                            destination = Destination.Gear.name
-                                        },
-                                        onGoToGear = { destination = Destination.Gear.name },
-                                    )
-                                }
+    val attentionCount = attentionPresenter.state.attention.count
 
-                                Destination.Statistics -> {
-                                    StatisticsRoute(getStatistics, statisticsFilter, onShowAll = {
-                                        statisticsFilter = null
-                                    }, onGoToLogbook = {
-                                        destination =
-                                            Destination.Logbook.name
-                                    })
-                                }
+    val shortcuts = remember { PageShortcuts() }
 
-                                Destination.Gear -> {
-                                    GearRoute(
-                                        useCases = gearUseCases,
-                                        maintenanceUseCases = maintenanceUseCases,
-                                        platform = platform,
-                                        initialRef = pendingGear,
-                                        onInitialConsumed = { pendingGear = null },
-                                    )
-                                }
+    CompositionLocalProvider(LocalUndo provides undo, LocalPageShortcuts provides shortcuts) {
+        // Above the selection, so the page hears its keys also once the pilot selected text.
+        Surface(modifier = Modifier.fillMaxSize().onPreviewKeyEvent(shortcuts::handle)) {
+            // Every text and value can be selected and copied, e.g. a site name or a date into another program.
+            SelectionContainer {
+                Box {
+                    Row {
+                        NavigationRail(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
+                            Destination.entries.forEach { item ->
+                                NavigationRailItem(
+                                    selected = item == current,
+                                    onClick = {
+                                        if (item == Destination.Statistics) statisticsFilter = null
+                                        destination = item.name
+                                    },
+                                    icon = {
+                                        RailIcon(item, attentionCount, updatePresenter.showsBadge)
+                                    },
+                                    colors =
+                                        NavigationRailItemDefaults.colors(
+                                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                            selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                                        ),
+                                    label = { Text(stringResource(item.label)) },
+                                )
+                            }
+                            Spacer(modifier = Modifier.weight(1f))
+                            RailVersion(appVersion)
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            if (fileNamesWarning) {
+                                FileNamesBanner(
+                                    onDismiss = { fileNamesWarning = false },
+                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                )
+                            }
+                            if (updatePresenter.showsBanner) {
+                                UpdateBanner(
+                                    updatePresenter,
+                                    installPresenter,
+                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                )
+                            }
+                            Box(modifier = Modifier.weight(1f)) {
+                                when (current) {
+                                    Destination.Logbook -> {
+                                        LogbookRoute(
+                                            useCases = logbookUseCases,
+                                            platform = platform,
+                                            attention = attentionPresenter.state.attention,
+                                            search = logbookSearch,
+                                            onSearchChange = { logbookSearch = it },
+                                            onOpenStatistics = { filter ->
+                                                statisticsFilter = filter
+                                                destination = Destination.Statistics.name
+                                            },
+                                            onOpenGear = { ref ->
+                                                pendingGear = ref
+                                                destination = Destination.Gear.name
+                                            },
+                                            onGoToGear = { destination = Destination.Gear.name },
+                                        )
+                                    }
 
-                                Destination.Settings -> {
-                                    SettingsScreen(
-                                        themePreference,
-                                        scalePreference,
-                                        reminderSettings,
-                                        dataLocation,
-                                        logLocation,
-                                        updatePresenter,
-                                        installPresenter,
-                                        appVersion,
-                                    )
+                                    Destination.Statistics -> {
+                                        StatisticsRoute(getStatistics, statisticsFilter, onShowAll = {
+                                            statisticsFilter = null
+                                        }, onGoToLogbook = {
+                                            destination =
+                                                Destination.Logbook.name
+                                        })
+                                    }
+
+                                    Destination.Gear -> {
+                                        GearRoute(
+                                            useCases = gearUseCases,
+                                            maintenanceUseCases = maintenanceUseCases,
+                                            platform = platform,
+                                            initialRef = pendingGear,
+                                            onInitialConsumed = { pendingGear = null },
+                                        )
+                                    }
+
+                                    Destination.Settings -> {
+                                        SettingsScreen(
+                                            themePreference,
+                                            scalePreference,
+                                            reminderSettings,
+                                            dataLocation,
+                                            logLocation,
+                                            updatePresenter,
+                                            installPresenter,
+                                            appVersion,
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
+                    WhatsNewDialog(updatePresenter, installPresenter)
+                    InstallDialog(installPresenter, updatePresenter.update)
+                    SnackbarHost(undo.snackbarHost, modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp))
                 }
-                WhatsNewDialog(updatePresenter, installPresenter)
-                InstallDialog(installPresenter, updatePresenter.update)
-                SnackbarHost(undo.snackbarHost, modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp))
             }
         }
     }

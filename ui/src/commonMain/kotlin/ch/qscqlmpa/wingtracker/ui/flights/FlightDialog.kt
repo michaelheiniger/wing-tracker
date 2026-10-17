@@ -30,8 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
+import ch.qscqlmpa.wingtracker.ui.components.AppDialog
+import ch.qscqlmpa.wingtracker.ui.components.AppExposedDropdownMenu
 import ch.qscqlmpa.wingtracker.ui.components.DateField
 import ch.qscqlmpa.wingtracker.ui.components.Severity
 import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
@@ -68,7 +69,7 @@ fun FlightDialog(
     val durationFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) { durationFocus.requestFocus() }
 
-    Dialog(onDismissRequest = onClose) {
+    AppDialog(onDismissRequest = onClose) {
         Card(modifier = Modifier.width(520.dp)) {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()).padding(24.dp),
@@ -216,7 +217,7 @@ internal fun WingDropdown(
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
         )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        AppExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             wings.forEach { wing ->
                 DropdownMenuItem(
                     text = { Text(wingLabel(wing)) },

@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.settings.ThemeMode
+import ch.qscqlmpa.wingtracker.ui.components.AppAlertDialog
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.reminders.ExportOutcome
 import ch.qscqlmpa.wingtracker.ui.reminders.ReminderSettingsField
@@ -133,7 +132,7 @@ private fun DataLocationSection(presenter: DataLocationPresenter) {
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     // Selectable, so the pilot can copy the path into a terminal or a backup tool.
-    SelectionContainer { Text(presenter.path, style = MaterialTheme.typography.bodyLarge) }
+    Text(presenter.path, style = MaterialTheme.typography.bodyLarge)
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         OutlinedButton(onClick = presenter::open) { Text(stringResource(Res.string.settings_data_open)) }
         OutlinedButton(onClick = presenter::choose, enabled = !presenter.busy) {
@@ -163,7 +162,7 @@ private fun LogLocationSection(presenter: LogLocationPresenter) {
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     // Selectable, so the pilot can paste the path into a bug report or a mail attachment dialog.
-    SelectionContainer { Text(presenter.path, style = MaterialTheme.typography.bodyLarge) }
+    Text(presenter.path, style = MaterialTheme.typography.bodyLarge)
     OutlinedButton(onClick = presenter::open) { Text(stringResource(Res.string.settings_log_open)) }
     presenter.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
 }
@@ -173,7 +172,7 @@ private fun ChangeDialog(
     proposal: FolderProposal,
     presenter: DataLocationPresenter,
 ) {
-    AlertDialog(
+    AppAlertDialog(
         onDismissRequest = presenter::cancel,
         title = { Text(stringResource(Res.string.data_change_title)) },
         text = {
@@ -215,7 +214,7 @@ private fun ChangeDialog(
 // Not dismissible: carrying on would write to the old folder while the new one is already chosen.
 @Composable
 private fun RestartDialog(presenter: DataLocationPresenter) {
-    AlertDialog(
+    AppAlertDialog(
         onDismissRequest = {},
         title = { Text(stringResource(Res.string.data_restart_title)) },
         text = { Text(stringResource(Res.string.data_restart_body)) },
@@ -332,13 +331,13 @@ private fun AboutSection(
         Text(stringResource(Res.string.about_open))
     }
     if (open) {
-        AlertDialog(
+        AppAlertDialog(
             onDismissRequest = { open = false },
             title = { Text(stringResource(Res.string.about_title)) },
             // Selectable, so the version can be pasted into a bug report.
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SelectionContainer { Text(stringResource(Res.string.about_version, appVersion)) }
+                    Text(stringResource(Res.string.about_version, appVersion))
                     updates.update?.takeIf { updates.showsBadge }?.let { UpdateBadge(it.latest.version.toString()) }
                     TextButton(onClick = { uriHandler.openUri(CHANGELOG_URL) }) {
                         Text(stringResource(Res.string.about_changelog))

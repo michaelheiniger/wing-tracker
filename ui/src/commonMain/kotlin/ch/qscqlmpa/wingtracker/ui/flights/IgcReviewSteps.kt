@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
+import ch.qscqlmpa.wingtracker.ui.components.AppDropdownMenu
 import ch.qscqlmpa.wingtracker.ui.components.Severity
 import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.flights.importing.Busy
@@ -229,7 +229,7 @@ private fun WingMenu(
     TextButton(onClick = { expanded = true }) {
         Text(current?.let { wingLabel(it) }.orEmpty())
     }
-    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+    AppDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
         wings.forEach { wing ->
             DropdownMenuItem(
                 text = { Text(wingLabel(wing)) },

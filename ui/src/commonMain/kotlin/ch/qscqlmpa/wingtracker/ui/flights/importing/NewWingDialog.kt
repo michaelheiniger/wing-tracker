@@ -20,8 +20,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import ch.qscqlmpa.wingtracker.flights.importing.NewWingSpec
+import ch.qscqlmpa.wingtracker.ui.components.AppDialog
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.action_save
@@ -40,7 +40,7 @@ internal fun NewWingDialog(
     onDismiss: () -> Unit,
 ) {
     var spec by remember { mutableStateOf(initial) }
-    Dialog(onDismissRequest = onDismiss) {
+    AppDialog(onDismissRequest = onDismiss) {
         Card(modifier = Modifier.width(480.dp)) {
             Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(Res.string.import_newwing_title), style = MaterialTheme.typography.headlineSmall)

@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
+- All text in Wing Tracker can be selected and copied, including values such as dates, sites and altitudes, in the main window and in dialogs. Drag across text to select it and press Ctrl+C to copy it. Axis labels drawn in charts are the exception; their values show when you point at the chart.
 - A flight imported from Syride with a track there has an "Open on Syride" button on its page, which opens the flight on Syride in your browser. It uses the Syride account saved for the import.
 - The map of a flight can colour the track by climb and sink: blue while sinking, green for weak climb, orange and red for stronger climb, with a legend giving the m/s of each colour. Switch between "Flight" and "Climb/sink" on the map; Wing Tracker remembers your choice. Flights whose track has no altitudes keep the single colour.
 - Below the map, an altitude profile shows the altitude over time, the flight in the colour of the track on the map and the time before take-off and after landing in grey. Pointing at it shows the time and altitude, and a dot marks the same moment on the map.

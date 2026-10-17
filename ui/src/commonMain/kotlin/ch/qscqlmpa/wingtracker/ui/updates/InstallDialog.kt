@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import ch.qscqlmpa.wingtracker.ui.components.AppAlertDialog
 import ch.qscqlmpa.wingtracker.ui.isWorthRetrying
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
@@ -52,7 +51,7 @@ fun InstallDialog(
     if (state is InstallState.Idle || update == null) return
     val version = update.latest.version.toString()
     val uriHandler = LocalUriHandler.current
-    AlertDialog(
+    AppAlertDialog(
         onDismissRequest = presenter::close,
         title = { Text(stringResource(Res.string.update_install_title, version)) },
         text = {
@@ -160,10 +159,10 @@ private fun InstallStateContent(
         is InstallState.Manual -> {
             Text(stringResource(Res.string.update_manual))
             // Selectable, so the path and the command can be pasted into a terminal.
-            SelectionContainer { Text(state.path, fontFamily = FontFamily.Monospace) }
+            Text(state.path, fontFamily = FontFamily.Monospace)
             state.command?.let { command ->
                 Text(stringResource(Res.string.update_manual_command))
-                SelectionContainer { Text(command, fontFamily = FontFamily.Monospace) }
+                Text(command, fontFamily = FontFamily.Monospace)
             }
         }
 

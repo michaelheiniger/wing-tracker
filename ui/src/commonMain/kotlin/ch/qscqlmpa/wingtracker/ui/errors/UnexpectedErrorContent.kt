@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.ui.errors
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,30 +48,33 @@ fun UnexpectedErrorContent(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Its own window, so its own selection: every text can be selected, like in the main window.
     Surface(modifier.fillMaxSize()) {
-        Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(unexpectedErrorTitle(), style = MaterialTheme.typography.headlineSmall)
-            Text(stringResource(Res.string.unexpected_error_body))
-            // The log also holds what happened before the error, which the trace alone does not tell.
-            if (onOpenLog != null) Text(stringResource(Res.string.unexpected_error_logged))
-            if (error.occurrences > 1) {
-                Text(
-                    pluralStringResource(
-                        Res.plurals.unexpected_error_occurrences,
-                        error.occurrences,
-                        error.occurrences,
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            StackTrace(error.stackTrace, Modifier.weight(1f).fillMaxWidth())
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)) {
-                onOpenLog?.let {
-                    TextButton(onClick = it) { Text(stringResource(Res.string.unexpected_error_open_log)) }
+        SelectionContainer {
+            Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(unexpectedErrorTitle(), style = MaterialTheme.typography.headlineSmall)
+                Text(stringResource(Res.string.unexpected_error_body))
+                // The log also holds what happened before the error, which the trace alone does not tell.
+                if (onOpenLog != null) Text(stringResource(Res.string.unexpected_error_logged))
+                if (error.occurrences > 1) {
+                    Text(
+                        pluralStringResource(
+                            Res.plurals.unexpected_error_occurrences,
+                            error.occurrences,
+                            error.occurrences,
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
-                TextButton(onClick = onCopy) { Text(stringResource(Res.string.unexpected_error_copy)) }
-                Button(onClick = onDismiss) { Text(stringResource(Res.string.unexpected_error_ok)) }
+                StackTrace(error.stackTrace, Modifier.weight(1f).fillMaxWidth())
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)) {
+                    onOpenLog?.let {
+                        TextButton(onClick = it) { Text(stringResource(Res.string.unexpected_error_open_log)) }
+                    }
+                    TextButton(onClick = onCopy) { Text(stringResource(Res.string.unexpected_error_copy)) }
+                    Button(onClick = onDismiss) { Text(stringResource(Res.string.unexpected_error_ok)) }
+                }
             }
         }
     }
@@ -83,7 +87,7 @@ private fun StackTrace(
 ) {
     Surface(modifier, color = MaterialTheme.colorScheme.surfaceContainerHighest, shape = MaterialTheme.shapes.small) {
         // Wrapped, so the whole trace reads without scrolling sideways; copying keeps the original lines.
-        SelectionContainer(Modifier.verticalScroll(rememberScrollState())) {
+        Box(Modifier.verticalScroll(rememberScrollState())) {
             Text(
                 stackTrace,
                 modifier = Modifier.padding(12.dp),
