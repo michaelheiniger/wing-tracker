@@ -5,6 +5,7 @@ import ch.qscqlmpa.wingtracker.attachments.AttachmentId
 import ch.qscqlmpa.wingtracker.flights.ExternalReference
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
+import ch.qscqlmpa.wingtracker.flights.FlightExport
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
@@ -39,6 +40,8 @@ internal data class FlightDocument(
     val importedFromId: String? = null,
     // Added in schema 4: when the flight took off.
     val takeOffTime: LocalTime? = null,
+    // Added in schema 5: the services the flight was sent to.
+    val exports: List<FlightExportDocument> = emptyList(),
 ) {
     fun toDomain(): Flight =
         Flight(
@@ -59,6 +62,7 @@ internal data class FlightDocument(
             loggedAt = Instant.parse(loggedAt),
             igcFile = igcFile(),
             importedFrom = importedFrom(),
+            exports = exports.map { it.toDomain() },
         )
 
     private fun importedFrom(): ExternalReference? {
@@ -73,8 +77,9 @@ internal data class FlightDocument(
 
     companion object {
         // Version 2 added the imported track, version 3 the details imported from other services, version 4 the
-        // take-off time. Older application versions treat newer data as unsupported and leave it untouched.
-        const val CURRENT_SCHEMA_VERSION = 4
+        // take-off time, version 5 the exports. Older application versions treat newer data as unsupported and leave
+        // it untouched.
+        const val CURRENT_SCHEMA_VERSION = 5
 
         fun from(flight: Flight) =
             FlightDocument(
@@ -99,6 +104,16 @@ internal data class FlightDocument(
                 importedFromSystem = flight.importedFrom?.system,
                 importedFromId = flight.importedFrom?.id,
                 takeOffTime = flight.details.takeOffTime,
+                exports = flight.exports.map { FlightExportDocument(it.system, it.at.toString()) },
             )
     }
+}
+
+@Serializable
+internal data class FlightExportDocument(
+    val system: String,
+    // ISO-8601 text, like [FlightDocument.loggedAt].
+    val at: String,
+) {
+    fun toDomain() = FlightExport(system, Instant.parse(at))
 }

@@ -19,6 +19,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
+import kotlin.time.Instant
 
 class JsonFlightRepositoryTest {
     @TempDir
@@ -98,6 +99,41 @@ class JsonFlightRepositoryTest {
 
                 // then
                 assertThat(found).usingRecursiveComparison().isEqualTo(imported)
+            }
+
+        @Test
+        fun `restores the services the flight was exported to`() =
+            runTest {
+                // given
+                val exported = aStoredFlight().markExported("airtime", Instant.parse("2026-10-17T20:12:04Z"))
+                repository.save(exported)
+
+                // when
+                val found = repository.findById(exported.id)
+
+                // then
+                assertThat(found).usingRecursiveComparison().isEqualTo(exported)
+            }
+
+        @Test
+        fun `reads a flight written before exports were kept`() =
+            runTest {
+                // given
+                val flight = aStoredFlight()
+                repository.save(flight)
+                val file = dataDirectory.resolve("flights/${flight.id.value}.json")
+                val document = Json.parseToJsonElement(file.readText()).jsonObject
+                file.writeText(
+                    JsonObject(
+                        document.filterKeys { it != "exports" } + ("schemaVersion" to JsonPrimitive(4)),
+                    ).toString(),
+                )
+
+                // when
+                val found = repository.findById(flight.id)
+
+                // then
+                assertThat(found).usingRecursiveComparison().isEqualTo(flight)
             }
 
         @Test

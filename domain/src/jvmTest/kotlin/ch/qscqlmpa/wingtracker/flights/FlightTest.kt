@@ -59,4 +59,31 @@ class FlightTest {
                 .isInstanceOf(IllegalStateException::class.java)
         }
     }
+
+    @Nested
+    inner class MarkExported {
+        @Test
+        fun `remembers the system and when the flight was sent`() {
+            // given
+            val flight = aSyrideFlight()
+            val sentAt = Instant.parse("2026-10-17T20:12:04Z")
+
+            // when
+            val exported = flight.markExported("airtime", sentAt)
+
+            // then
+            assertThat(exported.exports).containsExactly(FlightExport("airtime", sentAt))
+            assertThat(exported.isExportedTo("airtime")).isTrue()
+        }
+
+        @Test
+        fun `refuses to mark a flight exported twice to the same system`() {
+            // given
+            val flight = aSyrideFlight().markExported("airtime", Instant.parse("2026-10-17T20:12:04Z"))
+
+            // when / then
+            assertThatThrownBy { flight.markExported("airtime", Instant.parse("2026-10-18T08:00:00Z")) }
+                .isInstanceOf(IllegalStateException::class.java)
+        }
+    }
 }
