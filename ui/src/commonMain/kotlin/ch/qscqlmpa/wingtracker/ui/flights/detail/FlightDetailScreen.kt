@@ -61,7 +61,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.flight_altitude
 import ch.qscqlmpa.wingtracker.ui.resources.flight_date_time
 import ch.qscqlmpa.wingtracker.ui.resources.flight_delete
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_airtime_forget
-import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_airtime_forget_hint
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_airtime_no_page
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_airtime_not_sent
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_airtime_sent
@@ -366,11 +365,6 @@ private fun AirtimeFacts(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Text(
-                stringResource(Res.string.flight_detail_airtime_forget_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
             TextButton(onClick = actions.onForgetAirtimeExport) {
                 Text(stringResource(Res.string.flight_detail_airtime_forget))
             }

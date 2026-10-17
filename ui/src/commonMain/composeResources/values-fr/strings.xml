@@ -768,7 +768,6 @@
     <string name="flight_detail_airtime_sent">Envoyé</string>
     <string name="flight_detail_airtime_not_sent">Pas envoyé</string>
     <string name="flight_detail_airtime_no_page">Sa page sur air-time n'est pas connue.</string>
-    <string name="flight_detail_airtime_forget_hint">Oublier l'export ne change que ton carnet de vol, rien sur air-time. Le prochain export laisse le vol de côté si air-time l'a encore, et l'envoie sinon.</string>
     <string name="flight_detail_airtime_forget">Oublier l'export</string>
     <string name="flight_detail_open_airtime">Ouvrir sur air-time</string>
     <string name="undo_export_forgotten">Export vers air-time oublié</string>
