@@ -80,8 +80,8 @@ fun StatisticsTables(
 
     fun hours(value: Duration) = formatHoursAndMinutes(value.inWholeMinutes)
 
-    // The current year ends today, because the lines do not extend into the future.
-    fun yearEnd(year: Int) = minOf(LocalDate(year, Month.DECEMBER, LAST_DAY_OF_DECEMBER), statistics.today)
+    // The last year ends where the lines do: today, or earlier when a search ends earlier.
+    fun yearEnd(year: Int) = minOf(LocalDate(year, Month.DECEMBER, LAST_DAY_OF_DECEMBER), statistics.until)
 
     val allWings = statistics.totals.years.associateBy { it.year }
     val allYears = stringResource(Res.string.statistics_all_years)

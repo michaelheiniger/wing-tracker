@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import ch.qscqlmpa.wingtracker.flights.FlightFilter
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
 import ch.qscqlmpa.wingtracker.ui.components.FileNamesBanner
@@ -134,6 +135,8 @@ fun AppShell(
     var pendingGear by remember { mutableStateOf<GearRef?>(null) }
     // Kept here, outside the logbook, so a search survives a look at the gear; it is gone after a restart.
     var logbookSearch by remember { mutableStateOf(LogbookSearch()) }
+    // Set only by the logbook's search; opening Statistics from the rail always shows every flight.
+    var statisticsFilter by remember { mutableStateOf<FlightFilter?>(null) }
 
     // Reminders are computed on demand (ADR 0012), so they are refreshed whenever the pilot moves between sections.
     LaunchedEffect(destination) { attentionPresenter.refresh() }
@@ -149,7 +152,10 @@ fun AppShell(
                         Destination.entries.forEach { item ->
                             NavigationRailItem(
                                 selected = item == current,
-                                onClick = { destination = item.name },
+                                onClick = {
+                                    if (item == Destination.Statistics) statisticsFilter = null
+                                    destination = item.name
+                                },
                                 icon = {
                                     RailIcon(item, attentionPresenter.state.attention.count, updatePresenter.showsBadge)
                                 },
@@ -188,6 +194,10 @@ fun AppShell(
                                         attention = attentionPresenter.state.attention,
                                         search = logbookSearch,
                                         onSearchChange = { logbookSearch = it },
+                                        onOpenStatistics = { filter ->
+                                            statisticsFilter = filter
+                                            destination = Destination.Statistics.name
+                                        },
                                         onOpenGear = { ref ->
                                             pendingGear = ref
                                             destination = Destination.Gear.name
@@ -197,7 +207,9 @@ fun AppShell(
                                 }
 
                                 Destination.Statistics -> {
-                                    StatisticsRoute(getStatistics, onGoToLogbook = {
+                                    StatisticsRoute(getStatistics, statisticsFilter, onShowAll = {
+                                        statisticsFilter = null
+                                    }, onGoToLogbook = {
                                         destination =
                                             Destination.Logbook.name
                                     })

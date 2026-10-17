@@ -77,6 +77,8 @@ data class Totals(
 data class Statistics(
     // Order is stable (by entering service) so a series keeps its color when others are hidden or added.
     val series: List<Series>,
+    // The series to chart: every one, or under a search only those it found flights for.
+    val shownSeries: List<Series>,
     // Tracked flights only: hours before tracking carry no date, so they cannot belong to a year.
     val yearly: List<YearlyHours>,
     // Includes hours flown before tracking, because that is what the wing really has on the clock.
@@ -87,7 +89,8 @@ data class Statistics(
     val cumulativeFlights: Map<SeriesKey, List<CumulativeFlightsPoint>>,
     val sinceLastCheck: List<SinceLastCheck>,
     val totals: Totals,
-    val today: LocalDate,
+    // The last day the charts cover: today, or the end of the search when that is earlier.
+    val until: LocalDate,
     val unreadable: List<UnreadableRecord>,
 ) {
     val isEmpty: Boolean get() = yearly.isEmpty()

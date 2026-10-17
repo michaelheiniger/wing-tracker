@@ -81,7 +81,7 @@ fun StatisticsCharts(
                 ChartUnit.Hours -> statistics.cumulativeHourLines()
                 ChartUnit.Flights -> statistics.cumulativeFlightLines()
             }
-        CumulativeChart(lines, statistics.today, series, unit, theme, chartModifier)
+        CumulativeChart(lines, statistics.until, series, unit, theme, chartModifier)
     }
 }
 

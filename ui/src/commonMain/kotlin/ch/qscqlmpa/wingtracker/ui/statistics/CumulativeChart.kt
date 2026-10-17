@@ -65,7 +65,7 @@ private class TimePlot(
 @Composable
 fun CumulativeChart(
     cumulative: Map<SeriesKey, List<ValuePoint>>,
-    today: LocalDate,
+    until: LocalDate,
     series: List<ChartSeries>,
     unit: ChartUnit,
     theme: ChartTheme,
@@ -78,11 +78,11 @@ fun CumulativeChart(
     val minTickSpacingPx = with(LocalDensity.current) { MIN_TICK_SPACING_DP.dp.toPx() }
 
     val lines = series.associateWith { cumulative[it.key].orEmpty() }.filterValues { it.isNotEmpty() }
-    val firstDay = lines.values.minOfOrNull { it.first().date.day() } ?: today.day()
+    val firstDay = lines.values.minOfOrNull { it.first().date.day() } ?: until.day()
     val scale =
         niceScale(lines.values.maxOfOrNull { line -> line.maxOf { it.value } } ?: 0.0, wholeNumbers = unit.wholeNumbers)
     val time =
-        TimePlot(rememberPlotArea(size, rightPad = 64.dp), firstDay, maxOf(firstDay + 1, today.day()), scale)
+        TimePlot(rememberPlotArea(size, rightPad = 64.dp), firstDay, maxOf(firstDay + 1, until.day()), scale)
 
     val tickLabels = scale.ticks.map { unit.short(it) }
     val endLabels = lines.mapValues { (_, points) -> unit.short(points.last().value) }

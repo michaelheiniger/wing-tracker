@@ -49,6 +49,7 @@ import ch.qscqlmpa.wingtracker.ui.components.Severity
 import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.components.UnreadableBanner
 import ch.qscqlmpa.wingtracker.ui.formatDuration
+import ch.qscqlmpa.wingtracker.ui.icons.BarChartIcon
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.reminders.AttentionPanel
 import ch.qscqlmpa.wingtracker.ui.resources.Res
@@ -79,6 +80,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_clear
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_none_body
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_none_title
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_result
+import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_statistics
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_title
 import ch.qscqlmpa.wingtracker.ui.resources.month_names
 import ch.qscqlmpa.wingtracker.ui.resources.undo_flight_deleted
@@ -104,6 +106,7 @@ fun LogbookScreen(
     onImportDevice: () -> Unit,
     onImportSyride: () -> Unit,
     onImportSpreadsheet: () -> Unit,
+    onOpenStatistics: () -> Unit,
     attention: Attention,
     onOpenAttention: (GearRef) -> Unit,
     onGoToGear: () -> Unit,
@@ -154,7 +157,7 @@ fun LogbookScreen(
             } else if (logbook != null) {
                 LogbookBody(
                     logbook,
-                    LogbookSearchBinding(state.search, checkNotNull(state.shown), presenter::search),
+                    LogbookSearchBinding(state.search, checkNotNull(state.shown), presenter::search, onOpenStatistics),
                     onLogFlight,
                     onEditFlight,
                     presenter::openTrack,
@@ -199,6 +202,7 @@ private class LogbookSearchBinding(
     val search: LogbookSearch,
     val shown: Logbook,
     val onChange: (LogbookSearch) -> Unit,
+    val onOpenStatistics: () -> Unit,
 )
 
 @Composable
@@ -256,14 +260,22 @@ private fun LogbookContent(
     LogbookSearchBar(search.search, logbook.wings, search.onChange)
     val shown = search.shown
     if (search.search.isActive) {
-        Text(
-            stringResource(
-                Res.string.logbook_search_result,
-                pluralStringResource(Res.plurals.flights_count, shown.flightCount, shown.flightCount),
-                formatDuration(shown.total),
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                stringResource(
+                    Res.string.logbook_search_result,
+                    pluralStringResource(Res.plurals.flights_count, shown.flightCount, shown.flightCount),
+                    formatDuration(shown.total),
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (!shown.isEmpty) {
+                TextButton(onClick = search.onOpenStatistics) {
+                    Icon(BarChartIcon, contentDescription = null)
+                    Text(stringResource(Res.string.logbook_search_statistics))
+                }
+            }
+        }
     }
     if (shown.isEmpty) {
         EmptyState(

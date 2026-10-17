@@ -3,6 +3,7 @@ package ch.qscqlmpa.wingtracker.statistics
 import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
+import ch.qscqlmpa.wingtracker.flights.FlightFilter
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.gear.Acquisition
@@ -94,7 +95,7 @@ class GetStatisticsTest {
         coEvery { flights.findAll() } returns LoadResult(flightList.toList())
     }
 
-    private suspend fun statistics() = GetStatistics(flights, wings, clock)()
+    private suspend fun statistics(filter: FlightFilter = FlightFilter()) = GetStatistics(flights, wings, clock)(filter)
 
     @Nested
     inner class Yearly {
@@ -478,6 +479,114 @@ class GetStatisticsTest {
 
                 // then
                 assertThat(result.sinceLastCheck.map { it.wing.id }).containsExactly(WingId("wing-2"))
+            }
+    }
+
+    @Nested
+    inner class Searched {
+        private val sky =
+            aWing("wing-1", before = 42.hours, flightsBefore = 61, checks = listOf(aCheck(LocalDate(2025, 3, 1))))
+        private val cloud = aWing("wing-2", name = "Cloud Surfer", inService = LocalDate(2025, 1, 1))
+        private val summer2025 = FlightFilter(from = LocalDate(2025, 6, 1), to = LocalDate(2025, 8, 31))
+
+        private fun givenFlown() =
+            givenStored(
+                listOf(sky, cloud),
+                aFlight("wing-1", LocalDate(2025, 5, 20), 30.minutes),
+                aFlight("wing-1", LocalDate(2025, 7, 4), 90.minutes),
+                aFlight("wing-1", LocalDate(2025, 8, 15), 60.minutes),
+                aFlight("wing-2", LocalDate(2026, 4, 2), 45.minutes),
+            )
+
+        @Test
+        fun `counts only the matching flights, without those before tracking`() =
+            runTest {
+                // given
+                givenFlown()
+
+                // when
+                val result = statistics(summer2025)
+
+                // then
+                assertThat(result.totals.flights).isEqualTo(2)
+                assertThat(result.totals.hours).isEqualTo(150.minutes)
+                assertThat(result.totals.flightsBeforeTracking).isZero()
+                assertThat(result.yearly.map { it.year }).containsExactly(2025)
+            }
+
+        @Test
+        fun `draws a wing from zero at the start of the search to its end`() =
+            runTest {
+                // given
+                givenFlown()
+
+                // when
+                val result = statistics(summer2025)
+
+                // then
+                assertThat(result.cumulative[SeriesKey.OfWing(sky.id)]).containsExactly(
+                    CumulativePoint(LocalDate(2025, 6, 1), Duration.ZERO),
+                    CumulativePoint(LocalDate(2025, 7, 4), 90.minutes),
+                    CumulativePoint(LocalDate(2025, 8, 15), 150.minutes),
+                    CumulativePoint(LocalDate(2025, 8, 31), 150.minutes),
+                )
+                assertThat(result.until).isEqualTo(LocalDate(2025, 8, 31))
+            }
+
+        @Test
+        fun `starts a line on the first matching flight when the search has no start`() =
+            runTest {
+                // given
+                givenFlown()
+
+                // when
+                val result = statistics(FlightFilter(wingIds = setOf(cloud.id)))
+
+                // then
+                assertThat(result.cumulative[SeriesKey.OfWing(cloud.id)]?.first())
+                    .isEqualTo(CumulativePoint(LocalDate(2026, 4, 2), 45.minutes))
+                assertThat(result.until).isEqualTo(TODAY)
+            }
+
+        @Test
+        fun `shows only the wings it found flights for, keeping every series for stable colors`() =
+            runTest {
+                // given
+                givenFlown()
+
+                // when
+                val result = statistics(summer2025)
+
+                // then
+                assertThat(result.shownSeries.map { it.key }).containsExactly(SeriesKey.OfWing(sky.id))
+                assertThat(result.series).hasSize(2)
+                assertThat(result.cumulative[SeriesKey.OfWing(cloud.id)]).isEmpty()
+            }
+
+        @Test
+        fun `leaves out what was flown since the last check`() =
+            runTest {
+                // given
+                givenFlown()
+
+                // when
+                val result = statistics(summer2025)
+
+                // then
+                assertThat(result.sinceLastCheck).isEmpty()
+            }
+
+        @Test
+        fun `is empty when no flight matches`() =
+            runTest {
+                // given
+                givenFlown()
+
+                // when
+                val result = statistics(FlightFilter(text = "fiesch"))
+
+                // then
+                assertThat(result.isEmpty).isTrue()
             }
     }
 

@@ -3,6 +3,7 @@ package ch.qscqlmpa.wingtracker.ui.statistics
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import ch.qscqlmpa.wingtracker.flights.FlightFilter
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
 import ch.qscqlmpa.wingtracker.statistics.Series
@@ -26,7 +27,7 @@ data class StatisticsState(
 ) {
     val loading: Boolean get() = statistics == null && failure == null
 
-    val visibleSeries: List<Series> get() = statistics?.series.orEmpty().filter { it.key !in hidden }
+    val visibleSeries: List<Series> get() = statistics?.shownSeries.orEmpty().filter { it.key !in hidden }
 
     /** The slot is the position among all series, not among visible ones, so colors never shift. */
     fun slotOf(key: SeriesKey): Int = statistics?.series?.indexOfFirst { it.key == key } ?: 0
@@ -35,6 +36,8 @@ data class StatisticsState(
 class StatisticsPresenter(
     private val scope: CoroutineScope,
     private val getStatistics: GetStatistics,
+    // Set when the statistics were opened for a logbook search.
+    val filter: FlightFilter? = null,
 ) {
     var state by mutableStateOf(StatisticsState())
         private set
@@ -43,7 +46,7 @@ class StatisticsPresenter(
         scope.launch {
             state =
                 try {
-                    val statistics = getStatistics()
+                    val statistics = getStatistics(filter ?: FlightFilter())
                     state.copy(
                         statistics = statistics,
                         unreadable = (state.unreadable + statistics.unreadable).distinct(),

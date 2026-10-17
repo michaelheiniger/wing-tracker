@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.Flight
+import ch.qscqlmpa.wingtracker.flights.FlightFilter
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import ch.qscqlmpa.wingtracker.reminders.Attention
@@ -66,6 +67,7 @@ fun LogbookRoute(
     attention: Attention,
     search: LogbookSearch,
     onSearchChange: (LogbookSearch) -> Unit,
+    onOpenStatistics: (FlightFilter) -> Unit,
     onOpenGear: (GearRef) -> Unit,
     onGoToGear: () -> Unit,
 ) {
@@ -129,6 +131,7 @@ fun LogbookRoute(
             },
             onImportSyride = { dialog = LogbookDialog.Syride },
             onImportSpreadsheet = { dialog = LogbookDialog.Spreadsheet },
+            onOpenStatistics = { onOpenStatistics(presenter.state.search.toFilter()) },
             attention = attention,
             onOpenAttention = onOpenGear,
             onGoToGear = onGoToGear,

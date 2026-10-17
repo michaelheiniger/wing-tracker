@@ -20,6 +20,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_flights
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_flights_column
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_hours_column
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_note
+import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_note_search
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_title
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -29,10 +30,12 @@ import org.jetbrains.compose.resources.stringResource
 fun TotalsCard(
     totals: Totals,
     theme: ChartTheme,
+    // Under a search, the totals count only the matching flights, so the note must not claim all wings.
+    searched: Boolean = false,
 ) {
     ChartCard(
         stringResource(Res.string.statistics_totals_title),
-        stringResource(Res.string.statistics_totals_note),
+        stringResource(if (searched) Res.string.statistics_totals_note_search else Res.string.statistics_totals_note),
         theme,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {

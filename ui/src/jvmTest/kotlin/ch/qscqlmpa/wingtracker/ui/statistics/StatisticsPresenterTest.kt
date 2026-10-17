@@ -1,6 +1,10 @@
 package ch.qscqlmpa.wingtracker.ui.statistics
 
 import ch.qscqlmpa.wingtracker.AppClock
+import ch.qscqlmpa.wingtracker.flights.Flight
+import ch.qscqlmpa.wingtracker.flights.FlightDetails
+import ch.qscqlmpa.wingtracker.flights.FlightFilter
+import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.gear.Acquisition
 import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
@@ -23,6 +27,8 @@ import kotlinx.datetime.LocalDate
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 
 private fun aWing(
     id: String,
@@ -46,10 +52,11 @@ class StatisticsPresenterTest {
     private val first = aWing("wing-1", LocalDate(2023, 1, 1))
     private val second = aWing("wing-2", LocalDate(2024, 1, 1))
 
-    private fun TestScope.presenter() =
+    private fun TestScope.presenter(filter: FlightFilter? = null) =
         StatisticsPresenter(
             scope = TestScope(UnconfinedTestDispatcher(testScheduler)),
             getStatistics = GetStatistics(flights, wings, AppClock()),
+            filter = filter,
         )
 
     private fun givenStored() {
@@ -72,6 +79,30 @@ class StatisticsPresenterTest {
                 // then
                 assertThat(presenter.state.loading).isFalse()
                 assertThat(presenter.state.statistics?.series).hasSize(2)
+            }
+
+        @Test
+        fun `loads only the wings the search found flights for`() =
+            runTest {
+                // given
+                coEvery { flights.findAll() } returns
+                    LoadResult(
+                        listOf(
+                            Flight(
+                                FlightId("flight-1"),
+                                FlightDetails(LocalDate(2025, 7, 4), 90.minutes, first.id),
+                                Instant.parse("2025-07-04T17:00:00Z"),
+                            ),
+                        ),
+                    )
+                coEvery { wings.findAll() } returns LoadResult(listOf(second, first))
+                val presenter = presenter(FlightFilter(wingIds = setOf(first.id)))
+
+                // when
+                presenter.refresh()
+
+                // then
+                assertThat(presenter.state.visibleSeries.map { it.key }).containsExactly(SeriesKey.OfWing(first.id))
             }
 
         @Test

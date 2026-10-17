@@ -34,6 +34,9 @@ import ch.qscqlmpa.wingtracker.ui.resources.statistics_empty_action
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_empty_body
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_empty_title
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_legend_hint
+import ch.qscqlmpa.wingtracker.ui.resources.statistics_search_none_body
+import ch.qscqlmpa.wingtracker.ui.resources.statistics_search_none_title
+import ch.qscqlmpa.wingtracker.ui.resources.statistics_search_show_all
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_show_charts
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_show_table
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_title
@@ -43,6 +46,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun StatisticsScreen(
     presenter: StatisticsPresenter,
+    onShowAll: () -> Unit,
     onGoToLogbook: () -> Unit,
 ) {
     val state = presenter.state
@@ -71,11 +75,16 @@ fun StatisticsScreen(
         }
         state.unreadable.forEach { UnreadableBanner(it, onDismiss = presenter::dismissUnreadable) }
         state.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
+        presenter.filter?.let { filter ->
+            statistics?.let { SearchBanner(filter, it.series.flatMap { s -> s.wings }, onShowAll) }
+        }
 
         if (state.loading) {
             CircularProgressIndicator(modifier = Modifier.padding(24.dp))
         } else if (statistics != null) {
-            if (statistics.isEmpty) {
+            if (statistics.isEmpty && presenter.filter != null) {
+                NothingFound(onShowAll)
+            } else if (statistics.isEmpty) {
                 EmptyStatistics(onGoToLogbook)
             } else {
                 StatisticsContent(state, statistics, presenter)
@@ -99,7 +108,7 @@ private fun StatisticsContent(
     val chartSeries = state.visibleSeries.map { ChartSeries(it.key, names.getValue(it.key), colorOf(it.key)) }
 
     // Above the legend, as it is about all wings and does not change when some are hidden.
-    TotalsCard(statistics.totals, theme)
+    TotalsCard(statistics.totals, theme, searched = presenter.filter != null)
 
     // A legend is always shown: it is the dependable identity channel and the control for hiding wings.
     Text(
@@ -108,7 +117,7 @@ private fun StatisticsContent(
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        statistics.series.forEach { s ->
+        statistics.shownSeries.forEach { s ->
             FilterChip(
                 selected = s.key !in state.hidden,
                 onClick = { presenter.toggleSeries(s.key) },
@@ -147,6 +156,19 @@ private fun StatisticsViewButton(
                 if (showTable) Res.string.statistics_show_charts else Res.string.statistics_show_table,
             ),
         )
+    }
+}
+
+@Composable
+private fun NothingFound(onShowAll: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(top = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(stringResource(Res.string.statistics_search_none_title), style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(Res.string.statistics_search_none_body), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Button(onClick = onShowAll) { Text(stringResource(Res.string.statistics_search_show_all)) }
     }
 }
 

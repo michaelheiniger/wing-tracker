@@ -100,6 +100,7 @@
     <string name="logbook_search_to_before_from">Must not be before From</string>
     <string name="logbook_search_clear">Clear search</string>
     <string name="logbook_search_result">%1$s found · %2$s</string>
+    <string name="logbook_search_statistics">Statistics</string>
     <string name="logbook_search_none_title">No matching flights</string>
     <string name="logbook_search_none_body">No flight matches your search. Change or clear it to see your flights again.</string>
     <plurals name="flights_count">
@@ -165,6 +166,14 @@
     <string name="statistics_empty_title">Nothing to chart yet</string>
     <string name="statistics_empty_body">Charts appear as soon as you have logged a flight.</string>
     <string name="statistics_empty_action">Go to the logbook</string>
+    <string name="statistics_search_banner">Only the flights matching your logbook search: %1$s</string>
+    <string name="statistics_search_text">“%1$s”</string>
+    <string name="statistics_search_from">from %1$s</string>
+    <string name="statistics_search_until">until %1$s</string>
+    <string name="statistics_search_range">%1$s – %2$s</string>
+    <string name="statistics_search_show_all">Show all</string>
+    <string name="statistics_search_none_title">No flights match this search</string>
+    <string name="statistics_search_none_body">Change the search in the logbook, or show the statistics of all your flights.</string>
     <string name="statistics_table_year">Year</string>
     <string name="statistics_table_yearly_title">Hours per year (h:mm)</string>
     <string name="statistics_table_cumulative_title">Cumulative hours at the end of the year (h:mm)</string>
@@ -487,6 +496,7 @@
     </plurals>
     <string name="statistics_totals_title">Totals</string>
     <string name="statistics_totals_note">All wings together, retired ones included</string>
+    <string name="statistics_totals_note_search">Only the flights matching the search, without those before tracking</string>
     <string name="statistics_totals_before_tracking">Including %1$d flights and %2$s from before tracking, which belong to no year</string>
     <string name="statistics_totals_flights_column">Flights</string>
     <string name="statistics_totals_hours_column">Hours (h:mm)</string>

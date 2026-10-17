@@ -100,6 +100,7 @@
     <string name="logbook_search_to_before_from">Ne peut pas précéder « Du »</string>
     <string name="logbook_search_clear">Effacer la recherche</string>
     <string name="logbook_search_result">Résultat : %1$s · %2$s</string>
+    <string name="logbook_search_statistics">Statistiques</string>
     <string name="logbook_search_none_title">Aucun vol correspondant</string>
     <string name="logbook_search_none_body">Aucun vol ne correspond à ta recherche. Modifie-la ou efface-la pour revoir tes vols.</string>
     <plurals name="flights_count">
@@ -165,6 +166,14 @@
     <string name="statistics_empty_title">Rien à représenter pour l'instant</string>
     <string name="statistics_empty_body">Les graphiques apparaissent dès que tu as saisi un vol.</string>
     <string name="statistics_empty_action">Aller au carnet de vol</string>
+    <string name="statistics_search_banner">Seulement les vols correspondant à ta recherche dans le carnet de vol : %1$s</string>
+    <string name="statistics_search_text">« %1$s »</string>
+    <string name="statistics_search_from">dès le %1$s</string>
+    <string name="statistics_search_until">jusqu'au %1$s</string>
+    <string name="statistics_search_range">du %1$s au %2$s</string>
+    <string name="statistics_search_show_all">Tout afficher</string>
+    <string name="statistics_search_none_title">Aucun vol ne correspond à cette recherche</string>
+    <string name="statistics_search_none_body">Modifie la recherche dans le carnet de vol, ou affiche les statistiques de tous tes vols.</string>
     <string name="statistics_table_year">Année</string>
     <string name="statistics_table_yearly_title">Heures par année (h:mm)</string>
     <string name="statistics_table_cumulative_title">Heures cumulées à la fin de l'année (h:mm)</string>
@@ -487,6 +496,7 @@
     </plurals>
     <string name="statistics_totals_title">Totaux</string>
     <string name="statistics_totals_note">Toutes les voiles ensemble, y compris celles retirées</string>
+    <string name="statistics_totals_note_search">Seulement les vols correspondant à la recherche, sans ceux d'avant le suivi</string>
     <string name="statistics_totals_before_tracking">Dont %1$d vols et %2$s d'avant le suivi, qui n'appartiennent à aucune année</string>
     <string name="statistics_totals_flights_column">Vols</string>
     <string name="statistics_totals_hours_column">Heures (h:mm)</string>

@@ -100,6 +100,7 @@
     <string name="logbook_search_to_before_from">Darf nicht vor «Von» liegen</string>
     <string name="logbook_search_clear">Suche zurücksetzen</string>
     <string name="logbook_search_result">Treffer: %1$s · %2$s</string>
+    <string name="logbook_search_statistics">Statistik</string>
     <string name="logbook_search_none_title">Keine passenden Flüge</string>
     <string name="logbook_search_none_body">Kein Flug passt zu deiner Suche. Ändere oder lösche sie, um deine Flüge wieder zu sehen.</string>
     <plurals name="flights_count">
@@ -165,6 +166,14 @@
     <string name="statistics_empty_title">Noch nichts darzustellen</string>
     <string name="statistics_empty_body">Diagramme erscheinen, sobald du einen Flug erfasst hast.</string>
     <string name="statistics_empty_action">Zum Flugbuch</string>
+    <string name="statistics_search_banner">Nur die Flüge, die zu deiner Suche im Flugbuch passen: %1$s</string>
+    <string name="statistics_search_text">„%1$s“</string>
+    <string name="statistics_search_from">ab %1$s</string>
+    <string name="statistics_search_until">bis %1$s</string>
+    <string name="statistics_search_range">%1$s – %2$s</string>
+    <string name="statistics_search_show_all">Alle anzeigen</string>
+    <string name="statistics_search_none_title">Keine Flüge passen zu dieser Suche</string>
+    <string name="statistics_search_none_body">Ändere die Suche im Flugbuch oder zeige die Statistik aller deiner Flüge.</string>
     <string name="statistics_table_year">Jahr</string>
     <string name="statistics_table_yearly_title">Stunden pro Jahr (h:mm)</string>
     <string name="statistics_table_cumulative_title">Kumulierte Stunden am Jahresende (h:mm)</string>
@@ -487,6 +496,7 @@
     </plurals>
     <string name="statistics_totals_title">Summen</string>
     <string name="statistics_totals_note">Alle Schirme zusammen, ausgemusterte inbegriffen</string>
+    <string name="statistics_totals_note_search">Nur die Flüge, die zur Suche passen, ohne die vor der Erfassung</string>
     <string name="statistics_totals_before_tracking">Davon %1$d Flüge und %2$s vor der Erfassung, die zu keinem Jahr gehören</string>
     <string name="statistics_totals_flights_column">Flüge</string>
     <string name="statistics_totals_hours_column">Stunden (h:mm)</string>
