@@ -21,13 +21,19 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.net.http.HttpTimeoutException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 
 // Long enough for a slow build machine, short enough that a test which hangs fails instead.
 private const val WAIT_MILLIS = 5_000L
 private const val TEST_SECONDS = 20L
+
+// Far longer than any test takes, for the tests that are not about the idle timeout.
+private val LONG_IDLE = 1.minutes
 
 class ReadAbortingTest {
     private val server = ServerSocket(0, 1, InetAddress.getLoopbackAddress()).apply { soTimeout = WAIT_MILLIS.toInt() }
@@ -68,7 +74,7 @@ class ReadAbortingTest {
                 }
 
             // when
-            val text = runBlocking { stream.readAborting { it.readBytes().decodeToString() } }
+            val text = runBlocking { stream.readAborting(LONG_IDLE) { it.readBytes().decodeToString() } }
 
             // then
             assertThat(text).isEqualTo("!Debian package")
@@ -93,7 +99,7 @@ class ReadAbortingTest {
                                     request,
                                     HttpResponse.BodyHandlers.ofInputStream(),
                                 ).body()
-                                .readAborting { body ->
+                                .readAborting(LONG_IDLE) { body ->
                                     body.read(ByteArray(7))
                                     firstBytes.countDown()
                                     body.read(ByteArray(7))
@@ -118,6 +124,63 @@ class ReadAbortingTest {
             }
         }
 
+        // On its own thread, so a stall that is never noticed fails the test instead of hanging the build.
+        @Test
+        @Timeout(value = TEST_SECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+        fun `gives up on a body that stopped arriving for too long, and closes the connection`() {
+            // given
+            val clientClosed = stallingServer()
+            val request = HttpRequest.newBuilder(URI.create("http://127.0.0.1:${server.localPort}/")).build()
+
+            // when / then
+            assertThatThrownBy {
+                runBlocking {
+                    client.sendAborting(request, HttpResponse.BodyHandlers.ofInputStream()).body().readAborting(
+                        300.milliseconds,
+                    ) { it.readBytes() }
+                }
+            }.isInstanceOf(HttpTimeoutException::class.java)
+            assertThat(clientClosed.await(WAIT_MILLIS, TimeUnit.MILLISECONDS)).describedAs("connection closed").isTrue()
+        }
+
+        @Test
+        fun `keeps reading a body that arrives slowly but steadily`() {
+            // given
+            val trickle =
+                // One byte per read, and none once closed, as a socket would.
+                object : InputStream() {
+                    private var left = 8
+
+                    @Volatile
+                    private var closed = false
+
+                    override fun read(): Int = throw UnsupportedOperationException("only read into a buffer")
+
+                    override fun read(
+                        b: ByteArray,
+                        off: Int,
+                        len: Int,
+                    ): Int {
+                        if (left == 0) return -1
+                        Thread.sleep(100)
+                        if (closed) throw IOException("closed")
+                        left--
+                        b[off] = 1
+                        return 1
+                    }
+
+                    override fun close() {
+                        closed = true
+                    }
+                }
+
+            // when
+            val bytes = runBlocking { trickle.readAborting(300.milliseconds) { it.readBytes() } }
+
+            // then
+            assertThat(bytes).hasSize(8)
+        }
+
         @Test
         fun `reports a read that failed by itself`() {
             // given
@@ -127,7 +190,7 @@ class ReadAbortingTest {
                 }
 
             // when / then
-            assertThatThrownBy { runBlocking { broken.readAborting { it.read() } } }
+            assertThatThrownBy { runBlocking { broken.readAborting(LONG_IDLE) { it.read() } } }
                 .isInstanceOf(IOException::class.java)
                 .hasMessage("Connection reset")
         }

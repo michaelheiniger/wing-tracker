@@ -20,6 +20,8 @@ import kotlin.io.path.deleteIfExists
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.outputStream
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 private const val BUFFER_BYTES = 64 * 1024
 
@@ -27,13 +29,16 @@ private val logger = KotlinLogging.logger {}
 
 /**
  * Downloads release files into [directory], a cache folder of this installation that holds only the latest download:
- * an installer is large, and an older one is of no use once a newer one is fetched (ADR 0024).
+ * an installer is large, and an older one is of no use once a newer one is fetched (ADR 0024). A download that
+ * receives nothing for [idleTimeout] fails, so a stalled connection ends in a message instead of a progress bar
+ * that never moves.
  */
 class HttpReleaseDownloads(
     private val directory: Path,
     private val userAgent: String,
     private val get: suspend (url: String, userAgent: String) -> HttpAnswer = ::httpGet,
     private val open: suspend (url: String, userAgent: String) -> HttpStream = ::httpOpen,
+    private val idleTimeout: Duration = TIMEOUT_SECONDS.seconds,
 ) : ReleaseDownloads {
     override suspend fun readText(asset: ReleaseAsset): String {
         val answer = get(asset.downloadUrl, userAgent)
@@ -50,7 +55,7 @@ class HttpReleaseDownloads(
         // Written under a temporary name, so a cut-off download never looks like a finished one.
         val partial = directory.resolve("${target.fileName}.part")
         return try {
-            stream.body.readAborting { body ->
+            stream.body.readAborting(idleTimeout) { body ->
                 checkAnswered(stream.status, "Downloading ${asset.name}")
                 clearEarlierDownloads()
                 val digest = MessageDigest.getInstance("SHA-256")

@@ -28,6 +28,9 @@ import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.readBytes
 import kotlin.io.path.writeText
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 // Long enough for a slow build machine, short enough that a test which hangs fails instead.
 private const val WAIT_MILLIS = 5_000L
@@ -60,6 +63,7 @@ class HttpReleaseDownloadsTest {
         body: InputStream = ByteArrayInputStream(DEB_BYTES),
         length: Long? = DEB_BYTES.size.toLong(),
         text: HttpAnswer = HttpAnswer(200, ""),
+        idleTimeout: Duration = 20.seconds,
     ) = HttpReleaseDownloads(
         directory,
         USER_AGENT,
@@ -68,6 +72,7 @@ class HttpReleaseDownloadsTest {
             opened += url
             HttpStream(status, length, body)
         },
+        idleTimeout,
     )
 
     @Nested
@@ -161,6 +166,20 @@ class HttpReleaseDownloadsTest {
                 assertThat(directory.listDirectoryEntries()).isEmpty()
             }
         }
+
+        // On its own thread, so a stall that is never noticed fails the test instead of hanging the build.
+        @Test
+        @Timeout(value = TEST_SECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+        fun `gives up on a download that receives nothing for too long, and keeps nothing`() =
+            runTest {
+                // when / then
+                assertThatThrownBy {
+                    runBlocking { downloads(body = stalling, idleTimeout = 300.milliseconds).download(deb) { _, _ -> } }
+                }.isInstanceOfSatisfying(ReleaseSourceException::class.java) {
+                    assertThat(it.problem).isEqualTo(ReleaseProblem.Unreachable)
+                }
+                assertThat(directory.listDirectoryEntries()).isEmpty()
+            }
 
         @Test
         fun `reports a refusal and downloads nothing`() =

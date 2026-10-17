@@ -18,7 +18,7 @@ private const val HTTP_OK = 200
 private const val HTTP_FORBIDDEN = 403
 private const val HTTP_TOO_MANY_REQUESTS = 429
 private const val HTTP_SERVER_ERRORS = 500
-private const val TIMEOUT_SECONDS = 20L
+internal const val TIMEOUT_SECONDS = 20L
 
 private val logger = KotlinLogging.logger {}
 
