@@ -25,6 +25,9 @@ import kotlin.time.Duration.Companion.seconds
 
 private const val BUFFER_BYTES = 64 * 1024
 
+// Longer than the wait for an answer: a download should ride out a short drop, e.g. switching Wi-Fi networks.
+private const val IDLE_TIMEOUT_SECONDS = 60L
+
 private val logger = KotlinLogging.logger {}
 
 /**
@@ -38,7 +41,7 @@ class HttpReleaseDownloads(
     private val userAgent: String,
     private val get: suspend (url: String, userAgent: String) -> HttpAnswer = ::httpGet,
     private val open: suspend (url: String, userAgent: String) -> HttpStream = ::httpOpen,
-    private val idleTimeout: Duration = TIMEOUT_SECONDS.seconds,
+    private val idleTimeout: Duration = IDLE_TIMEOUT_SECONDS.seconds,
 ) : ReleaseDownloads {
     override suspend fun readText(asset: ReleaseAsset): String {
         val answer = get(asset.downloadUrl, userAgent)
