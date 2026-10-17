@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-17
+
 ### Added
 - A flight's page has an "air-time" card telling whether and when the flight was sent to air-time. A flight sent there has an "Open on air-time" button that opens its page on air-time. "Forget the export" asks first, then removes only the record in your logbook, nothing on air-time, so the next export sends the flight again unless air-time still has it; Undo puts the record back. The card sits below the notes.
 - "Export to air-time" in the logbook sends your flights to your air-time account. Paste an API token generated in air-time's settings once; it is kept by your system's password store (on Linux, install libsecret-tools, otherwise it is kept until Wing Tracker closes), and your air-time nick is remembered. A preview lists the flights to send, with a box to untick each one: flights with a track are sent as their IGC file, the others as a manual entry from their take-off time and duration. Wings that have no glider of the same brand, model and size on air-time get one, after you give its colour. Flights sent before, flights already on air-time starting in the same minute, and flights with neither a track nor a take-off time are left out, with a count of each.
