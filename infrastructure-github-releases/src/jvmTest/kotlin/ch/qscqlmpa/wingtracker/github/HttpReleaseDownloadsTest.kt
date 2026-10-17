@@ -4,21 +4,34 @@ import ch.qscqlmpa.wingtracker.updates.DownloadedFile
 import ch.qscqlmpa.wingtracker.updates.ReleaseAsset
 import ch.qscqlmpa.wingtracker.updates.ReleaseProblem
 import ch.qscqlmpa.wingtracker.updates.ReleaseSourceException
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import org.junit.jupiter.api.io.TempDir
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.nio.file.Path
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.readBytes
 import kotlin.io.path.writeText
 
+// Long enough for a slow build machine, short enough that a test which hangs fails instead.
+private const val WAIT_MILLIS = 5_000L
+private const val TEST_SECONDS = 20L
 private const val USER_AGENT = "wing-tracker/0.1.0"
 private const val DOWNLOADS = "https://github.com/michaelheiniger/wing-tracker/releases/download/v0.2.0"
 private const val DEB_NAME = "wing-tracker_0.2.0_amd64.deb"
@@ -34,6 +47,13 @@ class HttpReleaseDownloadsTest {
     lateinit var directory: Path
 
     private val opened = mutableListOf<String>()
+    private val stalling = StallingStream()
+
+    // Releases a read that the code under test failed to stop, so no thread outlives the test.
+    @AfterEach
+    fun releaseStalledRead() {
+        stalling.close()
+    }
 
     private fun downloads(
         status: Int = 200,
@@ -113,6 +133,35 @@ class HttpReleaseDownloadsTest {
                 assertThat(directory.listDirectoryEntries()).isEmpty()
             }
 
+        // On its own thread, so a read that is never stopped fails the test instead of hanging the build.
+        @Test
+        @Timeout(value = TEST_SECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
+        fun `stops a download that stalled as soon as it is cancelled, and keeps nothing`() {
+            runBlocking {
+                // given
+                var outcome: Any? = null
+                val download =
+                    launch(Dispatchers.Default) {
+                        try {
+                            downloads(body = stalling, length = null).download(deb) { _, _ -> }
+                        } catch (e: CancellationException) {
+                            outcome = "cancelled"
+                            throw e
+                        } catch (e: ReleaseSourceException) {
+                            outcome = e
+                        }
+                    }
+                assertThat(stalling.waiting.await(WAIT_MILLIS, TimeUnit.MILLISECONDS)).isTrue()
+
+                // when
+                withTimeout(WAIT_MILLIS) { download.cancelAndJoin() }
+
+                // then
+                assertThat(outcome).isEqualTo("cancelled")
+                assertThat(directory.listDirectoryEntries()).isEmpty()
+            }
+        }
+
         @Test
         fun `reports a refusal and downloads nothing`() =
             runTest {
@@ -178,5 +227,33 @@ class HttpReleaseDownloadsTest {
                 // then
                 assertThat(path.exists()).isFalse()
             }
+    }
+}
+
+/** Sends one byte, then waits for data that never comes, until it is closed: a connection that stalled. */
+private class StallingStream : InputStream() {
+    val waiting = CountDownLatch(1)
+    private val closed = CountDownLatch(1)
+    private var sent = false
+
+    override fun read(): Int = throw UnsupportedOperationException("only read into a buffer")
+
+    override fun read(
+        b: ByteArray,
+        off: Int,
+        len: Int,
+    ): Int {
+        if (!sent) {
+            sent = true
+            b[off] = 1
+            return 1
+        }
+        waiting.countDown()
+        closed.await()
+        throw IOException("closed")
+    }
+
+    override fun close() {
+        closed.countDown()
     }
 }

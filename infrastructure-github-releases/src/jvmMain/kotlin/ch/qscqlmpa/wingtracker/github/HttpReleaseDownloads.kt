@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.github
 
+import ch.qscqlmpa.wingtracker.http.readAborting
 import ch.qscqlmpa.wingtracker.updates.DownloadedFile
 import ch.qscqlmpa.wingtracker.updates.ReleaseAsset
 import ch.qscqlmpa.wingtracker.updates.ReleaseDownloads
@@ -7,7 +8,7 @@ import ch.qscqlmpa.wingtracker.updates.ReleaseProblem
 import ch.qscqlmpa.wingtracker.updates.ReleaseSourceException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.nio.file.Files
@@ -46,37 +47,34 @@ class HttpReleaseDownloads(
     ): DownloadedFile {
         val target = directory.resolve(safeName(asset.name))
         val stream = open(asset.downloadUrl, userAgent)
-        return withContext(Dispatchers.IO) {
-            stream.body.use { body ->
+        // Written under a temporary name, so a cut-off download never looks like a finished one.
+        val partial = directory.resolve("${target.fileName}.part")
+        return try {
+            stream.body.readAborting { body ->
                 checkAnswered(stream.status, "Downloading ${asset.name}")
                 clearEarlierDownloads()
-                // Written under a temporary name, so a cut-off download never looks like a finished one.
-                val partial = directory.resolve("${target.fileName}.part")
                 val digest = MessageDigest.getInstance("SHA-256")
-                try {
-                    var received = 0L
-                    partial.outputStream().use { out ->
-                        val buffer = ByteArray(BUFFER_BYTES)
-                        while (true) {
-                            ensureActive()
-                            val count = body.read(buffer)
-                            if (count < 0) break
-                            out.write(buffer, 0, count)
-                            digest.update(buffer, 0, count)
-                            received += count
-                            onProgress(received, stream.length)
-                        }
+                var received = 0L
+                partial.outputStream().use { out ->
+                    val buffer = ByteArray(BUFFER_BYTES)
+                    while (true) {
+                        val count = body.read(buffer)
+                        if (count < 0) break
+                        out.write(buffer, 0, count)
+                        digest.update(buffer, 0, count)
+                        received += count
+                        onProgress(received, stream.length)
                     }
-                    Files.move(partial, target, StandardCopyOption.REPLACE_EXISTING)
-                    logger.info { "Downloaded ${asset.name} ($received bytes) to $target" }
-                } catch (e: IOException) {
-                    logger.warn(e) { "Downloading ${asset.name} failed" }
-                    throw ReleaseSourceException(ReleaseProblem.Unreachable, e.message, e)
-                } finally {
-                    partial.deleteIfExists()
                 }
+                Files.move(partial, target, StandardCopyOption.REPLACE_EXISTING)
+                logger.info { "Downloaded ${asset.name} ($received bytes) to $target" }
                 DownloadedFile(target.toString(), digest.digest().toHex())
             }
+        } catch (e: IOException) {
+            logger.warn(e) { "Downloading ${asset.name} failed" }
+            throw ReleaseSourceException(ReleaseProblem.Unreachable, e.message, e)
+        } finally {
+            withContext(NonCancellable + Dispatchers.IO) { partial.deleteIfExists() }
         }
     }
 
