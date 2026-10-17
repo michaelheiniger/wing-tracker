@@ -42,6 +42,11 @@ enum class FailureKind {
     SpreadsheetUnreadable,
     SpreadsheetOldFormat,
     ImportSpreadsheet,
+    AirtimeTokenRefused,
+    AirtimePilotNotFound,
+    AirtimeUnreachable,
+    AirtimeUnexpected,
+    ExportAirtime,
     UnsupportedPath,
 
     // Shared by every feature that goes online, since the remedy is the same.
@@ -62,7 +67,12 @@ data class Failure(
 
 // The connection may be back a moment later. A refusal is left out: its message asks to wait.
 private val WORTH_RETRYING =
-    setOf(FailureKind.NoConnection, FailureKind.SyrideUnreachable, FailureKind.UpdateUnreachable)
+    setOf(
+        FailureKind.NoConnection,
+        FailureKind.SyrideUnreachable,
+        FailureKind.AirtimeUnreachable,
+        FailureKind.UpdateUnreachable,
+    )
 
 /** Whether doing the same again soon may well succeed, so the screen offers to try again. */
 val Failure.isWorthRetrying: Boolean get() = kind in WORTH_RETRYING

@@ -707,4 +707,61 @@
     <string name="profile_ground_incomplete">Der Boden konnte nicht überall geladen werden, z. B. ohne Internetverbindung.</string>
     <string name="profile_ground_source">Boden: Terrain Tiles (AWS Open Data; SRTM, EU-DEM, swissALTI3D und weitere)</string>
     <string name="failure_read_ground">Der Boden unter dem Track konnte nicht gelesen werden: %1$s</string>
+    <string name="airtime_export_action">Nach air-time exportieren</string>
+    <string name="airtime_title">Flüge nach air-time exportieren</string>
+    <string name="airtime_account_hint">Deine Flüge werden an dein air-time-Konto gesendet. Dein Nick ist der Name in der Adresse deiner Pilotenseite auf air-time.</string>
+    <string name="airtime_nick">air-time-Nick</string>
+    <string name="airtime_token">API-Token</string>
+    <string name="airtime_token_hint">Öffne auf air-time die Einstellungen und wähle „Generate API token“, dann füge das Token hier ein. Die App fragt nie nach deinem air-time-Passwort.</string>
+    <string name="airtime_open_settings">air-time-Einstellungen öffnen</string>
+    <string name="airtime_token_kept">API-Token vom System aufbewahrt</string>
+    <string name="airtime_token_session">Dein System bietet keinen Passwortspeicher, deshalb wird das Token nur bis zum Schliessen der App aufbewahrt. Unter Linux das Paket libsecret-tools installieren, um es zu behalten.</string>
+    <string name="airtime_token_replace">Anderes Token verwenden</string>
+    <string name="airtime_read">Export vorbereiten</string>
+    <string name="airtime_reading">Dein air-time-Konto wird gelesen…</string>
+    <string name="airtime_review_hint">Flüge mit Track werden als IGC-Datei gesendet, air-time berechnet den Rest. Die anderen werden als manueller Eintrag mit Startzeit und Dauer gesendet.</string>
+    <string name="airtime_choose_all">Alle Flüge</string>
+    <string name="airtime_kind_track">Track</string>
+    <string name="airtime_kind_manual">Manueller Eintrag</string>
+    <string name="airtime_gliders_title">Neue Schirme auf air-time</string>
+    <string name="airtime_gliders_hint">air-time hat für diese Schirme noch keinen Schirm mit gleicher Marke, gleichem Modell und gleicher Grösse, deshalb wird je einer erstellt. air-time verlangt eine Farbe.</string>
+    <string name="airtime_colour">Farbe</string>
+    <string name="airtime_nothing">Es gibt keine Flüge zu senden.</string>
+    <plurals name="airtime_already">
+        <item quantity="one">%1$d Flug wurde schon früher gesendet und wird ausgelassen.</item>
+        <item quantity="other">%1$d Flüge wurden schon früher gesendet und werden ausgelassen.</item>
+    </plurals>
+    <plurals name="airtime_skipped_on_airtime">
+        <item quantity="one">%1$d Flug ist schon auf air-time, mit Start in derselben Minute, und wird ausgelassen.</item>
+        <item quantity="other">%1$d Flüge sind schon auf air-time, mit Start in derselben Minute, und werden ausgelassen.</item>
+    </plurals>
+    <plurals name="airtime_skipped_no_time">
+        <item quantity="one">%1$d Flug hat weder Track noch Startzeit, air-time braucht aber den genauen Start. Füge eine Startzeit hinzu, um ihn zu senden.</item>
+        <item quantity="other">%1$d Flüge haben weder Track noch Startzeit, air-time braucht aber den genauen Start. Füge eine Startzeit hinzu, um sie zu senden.</item>
+    </plurals>
+    <plurals name="airtime_skipped_no_wing">
+        <item quantity="one">%1$d Flug wird ausgelassen, weil sein Schirm nicht gefunden wird.</item>
+        <item quantity="other">%1$d Flüge werden ausgelassen, weil ihr Schirm nicht gefunden wird.</item>
+    </plurals>
+    <plurals name="airtime_send">
+        <item quantity="one">%1$d Flug senden</item>
+        <item quantity="other">%1$d Flüge senden</item>
+    </plurals>
+    <string name="airtime_sending">%1$d von %2$d Flügen gesendet…</string>
+    <string name="airtime_stop">Anhalten</string>
+    <plurals name="airtime_sent">
+        <item quantity="one">%1$d Flug wurde an air-time gesendet.</item>
+        <item quantity="other">%1$d Flüge wurden an air-time gesendet.</item>
+    </plurals>
+    <plurals name="airtime_gliders_created">
+        <item quantity="one">%1$d Schirm wurde erstellt.</item>
+        <item quantity="other">%1$d Schirme wurden erstellt.</item>
+    </plurals>
+    <string name="airtime_stopped">Das Senden wurde angehalten. Die bis dahin gesendeten Flüge sind auf air-time, und der nächste Export lässt sie aus.</string>
+    <string name="airtime_open_pilot">Meine Seite auf air-time öffnen</string>
+    <string name="failure_airtime_token">air-time hat das API-Token abgelehnt. Erstelle in den air-time-Einstellungen ein neues und füge es hier ein.</string>
+    <string name="failure_airtime_pilot">Es wurde kein air-time-Pilot mit diesem Nick gefunden.</string>
+    <string name="failure_airtime_unreachable">air-time ist nicht erreichbar: %1$s</string>
+    <string name="failure_airtime_unexpected">air-time hat unerwartet geantwortet (%1$s). Die App muss eventuell aktualisiert werden.</string>
+    <string name="failure_export_airtime">Die Flüge konnten nicht gesendet werden: %1$s</string>
 </resources>

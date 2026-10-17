@@ -134,6 +134,28 @@ class AirtimeExportTest {
                 // then
                 assertThat(draft.newGliders.map { it.id }).containsExactly(aBirdy().id)
                 assertThat(draft.candidates.map { it.gliderId }).containsOnlyNulls()
+                assertThat(draft.candidates.map { it.newGlider }).containsOnly(aBirdy().id)
+            }
+
+        @Test
+        fun `creates one glider for two wings of the same brand, model and size`() =
+            runTest {
+                // given
+                val secondBirdy = aBirdy().copy(id = WingId("e1b7d3a9-4c62-4f05-8a3e-9b2d6c1f4e70"))
+                givenStored(
+                    listOf(
+                        aTrackedFlight("flight-1", wingId = aBirdy().id),
+                        aManualFlight("flight-2", wingId = secondBirdy.id),
+                    ),
+                    wingList = listOf(aBirdy(), secondBirdy),
+                )
+
+                // when
+                val draft = prepare()
+
+                // then
+                assertThat(draft.newGliders).hasSize(1)
+                assertThat(draft.candidates.map { it.newGlider }).containsOnly(draft.newGliders.single().id)
             }
 
         @Test
@@ -355,6 +377,23 @@ class AirtimeExportTest {
                 // then
                 assertThat(saved.map { it.id }).containsExactly(FlightId("flight-1"))
                 assertThat(result).isEqualTo(AirtimeExportResult(1, 0, AirtimeProblem.NoConnection))
+            }
+
+        @Test
+        fun `reports progress after each chosen flight`() =
+            runTest {
+                // given
+                givenStored(listOf(aTrackedFlight(), aManualFlight()))
+                val draft = prepare()
+                val progress = mutableListOf<Pair<Int, Int>>()
+
+                // when
+                export(TOKEN, draft, setOf(FlightId("flight-1"), FlightId("flight-2")), emptyMap()) { done, total ->
+                    progress += done to total
+                }
+
+                // then
+                assertThat(progress).containsExactly(1 to 2, 2 to 2)
             }
 
         @Test

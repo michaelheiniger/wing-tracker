@@ -70,7 +70,7 @@ class AirtimeWebAccount(
 
     override suspend fun flightStarts(nick: String): List<Instant> {
         val starts = mutableListOf<Instant>()
-        val path = URLEncoder.encode(nick, Charsets.UTF_8).replace("+", "%20")
+        val path = pathSegment(nick)
         do {
             val url = "$baseUrl/v0/pilots/$path/flights?limit=$PAGE_SIZE&offset=${starts.size}"
             val page =
@@ -117,6 +117,11 @@ class AirtimeWebAccount(
             "Registering the flight of ${flight.start}",
         )
     }
+
+    // The token is generated on the settings page of air-time's web app.
+    override fun tokenPage(): String = "$baseUrl/settings"
+
+    override fun pilotPage(nick: String): String = "$baseUrl/pilot/${pathSegment(nick)}"
 
     private suspend fun call(
         request: AirtimeRequest,
@@ -174,6 +179,9 @@ class AirtimeWebAccount(
 }
 
 private const val LOGGED_BODY_CHARS = 500
+
+// A nick is typed by the pilot, so it is encoded before it becomes part of an address.
+private fun pathSegment(nick: String) = URLEncoder.encode(nick, Charsets.UTF_8).replace("+", "%20")
 
 /** The form air-time's upload expects: the track as `file`, and the glider it was flown with. */
 internal fun multipart(

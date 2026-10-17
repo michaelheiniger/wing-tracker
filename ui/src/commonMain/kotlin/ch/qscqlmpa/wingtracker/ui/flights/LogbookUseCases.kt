@@ -22,6 +22,7 @@ import ch.qscqlmpa.wingtracker.maps.ReadMapTile
 import ch.qscqlmpa.wingtracker.settings.GetAppSettings
 import ch.qscqlmpa.wingtracker.settings.SaveDeviceFolder
 import ch.qscqlmpa.wingtracker.settings.SaveSyrideUsername
+import ch.qscqlmpa.wingtracker.ui.airtime.AirtimeExportUseCases
 
 /** Use cases the logbook section needs; passed in so this module never sees the DI framework. */
 class LogbookUseCases(
@@ -47,4 +48,5 @@ class LogbookUseCases(
     val readMapTile: ReadMapTile,
     val getSyrideFlightPage: GetSyrideFlightPage,
     val readGroundProfile: ReadGroundProfile,
+    val airtimeExport: AirtimeExportUseCases,
 )

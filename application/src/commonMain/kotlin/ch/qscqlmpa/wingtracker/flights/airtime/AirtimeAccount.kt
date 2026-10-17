@@ -83,4 +83,19 @@ interface AirtimeAccount {
         token: String,
         flight: ManualAirtimeFlight,
     )
+
+    /** The page where the pilot generates a token, to open in the browser. */
+    fun tokenPage(): String
+
+    /** The pilot's public page, to look at the flights just sent. */
+    fun pilotPage(nick: String): String
+}
+
+/** The air-time pages the pilot is sent to; their addresses are the adapter's business. */
+class GetAirtimePages(
+    private val account: AirtimeAccount,
+) {
+    fun tokenPage(): String = account.tokenPage()
+
+    fun pilotPage(nick: String): String = account.pilotPage(nick.trim())
 }

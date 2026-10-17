@@ -28,6 +28,9 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.reminders.Attention
+import ch.qscqlmpa.wingtracker.ui.airtime.AirtimeExportDialog
+import ch.qscqlmpa.wingtracker.ui.airtime.AirtimeExportPresenter
+import ch.qscqlmpa.wingtracker.ui.airtime.AirtimeExportUseCases
 import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightDetailActions
 import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightDetailScreen
 import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightTrackPresenter
@@ -64,6 +67,8 @@ private sealed interface LogbookDialog {
     data class Import(
         val dropped: List<NewAttachment>? = null,
     ) : LogbookDialog
+
+    data object ExportToAirtime : LogbookDialog
 }
 
 @Composable
@@ -136,6 +141,7 @@ fun LogbookRoute(
                 onLogFlight = { dialog = LogbookDialog.New() },
                 onOpenFlight = { openFlight = it.id },
                 onImport = { dialog = LogbookDialog.Import() },
+                onExportToAirtime = { dialog = LogbookDialog.ExportToAirtime },
                 onOpenStatistics = { onOpenStatistics(presenter.state.search.toFilter()) },
                 attention = attention,
                 onOpenAttention = onOpenGear,
@@ -182,6 +188,10 @@ fun LogbookRoute(
             ImportWizard(wizard, wings)
         }
 
+        LogbookDialog.ExportToAirtime -> {
+            AirtimeExport(useCases.airtimeExport, useCases, scope, onClose = closeDialog)
+        }
+
         else -> {
             FlightFormHost(
                 current,
@@ -193,6 +203,23 @@ fun LogbookRoute(
             )
         }
     }
+}
+
+@Composable
+private fun AirtimeExport(
+    airtime: AirtimeExportUseCases,
+    useCases: LogbookUseCases,
+    scope: CoroutineScope,
+    onClose: () -> Unit,
+) {
+    val presenter =
+        remember {
+            AirtimeExportPresenter(scope, airtime.prepare, airtime.export, airtime.saveNick, airtime.token, "").also {
+                it.start()
+                scope.launch { it.suggestNick(useCases.getAppSettings().airtimeNick) }
+            }
+        }
+    AirtimeExportDialog(presenter, airtime.pages, onClose)
 }
 
 /** The form for a new or an edited flight; [onRestore] reopens a new flight the pilot discarded and took back. */

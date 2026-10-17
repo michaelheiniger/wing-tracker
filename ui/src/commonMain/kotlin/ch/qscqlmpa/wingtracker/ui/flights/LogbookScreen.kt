@@ -51,6 +51,7 @@ import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.reminders.AttentionPanel
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_dismiss
+import ch.qscqlmpa.wingtracker.ui.resources.airtime_export_action
 import ch.qscqlmpa.wingtracker.ui.resources.flight_altitude
 import ch.qscqlmpa.wingtracker.ui.resources.flight_date_time
 import ch.qscqlmpa.wingtracker.ui.resources.flight_distance
@@ -92,6 +93,7 @@ fun LogbookScreen(
     onLogFlight: () -> Unit,
     onOpenFlight: (Flight) -> Unit,
     onImport: () -> Unit,
+    onExportToAirtime: () -> Unit,
     onOpenStatistics: () -> Unit,
     attention: Attention,
     onOpenAttention: (GearRef) -> Unit,
@@ -126,7 +128,12 @@ fun LogbookScreen(
             ) {
                 Text(stringResource(Res.string.logbook_title), style = MaterialTheme.typography.headlineMedium)
                 if (logbook != null) {
-                    OutlinedButton(onClick = onImport) { Text(stringResource(Res.string.import_menu)) }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = onImport) { Text(stringResource(Res.string.import_menu)) }
+                        OutlinedButton(onClick = onExportToAirtime) {
+                            Text(stringResource(Res.string.airtime_export_action))
+                        }
+                    }
                 }
             }
             importFailure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }

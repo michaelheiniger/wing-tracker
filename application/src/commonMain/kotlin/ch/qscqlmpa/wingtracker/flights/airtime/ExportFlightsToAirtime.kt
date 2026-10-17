@@ -30,20 +30,24 @@ class ExportFlightsToAirtime(
     // Injectable so tests get deterministic ids.
     private val newGliderId: () -> String = { Uuid.random().toString() },
 ) {
-    /** [colours] holds the colour the pilot gave for each wing of [AirtimeExportDraft.newGliders]. */
+    /**
+     * [colours] holds the colour the pilot gave for each wing of [AirtimeExportDraft.newGliders]; [onProgress] hears
+     * how many of the chosen flights are done, since sending many takes a while.
+     */
     suspend operator fun invoke(
         token: String,
         draft: AirtimeExportDraft,
         chosen: Set<FlightId>,
         colours: Map<WingId, String>,
+        onProgress: (done: Int, total: Int) -> Unit = { _, _ -> },
     ): AirtimeExportResult {
         val selection = draft.candidates.filter { it.flight.id in chosen }
         // Only the gliders the chosen flights need; the others stay uncreated.
-        val missing = selection.filter { it.gliderId == null }.map { GliderKey.of(it.wing) }.toSet()
-        val gliderIds = mutableMapOf<GliderKey, String>()
+        val missing = selection.mapNotNull { it.newGlider }.toSet()
+        val gliderIds = mutableMapOf<WingId, String>()
         var exported = 0
         try {
-            for (wing in draft.newGliders.filter { GliderKey.of(it) in missing }) {
+            for (wing in draft.newGliders.filter { it.id in missing }) {
                 val glider =
                     NewAirtimeGlider(
                         id = newGliderId(),
@@ -54,16 +58,18 @@ class ExportFlightsToAirtime(
                         colour = requireNotNull(colours[wing.id]) { "No colour given for wing ${wing.id.value}" },
                     )
                 account.createGlider(token, glider)
-                gliderIds[GliderKey.of(wing)] = glider.id
+                gliderIds[wing.id] = glider.id
             }
-            for (candidate in selection) {
-                val gliderId = candidate.gliderId ?: gliderIds.getValue(GliderKey.of(candidate.wing))
+            for ((index, candidate) in selection.withIndex()) {
+                val gliderId = candidate.gliderId ?: gliderIds.getValue(checkNotNull(candidate.newGlider))
                 // Read again, so a flight edited or exported since the preview is neither sent twice nor overwritten.
-                val flight =
-                    flights.findById(candidate.flight.id)?.takeUnless { it.isExportedTo(AIRTIME_SYSTEM) } ?: continue
-                send(token, flight, gliderId, candidate.takeOffId)
-                flights.save(flight.markExported(AIRTIME_SYSTEM, clock.now()))
-                exported++
+                val flight = flights.findById(candidate.flight.id)?.takeUnless { it.isExportedTo(AIRTIME_SYSTEM) }
+                if (flight != null) {
+                    send(token, flight, gliderId, candidate.takeOffId)
+                    flights.save(flight.markExported(AIRTIME_SYSTEM, clock.now()))
+                    exported++
+                }
+                onProgress(index + 1, selection.size)
             }
         } catch (e: AirtimeException) {
             return AirtimeExportResult(exported, gliderIds.size, e.problem)

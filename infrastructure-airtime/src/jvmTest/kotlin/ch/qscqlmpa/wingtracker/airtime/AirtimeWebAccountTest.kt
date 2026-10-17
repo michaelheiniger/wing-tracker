@@ -283,6 +283,19 @@ class AirtimeWebAccountTest {
     }
 
     @Nested
+    inner class Pages {
+        @Test
+        fun `points to the settings page for a token and to the pilot's page`() {
+            // given
+            val account = account()
+
+            // when / then
+            assertThat(account.tokenPage()).isEqualTo("$BASE_URL/settings")
+            assertThat(account.pilotPage("Jean Dé")).isEqualTo("$BASE_URL/pilot/Jean%20D%C3%A9")
+        }
+    }
+
+    @Nested
     inner class Answers {
         @ParameterizedTest
         @CsvSource("403, TokenRefused", "500, Unreachable", "502, Unreachable", "422, UnexpectedAnswer")

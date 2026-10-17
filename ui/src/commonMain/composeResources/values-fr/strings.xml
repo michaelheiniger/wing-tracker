@@ -707,4 +707,61 @@
     <string name="profile_ground_incomplete">Le sol n'a pas pu être chargé partout, p. ex. sans connexion Internet.</string>
     <string name="profile_ground_source">Sol : Terrain Tiles (AWS Open Data ; SRTM, EU-DEM, swissALTI3D et autres)</string>
     <string name="failure_read_ground">Le sol sous la trace n'a pas pu être lu : %1$s</string>
+    <string name="airtime_export_action">Exporter vers air-time</string>
+    <string name="airtime_title">Exporter les vols vers air-time</string>
+    <string name="airtime_account_hint">Tes vols sont envoyés à ton compte air-time. Ton pseudo est le nom figurant dans l'adresse de ta page de pilote sur air-time.</string>
+    <string name="airtime_nick">Pseudo air-time</string>
+    <string name="airtime_token">Jeton d'API</string>
+    <string name="airtime_token_hint">Sur air-time, ouvre les paramètres et choisis « Generate API token », puis colle le jeton ici. L'application ne demande jamais ton mot de passe air-time.</string>
+    <string name="airtime_open_settings">Ouvrir les paramètres d'air-time</string>
+    <string name="airtime_token_kept">Jeton d'API conservé par ton système</string>
+    <string name="airtime_token_session">Ton système n'offre pas de trousseau de mots de passe : le jeton n'est conservé que jusqu'à la fermeture de l'application. Sous Linux, installe le paquet libsecret-tools pour le conserver.</string>
+    <string name="airtime_token_replace">Utiliser un autre jeton</string>
+    <string name="airtime_read">Préparer l'export</string>
+    <string name="airtime_reading">Lecture de ton compte air-time…</string>
+    <string name="airtime_review_hint">Les vols avec une trace sont envoyés sous forme de fichier IGC, et air-time calcule le reste. Les autres sont envoyés comme saisie manuelle avec leur heure de décollage et leur durée.</string>
+    <string name="airtime_choose_all">Tous les vols</string>
+    <string name="airtime_kind_track">Trace</string>
+    <string name="airtime_kind_manual">Saisie manuelle</string>
+    <string name="airtime_gliders_title">Nouvelles voiles sur air-time</string>
+    <string name="airtime_gliders_hint">air-time n'a pas encore de voile de même marque, modèle et taille que celles-ci : une voile est créée pour chacune. air-time exige une couleur.</string>
+    <string name="airtime_colour">Couleur</string>
+    <string name="airtime_nothing">Il n'y a aucun vol à envoyer.</string>
+    <plurals name="airtime_already">
+        <item quantity="one">%1$d vol a déjà été envoyé et est laissé de côté.</item>
+        <item quantity="other">%1$d vols ont déjà été envoyés et sont laissés de côté.</item>
+    </plurals>
+    <plurals name="airtime_skipped_on_airtime">
+        <item quantity="one">%1$d vol est déjà sur air-time, avec un départ à la même minute, et est laissé de côté.</item>
+        <item quantity="other">%1$d vols sont déjà sur air-time, avec un départ à la même minute, et sont laissés de côté.</item>
+    </plurals>
+    <plurals name="airtime_skipped_no_time">
+        <item quantity="one">%1$d vol n'a ni trace ni heure de décollage, alors qu'air-time a besoin de son heure de départ exacte. Ajoute une heure de décollage pour l'envoyer.</item>
+        <item quantity="other">%1$d vols n'ont ni trace ni heure de décollage, alors qu'air-time a besoin de leur heure de départ exacte. Ajoute une heure de décollage pour les envoyer.</item>
+    </plurals>
+    <plurals name="airtime_skipped_no_wing">
+        <item quantity="one">%1$d vol est laissé de côté car sa voile est introuvable.</item>
+        <item quantity="other">%1$d vols sont laissés de côté car leur voile est introuvable.</item>
+    </plurals>
+    <plurals name="airtime_send">
+        <item quantity="one">Envoyer %1$d vol</item>
+        <item quantity="other">Envoyer %1$d vols</item>
+    </plurals>
+    <string name="airtime_sending">Envoi de %1$d vols sur %2$d…</string>
+    <string name="airtime_stop">Arrêter</string>
+    <plurals name="airtime_sent">
+        <item quantity="one">%1$d vol a été envoyé à air-time.</item>
+        <item quantity="other">%1$d vols ont été envoyés à air-time.</item>
+    </plurals>
+    <plurals name="airtime_gliders_created">
+        <item quantity="one">%1$d voile a été créée sur air-time.</item>
+        <item quantity="other">%1$d voiles ont été créées sur air-time.</item>
+    </plurals>
+    <string name="airtime_stopped">L'envoi a été arrêté. Les vols envoyés jusque-là sont sur air-time, et le prochain export les laisse de côté.</string>
+    <string name="airtime_open_pilot">Ouvrir ma page sur air-time</string>
+    <string name="failure_airtime_token">air-time a refusé le jeton d'API. Génères-en un nouveau dans les paramètres d'air-time et colle-le ici.</string>
+    <string name="failure_airtime_pilot">Aucun pilote air-time avec ce pseudo n'a été trouvé.</string>
+    <string name="failure_airtime_unreachable">air-time n'a pas pu être joint : %1$s</string>
+    <string name="failure_airtime_unexpected">air-time a répondu de façon inattendue (%1$s). L'application doit peut-être être mise à jour.</string>
+    <string name="failure_export_airtime">Les vols n'ont pas pu être envoyés : %1$s</string>
 </resources>

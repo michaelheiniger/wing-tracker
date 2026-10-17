@@ -11,6 +11,10 @@ import ch.qscqlmpa.wingtracker.ui.resources.error_days
 import ch.qscqlmpa.wingtracker.ui.resources.error_hours
 import ch.qscqlmpa.wingtracker.ui.resources.error_months
 import ch.qscqlmpa.wingtracker.ui.resources.error_required
+import ch.qscqlmpa.wingtracker.ui.resources.failure_airtime_pilot
+import ch.qscqlmpa.wingtracker.ui.resources.failure_airtime_token
+import ch.qscqlmpa.wingtracker.ui.resources.failure_airtime_unexpected
+import ch.qscqlmpa.wingtracker.ui.resources.failure_airtime_unreachable
 import ch.qscqlmpa.wingtracker.ui.resources.failure_cancel_plan
 import ch.qscqlmpa.wingtracker.ui.resources.failure_change_data_folder
 import ch.qscqlmpa.wingtracker.ui.resources.failure_data_overlaps
@@ -21,6 +25,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_delete_check
 import ch.qscqlmpa.wingtracker.ui.resources.failure_delete_flight
 import ch.qscqlmpa.wingtracker.ui.resources.failure_delete_in_use
 import ch.qscqlmpa.wingtracker.ui.resources.failure_drop_no_igc
+import ch.qscqlmpa.wingtracker.ui.resources.failure_export_airtime
 import ch.qscqlmpa.wingtracker.ui.resources.failure_export_calendar
 import ch.qscqlmpa.wingtracker.ui.resources.failure_import_igc
 import ch.qscqlmpa.wingtracker.ui.resources.failure_import_spreadsheet
@@ -86,6 +91,11 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.SpreadsheetUnreadable to Res.string.failure_spreadsheet_unreadable,
         FailureKind.SpreadsheetOldFormat to Res.string.failure_spreadsheet_old_format,
         FailureKind.ImportSpreadsheet to Res.string.failure_import_spreadsheet,
+        FailureKind.AirtimeTokenRefused to Res.string.failure_airtime_token,
+        FailureKind.AirtimePilotNotFound to Res.string.failure_airtime_pilot,
+        FailureKind.AirtimeUnreachable to Res.string.failure_airtime_unreachable,
+        FailureKind.AirtimeUnexpected to Res.string.failure_airtime_unexpected,
+        FailureKind.ExportAirtime to Res.string.failure_export_airtime,
         FailureKind.UnsupportedPath to Res.string.failure_unsupported_path,
         FailureKind.NoConnection to Res.string.failure_no_connection,
         FailureKind.UpdateUnreachable to Res.string.failure_update_unreachable,

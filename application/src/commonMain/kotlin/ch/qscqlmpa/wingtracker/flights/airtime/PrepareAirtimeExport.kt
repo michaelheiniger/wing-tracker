@@ -8,17 +8,22 @@ import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.flights.igc.InvalidTrackException
 import ch.qscqlmpa.wingtracker.flights.igc.TrackReader
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
+import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
 import kotlinx.datetime.LocalDateTime
 import kotlin.time.Instant
 
-/** A flight that can be sent. [gliderId] is null when its wing's glider has to be created first. */
+/**
+ * A flight that can be sent, with either the air-time glider of its wing ([gliderId]) or the wing of
+ * [AirtimeExportDraft.newGliders] whose glider has to be created first ([newGlider]).
+ */
 data class AirtimeExportCandidate(
     val flight: Flight,
     val wing: Wing,
     val gliderId: String?,
     // air-time's site of the same name; only manual entries carry one.
     val takeOffId: Long?,
+    val newGlider: WingId? = null,
 ) {
     // Sent as its stored track when it has one, otherwise as a manual entry.
     val withTrack: Boolean get() = flight.igcFile != null
@@ -90,9 +95,14 @@ class PrepareAirtimeExport(
                 candidates += AirtimeExportCandidate(flight, checkNotNull(wing), gliders[GliderKey.of(wing)]?.id, null)
             }
         }
-        val withTakeOffs = withTakeOffIds(candidates)
-        val newGliders = withTakeOffs.filter { it.gliderId == null }.map { it.wing }.distinctBy { GliderKey.of(it) }
-        return AirtimeExportDraft(nick.trim(), withTakeOffs, newGliders, skipped, exported.size)
+        // Wings that share brand, model and size share one glider, which is created once.
+        val newGliders = candidates.filter { it.gliderId == null }.map { it.wing }.distinctBy { GliderKey.of(it) }
+        val byKey = newGliders.associateBy({ GliderKey.of(it) }, { it.id })
+        val complete =
+            withTakeOffIds(candidates).map {
+                if (it.gliderId == null) it.copy(newGlider = byKey.getValue(GliderKey.of(it.wing))) else it
+            }
+        return AirtimeExportDraft(nick.trim(), complete, newGliders, skipped, exported.size)
     }
 
     /** The take-off time, or else the first fix of the stored track; null when neither is known. */

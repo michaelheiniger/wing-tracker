@@ -10,6 +10,9 @@ import ch.qscqlmpa.wingtracker.flights.GetLogbook
 import ch.qscqlmpa.wingtracker.flights.LogFlight
 import ch.qscqlmpa.wingtracker.flights.UpdateFlight
 import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeAccount
+import ch.qscqlmpa.wingtracker.flights.airtime.ExportFlightsToAirtime
+import ch.qscqlmpa.wingtracker.flights.airtime.GetAirtimePages
+import ch.qscqlmpa.wingtracker.flights.airtime.PrepareAirtimeExport
 import ch.qscqlmpa.wingtracker.flights.igc.AttachIgcTrack
 import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
 import ch.qscqlmpa.wingtracker.flights.igc.PrepareIgcImport
@@ -69,6 +72,7 @@ import ch.qscqlmpa.wingtracker.reminders.GetCalendarEntries
 import ch.qscqlmpa.wingtracker.reminders.GetStartNotification
 import ch.qscqlmpa.wingtracker.reminders.MarkStartNotificationShown
 import ch.qscqlmpa.wingtracker.settings.GetAppSettings
+import ch.qscqlmpa.wingtracker.settings.SaveAirtimeNick
 import ch.qscqlmpa.wingtracker.settings.SaveDeviceFolder
 import ch.qscqlmpa.wingtracker.settings.SaveInterfaceScale
 import ch.qscqlmpa.wingtracker.settings.SaveReminderLeadTimes
@@ -85,6 +89,8 @@ import ch.qscqlmpa.wingtracker.storage.json.JsonSettingsRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonUpdatePreferencesRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonWingRepository
 import ch.qscqlmpa.wingtracker.syride.SyrideWebFlightSource
+import ch.qscqlmpa.wingtracker.ui.airtime.AirtimeExportUseCases
+import ch.qscqlmpa.wingtracker.ui.airtime.AirtimeToken
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.GearUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
@@ -202,11 +208,16 @@ private fun flightsModule() =
         factory { UpdateSyrideTakeOffTimes(get()) }
         factory { CountSyrideFlightsWithoutTrack(get()) }
         factory { GetSyrideFlightPage(get(), get()) }
+        factory { PrepareAirtimeExport(get(), get(), get(), get(), get(), get()) }
+        factory { ExportFlightsToAirtime(get(), get(), get(), get()) }
+        factory { GetAirtimePages(get()) }
+        factory { SaveAirtimeNick(get()) }
         factory { OpenSpreadsheet(get()) }
         factory { PrepareSpreadsheetImport(get(), get()) }
         factory { ImportSpreadsheetFlights(get(), get(), get(), RegisterWing(get())) }
         single {
             LogbookUseCases(
+                get(),
                 get(),
                 get(),
                 get(),
@@ -315,6 +326,9 @@ private fun uiModule(
     }
     single { ThemePreference() }
     single { UndoCoordinator() }
+    // One for the whole run, so a token kept for the session outlives the dialog (ADR 0029).
+    single { AirtimeToken(get<PlatformServices>().credentialStore) }
+    factory { AirtimeExportUseCases(get(), get(), get(), get(), get()) }
 }
 
 // Linux has the Secret Service; macOS has neither, so it keeps secrets for the session only (ADR 0029).

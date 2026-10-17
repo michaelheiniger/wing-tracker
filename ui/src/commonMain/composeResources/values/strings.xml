@@ -707,4 +707,61 @@
     <string name="profile_ground_incomplete">The ground could not be loaded everywhere, e.g. without an internet connection.</string>
     <string name="profile_ground_source">Ground: Terrain Tiles (AWS Open Data; SRTM, EU-DEM, swissALTI3D and others)</string>
     <string name="failure_read_ground">The ground under the track could not be read: %1$s</string>
+    <string name="airtime_export_action">Export to air-time</string>
+    <string name="airtime_title">Export flights to air-time</string>
+    <string name="airtime_account_hint">Your flights are sent to your air-time account. Your nick is the name in the address of your pilot page on air-time.</string>
+    <string name="airtime_nick">air-time nick</string>
+    <string name="airtime_token">API token</string>
+    <string name="airtime_token_hint">On air-time, open Settings and choose “Generate API token”, then paste the token here. The app never asks for your air-time password.</string>
+    <string name="airtime_open_settings">Open air-time settings</string>
+    <string name="airtime_token_kept">API token kept by your system</string>
+    <string name="airtime_token_session">Your system offers no password store, so the token is only kept until the app closes. On Linux, install the libsecret-tools package to keep it.</string>
+    <string name="airtime_token_replace">Use another token</string>
+    <string name="airtime_read">Prepare export</string>
+    <string name="airtime_reading">Reading your air-time account…</string>
+    <string name="airtime_review_hint">Flights with a track are sent as their IGC file, and air-time works out the rest. The others are sent as a manual entry with their take-off time and duration.</string>
+    <string name="airtime_choose_all">All flights</string>
+    <string name="airtime_kind_track">Track</string>
+    <string name="airtime_kind_manual">Manual entry</string>
+    <string name="airtime_gliders_title">New gliders on air-time</string>
+    <string name="airtime_gliders_hint">air-time has no glider of the same brand, model and size for these wings yet, so one is created for each. air-time requires a colour.</string>
+    <string name="airtime_colour">Colour</string>
+    <string name="airtime_nothing">There are no flights to send.</string>
+    <plurals name="airtime_already">
+        <item quantity="one">%1$d flight was sent earlier and is left out.</item>
+        <item quantity="other">%1$d flights were sent earlier and are left out.</item>
+    </plurals>
+    <plurals name="airtime_skipped_on_airtime">
+        <item quantity="one">%1$d flight is already on air-time, starting in the same minute, and is left out.</item>
+        <item quantity="other">%1$d flights are already on air-time, starting in the same minute, and are left out.</item>
+    </plurals>
+    <plurals name="airtime_skipped_no_time">
+        <item quantity="one">%1$d flight has neither a track nor a take-off time, but air-time needs its exact start. Add a take-off time to send it.</item>
+        <item quantity="other">%1$d flights have neither a track nor a take-off time, but air-time needs their exact start. Add a take-off time to send them.</item>
+    </plurals>
+    <plurals name="airtime_skipped_no_wing">
+        <item quantity="one">%1$d flight is left out because its wing cannot be found.</item>
+        <item quantity="other">%1$d flights are left out because their wing cannot be found.</item>
+    </plurals>
+    <plurals name="airtime_send">
+        <item quantity="one">Send %1$d flight</item>
+        <item quantity="other">Send %1$d flights</item>
+    </plurals>
+    <string name="airtime_sending">Sending %1$d of %2$d flights…</string>
+    <string name="airtime_stop">Stop</string>
+    <plurals name="airtime_sent">
+        <item quantity="one">%1$d flight was sent to air-time.</item>
+        <item quantity="other">%1$d flights were sent to air-time.</item>
+    </plurals>
+    <plurals name="airtime_gliders_created">
+        <item quantity="one">%1$d glider was created.</item>
+        <item quantity="other">%1$d gliders were created.</item>
+    </plurals>
+    <string name="airtime_stopped">Sending was stopped. The flights sent until then are on air-time, and the next export leaves them out.</string>
+    <string name="airtime_open_pilot">Open my page on air-time</string>
+    <string name="failure_airtime_token">air-time refused the API token. Generate a new one in air-time's settings and paste it here.</string>
+    <string name="failure_airtime_pilot">No air-time pilot with this nick was found.</string>
+    <string name="failure_airtime_unreachable">air-time could not be reached: %1$s</string>
+    <string name="failure_airtime_unexpected">air-time answered something unexpected (%1$s). The application may need an update.</string>
+    <string name="failure_export_airtime">The flights could not be sent: %1$s</string>
 </resources>
