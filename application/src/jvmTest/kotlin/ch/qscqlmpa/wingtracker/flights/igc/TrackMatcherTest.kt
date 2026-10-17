@@ -84,7 +84,7 @@ class TrackMatcherTest {
         @Test
         fun `never links to a Syride entry without a track that has the same number`() {
             // given
-            val activity = aSyrideFlight("f-1", takeOffTime = null, syrideId = "activity:3271596")
+            val activity = aSyrideFlight("f-1", takeOffTime = null, syrideId = "untracked-flight:3271596")
 
             // when
             val match = matcher.match(aTrack(fileName = "3271596.igc", duration = null), listOf(activity))

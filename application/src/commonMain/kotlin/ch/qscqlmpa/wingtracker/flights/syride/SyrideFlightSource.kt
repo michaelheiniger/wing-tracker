@@ -23,8 +23,13 @@ private const val FLIGHT_PREFIX = "flight:"
 /** Whether a flight came from Syride with a track there, which can then be imported and attached to it. */
 fun ExternalReference.isSyrideFlightWithTrack(): Boolean = system == SYRIDE_SYSTEM && id.startsWith(FLIGHT_PREFIX)
 
-/** The id of a Syride entry without a track, which only has an activity number. */
-fun syrideActivityId(activityNumber: Int): String = "activity:$activityNumber"
+/**
+ * The id of a Syride flight without a track. Syride calls such an entry an activity and only gives it an activity
+ * number; the prefix uses the app's own words, so stored data does not depend on Syride's vocabulary.
+ */
+fun syrideUntrackedFlightId(activityNumber: Int): String = "$UNTRACKED_FLIGHT_PREFIX$activityNumber"
+
+internal const val UNTRACKED_FLIGHT_PREFIX = "untracked-flight:"
 
 /** One flight of a Syride pilot. Flights logged without an instrument have no track ([hasTrack] is false). */
 data class SyrideFlight(

@@ -457,7 +457,7 @@ class SyrideImportTest {
                         listOf(
                             fromSyride("flight-1", "flight:3271596"),
                             fromSyride("flight-2", "flight:3271597", withTrack = true),
-                            fromSyride("flight-3", "activity:88412"),
+                            fromSyride("flight-3", "untracked-flight:88412"),
                             aFlight("flight-4"),
                         ),
                 )
@@ -467,6 +467,55 @@ class SyrideImportTest {
 
                 // then
                 assertThat(waiting).isEqualTo(1)
+            }
+    }
+
+    @Nested
+    inner class RenamingUntrackedFlightIds {
+        private val rename get() = RenameUntrackedSyrideFlightIds(flights)
+
+        private fun importedAs(
+            id: String,
+            system: String,
+            externalId: String,
+        ) = aFlight(id).copy(importedFrom = ExternalReference(system, externalId))
+
+        @Test
+        fun `gives Syride flights without a track the id the import uses now, keeping their number`() =
+            runTest {
+                // given
+                givenStored(flightList = listOf(importedAs("flight-1", SYRIDE_SYSTEM, "activity:3770736")))
+
+                // when
+                val renamed = rename()
+
+                // then
+                assertThat(renamed).isEqualTo(1)
+                assertThat(saved.single().importedFrom)
+                    .isEqualTo(ExternalReference(SYRIDE_SYSTEM, "untracked-flight:3770736"))
+                assertThat(saved.single().details).isEqualTo(aFlight("flight-1").details)
+            }
+
+        @Test
+        fun `leaves flights with a track, flights of other sources and renamed flights alone`() =
+            runTest {
+                // given
+                givenStored(
+                    flightList =
+                        listOf(
+                            importedAs("flight-1", SYRIDE_SYSTEM, "flight:3271596"),
+                            importedAs("flight-2", SYRIDE_SYSTEM, "untracked-flight:3770736"),
+                            importedAs("flight-3", "spreadsheet", "activity:12"),
+                            aFlight("flight-4"),
+                        ),
+                )
+
+                // when
+                val renamed = rename()
+
+                // then
+                assertThat(renamed).isEqualTo(0)
+                assertThat(saved).isEmpty()
             }
     }
 }

@@ -2,8 +2,8 @@ package ch.qscqlmpa.wingtracker.syride
 
 import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlight
-import ch.qscqlmpa.wingtracker.flights.syride.syrideActivityId
 import ch.qscqlmpa.wingtracker.flights.syride.syrideFlightId
+import ch.qscqlmpa.wingtracker.flights.syride.syrideUntrackedFlightId
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import org.jsoup.Jsoup
@@ -69,7 +69,7 @@ internal object SyrideActivityParser {
         if (moment == null || duration == null || wingName == null) return null
         return SyrideFlight(
             // A flight without a track has no flight page, so its activity stands in as the stable id.
-            id = if (flightId != null) syrideFlightId(flightId) else syrideActivityId(card.activityId()),
+            id = if (flightId != null) syrideFlightId(flightId) else syrideUntrackedFlightId(card.activityId()),
             hasTrack = flightId != null,
             name = value("Flight name")?.takeIf { it != NOT_SET },
             date = moment.first,

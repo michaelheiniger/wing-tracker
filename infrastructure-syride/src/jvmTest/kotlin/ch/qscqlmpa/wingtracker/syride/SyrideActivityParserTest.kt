@@ -75,7 +75,7 @@ class SyrideActivityParserTest {
 
         @Test
         fun `is identified by its activity and has no flight name when none was set`() {
-            assertThat(flight.id).startsWith("activity:")
+            assertThat(flight.id).startsWith("untracked-flight:")
             assertThat(flight.name).isNull()
         }
 

@@ -19,6 +19,7 @@ import ch.qscqlmpa.wingtracker.flights.spreadsheet.SpreadsheetReader
 import ch.qscqlmpa.wingtracker.flights.syride.CountSyrideFlightsWithoutTrack
 import ch.qscqlmpa.wingtracker.flights.syride.ImportSyrideFlights
 import ch.qscqlmpa.wingtracker.flights.syride.PrepareSyrideImport
+import ch.qscqlmpa.wingtracker.flights.syride.RenameUntrackedSyrideFlightIds
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlightSource
 import ch.qscqlmpa.wingtracker.flights.syride.UpdateSyrideTakeOffTimes
 import ch.qscqlmpa.wingtracker.gear.harness.DeleteHarness
@@ -178,6 +179,7 @@ private fun flightsModule() =
         factory { ImportSyrideFlights(get(), get(), get(), RegisterWing(get())) }
         factory { UpdateSyrideTakeOffTimes(get()) }
         factory { CountSyrideFlightsWithoutTrack(get()) }
+        factory { RenameUntrackedSyrideFlightIds(get()) }
         factory { OpenSpreadsheet(get()) }
         factory { PrepareSpreadsheetImport(get(), get()) }
         factory { ImportSpreadsheetFlights(get(), get(), get(), RegisterWing(get())) }
