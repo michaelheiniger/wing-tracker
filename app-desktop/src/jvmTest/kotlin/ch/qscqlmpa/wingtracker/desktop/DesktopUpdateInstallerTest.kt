@@ -7,13 +7,18 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.io.IOException
+import java.nio.file.Path
 
 private const val LOCK_ERROR =
     "E: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 4242 (unattended-upgr)"
+private const val MSI = "C:\\Users\\michael\\AppData\\Local\\wing-tracker\\cache\\updates\\wing-tracker-0.2.0.msi"
 private const val CACHED = "/home/michael/.cache/wing-tracker/updates/wing-tracker_0.2.0_amd64.deb"
 
 class DesktopUpdateInstallerTest {
     private val commands = mutableListOf<List<String>>()
+    private val detached = mutableListOf<List<String>>()
+    private var restartedPlainly = false
+    private var exited = false
 
     private fun installer(
         kind: InstallerKind = InstallerKind.Deb,
@@ -21,12 +26,16 @@ class DesktopUpdateInstallerTest {
         result: () -> CommandResult = { CommandResult(0, "Setting up wing-tracker (0.2.0) ...") },
     ) = DesktopUpdateInstaller(
         kind,
+        Path.of("C:/Users/michael/AppData/Local/wing-tracker/logs"),
         run = { command ->
             commands += command
             result()
         },
         isAvailable = { it in available },
         showFolder = {},
+        startDetached = { detached += it },
+        restartPlainly = { restartedPlainly = true },
+        exit = { exited = true },
     )
 
     @Nested
@@ -109,14 +118,60 @@ class DesktopUpdateInstallerTest {
             }
 
         @Test
-        fun `leaves installing to the pilot on Windows for now`() =
+        fun `waits for the restart on Windows, which cannot replace a running application`() =
             runTest {
                 // when
-                val outcome = installer(kind = InstallerKind.Msi).install("C:/Users/michael/wing-tracker-0.2.0.msi")
+                val outcome = installer(kind = InstallerKind.Msi).install(MSI)
 
                 // then
-                assertThat(outcome).isEqualTo(InstallOutcome.Manual(command = null))
+                assertThat(outcome).isEqualTo(InstallOutcome.InstallsOnRestart)
                 assertThat(commands).isEmpty()
+                assertThat(detached).isEmpty()
+            }
+    }
+
+    @Nested
+    inner class Restart {
+        @Test
+        fun `simply restarts after installing on Linux`() =
+            runTest {
+                // given
+                val installer = installer()
+                installer.install(CACHED)
+
+                // when
+                installer.restart()
+
+                // then
+                assertThat(restartedPlainly).isTrue()
+                assertThat(detached).isEmpty()
+            }
+
+        @Test
+        fun `hands the waiting installer to PowerShell and closes on Windows`() =
+            runTest {
+                // given
+                val installer = installer(kind = InstallerKind.Msi)
+                installer.install(MSI)
+
+                // when
+                installer.restart()
+
+                // then
+                assertThat(detached.single()).startsWith("powershell.exe", "-NoProfile")
+                assertThat(exited).isTrue()
+                assertThat(restartedPlainly).isFalse()
+            }
+
+        @Test
+        fun `simply restarts on Windows when nothing waits to be installed`() =
+            runTest {
+                // when
+                installer(kind = InstallerKind.Msi).restart()
+
+                // then
+                assertThat(restartedPlainly).isTrue()
+                assertThat(detached).isEmpty()
             }
     }
 }

@@ -155,6 +155,21 @@ class UpdateInstallPresenterTest {
             }
 
         @Test
+        fun `offers to install while restarting where the system cannot replace a running application`() =
+            runTest {
+                // given
+                givenDownloaded()
+                coEvery { installer.install(CACHED) } returns InstallOutcome.InstallsOnRestart
+                val presenter = presenter()
+
+                // when
+                presenter.install(anUpdate)
+
+                // then
+                assertThat(presenter.state).isEqualTo(InstallState.InstallsOnRestart)
+            }
+
+        @Test
         fun `shows why installing failed`() =
             runTest {
                 // given

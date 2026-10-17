@@ -9,6 +9,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.nio.file.Path
+import kotlin.system.exitProcess
 
 private val logger = KotlinLogging.logger {}
 
@@ -29,18 +30,33 @@ class CommandResult(
  * Installs an update the way the platform's package was installed (ADR 0024). On Linux the Debian package goes through
  * the package manager, run through polkit so the desktop asks for the administrator password; installing a package
  * replaces the files of the running application, which is safe there, and the new version runs after a restart.
- * Windows has no packages yet, so its pilots install by hand until that slice is done.
+ * Windows locks the files of a running application, so there the per-user MSI is installed while the application
+ * restarts, by a step that outlives it (ADR 0025); its log goes to [logDirectory].
  */
 class DesktopUpdateInstaller(
     private val kind: InstallerKind,
+    private val logDirectory: Path,
     private val run: suspend (List<String>) -> CommandResult = ::runCommand,
     private val isAvailable: (String) -> Boolean = ::isOnPath,
     private val showFolder: suspend (Path) -> Unit = ::openInFileManager,
+    private val startDetached: (List<String>) -> Unit = ::startDetached,
+    private val restartPlainly: () -> Unit = ::restartApplication,
+    private val exit: () -> Unit = { exitProcess(0) },
 ) : UpdateInstaller {
+    // The verified MSI that waits for the restart; only ever set on Windows.
+    @Volatile
+    private var pendingMsi: String? = null
+
     override suspend fun install(path: String): InstallOutcome =
         when (kind) {
-            InstallerKind.Deb -> installDeb(path)
-            InstallerKind.Msi -> InstallOutcome.Manual(command = null)
+            InstallerKind.Deb -> {
+                installDeb(path)
+            }
+
+            InstallerKind.Msi -> {
+                pendingMsi = path
+                InstallOutcome.InstallsOnRestart
+            }
         }
 
     private suspend fun installDeb(path: String): InstallOutcome {
@@ -85,7 +101,37 @@ class DesktopUpdateInstaller(
 
     override suspend fun showInFolder(path: String) = showFolder(Path.of(path).parent)
 
-    override fun restart() = restartApplication()
+    override fun restart() {
+        val msi = pendingMsi ?: return restartPlainly()
+        val handOff =
+            WindowsHandOff.commandLine(
+                WindowsHandOff.script(
+                    applicationPid = ProcessHandle.current().pid(),
+                    msi = msi,
+                    log = logDirectory.resolve(INSTALL_LOG).toString(),
+                    relaunch = currentCommand(),
+                ),
+            )
+        logger.info { "Closing to install $msi; the installer's log goes to ${logDirectory.resolve(INSTALL_LOG)}" }
+        startDetached(handOff)
+        exit()
+    }
+}
+
+private const val INSTALL_LOG = "update-install.log"
+
+/** The command that started this application, so the same one starts the installed version. */
+private fun currentCommand(): List<String> {
+    val info = ProcessHandle.current().info()
+    return listOfNotNull(info.command().orElse(null)) + info.arguments().orElse(emptyArray())
+}
+
+// Its output is not read, so it must not wait for anyone to read it.
+private fun startDetached(command: List<String>) {
+    ProcessBuilder(command)
+        .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+        .redirectError(ProcessBuilder.Redirect.DISCARD)
+        .start()
 }
 
 private suspend fun runCommand(command: List<String>): CommandResult =

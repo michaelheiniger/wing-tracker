@@ -23,9 +23,11 @@ import ch.qscqlmpa.wingtracker.ui.resources.update_cancelled
 import ch.qscqlmpa.wingtracker.ui.resources.update_close
 import ch.qscqlmpa.wingtracker.ui.resources.update_downloaded_bytes
 import ch.qscqlmpa.wingtracker.ui.resources.update_downloading
+import ch.qscqlmpa.wingtracker.ui.resources.update_install_and_restart
 import ch.qscqlmpa.wingtracker.ui.resources.update_install_title
 import ch.qscqlmpa.wingtracker.ui.resources.update_installed
 import ch.qscqlmpa.wingtracker.ui.resources.update_installing
+import ch.qscqlmpa.wingtracker.ui.resources.update_installs_on_restart
 import ch.qscqlmpa.wingtracker.ui.resources.update_manual
 import ch.qscqlmpa.wingtracker.ui.resources.update_manual_command
 import ch.qscqlmpa.wingtracker.ui.resources.update_open_release_page
@@ -67,6 +69,12 @@ fun InstallDialog(
                     Button(onClick = presenter::restart) { Text(stringResource(Res.string.update_restart_now)) }
                 }
 
+                InstallState.InstallsOnRestart -> {
+                    Button(onClick = presenter::restart) {
+                        Text(stringResource(Res.string.update_install_and_restart))
+                    }
+                }
+
                 is InstallState.Cancelled -> {
                     Button(onClick = presenter::retry) { Text(stringResource(Res.string.update_try_again)) }
                 }
@@ -88,7 +96,7 @@ fun InstallDialog(
         },
         dismissButton = {
             when (state) {
-                InstallState.Installed -> {
+                InstallState.Installed, InstallState.InstallsOnRestart -> {
                     TextButton(onClick = presenter::close) { Text(stringResource(Res.string.update_restart_later)) }
                 }
 
@@ -132,6 +140,10 @@ private fun InstallStateContent(
 
         InstallState.Installed -> {
             Text(stringResource(Res.string.update_installed, version))
+        }
+
+        InstallState.InstallsOnRestart -> {
+            Text(stringResource(Res.string.update_installs_on_restart, version))
         }
 
         is InstallState.Cancelled -> {

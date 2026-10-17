@@ -33,6 +33,9 @@ sealed interface InstallState {
 
     data object Installed : InstallState
 
+    // Installing replaces the running application, so it happens while the application restarts.
+    data object InstallsOnRestart : InstallState
+
     /** The pilot closed the password prompt; the verified file is kept so trying again needs no new download. */
     data class Cancelled(
         val path: String,
@@ -123,6 +126,7 @@ class UpdateInstallPresenter(
         state =
             when (val outcome = installer.install(path)) {
                 InstallOutcome.Installed -> InstallState.Installed
+                InstallOutcome.InstallsOnRestart -> InstallState.InstallsOnRestart
                 InstallOutcome.Cancelled -> InstallState.Cancelled(path)
                 is InstallOutcome.Manual -> InstallState.Manual(path, outcome.command)
                 is InstallOutcome.Failed -> InstallState.Failed(Failure(FailureKind.InstallUpdate, outcome.detail))

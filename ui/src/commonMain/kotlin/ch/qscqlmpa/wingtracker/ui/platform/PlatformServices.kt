@@ -126,6 +126,9 @@ interface LogLocation {
 sealed interface InstallOutcome {
     data object Installed : InstallOutcome
 
+    // The system cannot replace a running application: it installs when the application closes for [restart].
+    data object InstallsOnRestart : InstallOutcome
+
     // The pilot closed the system's password prompt.
     data object Cancelled : InstallOutcome
 
@@ -147,7 +150,7 @@ interface UpdateInstaller {
     /** Shows the installer in the system's file manager, for installing it by hand. */
     suspend fun showInFolder(path: String)
 
-    /** Starts the application again, so the installed version runs. */
+    /** Starts the application again, so the installed version runs; installs first if that waits for the restart. */
     fun restart()
 }
 

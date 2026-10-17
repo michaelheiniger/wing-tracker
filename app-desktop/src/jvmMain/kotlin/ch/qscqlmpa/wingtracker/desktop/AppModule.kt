@@ -263,7 +263,7 @@ private fun uiModule(
             DesktopFileDrop(),
             dataLocation(dataDirectory, devMode),
             DesktopLogLocation(DesktopLogging.directory(devMode)),
-            DesktopUpdateInstaller(InstallationDirectory.installerKind()),
+            DesktopUpdateInstaller(InstallationDirectory.installerKind(), DesktopLogging.directory(devMode)),
             supportsAllFileNames(),
         )
     }

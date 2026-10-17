@@ -556,4 +556,6 @@
     <string name="update_show_in_folder">Afficher dans le dossier</string>
     <string name="update_open_release_page">Ouvrir la page de la version</string>
     <string name="update_cancel">Annuler</string>
+    <string name="update_installs_on_restart">La version %1$s est prête. Wing Tracker se ferme, l'installe et se rouvre ; cela prend une minute.</string>
+    <string name="update_install_and_restart">Installer et redémarrer</string>
 </resources>
