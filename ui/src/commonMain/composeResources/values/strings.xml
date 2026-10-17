@@ -522,6 +522,7 @@
         <item quantity="other">%1$d Syride flights in your logbook have a track on Syride that is not stored here yet.</item>
     </plurals>
     <string name="syride_tracks_hint">Import the tracks now and each one is attached to its flight. Choose the files downloaded from the Syride website, or read them from your logger.</string>
+    <string name="syride_tracks_times_first">Update the take-off times above first, so the tracks can be matched to these flights by their time.</string>
     <string name="syride_tracks_files">Choose IGC files…</string>
     <string name="syride_tracks_device">Read from a device…</string>
     <string name="syride_tracks_skip">Not now</string>

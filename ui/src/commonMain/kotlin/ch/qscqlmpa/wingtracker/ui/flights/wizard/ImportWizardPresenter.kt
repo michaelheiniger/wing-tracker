@@ -44,7 +44,7 @@ sealed interface ImportFlow {
         override val source = ImportSource.Syride
 
         // Flights whose track is still on Syride lead on to adding the tracks, which then attach to them (ADR 0026).
-        val offersTracks: Boolean get() = presenter.stage == SyrideStage.Done && presenter.withoutTrack > 0
+        val offersTracks: Boolean get() = presenter.offersTracks
 
         override val steps: List<ImportStep>
             get() =
@@ -63,7 +63,15 @@ sealed interface ImportFlow {
                     SyrideStage.Done -> if (offersTracks) ImportStep.Tracks else ImportStep.Done
                 }
         override val saved: Boolean get() = presenter.stage == SyrideStage.Done || presenter.updatedTimes != null
-        override val hasUnsavedChoices: Boolean get() = presenter.stage == SyrideStage.Wings
+
+        // With nothing new to import, the wings step holds no choice to lose.
+        override val hasUnsavedChoices: Boolean
+            get() =
+                presenter.stage == SyrideStage.Wings &&
+                    presenter.draft
+                        ?.groups
+                        .orEmpty()
+                        .isNotEmpty()
         override val busy: Boolean get() = presenter.stage == SyrideStage.Importing || presenter.updatingTimes
         override val atStart: Boolean get() = presenter.stage == SyrideStage.Account
     }

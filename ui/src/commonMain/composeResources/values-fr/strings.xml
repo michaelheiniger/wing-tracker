@@ -522,6 +522,7 @@
         <item quantity="other">%1$d vols Syride de ton carnet ont sur Syride une trace qui n'est pas encore enregistrée ici.</item>
     </plurals>
     <string name="syride_tracks_hint">Importe les traces maintenant et chacune sera rattachée à son vol. Choisis les fichiers téléchargés depuis le site Syride, ou lis-les depuis ton enregistreur.</string>
+    <string name="syride_tracks_times_first">Mets d'abord à jour les heures de décollage ci-dessus, pour que les traces puissent être rattachées à ces vols par leur heure.</string>
     <string name="syride_tracks_files">Choisir des fichiers IGC…</string>
     <string name="syride_tracks_device">Lire depuis un appareil…</string>
     <string name="syride_tracks_skip">Pas maintenant</string>

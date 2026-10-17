@@ -46,6 +46,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.syride_tracks_device
 import ch.qscqlmpa.wingtracker.ui.resources.syride_tracks_files
 import ch.qscqlmpa.wingtracker.ui.resources.syride_tracks_hint
 import ch.qscqlmpa.wingtracker.ui.resources.syride_tracks_skip
+import ch.qscqlmpa.wingtracker.ui.resources.syride_tracks_times_first
 import ch.qscqlmpa.wingtracker.ui.resources.syride_tracks_title
 import ch.qscqlmpa.wingtracker.ui.resources.syride_tracks_waiting
 import ch.qscqlmpa.wingtracker.ui.resources.syride_update_times
@@ -65,7 +66,7 @@ internal fun SyrideImportSteps(
     when (presenter.stage) {
         SyrideStage.Account -> AccountStep(presenter, actions)
         SyrideStage.Reading -> ReadingStep(presenter)
-        SyrideStage.Wings -> WingsStep(presenter, actions, tracks.onImported)
+        SyrideStage.Wings -> WingsStep(presenter, actions, tracks)
         SyrideStage.Importing -> Busy(null)
         SyrideStage.Done -> DoneStep(presenter, actions, tracks)
     }
@@ -85,20 +86,34 @@ private fun DoneStep(
     actions: StepActions,
     tracks: TrackOffer,
 ) {
+    ImportDone(presenter.result, actions.close, closeButton = !presenter.offersTracks)
+    if (presenter.offersTracks) TracksOffer(presenter, tracks, onSkip = actions.close)
+}
+
+// Right after the flights is when adding the tracks attaches them, rather than duplicating flights (ADR 0026).
+@Composable
+private fun TracksOffer(
+    presenter: SyrideImportPresenter,
+    tracks: TrackOffer,
+    onSkip: () -> Unit,
+    onBack: (() -> Unit)? = null,
+) {
     val waiting = presenter.withoutTrack
-    ImportDone(presenter.result, actions.close, closeButton = waiting == 0)
-    if (waiting == 0) return
-    // Right after the flights is when adding the tracks attaches them, rather than duplicating flights (ADR 0026).
     Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium) {
         Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(Res.string.syride_tracks_title), style = MaterialTheme.typography.titleSmall)
             Text(pluralStringResource(Res.plurals.syride_tracks_waiting, waiting, waiting))
             Hint(stringResource(Res.string.syride_tracks_hint))
+            // Tracks match these flights by take-off time, so a time still to update would leave them unmatched.
+            if (presenter.takeOffTimesPending) {
+                StatusBadge(stringResource(Res.string.syride_tracks_times_first), Severity.Warning)
+            }
         }
     }
     tracks.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
     Buttons {
-        TextButton(onClick = actions.close) { Text(stringResource(Res.string.syride_tracks_skip)) }
+        onBack?.let { TextButton(onClick = it) { Text(stringResource(Res.string.import_back)) } }
+        TextButton(onClick = onSkip) { Text(stringResource(Res.string.syride_tracks_skip)) }
         OutlinedButton(onClick = tracks.onReadDevice) { Text(stringResource(Res.string.syride_tracks_device)) }
         OutlinedButton(onClick = tracks.onChooseFiles) { Text(stringResource(Res.string.syride_tracks_files)) }
     }
@@ -146,7 +161,7 @@ private fun ReadingStep(presenter: SyrideImportPresenter) {
 private fun WingsStep(
     presenter: SyrideImportPresenter,
     actions: StepActions,
-    onImported: () -> Unit,
+    tracks: TrackOffer,
 ) {
     val draft = checkNotNull(presenter.draft)
     if (draft.alreadyImported > 0) Hint(stringResource(Res.string.syride_already, draft.alreadyImported))
@@ -162,11 +177,16 @@ private fun WingsStep(
         )
     }
     presenter.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
+    // Nothing new to import: the tracks of the flights imported before can still be added.
+    if (presenter.offersTracks) {
+        TracksOffer(presenter, tracks, onSkip = actions.close, onBack = presenter::back)
+        return
+    }
     Buttons {
         TextButton(onClick = presenter::back) { Text(stringResource(Res.string.import_back)) }
         TextButton(onClick = actions.cancel) { Text(stringResource(Res.string.action_cancel)) }
         Button(
-            onClick = { presenter.import(onFinished = onImported) },
+            onClick = { presenter.import(onFinished = tracks.onImported) },
             enabled = presenter.importableCount > 0 && presenter.allReady,
         ) {
             Text(pluralStringResource(Res.plurals.import_count, presenter.importableCount, presenter.importableCount))

@@ -331,6 +331,52 @@ class SyrideImportPresenterTest {
             }
 
         @Test
+        fun `offers the tracks right after reading when there is nothing new to import`() =
+            runTest {
+                // given
+                givenAccount()
+                coEvery { countWithoutTrack() } returns 184
+                val presenter = presenter()
+
+                // when
+                presenter.read()
+
+                // then
+                assertThat(presenter.stage).isEqualTo(SyrideStage.Wings)
+                assertThat(presenter.offersTracks).isTrue()
+            }
+
+        @Test
+        fun `waits with the tracks until new flights are imported`() =
+            runTest {
+                // given
+                givenAccount(aGroup(BIRDY))
+                coEvery { countWithoutTrack() } returns 184
+                val presenter = presenter()
+
+                // when
+                presenter.read()
+
+                // then
+                assertThat(presenter.offersTracks).isFalse()
+            }
+
+        @Test
+        fun `points out take-off times that are still to update before adding tracks`() =
+            runTest {
+                // given
+                val update = TakeOffTimeUpdate(FlightId("flight-1"), LocalDate(2026, 9, 26), null, LocalTime(13, 43))
+                coEvery { prepare("QSCQLMPA") } returns aDraft().copy(takeOffTimeUpdates = listOf(update))
+                val presenter = presenter()
+
+                // when
+                presenter.read()
+
+                // then
+                assertThat(presenter.takeOffTimesPending).isTrue()
+            }
+
+        @Test
         fun `still reports the import as done when the flights cannot be counted`() =
             runTest {
                 // given

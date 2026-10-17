@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.ui.flights.wizard
 
+import ch.qscqlmpa.wingtracker.flights.syride.SyrideImportDraft
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import ch.qscqlmpa.wingtracker.ui.flights.IgcBatchPresenter
 import ch.qscqlmpa.wingtracker.ui.flights.IgcBatchRow
@@ -29,6 +30,7 @@ class ImportWizardPresenterTest {
             every { it.updatedTimes } returns null
             every { it.updatingTimes } returns false
             every { it.withoutTrack } returns 0
+            every { it.offersTracks } returns false
         }
     private val spreadsheet =
         mockk<SpreadsheetImportPresenter>(relaxed = true).also {
@@ -286,6 +288,7 @@ class ImportWizardPresenterTest {
         fun `asks before throwing away the wings chosen for Syride flights`() {
             // given
             every { syride.stage } returns SyrideStage.Wings
+            every { syride.draft } returns SyrideImportDraft("QSCQLMPA", listOf(mockk()), 0, emptyList())
             val wizard = wizard().also { it.chooseSyride() }
 
             // when
@@ -359,7 +362,50 @@ class ImportWizardPresenterTest {
             every { syride.stage } returns SyrideStage.Done
             every { syride.updatedTimes } returns null
             every { syride.withoutTrack } returns 184
+            every { syride.offersTracks } returns true
             return wizard().also { it.chooseSyride() }
+        }
+
+        private fun nothingNewOnSyride(): ImportWizardPresenter {
+            every { syride.stage } returns SyrideStage.Wings
+            every { syride.draft } returns SyrideImportDraft("QSCQLMPA", emptyList(), 184, emptyList())
+            every { syride.offersTracks } returns true
+            return wizard().also { it.chooseSyride() }
+        }
+
+        @Test
+        fun `shows the tracks as the next step when Syride has nothing new`() {
+            // when
+            val wizard = nothingNewOnSyride()
+
+            // then
+            assertThat(wizard.step).isEqualTo(ImportStep.Wings)
+            assertThat(wizard.steps).contains(ImportStep.Tracks)
+        }
+
+        @Test
+        fun `closes without asking when Syride has nothing new`() {
+            // given
+            val wizard = nothingNewOnSyride()
+
+            // when
+            wizard.cancel()
+
+            // then
+            assertThat(closed).isTrue()
+        }
+
+        @Test
+        fun `goes back from the review to the Syride step that offered the tracks`() {
+            // given
+            every { trackFiles.chooseFolder(any()) } answers { firstArg<(List<NewAttachment>) -> Unit>()(TRACKS) }
+            val wizard = nothingNewOnSyride().also { it.chooseTracks(ImportSource.Device) }
+
+            // when
+            wizard.back()
+
+            // then
+            assertThat(wizard.step).isEqualTo(ImportStep.Wings)
         }
 
         @Test
@@ -383,6 +429,7 @@ class ImportWizardPresenterTest {
             // given
             every { syride.stage } returns SyrideStage.Done
             every { syride.withoutTrack } returns 0
+            every { syride.offersTracks } returns false
 
             // when
             val wizard = wizard().also { it.chooseSyride() }

@@ -522,6 +522,7 @@
         <item quantity="other">%1$d Syride-Flüge in deinem Flugbuch haben auf Syride einen Track, der hier noch nicht gespeichert ist.</item>
     </plurals>
     <string name="syride_tracks_hint">Importiere die Tracks jetzt, dann wird jeder seinem Flug angehängt. Wähle die von der Syride-Website heruntergeladenen Dateien aus oder lies sie von deinem Logger.</string>
+    <string name="syride_tracks_times_first">Aktualisiere zuerst die Startzeiten oben, damit die Tracks diesen Flügen über die Zeit zugeordnet werden können.</string>
     <string name="syride_tracks_files">IGC-Dateien auswählen…</string>
     <string name="syride_tracks_device">Von einem Gerät lesen…</string>
     <string name="syride_tracks_skip">Nicht jetzt</string>

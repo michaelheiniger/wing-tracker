@@ -58,9 +58,19 @@ class SyrideImportPresenter(
     var updatedTimes by mutableStateOf<Int?>(null)
         private set
 
-    /** Syride flights in the logbook whose track is not stored yet, counted once the import is done. */
+    /** Syride flights in the logbook whose track is not stored yet, counted after reading and after importing. */
     var withoutTrack by mutableStateOf(0)
         private set
+
+    /** The tracks are offered once the flights are imported, or right away when there is nothing new to import. */
+    val offersTracks: Boolean
+        get() =
+            withoutTrack > 0 &&
+                (stage == SyrideStage.Done || (stage == SyrideStage.Wings && draft?.groups.isNullOrEmpty() == true))
+
+    /** Take-off times the pilot was offered and has not updated; tracks of these flights cannot match by time yet. */
+    val takeOffTimesPending: Boolean
+        get() = updatedTimes == null && draft?.takeOffTimeUpdates.orEmpty().isNotEmpty()
 
     private var reading: Job? = null
 
@@ -96,6 +106,8 @@ class SyrideImportPresenter(
                 try {
                     val prepared = prepare(name)
                     saveUsername(name)
+                    // Counted now too: with nothing new to import, the tracks are offered straight away.
+                    withoutTrack = countFlightsWithoutTrack()
                     start(prepared)
                 } catch (e: CancellationException) {
                     throw e
