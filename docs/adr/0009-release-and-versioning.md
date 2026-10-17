@@ -16,7 +16,11 @@ Versions follow strict Semantic Versioning (MAJOR.MINOR.PATCH); a hotfix is a pa
 
 ## Consequences
 
-Releasing is a tag push. Every release needs a hand-written changelog entry. Other OS packages and auto-update are deferred decisions.
+Releasing is a tag push. Every release needs a hand-written changelog entry. Other OS packages are a deferred decision; updating from within the app is decided in [ADR 0024](0024-built-in-updater-notifies-and-hands-off.md).
 - 2026-10-11: The release workflow can also be started by hand as a dry run: it builds the package and uploads it as an artifact, and publishes nothing. Both workflows run on a pinned runner version, so a new default image cannot change the build unnoticed.
 
 - 2026-10-11: A release is started by running the release workflow by hand with the version, instead of by pushing a tag. The workflow itself dates the `Unreleased` changelog section, builds and checks the package, and only then commits the changelog to `main`, creates the tag and publishes the release, so the changelog, tag and package cannot disagree. A dry run option builds without changing anything. Pushing a tag by hand no longer starts a release.
+
+## Amendments
+
+- 2026-10-17: Auto-update is no longer deferred: ADR 0024 decides it. To support it, the release also publishes a SHA-256 checksum file covering every installer, both in a dry run's artifact and in the GitHub Release, so the built-in updater can refuse a corrupted download.
