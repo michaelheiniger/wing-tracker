@@ -9,6 +9,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Added
 - The version of Wing Tracker is shown at the bottom of the navigation bar; clicking it opens what changed in that version on GitHub.
 
+### Changed
+- After an update installs on Linux, the log no longer lists the other software on your computer that the package manager mentioned; that output is only kept when the install fails.
+
 ## [0.2.0] - 2026-10-17
 
 ### Added

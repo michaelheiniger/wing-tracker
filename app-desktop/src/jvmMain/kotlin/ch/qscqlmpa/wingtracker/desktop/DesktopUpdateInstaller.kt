@@ -72,7 +72,12 @@ class DesktopUpdateInstaller(
                 logger.warn(e) { "The installer could not be started" }
                 return InstallOutcome.Failed(e.message)
             }
-        logger.info { "Installing $path ended with ${result.exitCode}:\n${result.output}" }
+        // apt's output only when it failed: otherwise it is noise in a bug report and lists the pilot's other software.
+        if (result.exitCode == 0 || result.exitCode == PKEXEC_DISMISSED) {
+            logger.info { "Installing $path ended with ${result.exitCode}" }
+        } else {
+            logger.warn { "Installing $path failed with ${result.exitCode}:\n${result.output}" }
+        }
         return when (result.exitCode) {
             0 -> {
                 InstallOutcome.Installed
