@@ -8,6 +8,7 @@ kotlin {
     sourceSets {
         jvmMain.dependencies {
             implementation(project(":application"))
+            implementation(project(":infrastructure-http"))
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlin.logging)

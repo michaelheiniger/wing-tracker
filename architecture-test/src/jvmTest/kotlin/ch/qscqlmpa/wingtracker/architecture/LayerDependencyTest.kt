@@ -87,6 +87,23 @@ class LayerDependencyTest {
     }
 
     @Nested
+    inner class InfrastructureHttp {
+        @Test
+        fun `knows nothing of the application, so any adapter can use it`() {
+            val violations =
+                importsOf("infrastructure-http")
+                    .map { it.name }
+                    .filter { it.startsWith("$base.") && !it.startsWith("$base.http.") }
+            assertThat(violations).describedAs("project imports in infrastructure-http").isEmpty()
+        }
+
+        @Test
+        fun `does not depend on ui or the composition root`() {
+            assertNoImportStartsWith("infrastructure-http", "androidx.compose", "org.koin", *loggingBackends)
+        }
+    }
+
+    @Nested
     inner class InfrastructureIgc {
         @Test
         fun `does not depend on ui, storage or the composition root`() {

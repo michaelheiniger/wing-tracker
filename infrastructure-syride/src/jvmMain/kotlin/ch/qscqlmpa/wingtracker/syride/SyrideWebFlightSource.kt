@@ -4,17 +4,15 @@ import ch.qscqlmpa.wingtracker.flights.syride.SyrideException
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlight
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlightSource
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideProblem
+import ch.qscqlmpa.wingtracker.http.ConnectionProblem
+import ch.qscqlmpa.wingtracker.http.connectionProblemOf
+import ch.qscqlmpa.wingtracker.http.sendAborting
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.net.ConnectException
 import java.net.URI
 import java.net.URLEncoder
-import java.net.UnknownHostException
 import java.net.http.HttpClient
-import java.net.http.HttpConnectTimeoutException
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
@@ -109,36 +107,32 @@ private val client: HttpClient by lazy {
 private suspend fun httpGet(
     url: String,
     referer: String,
-): String =
-    withContext(Dispatchers.IO) {
-        val request =
-            HttpRequest
-                .newBuilder(URI.create(url))
-                .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
-                .header("User-Agent", "wing-tracker (personal flight logbook)")
-                .header("Referer", referer)
-                .header("X-Requested-With", "XMLHttpRequest")
-                .GET()
-                .build()
-        try {
-            logger.debug { "GET $url" }
-            val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-            if (response.statusCode() != HTTP_OK) {
-                logger.warn { "Syride answered ${response.statusCode()} to $url" }
-                throw SyrideException(SyrideProblem.Unreachable, "Syride answered ${response.statusCode()}")
-            }
-            response.body()
-        } catch (e: IOException) {
-            logger.warn(e) { "Syride could not be reached at $url" }
-            throw SyrideException(problemOf(e), e.message, e)
+): String {
+    val request =
+        HttpRequest
+            .newBuilder(URI.create(url))
+            .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
+            .header("User-Agent", "wing-tracker (personal flight logbook)")
+            .header("Referer", referer)
+            .header("X-Requested-With", "XMLHttpRequest")
+            .GET()
+            .build()
+    try {
+        logger.debug { "GET $url" }
+        val response = client.sendAborting(request, HttpResponse.BodyHandlers.ofString())
+        if (response.statusCode() != HTTP_OK) {
+            logger.warn { "Syride answered ${response.statusCode()} to $url" }
+            throw SyrideException(SyrideProblem.Unreachable, "Syride answered ${response.statusCode()}")
         }
+        return response.body()
+    } catch (e: IOException) {
+        logger.warn(e) { "Syride could not be reached at $url" }
+        throw SyrideException(problemOf(e), e.message, e)
     }
+}
 
-/** Tells a connection that could not be made, most likely because this computer is offline, from one that broke. */
 internal fun problemOf(e: IOException): SyrideProblem =
-    when (e) {
-        // The JDK reports an unknown host and a missing network alike, as a connection that could not be made.
-        is ConnectException, is UnknownHostException, is HttpConnectTimeoutException -> SyrideProblem.NoConnection
-
-        else -> SyrideProblem.Unreachable
+    when (connectionProblemOf(e)) {
+        ConnectionProblem.NoConnection -> SyrideProblem.NoConnection
+        ConnectionProblem.Broken -> SyrideProblem.Unreachable
     }

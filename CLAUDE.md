@@ -21,6 +21,7 @@ Modules by layer (ADR 0004); dependencies point inwards:
 - `infrastructure-*`: adapters (e.g. `infrastructure-storage-json`). Storage is swappable (JSON files now; cloud/DB later).
 - `ui`: shared Compose Multiplatform UI and theme. Gear is split into tabs per kind; maintenance screens are generic over `GearKind`.
 - `app-desktop`: composition root (Koin wiring) and desktop entry point. The only module that sees everything.
+- `infrastructure-http`: JVM-only plumbing shared by the adapters that go online (requests that cancelling aborts, telling no connection from a broken one). Knows no port; the adapters map its outcomes.
 - `infrastructure-igc`: JVM-only adapter for the `TrackReader` port (igc4j, ADR 0018).
 - `infrastructure-syride`: JVM-only adapter for the `SyrideFlightSource` port; reads public Syride pages (ADR 0021).
 - `infrastructure-spreadsheet`: JVM-only adapter for the `SpreadsheetReader` port; reads ODS and XLSX logbooks (ADR 0022).

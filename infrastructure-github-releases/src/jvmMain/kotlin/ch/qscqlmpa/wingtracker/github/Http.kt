@@ -1,17 +1,15 @@
 package ch.qscqlmpa.wingtracker.github
 
+import ch.qscqlmpa.wingtracker.http.ConnectionProblem
+import ch.qscqlmpa.wingtracker.http.connectionProblemOf
+import ch.qscqlmpa.wingtracker.http.sendAborting
 import ch.qscqlmpa.wingtracker.updates.ReleaseProblem
 import ch.qscqlmpa.wingtracker.updates.ReleaseSourceException
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStream
-import java.net.ConnectException
 import java.net.URI
-import java.net.UnknownHostException
 import java.net.http.HttpClient
-import java.net.http.HttpConnectTimeoutException
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
@@ -66,7 +64,7 @@ internal suspend fun httpGet(
     userAgent: String,
 ): HttpAnswer =
     send(url) {
-        val response = client.send(request(url, userAgent), HttpResponse.BodyHandlers.ofString())
+        val response = client.sendAborting(request(url, userAgent), HttpResponse.BodyHandlers.ofString())
         HttpAnswer(response.statusCode(), response.body())
     }
 
@@ -75,32 +73,27 @@ internal suspend fun httpOpen(
     userAgent: String,
 ): HttpStream =
     send(url) {
-        val response = client.send(request(url, userAgent), HttpResponse.BodyHandlers.ofInputStream())
+        val response = client.sendAborting(request(url, userAgent), HttpResponse.BodyHandlers.ofInputStream())
         val length = response.headers().firstValueAsLong("Content-Length")
         HttpStream(response.statusCode(), if (length.isPresent) length.asLong else null, response.body())
     }
 
 private suspend fun <T> send(
     url: String,
-    block: () -> T,
+    block: suspend () -> T,
 ): T =
-    withContext(Dispatchers.IO) {
-        try {
-            logger.debug { "GET $url" }
-            block()
-        } catch (e: IOException) {
-            logger.warn(e) { "GitHub could not be reached at $url" }
-            throw ReleaseSourceException(problemOf(e), e.message, e)
-        }
+    try {
+        logger.debug { "GET $url" }
+        block()
+    } catch (e: IOException) {
+        logger.warn(e) { "GitHub could not be reached at $url" }
+        throw ReleaseSourceException(problemOf(e), e.message, e)
     }
 
-/** Tells a connection that could not be made, most likely because this computer is offline, from one that broke. */
 internal fun problemOf(e: IOException): ReleaseProblem =
-    when (e) {
-        // The JDK reports an unknown host and a missing network alike, as a connection that could not be made.
-        is ConnectException, is UnknownHostException, is HttpConnectTimeoutException -> ReleaseProblem.NoConnection
-
-        else -> ReleaseProblem.Unreachable
+    when (connectionProblemOf(e)) {
+        ConnectionProblem.NoConnection -> ReleaseProblem.NoConnection
+        ConnectionProblem.Broken -> ReleaseProblem.Unreachable
     }
 
 /** Throws what a status other than OK means for the pilot; [what] says what was being done, for the log. */

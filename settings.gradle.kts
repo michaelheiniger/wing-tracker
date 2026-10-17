@@ -27,6 +27,7 @@ include(
     ":domain",
     ":application",
     ":infrastructure-storage-json",
+    ":infrastructure-http",
     ":infrastructure-igc",
     ":infrastructure-syride",
     ":infrastructure-spreadsheet",
