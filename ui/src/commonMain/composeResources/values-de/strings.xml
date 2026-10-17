@@ -772,4 +772,7 @@
     <string name="flight_detail_airtime_forget">Export vergessen</string>
     <string name="flight_detail_open_airtime">Auf air-time öffnen</string>
     <string name="undo_export_forgotten">Export nach air-time vergessen</string>
+    <string name="forget_export_title">Export nach air-time vergessen?</string>
+    <string name="forget_export_body">Der Flug vom %1$s mit %2$s wird nicht mehr als an air-time gesendet markiert. Nur dein Flugbuch ändert sich: Der Flug bleibt auf air-time. Der nächste Export lässt ihn aus, wenn air-time ihn noch hat, und sendet ihn sonst.</string>
+    <string name="forget_export_confirm">Vergessen</string>
 </resources>

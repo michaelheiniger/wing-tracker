@@ -312,7 +312,6 @@ private fun Facts(
             Fact(Res.string.flight_detail_instrument, details.instrument)
         }
         TrackFacts(track)
-        AirtimeFacts(flight, actions)
         FactGroup(stringResource(Res.string.flight_detail_section_origin)) {
             if (flight.importedFrom?.system == SYRIDE_SYSTEM) {
                 Fact(Res.string.flight_detail_imported_from, stringResource(Res.string.flight_detail_syride))
@@ -343,6 +342,7 @@ private fun Facts(
             }
         }
     }
+    AirtimeFacts(flight, actions)
 }
 
 /** Whether the flight was sent to air-time; forgetting it only changes the logbook, never air-time. */
@@ -352,7 +352,7 @@ private fun AirtimeFacts(
     actions: FlightDetailActions,
 ) {
     val export = flight.exportTo(AIRTIME_SYSTEM)
-    FactGroup(stringResource(Res.string.flight_detail_section_airtime)) {
+    FactGroup(stringResource(Res.string.flight_detail_section_airtime), Modifier.fillMaxWidth()) {
         val sent =
             export?.at?.toLocalDateTime(TimeZone.currentSystemDefault())?.let {
                 stringResource(Res.string.flight_date_time, it.date.toDisplay(), it.time.toDisplay())
@@ -381,9 +381,10 @@ private fun AirtimeFacts(
 @Composable
 internal fun FactGroup(
     title: String,
+    modifier: Modifier = Modifier.width(FACT_GROUP_WIDTH),
     content: @Composable () -> Unit,
 ) {
-    AppCard(modifier = Modifier.width(FACT_GROUP_WIDTH)) {
+    AppCard(modifier = modifier) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
             content()

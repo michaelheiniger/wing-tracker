@@ -772,4 +772,7 @@
     <string name="flight_detail_airtime_forget">Oublier l'export</string>
     <string name="flight_detail_open_airtime">Ouvrir sur air-time</string>
     <string name="undo_export_forgotten">Export vers air-time oublié</string>
+    <string name="forget_export_title">Oublier l'export vers air-time ?</string>
+    <string name="forget_export_body">Le vol du %1$s avec %2$s ne sera plus marqué comme envoyé à air-time. Seul ton carnet de vol change : le vol reste sur air-time. Le prochain export le laisse de côté si air-time l'a encore, et l'envoie sinon.</string>
+    <string name="forget_export_confirm">Oublier</string>
 </resources>

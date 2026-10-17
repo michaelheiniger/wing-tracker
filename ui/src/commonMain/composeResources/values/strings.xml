@@ -772,4 +772,7 @@
     <string name="flight_detail_airtime_forget">Forget the export</string>
     <string name="flight_detail_open_airtime">Open on air-time</string>
     <string name="undo_export_forgotten">Export to air-time forgotten</string>
+    <string name="forget_export_title">Forget the export to air-time?</string>
+    <string name="forget_export_body">The flight on %1$s with %2$s will no longer be marked as sent to air-time. Only your logbook changes: the flight stays on air-time. The next export leaves it out if air-time still has it, and sends it otherwise.</string>
+    <string name="forget_export_confirm">Forget</string>
 </resources>
