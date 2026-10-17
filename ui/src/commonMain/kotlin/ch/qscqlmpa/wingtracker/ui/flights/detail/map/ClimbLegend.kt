@@ -29,15 +29,17 @@ internal fun ClimbLegend(
     modifier: Modifier = Modifier,
 ) {
     val weakSink = WEAK_SINK_FROM.toDisplayNumber()
-    val weak = WEAK_CLIMB_FROM.toDisplayNumber()
+    val zero = SLIGHT_CLIMB_FROM.toDisplayNumber()
+    val slight = SLIGHT_CLIMB_UP_TO.toDisplayNumber()
     val moderate = MODERATE_CLIMB_FROM.toDisplayNumber()
     val strong = STRONG_CLIMB_FROM.toDisplayNumber()
     val entries =
         listOf(
             ClimbBand.StrongClimb to stringResource(Res.string.map_climb_from, strong),
             ClimbBand.ModerateClimb to stringResource(Res.string.map_climb_range, moderate, strong),
-            ClimbBand.WeakClimb to stringResource(Res.string.map_climb_range, weak, moderate),
-            ClimbBand.WeakSink to stringResource(Res.string.map_climb_range, weakSink, weak),
+            ClimbBand.WeakClimb to stringResource(Res.string.map_climb_range, slight, moderate),
+            ClimbBand.SlightClimb to stringResource(Res.string.map_climb_range, zero, slight),
+            ClimbBand.WeakSink to stringResource(Res.string.map_climb_range, weakSink, zero),
             ClimbBand.StrongSink to stringResource(Res.string.map_climb_below, weakSink),
         )
     Surface(

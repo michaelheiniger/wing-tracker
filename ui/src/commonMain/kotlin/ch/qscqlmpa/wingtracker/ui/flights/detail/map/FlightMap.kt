@@ -200,6 +200,7 @@ internal fun MapColors.colorOf(band: ClimbBand): Color =
     when (band) {
         ClimbBand.StrongSink -> strongSink
         ClimbBand.WeakSink -> weakSink
+        ClimbBand.SlightClimb -> slightClimb
         ClimbBand.WeakClimb -> weakClimb
         ClimbBand.ModerateClimb -> moderateClimb
         ClimbBand.StrongClimb -> strongClimb

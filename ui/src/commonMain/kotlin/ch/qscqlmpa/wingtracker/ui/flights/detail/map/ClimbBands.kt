@@ -5,7 +5,10 @@ import ch.qscqlmpa.wingtracker.flights.igc.TrackFix
 
 // Where one band ends and the next begins, in metres per second.
 const val WEAK_SINK_FROM = -1.2
-const val WEAK_CLIMB_FROM = 0.0
+const val SLIGHT_CLIMB_FROM = 0.0
+
+// Unlike the other limits, this one still belongs to the band below it.
+const val SLIGHT_CLIMB_UP_TO = 0.5
 const val MODERATE_CLIMB_FROM = 1.0
 const val STRONG_CLIMB_FROM = 2.5
 
@@ -13,6 +16,7 @@ const val STRONG_CLIMB_FROM = 2.5
 enum class ClimbBand {
     StrongSink,
     WeakSink,
+    SlightClimb,
     WeakClimb,
     ModerateClimb,
     StrongClimb,
@@ -21,7 +25,8 @@ enum class ClimbBand {
 fun climbBandOf(metersPerSecond: Double): ClimbBand =
     when {
         metersPerSecond < WEAK_SINK_FROM -> ClimbBand.StrongSink
-        metersPerSecond < WEAK_CLIMB_FROM -> ClimbBand.WeakSink
+        metersPerSecond < SLIGHT_CLIMB_FROM -> ClimbBand.WeakSink
+        metersPerSecond <= SLIGHT_CLIMB_UP_TO -> ClimbBand.SlightClimb
         metersPerSecond < MODERATE_CLIMB_FROM -> ClimbBand.WeakClimb
         metersPerSecond < STRONG_CLIMB_FROM -> ClimbBand.ModerateClimb
         else -> ClimbBand.StrongClimb

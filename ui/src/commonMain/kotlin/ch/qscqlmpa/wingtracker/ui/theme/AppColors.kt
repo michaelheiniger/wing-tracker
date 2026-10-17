@@ -126,6 +126,7 @@ class MapColors(
     // The climb/sink colouring, from sinking to strong climb.
     val strongSink: Color,
     val weakSink: Color,
+    val slightClimb: Color,
     val weakClimb: Color,
     val moderateClimb: Color,
     val strongClimb: Color,
@@ -139,6 +140,7 @@ internal val MapPalette =
         background = hex(0xE8E4DA),
         strongSink = hex(0x0D47A1),
         weakSink = hex(0x3A8FD6),
+        slightClimb = hex(0x43A047),
         weakClimb = hex(0x2E7D32),
         moderateClimb = hex(0xEF6C00),
         strongClimb = hex(0xC62828),
