@@ -76,6 +76,7 @@ class JsonSettingsRepositoryTest {
                         lastReminderNotificationOn = LocalDate(2026, 10, 10),
                         interfaceScalePercent = 150,
                         deviceFolder = "/run/media/michael/SYRIDE1",
+                        airtimeNick = "qscqlmpa",
                     )
                 repository.save(saved)
 

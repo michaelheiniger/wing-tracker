@@ -53,6 +53,35 @@ class SettingsUseCasesTest {
     }
 
     @Nested
+    inner class SavingTheAirtimeNick {
+        @Test
+        fun `keeps the nick without surrounding spaces and the other settings`() =
+            runTest {
+                // given
+                coEvery { settings.load() } returns stored
+
+                // when
+                SaveAirtimeNick(settings)("  qscqlmpa ")
+
+                // then
+                coVerify(exactly = 1) { settings.save(stored.copy(airtimeNick = "qscqlmpa")) }
+            }
+
+        @Test
+        fun `forgets the nick when it is cleared`() =
+            runTest {
+                // given
+                coEvery { settings.load() } returns stored.copy(airtimeNick = "qscqlmpa")
+
+                // when
+                SaveAirtimeNick(settings)("  ")
+
+                // then
+                coVerify(exactly = 1) { settings.save(stored.copy(airtimeNick = null)) }
+            }
+    }
+
+    @Nested
     inner class SavingTheDeviceFolder {
         @Test
         fun `changes the folder and keeps the other settings`() =

@@ -21,6 +21,8 @@ internal data class SettingsDocument(
     val syrideUsername: String? = null,
     // Added in schema 5: where the flight tracks of a device were last imported from.
     val deviceFolder: String? = null,
+    // Added in schema 6: the air-time pilot whose flights an export compares with.
+    val airtimeNick: String? = null,
 ) {
     fun toDomain(): AppSettings =
         AppSettings(
@@ -30,10 +32,11 @@ internal data class SettingsDocument(
             interfaceScalePercent = interfaceScalePercent,
             syrideUsername = syrideUsername,
             deviceFolder = deviceFolder,
+            airtimeNick = airtimeNick,
         )
 
     companion object {
-        const val CURRENT_SCHEMA_VERSION = 5
+        const val CURRENT_SCHEMA_VERSION = 6
 
         fun from(settings: AppSettings) =
             SettingsDocument(
@@ -44,6 +47,7 @@ internal data class SettingsDocument(
                 interfaceScalePercent = settings.interfaceScalePercent,
                 syrideUsername = settings.syrideUsername,
                 deviceFolder = settings.deviceFolder,
+                airtimeNick = settings.airtimeNick,
             )
     }
 }

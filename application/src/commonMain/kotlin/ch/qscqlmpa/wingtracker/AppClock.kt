@@ -3,6 +3,7 @@ package ch.qscqlmpa.wingtracker
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
@@ -19,4 +20,7 @@ class AppClock(
 
     /** The pilot's wall-clock time for a moment, in the computer's time zone (ADR 0026). */
     fun local(instant: Instant): LocalDateTime = instant.toLocalDateTime(zone)
+
+    /** The moment a wall-clock time of the pilot stands for, in the computer's time zone (ADR 0029). */
+    fun instant(local: LocalDateTime): Instant = local.toInstant(zone)
 }

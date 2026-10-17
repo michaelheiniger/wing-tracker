@@ -39,6 +39,14 @@ class SaveDeviceFolder(
     }
 }
 
+class SaveAirtimeNick(
+    private val settings: SettingsRepository,
+) {
+    suspend operator fun invoke(nick: String) {
+        settings.save(settings.load().copy(airtimeNick = nick.trim().ifEmpty { null }))
+    }
+}
+
 class SaveSyrideUsername(
     private val settings: SettingsRepository,
 ) {
