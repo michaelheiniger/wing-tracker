@@ -59,6 +59,7 @@ kotlin {
             implementation(project(":infrastructure-igc"))
             implementation(project(":infrastructure-syride"))
             implementation(project(":infrastructure-spreadsheet"))
+            implementation(project(":infrastructure-github-releases"))
             implementation(libs.compose.material3)
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)

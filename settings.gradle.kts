@@ -30,6 +30,7 @@ include(
     ":infrastructure-igc",
     ":infrastructure-syride",
     ":infrastructure-spreadsheet",
+    ":infrastructure-github-releases",
     ":ui",
     ":app-desktop",
     ":architecture-test",

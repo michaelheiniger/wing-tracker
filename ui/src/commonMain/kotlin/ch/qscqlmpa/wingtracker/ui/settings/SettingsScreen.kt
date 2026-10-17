@@ -77,6 +77,9 @@ import ch.qscqlmpa.wingtracker.ui.resources.theme_light
 import ch.qscqlmpa.wingtracker.ui.resources.theme_system
 import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
+import ch.qscqlmpa.wingtracker.ui.updates.UpdateBadge
+import ch.qscqlmpa.wingtracker.ui.updates.UpdatePresenter
+import ch.qscqlmpa.wingtracker.ui.updates.UpdatesSection
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -86,6 +89,7 @@ fun SettingsScreen(
     reminders: ReminderSettingsPresenter,
     dataLocation: DataLocationPresenter,
     logLocation: LogLocationPresenter,
+    updates: UpdatePresenter,
     appVersion: String,
 ) {
     Column(
@@ -108,7 +112,8 @@ fun SettingsScreen(
         CalendarSection(reminders)
         DataLocationSection(dataLocation)
         LogLocationSection(logLocation)
-        AboutSection(appVersion)
+        UpdatesSection(updates)
+        AboutSection(appVersion, updates)
         reminders.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
     }
 }
@@ -315,7 +320,10 @@ private fun ScaleSection(preference: InterfaceScalePreference) {
 private const val CHANGELOG_URL = "https://github.com/michaelheiniger/wing-tracker/blob/main/CHANGELOG.md"
 
 @Composable
-private fun AboutSection(appVersion: String) {
+private fun AboutSection(
+    appVersion: String,
+    updates: UpdatePresenter,
+) {
     var open by remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
     TextButton(onClick = { open = true }, modifier = Modifier.padding(top = 16.dp)) {
@@ -329,6 +337,7 @@ private fun AboutSection(appVersion: String) {
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     SelectionContainer { Text(stringResource(Res.string.about_version, appVersion)) }
+                    updates.update?.takeIf { updates.showsBadge }?.let { UpdateBadge(it.latest.version.toString()) }
                     TextButton(onClick = { uriHandler.openUri(CHANGELOG_URL) }) {
                         Text(stringResource(Res.string.about_changelog))
                     }

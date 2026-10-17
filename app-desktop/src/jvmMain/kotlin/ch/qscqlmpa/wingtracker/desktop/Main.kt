@@ -42,6 +42,7 @@ import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import ch.qscqlmpa.wingtracker.ui.theme.WingTrackerTheme
 import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
+import ch.qscqlmpa.wingtracker.ui.updates.UpdateUseCases
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.vinceglb.filekit.FileKit
 import kotlinx.coroutines.Dispatchers
@@ -167,6 +168,7 @@ private fun ApplicationScope.MainWindow(
                 gearUseCases = koin.get<GearUseCases>(),
                 maintenanceUseCases = koin.get<MaintenanceUseCases>(),
                 reminders = koin.get<RemindersUseCases>(),
+                updates = koin.get<UpdateUseCases>(),
                 platform = koin.get<PlatformServices>(),
                 themePreference = themePreference,
                 scalePreference = scalePreference,

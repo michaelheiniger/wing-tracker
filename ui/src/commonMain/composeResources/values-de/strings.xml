@@ -515,4 +515,26 @@
     <string name="unexpected_error_open_log">Protokollordner öffnen</string>
     <string name="unexpected_error_copy">Details kopieren</string>
     <string name="unexpected_error_ok">OK</string>
+    <string name="update_title">Aktualisierungen</string>
+    <string name="update_available">Version %1$s von Wing Tracker ist verfügbar.</string>
+    <string name="update_badge">Aktualisierung %1$s verfügbar</string>
+    <string name="update_skipped">Version %1$s ist verfügbar; Sie haben sie übersprungen.</string>
+    <string name="update_whats_new">Neuerungen</string>
+    <string name="update_whats_new_title">Neuerungen bis Version %1$s</string>
+    <string name="update_release_title">Version %1$s</string>
+    <string name="update_no_notes">Keine Hinweise zu dieser Version.</string>
+    <string name="update_download">Herunterladen</string>
+    <string name="update_skip">Diese Version überspringen</string>
+    <string name="update_later">Später</string>
+    <string name="update_close">Schliessen</string>
+    <string name="update_check_at_startup">Beim Start nach Aktualisierungen suchen</string>
+    <string name="update_check_at_startup_hint">Fragt GitHub, wo Wing Tracker veröffentlicht wird, ob es eine neuere Version gibt. Nichts über Sie oder Ihr Flugbuch wird gesendet.</string>
+    <string name="update_check_now">Jetzt suchen</string>
+    <string name="update_checking">Suche läuft…</string>
+    <string name="update_up_to_date">Sie haben die neueste Version.</string>
+    <string name="update_not_applicable">Eine Entwicklungsversion wird nie aktualisiert.</string>
+    <string name="update_rail_badge">Aktualisierung verfügbar</string>
+    <string name="failure_update_unreachable">GitHub ist für die Suche nach Aktualisierungen nicht erreichbar: %1$s</string>
+    <string name="failure_update_refused">GitHub lehnt die Suche nach Aktualisierungen vorerst ab; versuchen Sie es später erneut (%1$s).</string>
+    <string name="failure_update_unexpected">Die Antwort von GitHub zu Aktualisierungen konnte nicht gelesen werden: %1$s</string>
 </resources>

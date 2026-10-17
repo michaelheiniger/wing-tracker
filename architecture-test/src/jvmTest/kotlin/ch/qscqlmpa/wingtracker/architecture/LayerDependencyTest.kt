@@ -130,4 +130,19 @@ class LayerDependencyTest {
             )
         }
     }
+
+    @Nested
+    inner class InfrastructureGitHubReleases {
+        @Test
+        fun `does not depend on ui, storage or the composition root`() {
+            assertNoImportStartsWith(
+                "infrastructure-github-releases",
+                "$base.ui",
+                "$base.desktop",
+                "$base.storage",
+                "androidx.compose",
+                *loggingBackends,
+            )
+        }
+    }
 }

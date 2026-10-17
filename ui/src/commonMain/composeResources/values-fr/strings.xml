@@ -515,4 +515,26 @@
     <string name="unexpected_error_open_log">Ouvrir le dossier du journal</string>
     <string name="unexpected_error_copy">Copier les détails</string>
     <string name="unexpected_error_ok">OK</string>
+    <string name="update_title">Mises à jour</string>
+    <string name="update_available">La version %1$s de Wing Tracker est disponible.</string>
+    <string name="update_badge">Mise à jour %1$s disponible</string>
+    <string name="update_skipped">La version %1$s est disponible ; vous avez choisi de l'ignorer.</string>
+    <string name="update_whats_new">Nouveautés</string>
+    <string name="update_whats_new_title">Nouveautés jusqu'à la version %1$s</string>
+    <string name="update_release_title">Version %1$s</string>
+    <string name="update_no_notes">Aucune note pour cette version.</string>
+    <string name="update_download">Télécharger</string>
+    <string name="update_skip">Ignorer cette version</string>
+    <string name="update_later">Plus tard</string>
+    <string name="update_close">Fermer</string>
+    <string name="update_check_at_startup">Rechercher les mises à jour au démarrage</string>
+    <string name="update_check_at_startup_hint">Demande à GitHub, où Wing Tracker est publié, si une version plus récente existe. Rien sur vous ni sur votre carnet n'est envoyé.</string>
+    <string name="update_check_now">Rechercher maintenant</string>
+    <string name="update_checking">Recherche…</string>
+    <string name="update_up_to_date">Vous avez la dernière version.</string>
+    <string name="update_not_applicable">Une version de développement n'est jamais mise à jour.</string>
+    <string name="update_rail_badge">Mise à jour disponible</string>
+    <string name="failure_update_unreachable">GitHub est injoignable pour rechercher les mises à jour : %1$s</string>
+    <string name="failure_update_refused">GitHub refuse la recherche de mises à jour pour l'instant ; réessayez plus tard (%1$s).</string>
+    <string name="failure_update_unexpected">La réponse de GitHub sur les mises à jour n'a pas pu être lue : %1$s</string>
 </resources>

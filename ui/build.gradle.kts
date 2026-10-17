@@ -12,6 +12,8 @@ kotlin {
             implementation(libs.compose.icons.core)
             implementation(libs.compose.resources)
             implementation(libs.kotlinx.coroutines.core)
+            // Release notes are Markdown; confined to this module (ADR 0024).
+            implementation(libs.markdown.renderer.m3)
         }
         jvmTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)

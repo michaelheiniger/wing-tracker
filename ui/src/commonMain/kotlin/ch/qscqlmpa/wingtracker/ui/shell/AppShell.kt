@@ -44,6 +44,7 @@ import ch.qscqlmpa.wingtracker.ui.gear.GearRoute
 import ch.qscqlmpa.wingtracker.ui.gear.GearUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
 import ch.qscqlmpa.wingtracker.ui.icons.BarChartIcon
+import ch.qscqlmpa.wingtracker.ui.icons.UpdateIcon
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.reminders.AttentionPresenter
 import ch.qscqlmpa.wingtracker.ui.reminders.ReminderSettingsPresenter
@@ -55,6 +56,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.nav_logbook
 import ch.qscqlmpa.wingtracker.ui.resources.nav_settings
 import ch.qscqlmpa.wingtracker.ui.resources.nav_statistics
 import ch.qscqlmpa.wingtracker.ui.resources.settings_data_choose_title
+import ch.qscqlmpa.wingtracker.ui.resources.update_rail_badge
 import ch.qscqlmpa.wingtracker.ui.settings.DataLocationPresenter
 import ch.qscqlmpa.wingtracker.ui.settings.LogLocationPresenter
 import ch.qscqlmpa.wingtracker.ui.settings.SettingsScreen
@@ -63,6 +65,10 @@ import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import ch.qscqlmpa.wingtracker.ui.undo.LocalUndo
 import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
+import ch.qscqlmpa.wingtracker.ui.updates.UpdateBanner
+import ch.qscqlmpa.wingtracker.ui.updates.UpdatePresenter
+import ch.qscqlmpa.wingtracker.ui.updates.UpdateUseCases
+import ch.qscqlmpa.wingtracker.ui.updates.WhatsNewDialog
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -84,6 +90,7 @@ fun AppShell(
     gearUseCases: GearUseCases,
     maintenanceUseCases: MaintenanceUseCases,
     reminders: RemindersUseCases,
+    updates: UpdateUseCases,
     platform: PlatformServices,
     themePreference: ThemePreference,
     scalePreference: InterfaceScalePreference,
@@ -107,6 +114,7 @@ fun AppShell(
     val dataLocation =
         remember { DataLocationPresenter(scope, platform.dataLocation, chooseTitle, beforeChange = undo::flush) }
     val logLocation = remember { LogLocationPresenter(scope, platform.logLocation) }
+    val updatePresenter = remember { UpdatePresenter(scope, updates) }
     // Shown once per start: the pilot can only fix it outside the application, then restart it.
     var fileNamesWarning by rememberSaveable { mutableStateOf(!platform.supportsAllFileNames) }
     // Set when the attention panel opens a piece of gear, consumed by the gear section.
@@ -115,6 +123,8 @@ fun AppShell(
     // Reminders are computed on demand (ADR 0012), so they are refreshed whenever the pilot moves between sections.
     LaunchedEffect(destination) { attentionPresenter.refresh() }
     LaunchedEffect(Unit) { reminderSettings.load() }
+    // Once per start (ADR 0012 rules out checking in the background).
+    LaunchedEffect(Unit) { updatePresenter.start() }
 
     CompositionLocalProvider(LocalUndo provides undo) {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -125,7 +135,9 @@ fun AppShell(
                             NavigationRailItem(
                                 selected = item == current,
                                 onClick = { destination = item.name },
-                                icon = { RailIcon(item, attentionPresenter.state.attention.count) },
+                                icon = {
+                                    RailIcon(item, attentionPresenter.state.attention.count, updatePresenter.showsBadge)
+                                },
                                 colors =
                                     NavigationRailItemDefaults.colors(
                                         indicatorColor = MaterialTheme.colorScheme.primaryContainer,
@@ -142,6 +154,9 @@ fun AppShell(
                                 onDismiss = { fileNamesWarning = false },
                                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                             )
+                        }
+                        if (updatePresenter.showsBanner) {
+                            UpdateBanner(updatePresenter, modifier = Modifier.fillMaxWidth().padding(16.dp))
                         }
                         Box(modifier = Modifier.weight(1f)) {
                             when (current) {
@@ -182,6 +197,7 @@ fun AppShell(
                                         reminderSettings,
                                         dataLocation,
                                         logLocation,
+                                        updatePresenter,
                                         appVersion,
                                     )
                                 }
@@ -189,19 +205,40 @@ fun AppShell(
                         }
                     }
                 }
+                WhatsNewDialog(updatePresenter)
                 SnackbarHost(undo.snackbarHost, modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp))
             }
         }
     }
 }
 
-/** The count badge sits on the Gear item, where the things that need attention actually live. */
+/**
+ * The count badge sits on the Gear item, where the things that need attention actually live; an available update is
+ * marked on Settings, where it is explained and can be installed.
+ */
 @Composable
 private fun RailIcon(
     destination: Destination,
     attentionCount: Int,
+    updateAvailable: Boolean,
 ) {
-    if (destination == Destination.Gear && attentionCount > 0) {
+    if (destination == Destination.Settings && updateAvailable) {
+        val description = stringResource(Res.string.update_rail_badge)
+        BadgedBox(
+            badge = {
+                // Not the default error colour: an update is good news, not a problem.
+                Badge(
+                    modifier = Modifier.semantics { contentDescription = description },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ) {
+                    Icon(UpdateIcon, contentDescription = null)
+                }
+            },
+        ) {
+            Icon(destination.icon, contentDescription = null)
+        }
+    } else if (destination == Destination.Gear && attentionCount > 0) {
         val description = stringResource(Res.string.attention_badge, attentionCount)
         BadgedBox(
             badge = {

@@ -7,6 +7,7 @@ import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.reminders.RemindersUseCases
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
+import ch.qscqlmpa.wingtracker.ui.updates.UpdateUseCases
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -17,11 +18,19 @@ class AppModuleTest {
     @TempDir
     lateinit var dataDirectory: Path
 
+    @TempDir
+    lateinit var installationDirectory: Path
+
     // Koin resolves at runtime (ADR 0007), so a missing binding must fail here instead of at app launch.
     @Test
     fun `every binding needed to start the application can be resolved`() {
         // given
-        val koin = koinApplication { modules(appModules(dataDirectory)) }.koin
+        val koin =
+            koinApplication {
+                modules(
+                    appModules(dataDirectory, installationDirectory = installationDirectory),
+                )
+            }.koin
 
         // when / then
         assertThat(koin.get<GearUseCases>()).isNotNull()
@@ -32,5 +41,6 @@ class AppModuleTest {
         assertThat(koin.get<RemindersUseCases>()).isNotNull()
         assertThat(koin.get<StartupReminder>()).isNotNull()
         assertThat(koin.get<ThemePreference>()).isNotNull()
+        assertThat(koin.get<UpdateUseCases>()).isNotNull()
     }
 }

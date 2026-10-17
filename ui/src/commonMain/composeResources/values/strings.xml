@@ -515,4 +515,26 @@
     <string name="unexpected_error_open_log">Open log folder</string>
     <string name="unexpected_error_copy">Copy details</string>
     <string name="unexpected_error_ok">OK</string>
+    <string name="update_title">Updates</string>
+    <string name="update_available">Version %1$s of Wing Tracker is available.</string>
+    <string name="update_badge">Update %1$s available</string>
+    <string name="update_skipped">Version %1$s is available; you chose to skip it.</string>
+    <string name="update_whats_new">What's new</string>
+    <string name="update_whats_new_title">What's new up to version %1$s</string>
+    <string name="update_release_title">Version %1$s</string>
+    <string name="update_no_notes">No notes for this version.</string>
+    <string name="update_download">Download</string>
+    <string name="update_skip">Skip this version</string>
+    <string name="update_later">Later</string>
+    <string name="update_close">Close</string>
+    <string name="update_check_at_startup">Check for updates at startup</string>
+    <string name="update_check_at_startup_hint">Asks GitHub, where Wing Tracker is published, whether a newer version is out. Nothing about you or your logbook is sent.</string>
+    <string name="update_check_now">Check now</string>
+    <string name="update_checking">Checking…</string>
+    <string name="update_up_to_date">You have the latest version.</string>
+    <string name="update_not_applicable">A development build is never updated.</string>
+    <string name="update_rail_badge">Update available</string>
+    <string name="failure_update_unreachable">GitHub could not be reached to check for updates: %1$s</string>
+    <string name="failure_update_refused">GitHub declined the check for updates for now; try again later (%1$s).</string>
+    <string name="failure_update_unexpected">GitHub's answer about updates could not be read: %1$s</string>
 </resources>

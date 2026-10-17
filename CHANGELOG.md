@@ -7,6 +7,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
+- Wing Tracker tells you when a new version is out: a banner at the top of the window shows what changed in every version since yours, with a button to download it. "Later" hides the banner until the next start; "Skip this version" stops reminding you of that version, and the next one is announced again. While an update is waiting, Settings and About show a badge.
+- A new "Updates" section in the settings checks for a new version on request and lets you turn off the check at startup. The check only asks GitHub, where Wing Tracker is published, which versions exist; nothing about you or your logbook is sent.
 - Each release lists the SHA-256 checksums of its installers in a `SHA256SUMS` file, so you can check that a download is complete and unaltered (e.g. `sha256sum --check --ignore-missing SHA256SUMS`).
 
 ## [0.1.0] - 2026-10-15

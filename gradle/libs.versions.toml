@@ -16,6 +16,7 @@ detekt = "2.0.0-alpha.6"
 igc4j = "1.1.0"
 fastexcel = "0.20.2"
 jsoup = "1.23.2"
+markdown-renderer = "0.46.0"
 kotlin-logging = "8.0.4"
 logback = "1.6.5"
 kover = "0.9.11"
@@ -30,6 +31,7 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 igc4j = { module = "com.github.smirnovegorv:igc4j", version.ref = "igc4j" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown-renderer" }
 fastexcel-reader = { module = "org.dhatim:fastexcel-reader", version.ref = "fastexcel" }
 kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kotlin-logging" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }

@@ -49,6 +49,7 @@ import ch.qscqlmpa.wingtracker.gear.wing.RetireWing
 import ch.qscqlmpa.wingtracker.gear.wing.UpdateWingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingFlightLookup
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
+import ch.qscqlmpa.wingtracker.github.GitHubReleaseSource
 import ch.qscqlmpa.wingtracker.igc.Igc4jTrackReader
 import ch.qscqlmpa.wingtracker.reminders.GetAttention
 import ch.qscqlmpa.wingtracker.reminders.GetCalendarEntries
@@ -68,6 +69,7 @@ import ch.qscqlmpa.wingtracker.storage.json.JsonFlightRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonHarnessRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonReserveRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonSettingsRepository
+import ch.qscqlmpa.wingtracker.storage.json.JsonUpdatePreferencesRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonWingRepository
 import ch.qscqlmpa.wingtracker.syride.SyrideWebFlightSource
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookUseCases
@@ -79,9 +81,20 @@ import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.reminders.RemindersUseCases
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
+import ch.qscqlmpa.wingtracker.ui.updates.UpdateUseCases
+import ch.qscqlmpa.wingtracker.updates.AppVersion
+import ch.qscqlmpa.wingtracker.updates.CheckForUpdate
+import ch.qscqlmpa.wingtracker.updates.GetUpdatePreferences
+import ch.qscqlmpa.wingtracker.updates.ReleaseSource
+import ch.qscqlmpa.wingtracker.updates.SaveCheckAtStartup
+import ch.qscqlmpa.wingtracker.updates.SkipVersion
+import ch.qscqlmpa.wingtracker.updates.UpdatePreferencesRepository
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import java.nio.file.Path
+
+// Where releases are published (ADR 0009, ADR 0024).
+private const val RELEASE_REPOSITORY = "michaelheiniger/wing-tracker"
 
 /**
  * Composition root: the only place where layers get wired together (ADR 0007). Split by feature so each module
@@ -90,6 +103,7 @@ import java.nio.file.Path
 fun appModules(
     dataDirectory: Path,
     devMode: Boolean = false,
+    installationDirectory: Path = InstallationDirectory.resolve(devMode),
 ): List<Module> =
     listOf(
         storageModule(dataDirectory),
@@ -97,6 +111,7 @@ fun appModules(
         flightsModule(),
         maintenanceModule(),
         remindersModule(),
+        updatesModule(installationDirectory, devMode),
         uiModule(dataDirectory, devMode),
     )
 
@@ -210,6 +225,23 @@ private fun remindersModule() =
         single { RemindersUseCases(get(), get(), get(), get()) }
         single { StartupReminder(get(), get(), TrayNotifier()) }
     }
+
+private fun updatesModule(
+    installationDirectory: Path,
+    devMode: Boolean,
+) = module {
+    single<ReleaseSource> { GitHubReleaseSource(RELEASE_REPOSITORY, "wing-tracker/${BuildInfo.VERSION}") }
+    single<UpdatePreferencesRepository> { JsonUpdatePreferencesRepository(installationDirectory) }
+    factory {
+        // A development build has no release version and is never updated (ADR 0024).
+        val installed = if (devMode) null else AppVersion.parseOrNull(BuildInfo.VERSION)
+        CheckForUpdate(get(), get(), installed, InstallationDirectory.installerKind())
+    }
+    factory { GetUpdatePreferences(get()) }
+    factory { SaveCheckAtStartup(get()) }
+    factory { SkipVersion(get()) }
+    single { UpdateUseCases(get(), get(), get(), get()) }
+}
 
 private fun uiModule(
     dataDirectory: Path,
