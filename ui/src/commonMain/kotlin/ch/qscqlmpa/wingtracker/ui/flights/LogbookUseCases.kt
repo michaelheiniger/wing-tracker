@@ -4,6 +4,7 @@ import ch.qscqlmpa.wingtracker.flights.DeleteFlight
 import ch.qscqlmpa.wingtracker.flights.GetLogbook
 import ch.qscqlmpa.wingtracker.flights.LogFlight
 import ch.qscqlmpa.wingtracker.flights.UpdateFlight
+import ch.qscqlmpa.wingtracker.flights.igc.AttachIgcTrack
 import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
 import ch.qscqlmpa.wingtracker.flights.igc.PrepareIgcImport
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.ImportSpreadsheetFlights
@@ -25,6 +26,7 @@ class LogbookUseCases(
     val deleteFlight: DeleteFlight,
     val prepareIgcImport: PrepareIgcImport,
     val importIgcFlight: ImportIgcFlight,
+    val attachIgcTrack: AttachIgcTrack,
     val readAttachment: ReadAttachment,
     val prepareSyrideImport: PrepareSyrideImport,
     val importSyrideFlights: ImportSyrideFlights,

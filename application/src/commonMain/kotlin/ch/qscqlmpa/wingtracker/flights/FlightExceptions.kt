@@ -6,3 +6,7 @@ class FlightNotFoundException(
 
 class FlightDateInFutureException :
     IllegalArgumentException("A flight cannot be logged for a day that has not happened yet")
+
+class FlightHasTrackException(
+    id: FlightId,
+) : IllegalStateException("Flight ${id.value} already has a track")

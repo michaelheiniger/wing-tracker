@@ -47,7 +47,9 @@ import ch.qscqlmpa.wingtracker.ui.resources.igc_batch_wing_for_all
 import ch.qscqlmpa.wingtracker.ui.resources.igc_detected
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_duplicate
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_future
+import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_has_track
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_no_flight
+import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_no_match
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_repeated
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_save
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_unreadable
@@ -78,6 +80,7 @@ fun IgcBatchDialog(
                         Text(stringResource(Res.string.igc_batch_nothing_new))
                     } else {
                         WingForAll(presenter, wings)
+                        MatchSummary(presenter)
                         TrackList(presenter, wings)
                     }
                     if (presenter.skippedCount > 0) {
@@ -139,7 +142,7 @@ private fun TrackList(
     wings: List<Wing>,
 ) {
     LazyColumn(modifier = Modifier.heightIn(max = ROWS_MAX_HEIGHT_DP.dp)) {
-        items(presenter.rows) { row ->
+        items(presenter.visibleRows) { row ->
             TrackRow(row, presenter, wings)
             HorizontalDivider()
         }
@@ -162,39 +165,53 @@ private fun TrackRow(
             onCheckedChange = { presenter.select(row, it) },
             enabled = row.selectable && !presenter.importing,
         )
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            val draft = row.draft
-            val duration = draft?.duration
-            if (draft != null && duration != null) {
-                Text(
-                    "${draft.date.toDisplay()} · ${formatDuration(duration)}",
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
+        TrackDetails(row, presenter, wings, Modifier.weight(1f))
+        // An attached track goes to a flight that already has its wing.
+        if (row.createsFlight) {
+            WingMenu(wings, presenter.wingOf(row), onSelected = { presenter.changeWing(row, it.id) })
+        }
+    }
+}
+
+/** What the track says, which flight it belongs to, and what still needs the pilot's attention. */
+@Composable
+private fun TrackDetails(
+    row: IgcBatchRow,
+    presenter: IgcBatchPresenter,
+    wings: List<Wing>,
+    modifier: Modifier,
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        val draft = row.draft
+        val duration = draft?.duration
+        if (draft != null && duration != null) {
             Text(
-                row.file.fileName,
+                "${draft.date.toDisplay()} · ${formatDuration(duration)}",
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+        Text(
+            row.file.fileName,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        val takeOff = draft?.takeOffTime
+        val landing = draft?.landingTime
+        if (takeOff != null && landing != null) {
+            Text(
+                stringResource(Res.string.igc_detected, takeOff.toDisplay(), landing.toDisplay()),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            val takeOff = draft?.takeOffTime
-            val landing = draft?.landingTime
-            if (takeOff != null && landing != null) {
-                Text(
-                    stringResource(Res.string.igc_detected, takeOff.toDisplay(), landing.toDisplay()),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            row.problem?.let { StatusBadge(it.text(row.detail), it.severity()) }
-            val date = draft?.date
-            if (row.selectable && date != null &&
-                wings.firstOrNull { it.id == presenter.wingOf(row) }?.wasInServiceOn(date) == false
-            ) {
-                StatusBadge(stringResource(Res.string.flight_warning_before_service), Severity.Warning)
-            }
         }
-        if (row.selectable) {
-            WingMenu(wings, presenter.wingOf(row), onSelected = { presenter.changeWing(row, it.id) })
+        row.match?.let { MatchLine(it, row) }
+        if (row.selectable && row.canAttach) AttachChoice(row, presenter)
+        row.problem?.let { StatusBadge(it.text(row.detail), it.severity()) }
+        val date = draft?.date
+        if (row.createsFlight && date != null &&
+            wings.firstOrNull { it.id == presenter.wingOf(row) }?.wasInServiceOn(date) == false
+        ) {
+            StatusBadge(stringResource(Res.string.flight_warning_before_service), Severity.Warning)
         }
     }
 }
@@ -233,11 +250,23 @@ private fun IgcRowProblem.text(detail: String?): String =
         IgcRowProblem.RepeatedInSelection -> stringResource(Res.string.igc_problem_repeated)
         IgcRowProblem.DateInFuture -> stringResource(Res.string.igc_problem_future)
         IgcRowProblem.SaveFailed -> stringResource(Res.string.igc_problem_save, detail.orEmpty())
+        IgcRowProblem.NoMatchingFlight -> stringResource(Res.string.igc_problem_no_match)
+        IgcRowProblem.FlightHasTrack -> stringResource(Res.string.igc_problem_has_track)
     }
 
 // Not yet imported but importable (a duplicate) is a warning; the rest cannot or did not work.
 private fun IgcRowProblem.severity(): Severity =
     when (this) {
-        IgcRowProblem.AlreadyImported, IgcRowProblem.RepeatedInSelection -> Severity.Warning
-        else -> Severity.Critical
+        // Only a hint: such a track can still be ticked.
+        IgcRowProblem.NoMatchingFlight -> {
+            Severity.Neutral
+        }
+
+        IgcRowProblem.AlreadyImported, IgcRowProblem.RepeatedInSelection, IgcRowProblem.FlightHasTrack -> {
+            Severity.Warning
+        }
+
+        else -> {
+            Severity.Critical
+        }
     }

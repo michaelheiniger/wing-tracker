@@ -189,6 +189,7 @@ fun LogbookRoute(
                         scope,
                         useCases.prepareIgcImport,
                         useCases.importIgcFlight,
+                        useCases.attachIgcTrack,
                         // The wing flown last, like for a flight entered by hand.
                         checkNotNull(presenter.state.newFlightInput(today()).wingId ?: wings.firstOrNull()?.id),
                         hideAlreadyImported = current.fromDevice,

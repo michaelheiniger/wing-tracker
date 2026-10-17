@@ -26,7 +26,7 @@ A track is either attached to an existing flight or creates a new one, and the p
 2. **Take-off time**: a track whose first fix, converted to the computer's time zone, has the same date and minute as a flight's take-off time.
 3. **Date and duration**: a flight on the same date whose duration is within a tolerance (a named constant next to the matcher). This is only a possible match and is never selected by default.
 
-Tracks with no match are offered as new flights, unticked, since they are often recordings that were not flights.
+Tracks with no match are offered as new flights. On a day that already has flights they start unticked, since they are then often recordings that were not flights; on other days they start ticked, so a pilot who never imported from Syride sees no change.
 
 To make the second rule possible, flights store an optional take-off time. The Syride import fills it, also on flights it imported before once the pilot agreed, and the IGC import fills it from the detected take-off. Within a day, flights are ordered by it, and flights without one come after those with one.
 
@@ -40,3 +40,4 @@ Importing from Syride and then from the logger gives one flight per real flight,
 
 - 2026-10-17: A flight created from a track stores the detected take-off, not the first fix, so the field means what its name says; a logger is often switched on well before take-off. Matching is unaffected, since it compares a track's first fix with Syride's start time. Flights without a take-off time are listed after the timed ones of their day.
 - 2026-10-17: On flights imported before, Syride's start time replaces the stored take-off time, also one entered by hand, but only after the pilot saw how many flights change and agreed.
+- 2026-10-17: Tracks with no match start unticked only on days that already have flights. Unticking them everywhere would have unticked every track of a pilot who does not use Syride.

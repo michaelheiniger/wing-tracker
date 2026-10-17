@@ -349,6 +349,28 @@
     <string name="igc_problem_repeated">Dieselbe Datei ist zweimal in der Auswahl</string>
     <string name="igc_problem_future">Das Datum liegt in der Zukunft</string>
     <string name="igc_problem_save">Konnte nicht gespeichert werden: %1$s</string>
+    <string name="igc_problem_no_match">Kein Flug im Flugbuch passt zu diesem Track</string>
+    <string name="igc_problem_has_track">Der passende Flug hat schon einen anderen Track</string>
+    <string name="igc_match_exact">Gehört zu: %1$s</string>
+    <string name="igc_match_possible">Möglicherweise: %1$s</string>
+    <string name="igc_match_why_syride">Die Datei trägt die Syride-ID dieses Flugs, %1$s, also gehört der Track dazu.</string>
+    <string name="igc_match_why_time">Der Track beginnt um %1$s, der Startzeit dieses Flugs, also gehört er dazu.</string>
+    <string name="igc_match_why_possible">Gleicher Tag und ähnliche Dauer, aber nicht sicher. Wähle «Anhängen» nur, wenn es derselbe Flug ist.</string>
+    <string name="igc_choice_attach">Anhängen</string>
+    <string name="igc_choice_new">Neuer Flug</string>
+    <string name="igc_filter_all">Alle (%1$d)</string>
+    <plurals name="igc_filter_exact">
+        <item quantity="one">%1$d gehört zu einem Flug</item>
+        <item quantity="other">%1$d gehören zu einem Flug</item>
+    </plurals>
+    <plurals name="igc_filter_possible">
+        <item quantity="one">%1$d mögliche Zuordnung</item>
+        <item quantity="other">%1$d mögliche Zuordnungen</item>
+    </plurals>
+    <plurals name="igc_filter_none">
+        <item quantity="one">%1$d ohne Zuordnung</item>
+        <item quantity="other">%1$d ohne Zuordnung</item>
+    </plurals>
     <string name="igc_drop_hint">IGC-Dateien hierher ziehen, um sie zu importieren</string>
     <string name="failure_drop_no_igc">Nur IGC-Flugtracks können importiert werden. Es wurde nichts importiert.</string>
     <string name="igc_track_chip">Track</string>

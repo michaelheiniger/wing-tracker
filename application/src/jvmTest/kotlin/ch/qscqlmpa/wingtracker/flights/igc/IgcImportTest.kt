@@ -1,10 +1,15 @@
 package ch.qscqlmpa.wingtracker.flights.igc
 
 import ch.qscqlmpa.wingtracker.AppClock
+import ch.qscqlmpa.wingtracker.attachments.Attachment
+import ch.qscqlmpa.wingtracker.attachments.AttachmentId
 import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
+import ch.qscqlmpa.wingtracker.flights.ExternalReference
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDateInFutureException
+import ch.qscqlmpa.wingtracker.flights.FlightHasTrackException
 import ch.qscqlmpa.wingtracker.flights.FlightId
+import ch.qscqlmpa.wingtracker.flights.FlightNotFoundException
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.flights.NOW
@@ -133,6 +138,54 @@ class IgcImportTest {
             }
 
         @Test
+        fun `dates the flight on the pilot's local day, which can differ from the UTC date in the file`() =
+            runTest {
+                // given
+                givenTrack(arrayOf(Leg.Still(10.minutes), Leg.Moving(75.minutes, 32.0), Leg.Still(5.minutes)))
+                givenStoredFlights()
+                val honolulu = AppClock(zone = TimeZone.of("Pacific/Honolulu"))
+
+                // when
+                val draft = PrepareIgcImport(reader, flights, honolulu)(FILE)
+
+                // then
+                assertThat(draft.date).isEqualTo(LocalDate(2026, 9, 19))
+            }
+
+        @Test
+        fun `points at the flight in the logbook the track belongs to`() =
+            runTest {
+                // given
+                givenTrack(arrayOf(Leg.Still(10.minutes), Leg.Moving(75.minutes, 32.0), Leg.Still(5.minutes)))
+                val syride =
+                    aFlight("flight-1", aFlightDetails(takeOffTime = LocalTime(9, 0)))
+                        .copy(importedFrom = ExternalReference("syride", "flight:3720061"))
+                givenStoredFlights(aFlight("flight-0", aFlightDetails(takeOffTime = LocalTime(15, 20))), syride)
+
+                // when
+                val draft = PrepareIgcImport(reader, flights, aFixedClock())(FILE)
+
+                // then
+                assertThat(draft.match).isEqualTo(TrackMatch.Exact(syride, MatchReason.TakeOffTime))
+                assertThat(draft.dayHasFlights).isTrue()
+            }
+
+        @Test
+        fun `tells when no flight was logged on the day of the track`() =
+            runTest {
+                // given
+                givenTrack(arrayOf(Leg.Still(10.minutes), Leg.Moving(75.minutes, 32.0), Leg.Still(5.minutes)))
+                givenStoredFlights(aFlight("flight-0", aFlightDetails(date = LocalDate(2026, 9, 12))))
+
+                // when
+                val draft = PrepareIgcImport(reader, flights, aFixedClock())(FILE)
+
+                // then
+                assertThat(draft.match).isNull()
+                assertThat(draft.dayHasFlights).isFalse()
+            }
+
+        @Test
         fun `passes on the failure when the file is not a readable track`() =
             runTest {
                 // given
@@ -205,6 +258,64 @@ class IgcImportTest {
                 // then
                 assertThat(failure).isInstanceOf(IOException::class.java)
                 coVerify(exactly = 1) { attachments.delete(any()) }
+            }
+    }
+
+    @Nested
+    inner class Attaching {
+        private val attach = AttachIgcTrack(flights, attachments)
+        private val syride =
+            aFlight("flight-1", aFlightDetails(takeOffTime = LocalTime(9, 0)))
+                .copy(importedFrom = ExternalReference("syride", "flight:3720061"))
+
+        @Test
+        fun `stores the track and adds it to the flight, keeping its details`() =
+            runTest {
+                // given
+                coEvery { flights.findById(syride.id) } returns syride
+
+                // when
+                val linked = attach(syride.id, FILE, CHECKSUM)
+
+                // then
+                assertThat(linked.details).isEqualTo(syride.details)
+                assertThat(linked.importedFrom).isEqualTo(syride.importedFrom)
+                assertThat(linked.igcFile?.checksum).isEqualTo(CHECKSUM)
+                assertThat(linked.igcFile?.attachment?.fileName).isEqualTo(FILE.fileName)
+                coVerify(exactly = 1) { attachments.save(any(), FILE.bytes) }
+                coVerify(exactly = 1) { flights.save(linked) }
+            }
+
+        @Test
+        fun `refuses a flight that got a track meanwhile and stores nothing`() =
+            runTest {
+                // given
+                val tracked =
+                    syride.copy(
+                        igcFile = IgcFile(Attachment(AttachmentId("igc-1"), "old.igc"), "9f0c41aa77e2"),
+                    )
+                coEvery { flights.findById(syride.id) } returns tracked
+
+                // when
+                val failure = runCatching { attach(syride.id, FILE, CHECKSUM) }.exceptionOrNull()
+
+                // then
+                assertThat(failure).isInstanceOf(FlightHasTrackException::class.java)
+                coVerify(exactly = 0) { attachments.save(any(), any()) }
+                coVerify(exactly = 0) { flights.save(any()) }
+            }
+
+        @Test
+        fun `refuses a flight that was deleted meanwhile`() =
+            runTest {
+                // given
+                coEvery { flights.findById(syride.id) } returns null
+
+                // when
+                val failure = runCatching { attach(syride.id, FILE, CHECKSUM) }.exceptionOrNull()
+
+                // then
+                assertThat(failure).isInstanceOf(FlightNotFoundException::class.java)
             }
     }
 }

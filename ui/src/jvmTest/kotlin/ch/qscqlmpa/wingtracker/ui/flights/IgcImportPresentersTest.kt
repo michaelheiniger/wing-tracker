@@ -4,6 +4,7 @@ import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.attachments.Attachment
 import ch.qscqlmpa.wingtracker.attachments.AttachmentId
 import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
+import ch.qscqlmpa.wingtracker.flights.ExternalReference
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.FlightId
@@ -11,6 +12,7 @@ import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.flights.LogFlight
 import ch.qscqlmpa.wingtracker.flights.UpdateFlight
+import ch.qscqlmpa.wingtracker.flights.igc.AttachIgcTrack
 import ch.qscqlmpa.wingtracker.flights.igc.FlightTrack
 import ch.qscqlmpa.wingtracker.flights.igc.IgcImportDraft
 import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
@@ -53,6 +55,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.io.IOException
 import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
@@ -117,13 +120,14 @@ class IgcImportPresentersTest {
         moving: Boolean = true,
     ): NewAttachment {
         val file = NewAttachment(fileName, fileName.encodeToByteArray())
+        val start = Instant.parse("${date}T09:42:00Z")
         // A track that never moves has a single fix, so no flight can be detected in it.
         val fixes =
             if (moving) {
                 // One fix a minute at about 9 m/s: well above walking speed, so a flight is detected.
-                (0..95).map { TrackFix(Instant.parse("2026-09-20T09:42:00Z") + it.minutes, 46.7 + it * 0.005, 7.8) }
+                (0..95).map { TrackFix(start + it.minutes, 46.7 + it * 0.005, 7.8) }
             } else {
-                listOf(TrackFix(Instant.parse("2026-09-20T09:42:00Z"), 46.7, 7.8))
+                listOf(TrackFix(start, 46.7, 7.8))
             }
         every { reader.read(file.bytes) } returns ReadTrack(FlightTrack(date, fixes), checksum)
         return file
@@ -312,6 +316,7 @@ class IgcImportPresentersTest {
                 scope(),
                 PrepareIgcImport(reader, flights, clock),
                 ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported-${counter++}") },
+                AttachIgcTrack(flights, attachments),
                 WING_ID,
             )
 
@@ -377,6 +382,7 @@ class IgcImportPresentersTest {
                         scope(),
                         PrepareIgcImport(reader, flights, clock),
                         ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported-${counter++}") },
+                        AttachIgcTrack(flights, attachments),
                         WING_ID,
                         hideAlreadyImported = true,
                     )
@@ -466,6 +472,7 @@ class IgcImportPresentersTest {
                 scope(),
                 PrepareIgcImport(reader, flights, clock),
                 ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported-${counter++}") },
+                AttachIgcTrack(flights, attachments),
                 WING_ID,
             )
 
@@ -593,6 +600,174 @@ class IgcImportPresentersTest {
 
                 // then
                 assertThat(presenter.importedCount).isEqualTo(1)
+            }
+    }
+
+    @Nested
+    inner class LinkingToFlightsInTheLogbook {
+        private fun TestScope.batch() =
+            IgcBatchPresenter(
+                scope(),
+                PrepareIgcImport(reader, flights, clock),
+                ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported") },
+                AttachIgcTrack(flights, attachments),
+                WING_ID,
+            )
+
+        private fun aLoggedFlight(
+            id: String,
+            takeOffTime: LocalTime? = LocalTime(9, 42),
+            duration: Duration = 95.minutes,
+            withTrack: Boolean = false,
+        ) = Flight(
+            FlightId(id),
+            FlightDetails(LocalDate(2026, 9, 20), duration, WING_ID, "Niederhorn", takeOffTime = takeOffTime),
+            Instant.parse("2026-10-15T19:31:53Z"),
+            igcFile = if (withTrack) IgcFile(Attachment(AttachmentId("igc-0"), "older.igc"), "9f0c41aa77e2") else null,
+            importedFrom = ExternalReference("syride", "flight:3720061"),
+        )
+
+        private fun givenLogbook(vararg list: Flight) {
+            coEvery { flights.findAll() } returns LoadResult(list.toList())
+            list.forEach { flight -> coEvery { flights.findById(flight.id) } returns flight }
+        }
+
+        @Test
+        fun `attaches a track to the flight it belongs to by default, without asking for a wing`() =
+            runTest {
+                // given
+                givenLogbook(aLoggedFlight("syride-1"))
+                val presenter = batch()
+                presenter.load(listOf(track("094200.IGC", "sum-a")))
+
+                // when
+                presenter.import {}
+
+                // then
+                assertThat(presenter.importedCount).isEqualTo(1)
+                coVerify(exactly = 1) {
+                    flights.save(match { it.id == FlightId("syride-1") && it.igcFile?.checksum == "sum-a" })
+                }
+                coVerify(exactly = 0) { flights.save(match { it.id == FlightId("imported") }) }
+            }
+
+        @Test
+        fun `shows the flight a track belongs to as attached and not as a new flight`() =
+            runTest {
+                // given
+                givenLogbook(aLoggedFlight("syride-1"))
+                val presenter = batch()
+
+                // when
+                presenter.load(listOf(track("094200.IGC", "sum-a")))
+
+                // then
+                val row = presenter.rows.single()
+                assertThat(row.attach).isTrue()
+                assertThat(row.createsFlight).isFalse()
+                assertThat(row.matchKind).isEqualTo(TrackMatchKind.Exact)
+            }
+
+        @Test
+        fun `logs a possible match as a new flight unless the pilot chooses to attach it`() =
+            runTest {
+                // given
+                givenLogbook(aLoggedFlight("syride-1", takeOffTime = null))
+                val presenter = batch()
+                presenter.load(listOf(track("094200.IGC", "sum-a")))
+                val row = presenter.rows.single()
+                assertThat(row.attach).isFalse()
+
+                // when
+                presenter.choose(row, attach = true)
+
+                // then
+                assertThat(presenter.rows.single().attach).isTrue()
+            }
+
+        @Test
+        fun `leaves a track unticked that matches no flight on a day with flights`() =
+            runTest {
+                // given
+                givenLogbook(aLoggedFlight("syride-1", takeOffTime = LocalTime(15, 20), duration = 30.minutes))
+                val presenter = batch()
+
+                // when
+                presenter.load(listOf(track("094200.IGC", "sum-a")))
+
+                // then
+                val row = presenter.rows.single()
+                assertThat(row.problem).isEqualTo(IgcRowProblem.NoMatchingFlight)
+                assertThat(row.selected).isFalse()
+                assertThat(row.selectable).isTrue()
+            }
+
+        @Test
+        fun `ticks a track as before on a day without flights`() =
+            runTest {
+                // given
+                givenLogbook()
+                val presenter = batch()
+
+                // when
+                presenter.load(listOf(track("094200.IGC", "sum-a")))
+
+                // then
+                assertThat(presenter.rows.single().problem).isNull()
+                assertThat(presenter.rows.single().selected).isTrue()
+            }
+
+        @Test
+        fun `never offers to attach a track to a flight that has another one`() =
+            runTest {
+                // given
+                givenLogbook(aLoggedFlight("syride-1", withTrack = true))
+                val presenter = batch()
+                presenter.load(listOf(track("094200.IGC", "sum-a")))
+                val row = presenter.rows.single()
+
+                // when
+                presenter.choose(row, attach = true)
+
+                // then
+                assertThat(presenter.rows.single().attach).isFalse()
+                assertThat(row.problem).isEqualTo(IgcRowProblem.FlightHasTrack)
+                assertThat(row.selected).isFalse()
+                assertThat(row.canAttach).isFalse()
+            }
+
+        @Test
+        fun `lets only the first of two tracks of one flight attach to it`() =
+            runTest {
+                // given
+                givenLogbook(aLoggedFlight("syride-1"))
+                val presenter = batch()
+
+                // when
+                presenter.load(listOf(track("3720061.igc", "sum-web"), track("094200.IGC", "sum-device")))
+
+                // then
+                assertThat(presenter.rows.map { it.attach }).containsExactly(true, false)
+                assertThat(presenter.rows[1].problem).isEqualTo(IgcRowProblem.FlightHasTrack)
+            }
+
+        @Test
+        fun `counts the tracks by how sure their match is and shows only the chosen kind`() =
+            runTest {
+                // given
+                givenLogbook(aLoggedFlight("syride-1"))
+                val presenter = batch()
+                presenter.load(
+                    listOf(track("094200.IGC", "sum-a"), track("other.IGC", "sum-b", LocalDate(2026, 9, 21))),
+                )
+
+                // when
+                presenter.showOnly(TrackMatchKind.None)
+
+                // then
+                assertThat(presenter.rows.countOf(TrackMatchKind.Exact)).isEqualTo(1)
+                assertThat(presenter.rows.countOf(TrackMatchKind.None)).isEqualTo(1)
+                assertThat(presenter.visibleRows.map { it.file.fileName }).containsExactly("other.IGC")
             }
     }
 

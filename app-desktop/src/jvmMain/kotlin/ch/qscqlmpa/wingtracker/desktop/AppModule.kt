@@ -8,6 +8,7 @@ import ch.qscqlmpa.wingtracker.flights.FlightsOfWing
 import ch.qscqlmpa.wingtracker.flights.GetLogbook
 import ch.qscqlmpa.wingtracker.flights.LogFlight
 import ch.qscqlmpa.wingtracker.flights.UpdateFlight
+import ch.qscqlmpa.wingtracker.flights.igc.AttachIgcTrack
 import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
 import ch.qscqlmpa.wingtracker.flights.igc.PrepareIgcImport
 import ch.qscqlmpa.wingtracker.flights.igc.TrackReader
@@ -169,6 +170,7 @@ private fun flightsModule() =
         factory { UpdateFlight(get(), get(), get()) }
         factory { DeleteFlight(get(), get()) }
         factory { PrepareIgcImport(get(), get(), get()) }
+        factory { AttachIgcTrack(get(), get()) }
         factory { ImportIgcFlight(get(), get(), get(), get()) }
         factory { GetLogbook(get(), get()) }
         factory { PrepareSyrideImport(get(), get(), get()) }
@@ -179,6 +181,7 @@ private fun flightsModule() =
         factory { ImportSpreadsheetFlights(get(), get(), get(), RegisterWing(get())) }
         single {
             LogbookUseCases(
+                get(),
                 get(),
                 get(),
                 get(),

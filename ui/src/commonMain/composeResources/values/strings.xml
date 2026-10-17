@@ -349,6 +349,28 @@
     <string name="igc_problem_repeated">The same file is in this selection twice</string>
     <string name="igc_problem_future">The date is in the future</string>
     <string name="igc_problem_save">Could not be saved: %1$s</string>
+    <string name="igc_problem_no_match">No flight in the logbook matches this track</string>
+    <string name="igc_problem_has_track">Its flight already has another track</string>
+    <string name="igc_match_exact">Belongs to: %1$s</string>
+    <string name="igc_match_possible">Possibly: %1$s</string>
+    <string name="igc_match_why_syride">The file is named after this flight's Syride id, %1$s, so the track belongs to it.</string>
+    <string name="igc_match_why_time">The track starts at %1$s, the take-off time of this flight, so it belongs to it.</string>
+    <string name="igc_match_why_possible">Same day and a similar duration, but not certain. Choose Attach only if it is the same flight.</string>
+    <string name="igc_choice_attach">Attach</string>
+    <string name="igc_choice_new">New flight</string>
+    <string name="igc_filter_all">All (%1$d)</string>
+    <plurals name="igc_filter_exact">
+        <item quantity="one">%1$d belongs to a flight</item>
+        <item quantity="other">%1$d belong to a flight</item>
+    </plurals>
+    <plurals name="igc_filter_possible">
+        <item quantity="one">%1$d possible match</item>
+        <item quantity="other">%1$d possible matches</item>
+    </plurals>
+    <plurals name="igc_filter_none">
+        <item quantity="one">%1$d without a match</item>
+        <item quantity="other">%1$d without a match</item>
+    </plurals>
     <string name="igc_drop_hint">Drop IGC files here to import them</string>
     <string name="failure_drop_no_igc">Only IGC flight tracks can be imported. Nothing was imported.</string>
     <string name="igc_track_chip">Track</string>

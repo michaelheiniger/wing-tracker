@@ -349,6 +349,28 @@
     <string name="igc_problem_repeated">Le même fichier apparaît deux fois dans la sélection</string>
     <string name="igc_problem_future">La date est dans le futur</string>
     <string name="igc_problem_save">Enregistrement impossible : %1$s</string>
+    <string name="igc_problem_no_match">Aucun vol du carnet ne correspond à cette trace</string>
+    <string name="igc_problem_has_track">Le vol correspondant a déjà une autre trace</string>
+    <string name="igc_match_exact">Appartient à : %1$s</string>
+    <string name="igc_match_possible">Peut-être : %1$s</string>
+    <string name="igc_match_why_syride">Le fichier porte l'identifiant Syride de ce vol, %1$s, la trace lui appartient donc.</string>
+    <string name="igc_match_why_time">La trace commence à %1$s, l'heure de décollage de ce vol, elle lui appartient donc.</string>
+    <string name="igc_match_why_possible">Même jour et durée semblable, mais pas certain. Choisis « Rattacher » seulement s'il s'agit du même vol.</string>
+    <string name="igc_choice_attach">Rattacher</string>
+    <string name="igc_choice_new">Nouveau vol</string>
+    <string name="igc_filter_all">Toutes (%1$d)</string>
+    <plurals name="igc_filter_exact">
+        <item quantity="one">%1$d appartient à un vol</item>
+        <item quantity="other">%1$d appartiennent à un vol</item>
+    </plurals>
+    <plurals name="igc_filter_possible">
+        <item quantity="one">%1$d correspondance possible</item>
+        <item quantity="other">%1$d correspondances possibles</item>
+    </plurals>
+    <plurals name="igc_filter_none">
+        <item quantity="one">%1$d sans correspondance</item>
+        <item quantity="other">%1$d sans correspondance</item>
+    </plurals>
     <string name="igc_drop_hint">Dépose des fichiers IGC ici pour les importer</string>
     <string name="failure_drop_no_igc">Seules les traces de vol IGC peuvent être importées. Rien n'a été importé.</string>
     <string name="igc_track_chip">Trace</string>
