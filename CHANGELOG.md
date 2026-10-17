@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-17
+
 ### Added
 - Wing Tracker is available for Windows: each release has an installer (.msi) that installs for your user only, without administrator rights. It is not signed yet, so Windows warns about an unknown publisher on the first install: choose "More info", then "Run anyway". Updates install from the app: Wing Tracker closes, installs the new version and opens again.
 - Wing Tracker tells you when a new version is out and installs it for you: a banner at the top of the window shows what changed in every version since yours. "Install" downloads the new version, checks that it is exactly the published one, installs it after your system asks for your password, and offers to restart. Versions published before this one cannot be installed this way, so for those the banner links to their download page. "Later" hides the banner until the next start; "Skip this version" stops reminding you of that version, and the next one is announced again. While an update is waiting, Settings and About show a badge.
