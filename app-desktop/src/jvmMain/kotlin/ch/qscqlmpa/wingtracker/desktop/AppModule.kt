@@ -90,6 +90,7 @@ import ch.qscqlmpa.wingtracker.ui.gear.GearUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.simple.HarnessOps
 import ch.qscqlmpa.wingtracker.ui.gear.simple.ReserveOps
+import ch.qscqlmpa.wingtracker.ui.platform.CredentialStore
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.reminders.RemindersUseCases
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
@@ -308,9 +309,14 @@ private fun uiModule(
             dataLocation(dataDirectory, devMode),
             DesktopLogLocation(DesktopLogging.directory(devMode)),
             DesktopUpdateInstaller(InstallationDirectory.installerKind(), DesktopLogging.directory(devMode)),
+            credentialStore(),
             supportsAllFileNames(),
         )
     }
     single { ThemePreference() }
     single { UndoCoordinator() }
 }
+
+// Linux has the Secret Service; macOS has neither, so it keeps secrets for the session only (ADR 0029).
+private fun credentialStore(osName: String = System.getProperty("os.name")): CredentialStore =
+    if ("win" in osName.lowercase()) WindowsCredentialStore() else SecretToolCredentialStore()

@@ -23,6 +23,7 @@ logback = "1.6.5"
 kover = "0.9.11"
 spotless = "8.10.4"
 ktlint = "1.8.0"
+jna = "5.19.1"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -37,6 +38,7 @@ mapcompose = { module = "ovh.plrapps:mapcompose-mp", version.ref = "mapcompose" 
 fastexcel-reader = { module = "org.dhatim:fastexcel-reader", version.ref = "fastexcel" }
 kotlin-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "kotlin-logging" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
 filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }

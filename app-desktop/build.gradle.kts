@@ -67,6 +67,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.koin.core)
             implementation(libs.filekit.dialogs)
+            implementation(libs.jna.platform)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlin.logging)
             // The logging backend is chosen here only; every other module sees just the facade (ADR 0023).

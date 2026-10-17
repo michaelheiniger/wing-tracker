@@ -154,6 +154,29 @@ interface UpdateInstaller {
     fun restart()
 }
 
+/**
+ * Keeps secrets, such as the air-time token, in the operating system's credential store, so they never sit in a file
+ * of the application (ADR 0029). Every call throws [CredentialStoreException] when the store cannot be used.
+ */
+interface CredentialStore {
+    /** The secret kept under [key], or null when there is none. */
+    suspend fun read(key: String): String?
+
+    suspend fun write(
+        key: String,
+        secret: String,
+    )
+
+    /** Removing a secret that is not there is not an error. */
+    suspend fun delete(key: String)
+}
+
+/** The system has no credential store, or it refused; the caller then keeps the secret for the session only. */
+class CredentialStoreException(
+    message: String,
+    cause: Throwable? = null,
+) : Exception(message, cause)
+
 class PlatformServices(
     val filePicker: FilePicker,
     val fileOpener: FileOpener,
@@ -162,6 +185,7 @@ class PlatformServices(
     val dataLocation: DataLocation,
     val logLocation: LogLocation,
     val updateInstaller: UpdateInstaller,
+    val credentialStore: CredentialStore,
     // False when some file names cannot be opened on this system at all, which the user should hear about up front.
     val supportsAllFileNames: Boolean = true,
 )
