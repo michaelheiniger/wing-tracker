@@ -11,8 +11,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -20,7 +18,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -56,9 +53,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_dismiss
 import ch.qscqlmpa.wingtracker.ui.resources.flight_altitude
 import ch.qscqlmpa.wingtracker.ui.resources.flight_date_time
-import ch.qscqlmpa.wingtracker.ui.resources.flight_delete
 import ch.qscqlmpa.wingtracker.ui.resources.flight_distance
-import ch.qscqlmpa.wingtracker.ui.resources.flight_edit
 import ch.qscqlmpa.wingtracker.ui.resources.flight_sites
 import ch.qscqlmpa.wingtracker.ui.resources.flights_count
 import ch.qscqlmpa.wingtracker.ui.resources.igc_open_track
@@ -96,7 +91,6 @@ fun LogbookScreen(
     importFailure: Failure?,
     onLogFlight: () -> Unit,
     onOpenFlight: (Flight) -> Unit,
-    onEditFlight: (Flight) -> Unit,
     onImport: () -> Unit,
     onOpenStatistics: () -> Unit,
     attention: Attention,
@@ -107,7 +101,6 @@ fun LogbookScreen(
 ) {
     val state = presenter.state
     val logbook = state.visible
-    var flightToDelete by remember { mutableStateOf<Flight?>(null) }
 
     Scaffold(
         floatingActionButton = {
@@ -146,7 +139,7 @@ fun LogbookScreen(
                 LogbookBody(
                     logbook,
                     LogbookSearchBinding(state.search, checkNotNull(state.shown), presenter::search, onOpenStatistics),
-                    FlightActions(onOpenFlight, onEditFlight, presenter::openTrack, onDelete = { flightToDelete = it }),
+                    FlightActions(onOpenFlight, presenter::openTrack),
                     listState,
                     onLogFlight,
                     onGoToGear,
@@ -154,24 +147,12 @@ fun LogbookScreen(
             }
         }
     }
-
-    flightToDelete?.let { flight ->
-        DeleteFlightDialog(
-            flight,
-            logbook.wingNameOf(flight),
-            presenter,
-            onDeleted = { flightToDelete = null },
-            onDismiss = { flightToDelete = null },
-        )
-    }
 }
 
-/** What can be done with a flight in the list. */
+/** What can be done with a flight in the list; editing and deleting happen on its page. */
 private class FlightActions(
     val onOpen: (Flight) -> Unit,
-    val onEdit: (Flight) -> Unit,
     val onOpenTrack: (Flight) -> Unit,
-    val onDelete: (Flight) -> Unit,
 )
 
 /** The search as typed, the flights it leaves and how to change it. */
@@ -360,12 +341,6 @@ private fun FlightCard(
                 )
             }
             Text(formatDuration(details.duration), style = MaterialTheme.typography.titleMedium)
-            IconButton(onClick = { actions.onEdit(flight) }) {
-                Icon(Icons.Default.Edit, contentDescription = stringResource(Res.string.flight_edit))
-            }
-            IconButton(onClick = { actions.onDelete(flight) }) {
-                Icon(Icons.Default.Delete, contentDescription = stringResource(Res.string.flight_delete))
-            }
         }
     }
 }

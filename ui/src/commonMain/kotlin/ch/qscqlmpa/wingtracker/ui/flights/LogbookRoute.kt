@@ -134,7 +134,6 @@ fun LogbookRoute(
                 importFailure = importer.failure,
                 onLogFlight = { dialog = LogbookDialog.New() },
                 onOpenFlight = { openFlight = it.id },
-                onEditFlight = { dialog = LogbookDialog.Edit(it) },
                 onImport = { dialog = LogbookDialog.Import() },
                 onOpenStatistics = { onOpenStatistics(presenter.state.search.toFilter()) },
                 attention = attention,
