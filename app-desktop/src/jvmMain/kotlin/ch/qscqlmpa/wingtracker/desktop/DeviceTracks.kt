@@ -27,9 +27,10 @@ internal fun readTracks(
         .map { NewAttachment(it.nameBelow(root), it.readBytes()) }
         .toList()
 
-// Hidden folders hold things like the trash of a USB stick, whose deleted tracks must not come back.
+// Hidden folders hold things like the trash of a USB stick, whose deleted tracks must not come back. Windows only
+// honours the hidden attribute, so the leading dot that Linux and macOS use for their trash is checked too.
 private fun Path.isHiddenBelow(root: Path): Boolean =
-    generateSequence(this) { it.parent }.takeWhile { it != root }.any { Files.isHidden(it) }
+    generateSequence(this) { it.parent }.takeWhile { it != root }.any { it.name.startsWith('.') || Files.isHidden(it) }
 
 // A logger may name a track after its time only and keep the date in the folder, so the folder stays in front.
 private fun Path.nameBelow(root: Path): String = if (parent == root) name else "${parent.name}/$name"
