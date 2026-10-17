@@ -135,6 +135,22 @@ class UpdateInstallPresenterTest {
             }
 
         @Test
+        fun `downloads again when the pilot tries again after the connection failed`() =
+            runTest {
+                // given
+                givenDownloaded(DownloadResult.Failed(DownloadProblem.NoConnection, null))
+                val presenter = presenter().also { it.install(anUpdate) }
+                givenDownloaded()
+                coEvery { installer.install(CACHED) } returns InstallOutcome.Installed
+
+                // when
+                presenter.install(anUpdate)
+
+                // then
+                assertThat(presenter.state).isEqualTo(InstallState.Installed)
+            }
+
+        @Test
         fun `keeps the file when the pilot closes the password prompt, and tries again without downloading`() =
             runTest {
                 // given

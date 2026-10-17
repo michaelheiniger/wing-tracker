@@ -553,7 +553,7 @@
     <string name="update_restart_now">Jetzt neu starten</string>
     <string name="update_restart_later">Später neu starten</string>
     <string name="update_cancelled">Die Installation wurde abgebrochen. Das geprüfte Installationsprogramm bleibt erhalten, ein neuer Versuch braucht keinen neuen Download.</string>
-    <string name="update_try_again">Erneut versuchen</string>
+    <string name="action_try_again">Erneut versuchen</string>
     <string name="update_manual">Wing Tracker kann auf diesem System keine Aktualisierungen installieren. Das geprüfte Installationsprogramm liegt hier:</string>
     <string name="update_manual_command">Führen Sie zum Installieren dies in einem Terminal aus:</string>
     <string name="update_show_in_folder">Im Ordner zeigen</string>

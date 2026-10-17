@@ -57,6 +57,13 @@ data class Failure(
     val detail: String? = null,
 )
 
+// The connection may be back a moment later. A refusal is left out: its message asks to wait.
+private val WORTH_RETRYING =
+    setOf(FailureKind.NoConnection, FailureKind.SyrideUnreachable, FailureKind.UpdateUnreachable)
+
+/** Whether doing the same again soon may well succeed, so the screen offers to try again. */
+val Failure.isWorthRetrying: Boolean get() = kind in WORTH_RETRYING
+
 /** A path the system cannot name gets its own message, whatever was being done; anything else reports as [kind]. */
 fun Exception.toFailure(kind: FailureKind): Failure =
     when (this) {

@@ -16,8 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import ch.qscqlmpa.wingtracker.ui.isWorthRetrying
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
+import ch.qscqlmpa.wingtracker.ui.resources.action_try_again
 import ch.qscqlmpa.wingtracker.ui.resources.update_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.update_cancelled
 import ch.qscqlmpa.wingtracker.ui.resources.update_close
@@ -34,7 +36,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.update_open_release_page
 import ch.qscqlmpa.wingtracker.ui.resources.update_restart_later
 import ch.qscqlmpa.wingtracker.ui.resources.update_restart_now
 import ch.qscqlmpa.wingtracker.ui.resources.update_show_in_folder
-import ch.qscqlmpa.wingtracker.ui.resources.update_try_again
 import ch.qscqlmpa.wingtracker.updates.AvailableUpdate
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
@@ -76,7 +77,7 @@ fun InstallDialog(
                 }
 
                 is InstallState.Cancelled -> {
-                    Button(onClick = presenter::retry) { Text(stringResource(Res.string.update_try_again)) }
+                    Button(onClick = presenter::retry) { Text(stringResource(Res.string.action_try_again)) }
                 }
 
                 is InstallState.Manual -> {
@@ -86,8 +87,14 @@ fun InstallDialog(
                 }
 
                 is InstallState.Failed -> {
-                    Button(onClick = { uriHandler.openUri(update.latest.pageUrl) }) {
-                        Text(stringResource(Res.string.update_open_release_page))
+                    if (state.failure.isWorthRetrying) {
+                        Button(
+                            onClick = { presenter.install(update) },
+                        ) { Text(stringResource(Res.string.action_try_again)) }
+                    } else {
+                        Button(onClick = { uriHandler.openUri(update.latest.pageUrl) }) {
+                            Text(stringResource(Res.string.update_open_release_page))
+                        }
                     }
                 }
 

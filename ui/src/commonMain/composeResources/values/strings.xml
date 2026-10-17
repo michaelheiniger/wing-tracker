@@ -553,7 +553,7 @@
     <string name="update_restart_now">Restart now</string>
     <string name="update_restart_later">Restart later</string>
     <string name="update_cancelled">Installing was cancelled. The verified installer is kept, so trying again needs no new download.</string>
-    <string name="update_try_again">Try again</string>
+    <string name="action_try_again">Try again</string>
     <string name="update_manual">Wing Tracker cannot install updates on this system. The verified installer is saved here:</string>
     <string name="update_manual_command">To install it, run this in a terminal:</string>
     <string name="update_show_in_folder">Show in folder</string>

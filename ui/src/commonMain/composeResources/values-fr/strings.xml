@@ -553,7 +553,7 @@
     <string name="update_restart_now">Redémarrer maintenant</string>
     <string name="update_restart_later">Redémarrer plus tard</string>
     <string name="update_cancelled">L'installation a été annulée. L'installateur vérifié est conservé : réessayer ne demande pas de nouveau téléchargement.</string>
-    <string name="update_try_again">Réessayer</string>
+    <string name="action_try_again">Réessayer</string>
     <string name="update_manual">Wing Tracker ne peut pas installer de mises à jour sur ce système. L'installateur vérifié est enregistré ici :</string>
     <string name="update_manual_command">Pour l'installer, exécutez ceci dans un terminal :</string>
     <string name="update_show_in_folder">Afficher dans le dossier</string>

@@ -28,8 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.ui.icons.UpdateIcon
+import ch.qscqlmpa.wingtracker.ui.isWorthRetrying
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
+import ch.qscqlmpa.wingtracker.ui.resources.action_try_again
 import ch.qscqlmpa.wingtracker.ui.resources.update_available
 import ch.qscqlmpa.wingtracker.ui.resources.update_badge
 import ch.qscqlmpa.wingtracker.ui.resources.update_check_at_startup
@@ -121,7 +123,18 @@ fun UpdatesSection(
     }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         OutlinedButton(onClick = presenter::checkNow, enabled = presenter.manualCheck != ManualCheck.Checking) {
-            Text(stringResource(Res.string.update_check_now))
+            val failed = (presenter.manualCheck as? ManualCheck.Failed)?.failure
+            Text(
+                stringResource(
+                    if (failed?.isWorthRetrying ==
+                        true
+                    ) {
+                        Res.string.action_try_again
+                    } else {
+                        Res.string.update_check_now
+                    },
+                ),
+            )
         }
         ManualCheckOutcome(presenter.manualCheck)
     }

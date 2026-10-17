@@ -21,9 +21,11 @@ import ch.qscqlmpa.wingtracker.ui.flights.importing.Hint
 import ch.qscqlmpa.wingtracker.ui.flights.importing.IMPORT_DIALOG_WIDTH_DP
 import ch.qscqlmpa.wingtracker.ui.flights.importing.ImportDone
 import ch.qscqlmpa.wingtracker.ui.flights.importing.WingGroupList
+import ch.qscqlmpa.wingtracker.ui.isWorthRetrying
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
+import ch.qscqlmpa.wingtracker.ui.resources.action_try_again
 import ch.qscqlmpa.wingtracker.ui.resources.import_back
 import ch.qscqlmpa.wingtracker.ui.resources.import_count
 import ch.qscqlmpa.wingtracker.ui.resources.import_nothing_new
@@ -75,7 +77,19 @@ private fun AccountStep(
     presenter.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
     Buttons {
         TextButton(onClick = onClose) { Text(stringResource(Res.string.action_cancel)) }
-        Button(onClick = presenter::read, enabled = presenter.canRead) { Text(stringResource(Res.string.syride_read)) }
+        Button(onClick = presenter::read, enabled = presenter.canRead) {
+            Text(
+                stringResource(
+                    if (presenter.failure?.isWorthRetrying ==
+                        true
+                    ) {
+                        Res.string.action_try_again
+                    } else {
+                        Res.string.syride_read
+                    },
+                ),
+            )
+        }
     }
 }
 
