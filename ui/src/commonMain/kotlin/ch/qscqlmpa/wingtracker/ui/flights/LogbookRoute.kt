@@ -152,6 +152,7 @@ fun LogbookRoute(
                         defaultWing = {
                             checkNotNull(presenter.state.newFlightInput(today()).wingId ?: wings.firstOrNull()?.id)
                         },
+                        onSaved = presenter::refresh,
                         onClose = closeDialog,
                     ).also { wizard -> current.dropped?.let { wizard.openTracks(it, ImportSource.IgcFiles) } }
                 }
@@ -197,6 +198,7 @@ private fun importWizard(
     importer: IgcImportPresenter,
     spreadsheetPickTitle: String,
     defaultWing: () -> WingId,
+    onSaved: () -> Unit,
     onClose: () -> Unit,
 ) = ImportWizardPresenter(
     importer,
@@ -206,6 +208,7 @@ private fun importWizard(
             useCases.prepareSyrideImport,
             useCases.importSyrideFlights,
             useCases.updateSyrideTakeOffTimes,
+            useCases.countSyrideFlightsWithoutTrack,
             useCases.saveSyrideUsername,
             initialUsername = "",
         ).also { syride ->
@@ -233,6 +236,7 @@ private fun importWizard(
             hideAlreadyImported = fromDevice,
         )
     },
+    onSaved = onSaved,
     onClose = onClose,
 )
 

@@ -244,6 +244,8 @@ internal fun ImportDone(
     result: ImportResult<*>?,
     onClose: () -> Unit,
     extra: @Composable () -> Unit = {},
+    // False when the step goes on with its own buttons, such as the offer to add tracks.
+    closeButton: Boolean = true,
 ) {
     result ?: return
     Text(stringResource(Res.string.import_done_title), style = MaterialTheme.typography.titleMedium)
@@ -273,5 +275,5 @@ internal fun ImportDone(
             }
         }
     }
-    Buttons { Button(onClick = onClose) { Text(stringResource(Res.string.action_close)) } }
+    if (closeButton) Buttons { Button(onClick = onClose) { Text(stringResource(Res.string.action_close)) } }
 }

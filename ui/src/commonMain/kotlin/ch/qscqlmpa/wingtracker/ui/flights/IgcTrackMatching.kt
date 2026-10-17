@@ -1,17 +1,31 @@
 package ch.qscqlmpa.wingtracker.ui.flights
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.igc.MatchReason
 import ch.qscqlmpa.wingtracker.flights.igc.TrackMatch
@@ -24,6 +38,12 @@ import ch.qscqlmpa.wingtracker.ui.resources.igc_filter_all
 import ch.qscqlmpa.wingtracker.ui.resources.igc_filter_exact
 import ch.qscqlmpa.wingtracker.ui.resources.igc_filter_none
 import ch.qscqlmpa.wingtracker.ui.resources.igc_filter_possible
+import ch.qscqlmpa.wingtracker.ui.resources.igc_linking_intro
+import ch.qscqlmpa.wingtracker.ui.resources.igc_linking_possible
+import ch.qscqlmpa.wingtracker.ui.resources.igc_linking_syride
+import ch.qscqlmpa.wingtracker.ui.resources.igc_linking_time
+import ch.qscqlmpa.wingtracker.ui.resources.igc_linking_title
+import ch.qscqlmpa.wingtracker.ui.resources.igc_linking_zone
 import ch.qscqlmpa.wingtracker.ui.resources.igc_match_exact
 import ch.qscqlmpa.wingtracker.ui.resources.igc_match_possible
 import ch.qscqlmpa.wingtracker.ui.resources.igc_match_why_possible
@@ -127,6 +147,29 @@ internal fun AttachChoice(
             ) {
                 Text(stringResource(label))
             }
+        }
+    }
+}
+
+/** How the review decides which flight a track belongs to; folded away, since it matters mostly when one is missing. */
+@Composable
+internal fun LinkingHelp() {
+    var open by remember { mutableStateOf(false) }
+    TextButton(onClick = { open = !open }) {
+        Icon(if (open) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown, contentDescription = null)
+        Text(stringResource(Res.string.igc_linking_title))
+    }
+    if (!open) return
+    Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium) {
+        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(Res.string.igc_linking_intro))
+            listOf(Res.string.igc_linking_syride, Res.string.igc_linking_time, Res.string.igc_linking_possible)
+                .forEach { Text("• " + stringResource(it), style = MaterialTheme.typography.bodySmall) }
+            Text(
+                stringResource(Res.string.igc_linking_zone),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

@@ -77,6 +77,7 @@ internal fun IgcReviewStep(
         } else {
             WingForAll(presenter, wings)
             MatchSummary(presenter)
+            LinkingHelp()
             TrackList(presenter, wings)
         }
         SkippedHint(presenter)

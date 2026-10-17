@@ -1,9 +1,12 @@
 package ch.qscqlmpa.wingtracker.flights.syride
 
+import ch.qscqlmpa.wingtracker.attachments.Attachment
+import ch.qscqlmpa.wingtracker.attachments.AttachmentId
 import ch.qscqlmpa.wingtracker.flights.ExternalReference
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
+import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.flights.InMemoryWings
 import ch.qscqlmpa.wingtracker.flights.aFixedClock
 import ch.qscqlmpa.wingtracker.flights.aFlight
@@ -421,6 +424,49 @@ class SyrideImportTest {
 
                 // then
                 assertThat(count).isEqualTo(0)
+            }
+    }
+
+    @Nested
+    inner class CountingFlightsWithoutTrack {
+        private val count get() = CountSyrideFlightsWithoutTrack(flights)
+
+        private fun fromSyride(
+            id: String,
+            syrideId: String,
+            withTrack: Boolean = false,
+        ) = aFlight(id).copy(
+            importedFrom = ExternalReference(SYRIDE_SYSTEM, syrideId),
+            igcFile =
+                if (withTrack) {
+                    IgcFile(
+                        Attachment(AttachmentId("igc-1"), "3271596.igc"),
+                        "9f0c41aa77e2",
+                    )
+                } else {
+                    null
+                },
+        )
+
+        @Test
+        fun `counts only Syride flights that have a track on Syride and none stored`() =
+            runTest {
+                // given
+                givenStored(
+                    flightList =
+                        listOf(
+                            fromSyride("flight-1", "flight:3271596"),
+                            fromSyride("flight-2", "flight:3271597", withTrack = true),
+                            fromSyride("flight-3", "activity:88412"),
+                            aFlight("flight-4"),
+                        ),
+                )
+
+                // when
+                val waiting = count()
+
+                // then
+                assertThat(waiting).isEqualTo(1)
             }
     }
 }

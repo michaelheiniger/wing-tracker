@@ -31,6 +31,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.spreadsheet_title
 import ch.qscqlmpa.wingtracker.ui.resources.syride_title
 import ch.qscqlmpa.wingtracker.ui.spreadsheet.SpreadsheetImportSteps
 import ch.qscqlmpa.wingtracker.ui.syride.SyrideImportSteps
+import ch.qscqlmpa.wingtracker.ui.syride.TrackOffer
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -58,7 +59,16 @@ fun ImportWizard(
                     }
 
                     is ImportFlow.Syride -> {
-                        SyrideImportSteps(flow.presenter, actions)
+                        SyrideImportSteps(
+                            flow.presenter,
+                            actions,
+                            TrackOffer(
+                                onImported = presenter::imported,
+                                onChooseFiles = { presenter.chooseTracks(ImportSource.IgcFiles) },
+                                onReadDevice = { presenter.chooseTracks(ImportSource.Device) },
+                                failure = presenter.pickFailure,
+                            ),
+                        )
                     }
 
                     is ImportFlow.Spreadsheet -> {

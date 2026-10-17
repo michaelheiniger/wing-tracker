@@ -6,6 +6,7 @@ import ch.qscqlmpa.wingtracker.flights.importing.NewWingSpec
 import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
 import ch.qscqlmpa.wingtracker.flights.importing.WingGroup
 import ch.qscqlmpa.wingtracker.flights.importing.WingTarget
+import ch.qscqlmpa.wingtracker.flights.syride.CountSyrideFlightsWithoutTrack
 import ch.qscqlmpa.wingtracker.flights.syride.ImportSyrideFlights
 import ch.qscqlmpa.wingtracker.flights.syride.PrepareSyrideImport
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideException
@@ -58,6 +59,7 @@ class SyrideImportPresenterTest {
     private val prepare = mockk<PrepareSyrideImport>()
     private val import = mockk<ImportSyrideFlights>()
     private val updateTimes = mockk<UpdateSyrideTakeOffTimes>()
+    private val countWithoutTrack = mockk<CountSyrideFlightsWithoutTrack>().also { coEvery { it() } returns 0 }
     private val saveUsername = mockk<SaveSyrideUsername>(relaxUnitFun = true)
 
     private fun TestScope.presenter(username: String = "QSCQLMPA") =
@@ -66,6 +68,7 @@ class SyrideImportPresenterTest {
             prepare,
             import,
             updateTimes,
+            countWithoutTrack,
             saveUsername,
             username,
         )
@@ -305,6 +308,45 @@ class SyrideImportPresenterTest {
                 // then
                 assertThat(presenter.failure?.kind).isEqualTo(FailureKind.ImportSyride)
                 assertThat(presenter.stage).isEqualTo(SyrideStage.Wings)
+            }
+    }
+
+    @Nested
+    inner class CountingTracksToAdd {
+        @Test
+        fun `counts the Syride flights still without a track once the import is done`() =
+            runTest {
+                // given
+                givenAccount(aGroup(BIRDY, suggested = WingId("w-1")))
+                val presenter = presenter()
+                presenter.read()
+                coEvery { import(any(), any()) } returns ImportResult(2, emptyList(), 0, emptyList())
+                coEvery { countWithoutTrack() } returns 184
+
+                // when
+                presenter.import {}
+
+                // then
+                assertThat(presenter.withoutTrack).isEqualTo(184)
+            }
+
+        @Test
+        fun `still reports the import as done when the flights cannot be counted`() =
+            runTest {
+                // given
+                givenAccount(aGroup(BIRDY, suggested = WingId("w-1")))
+                val presenter = presenter()
+                presenter.read()
+                coEvery { import(any(), any()) } returns ImportResult(2, emptyList(), 0, emptyList())
+                coEvery { countWithoutTrack() } throws IOException("Disk full")
+
+                // when
+                presenter.import {}
+
+                // then
+                assertThat(presenter.stage).isEqualTo(SyrideStage.Done)
+                assertThat(presenter.withoutTrack).isEqualTo(0)
+                assertThat(presenter.failure).isNull()
             }
     }
 

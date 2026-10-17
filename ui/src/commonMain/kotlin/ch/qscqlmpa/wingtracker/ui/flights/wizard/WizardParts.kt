@@ -156,7 +156,7 @@ internal fun SourceStep(
         SourceCard(
             Res.string.import_source_igc,
             Res.string.import_source_igc_text,
-            onClick = presenter::chooseIgcFiles,
+            onClick = { presenter.chooseTracks(ImportSource.IgcFiles) },
             needsWing = !hasWings,
         )
     }
@@ -164,7 +164,7 @@ internal fun SourceStep(
         SourceCard(
             Res.string.import_source_device,
             Res.string.import_source_device_text,
-            onClick = presenter::chooseDevice,
+            onClick = { presenter.chooseTracks(ImportSource.Device) },
             needsWing = !hasWings,
         )
         SourceCard(

@@ -516,6 +516,21 @@
         <item quantity="one">%1$d trace laissée de côté</item>
         <item quantity="other">%1$d traces laissées de côté</item>
     </plurals>
+    <string name="syride_tracks_title">Ajouter les traces</string>
+    <plurals name="syride_tracks_waiting">
+        <item quantity="one">%1$d vol Syride de ton carnet a sur Syride une trace qui n'est pas encore enregistrée ici.</item>
+        <item quantity="other">%1$d vols Syride de ton carnet ont sur Syride une trace qui n'est pas encore enregistrée ici.</item>
+    </plurals>
+    <string name="syride_tracks_hint">Importe les traces maintenant et chacune sera rattachée à son vol. Choisis les fichiers téléchargés depuis le site Syride, ou lis-les depuis ton enregistreur.</string>
+    <string name="syride_tracks_files">Choisir des fichiers IGC…</string>
+    <string name="syride_tracks_device">Lire depuis un appareil…</string>
+    <string name="syride_tracks_skip">Pas maintenant</string>
+    <string name="igc_linking_title">Comment le rattachement fonctionne</string>
+    <string name="igc_linking_intro">Chaque trace est comparée aux vols de ton carnet :</string>
+    <string name="igc_linking_syride">Un fichier nommé d'après un numéro de vol Syride, comme ceux téléchargés depuis le site Syride, appartient à ce vol.</string>
+    <string name="igc_linking_time">Une trace qui commence dans la minute de l'heure de décollage d'un vol appartient à ce vol. C'est ainsi que les fichiers d'un enregistreur Syride sont retrouvés.</string>
+    <string name="igc_linking_possible">Un vol du même jour avec une durée semblable n'est qu'une correspondance possible. Choisis « Rattacher » si c'est le bon.</string>
+    <string name="igc_linking_zone">Les heures sont comparées dans le fuseau horaire de ton ordinateur, les vols faits dans un autre fuseau n'apparaissent donc que comme correspondances possibles. Un vol qui a déjà une trace la garde.</string>
     <string name="import_menu_needs_wing">Ajoute d'abord une voile</string>
     <string name="spreadsheet_title">Importer des vols depuis un tableur</string>
     <string name="spreadsheet_pick_title">Choisis un fichier tableur (ODS ou XLSX)</string>

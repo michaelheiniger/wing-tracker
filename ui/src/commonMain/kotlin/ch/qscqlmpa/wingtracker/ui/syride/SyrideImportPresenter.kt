@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ch.qscqlmpa.wingtracker.flights.importing.ImportResult
+import ch.qscqlmpa.wingtracker.flights.syride.CountSyrideFlightsWithoutTrack
 import ch.qscqlmpa.wingtracker.flights.syride.ImportSyrideFlights
 import ch.qscqlmpa.wingtracker.flights.syride.PrepareSyrideImport
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideException
@@ -33,6 +34,7 @@ class SyrideImportPresenter(
     private val prepare: PrepareSyrideImport,
     private val import: ImportSyrideFlights,
     private val updateTimes: UpdateSyrideTakeOffTimes,
+    private val countWithoutTrack: CountSyrideFlightsWithoutTrack,
     private val saveUsername: SaveSyrideUsername,
     initialUsername: String,
 ) {
@@ -54,6 +56,10 @@ class SyrideImportPresenter(
 
     /** How many flights imported earlier got their take-off time; null until the pilot asked for it. */
     var updatedTimes by mutableStateOf<Int?>(null)
+        private set
+
+    /** Syride flights in the logbook whose track is not stored yet, counted once the import is done. */
+    var withoutTrack by mutableStateOf(0)
         private set
 
     private var reading: Job? = null
@@ -125,6 +131,7 @@ class SyrideImportPresenter(
         scope.launch {
             try {
                 result = import(mapping.selection(current.groups), mapping.newWings)
+                withoutTrack = countFlightsWithoutTrack()
                 stage = SyrideStage.Done
                 onFinished()
             } catch (e: CancellationException) {
@@ -160,6 +167,18 @@ class SyrideImportPresenter(
             }
         }
     }
+
+    // Only decides whether to offer adding the tracks; a failure here must not hide that the import worked.
+    private suspend fun countFlightsWithoutTrack(): Int =
+        try {
+            countWithoutTrack()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (
+            @Suppress("TooGenericExceptionCaught") _: Exception,
+        ) {
+            0
+        }
 
     private fun start(prepared: SyrideImportDraft) {
         updatedTimes = null

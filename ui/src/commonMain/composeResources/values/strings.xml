@@ -516,6 +516,21 @@
         <item quantity="one">%1$d track left out</item>
         <item quantity="other">%1$d tracks left out</item>
     </plurals>
+    <string name="syride_tracks_title">Add the tracks</string>
+    <plurals name="syride_tracks_waiting">
+        <item quantity="one">%1$d Syride flight in your logbook has a track on Syride that is not stored here yet.</item>
+        <item quantity="other">%1$d Syride flights in your logbook have a track on Syride that is not stored here yet.</item>
+    </plurals>
+    <string name="syride_tracks_hint">Import the tracks now and each one is attached to its flight. Choose the files downloaded from the Syride website, or read them from your logger.</string>
+    <string name="syride_tracks_files">Choose IGC files…</string>
+    <string name="syride_tracks_device">Read from a device…</string>
+    <string name="syride_tracks_skip">Not now</string>
+    <string name="igc_linking_title">How linking works</string>
+    <string name="igc_linking_intro">Each track is compared with the flights in your logbook:</string>
+    <string name="igc_linking_syride">A file named after a Syride flight number, as downloaded from the Syride website, belongs to that flight.</string>
+    <string name="igc_linking_time">A track that starts in the minute of a flight's take-off time belongs to that flight. This is how the files of a Syride logger are found.</string>
+    <string name="igc_linking_possible">A flight on the same day with a similar duration is only a possible match. Choose “Attach” if it is the right one.</string>
+    <string name="igc_linking_zone">Times are compared in your computer's time zone, so flights made in another time zone only show as possible matches. A flight that already has a track keeps it.</string>
     <string name="import_menu_needs_wing">Add a wing first</string>
     <string name="spreadsheet_title">Import flights from a spreadsheet</string>
     <string name="spreadsheet_pick_title">Choose a spreadsheet (ODS or XLSX)</string>

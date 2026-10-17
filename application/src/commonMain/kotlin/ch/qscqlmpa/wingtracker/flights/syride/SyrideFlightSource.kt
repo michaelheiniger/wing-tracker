@@ -16,7 +16,12 @@ const val SYRIDE_SYSTEM = "syride"
  * The id of a Syride flight with a track. Flights and activities are numbered separately on Syride, so the kind is part
  * of the id; tracks downloaded from Syride are named after the flight number (ADR 0026).
  */
-fun syrideFlightId(flightNumber: String): String = "flight:$flightNumber"
+fun syrideFlightId(flightNumber: String): String = "$FLIGHT_PREFIX$flightNumber"
+
+private const val FLIGHT_PREFIX = "flight:"
+
+/** Whether a flight came from Syride with a track there, which can then be imported and attached to it. */
+fun ExternalReference.isSyrideFlightWithTrack(): Boolean = system == SYRIDE_SYSTEM && id.startsWith(FLIGHT_PREFIX)
 
 /** The id of a Syride entry without a track, which only has an activity number. */
 fun syrideActivityId(activityNumber: Int): String = "activity:$activityNumber"

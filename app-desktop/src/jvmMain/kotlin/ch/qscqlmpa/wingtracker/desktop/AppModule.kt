@@ -16,6 +16,7 @@ import ch.qscqlmpa.wingtracker.flights.spreadsheet.ImportSpreadsheetFlights
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.OpenSpreadsheet
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.PrepareSpreadsheetImport
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.SpreadsheetReader
+import ch.qscqlmpa.wingtracker.flights.syride.CountSyrideFlightsWithoutTrack
 import ch.qscqlmpa.wingtracker.flights.syride.ImportSyrideFlights
 import ch.qscqlmpa.wingtracker.flights.syride.PrepareSyrideImport
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlightSource
@@ -176,11 +177,13 @@ private fun flightsModule() =
         factory { PrepareSyrideImport(get(), get(), get()) }
         factory { ImportSyrideFlights(get(), get(), get(), RegisterWing(get())) }
         factory { UpdateSyrideTakeOffTimes(get()) }
+        factory { CountSyrideFlightsWithoutTrack(get()) }
         factory { OpenSpreadsheet(get()) }
         factory { PrepareSpreadsheetImport(get(), get()) }
         factory { ImportSpreadsheetFlights(get(), get(), get(), RegisterWing(get())) }
         single {
             LogbookUseCases(
+                get(),
                 get(),
                 get(),
                 get(),

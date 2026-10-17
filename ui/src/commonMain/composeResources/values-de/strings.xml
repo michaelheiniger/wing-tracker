@@ -516,6 +516,21 @@
         <item quantity="one">%1$d Track ausgelassen</item>
         <item quantity="other">%1$d Tracks ausgelassen</item>
     </plurals>
+    <string name="syride_tracks_title">Tracks hinzufügen</string>
+    <plurals name="syride_tracks_waiting">
+        <item quantity="one">%1$d Syride-Flug in deinem Flugbuch hat auf Syride einen Track, der hier noch nicht gespeichert ist.</item>
+        <item quantity="other">%1$d Syride-Flüge in deinem Flugbuch haben auf Syride einen Track, der hier noch nicht gespeichert ist.</item>
+    </plurals>
+    <string name="syride_tracks_hint">Importiere die Tracks jetzt, dann wird jeder seinem Flug angehängt. Wähle die von der Syride-Website heruntergeladenen Dateien aus oder lies sie von deinem Logger.</string>
+    <string name="syride_tracks_files">IGC-Dateien auswählen…</string>
+    <string name="syride_tracks_device">Von einem Gerät lesen…</string>
+    <string name="syride_tracks_skip">Nicht jetzt</string>
+    <string name="igc_linking_title">So wird verknüpft</string>
+    <string name="igc_linking_intro">Jeder Track wird mit den Flügen in deinem Flugbuch verglichen:</string>
+    <string name="igc_linking_syride">Eine Datei, die nach einer Syride-Flugnummer benannt ist, wie sie von der Syride-Website heruntergeladen wird, gehört zu diesem Flug.</string>
+    <string name="igc_linking_time">Ein Track, der in der Minute der Startzeit eines Flugs beginnt, gehört zu diesem Flug. So werden die Dateien eines Syride-Loggers gefunden.</string>
+    <string name="igc_linking_possible">Ein Flug am selben Tag mit ähnlicher Dauer passt nur möglicherweise. Wähle «Anhängen», wenn es der richtige ist.</string>
+    <string name="igc_linking_zone">Zeiten werden in der Zeitzone deines Computers verglichen, deshalb passen Flüge in einer anderen Zeitzone nur möglicherweise. Ein Flug, der schon einen Track hat, behält ihn.</string>
     <string name="import_menu_needs_wing">Lege zuerst einen Schirm an</string>
     <string name="spreadsheet_title">Flüge aus einer Tabelle importieren</string>
     <string name="spreadsheet_pick_title">Wähle eine Tabellendatei (ODS oder XLSX)</string>

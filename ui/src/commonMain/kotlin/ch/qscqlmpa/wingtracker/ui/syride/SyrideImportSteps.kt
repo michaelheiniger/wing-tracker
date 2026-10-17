@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -13,6 +14,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.components.Severity
 import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.flights.importing.Busy
@@ -40,6 +42,12 @@ import ch.qscqlmpa.wingtracker.ui.resources.syride_times_found
 import ch.qscqlmpa.wingtracker.ui.resources.syride_times_more
 import ch.qscqlmpa.wingtracker.ui.resources.syride_times_updated
 import ch.qscqlmpa.wingtracker.ui.resources.syride_times_why
+import ch.qscqlmpa.wingtracker.ui.resources.syride_tracks_device
+import ch.qscqlmpa.wingtracker.ui.resources.syride_tracks_files
+import ch.qscqlmpa.wingtracker.ui.resources.syride_tracks_hint
+import ch.qscqlmpa.wingtracker.ui.resources.syride_tracks_skip
+import ch.qscqlmpa.wingtracker.ui.resources.syride_tracks_title
+import ch.qscqlmpa.wingtracker.ui.resources.syride_tracks_waiting
 import ch.qscqlmpa.wingtracker.ui.resources.syride_update_times
 import ch.qscqlmpa.wingtracker.ui.resources.syride_username
 import ch.qscqlmpa.wingtracker.ui.resources.syride_wings_hint
@@ -52,13 +60,47 @@ import org.jetbrains.compose.resources.stringResource
 internal fun SyrideImportSteps(
     presenter: SyrideImportPresenter,
     actions: StepActions,
+    tracks: TrackOffer,
 ) {
     when (presenter.stage) {
         SyrideStage.Account -> AccountStep(presenter, actions)
         SyrideStage.Reading -> ReadingStep(presenter)
-        SyrideStage.Wings -> WingsStep(presenter, actions)
+        SyrideStage.Wings -> WingsStep(presenter, actions, tracks.onImported)
         SyrideStage.Importing -> Busy(null)
-        SyrideStage.Done -> ImportDone(presenter.result, actions.close)
+        SyrideStage.Done -> DoneStep(presenter, actions, tracks)
+    }
+}
+
+/** How the wizard goes on to the tracks of the flights just imported, and why picking them failed. */
+internal class TrackOffer(
+    val onImported: () -> Unit,
+    val onChooseFiles: () -> Unit,
+    val onReadDevice: () -> Unit,
+    val failure: Failure?,
+)
+
+@Composable
+private fun DoneStep(
+    presenter: SyrideImportPresenter,
+    actions: StepActions,
+    tracks: TrackOffer,
+) {
+    val waiting = presenter.withoutTrack
+    ImportDone(presenter.result, actions.close, closeButton = waiting == 0)
+    if (waiting == 0) return
+    // Right after the flights is when adding the tracks attaches them, rather than duplicating flights (ADR 0026).
+    Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium) {
+        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(Res.string.syride_tracks_title), style = MaterialTheme.typography.titleSmall)
+            Text(pluralStringResource(Res.plurals.syride_tracks_waiting, waiting, waiting))
+            Hint(stringResource(Res.string.syride_tracks_hint))
+        }
+    }
+    tracks.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
+    Buttons {
+        TextButton(onClick = actions.close) { Text(stringResource(Res.string.syride_tracks_skip)) }
+        OutlinedButton(onClick = tracks.onReadDevice) { Text(stringResource(Res.string.syride_tracks_device)) }
+        OutlinedButton(onClick = tracks.onChooseFiles) { Text(stringResource(Res.string.syride_tracks_files)) }
     }
 }
 
@@ -104,6 +146,7 @@ private fun ReadingStep(presenter: SyrideImportPresenter) {
 private fun WingsStep(
     presenter: SyrideImportPresenter,
     actions: StepActions,
+    onImported: () -> Unit,
 ) {
     val draft = checkNotNull(presenter.draft)
     if (draft.alreadyImported > 0) Hint(stringResource(Res.string.syride_already, draft.alreadyImported))
@@ -123,7 +166,7 @@ private fun WingsStep(
         TextButton(onClick = presenter::back) { Text(stringResource(Res.string.import_back)) }
         TextButton(onClick = actions.cancel) { Text(stringResource(Res.string.action_cancel)) }
         Button(
-            onClick = { presenter.import(onFinished = {}) },
+            onClick = { presenter.import(onFinished = onImported) },
             enabled = presenter.importableCount > 0 && presenter.allReady,
         ) {
             Text(pluralStringResource(Res.plurals.import_count, presenter.importableCount, presenter.importableCount))

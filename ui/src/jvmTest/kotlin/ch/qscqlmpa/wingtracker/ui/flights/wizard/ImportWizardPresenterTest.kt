@@ -28,6 +28,7 @@ class ImportWizardPresenterTest {
             every { it.stage } returns SyrideStage.Account
             every { it.updatedTimes } returns null
             every { it.updatingTimes } returns false
+            every { it.withoutTrack } returns 0
         }
     private val spreadsheet =
         mockk<SpreadsheetImportPresenter>(relaxed = true).also {
@@ -41,6 +42,7 @@ class ImportWizardPresenterTest {
         }
     private var hidesKnownTracks: Boolean? = null
     private var closed = false
+    private var savedCount = 0
 
     private fun wizard() =
         ImportWizardPresenter(
@@ -51,6 +53,7 @@ class ImportWizardPresenterTest {
                 hidesKnownTracks = fromDevice
                 tracks
             },
+            onSaved = { savedCount++ },
             onClose = { closed = true },
         )
 
@@ -91,7 +94,7 @@ class ImportWizardPresenterTest {
             val wizard = wizard()
 
             // when
-            wizard.chooseIgcFiles()
+            wizard.chooseTracks(ImportSource.IgcFiles)
 
             // then
             assertThat(wizard.step).isEqualTo(ImportStep.Tracks)
@@ -107,7 +110,7 @@ class ImportWizardPresenterTest {
             val wizard = wizard()
 
             // when
-            wizard.chooseDevice()
+            wizard.chooseTracks(ImportSource.Device)
 
             // then
             assertThat(wizard.flow?.source).isEqualTo(ImportSource.Device)
@@ -120,7 +123,7 @@ class ImportWizardPresenterTest {
             val wizard = wizard()
 
             // when
-            wizard.chooseIgcFiles()
+            wizard.chooseTracks(ImportSource.IgcFiles)
 
             // then
             assertThat(wizard.flow).isNull()
@@ -347,6 +350,97 @@ class ImportWizardPresenterTest {
 
             // then
             assertThat(closed).isTrue()
+        }
+    }
+
+    @Nested
+    inner class AddingTheTracksOfSyrideFlights {
+        private fun afterSyride(): ImportWizardPresenter {
+            every { syride.stage } returns SyrideStage.Done
+            every { syride.updatedTimes } returns null
+            every { syride.withoutTrack } returns 184
+            return wizard().also { it.chooseSyride() }
+        }
+
+        @Test
+        fun `offers the tracks as a step of the Syride import when flights still lack them`() {
+            // when
+            val wizard = afterSyride()
+
+            // then
+            assertThat(wizard.step).isEqualTo(ImportStep.Tracks)
+            assertThat(wizard.steps).containsExactly(
+                ImportStep.Source,
+                ImportStep.Account,
+                ImportStep.Wings,
+                ImportStep.Tracks,
+                ImportStep.Done,
+            )
+        }
+
+        @Test
+        fun `ends the Syride import when every flight has its track`() {
+            // given
+            every { syride.stage } returns SyrideStage.Done
+            every { syride.withoutTrack } returns 0
+
+            // when
+            val wizard = wizard().also { it.chooseSyride() }
+
+            // then
+            assertThat(wizard.step).isEqualTo(ImportStep.Done)
+            assertThat(wizard.steps).doesNotContain(ImportStep.Tracks)
+        }
+
+        @Test
+        fun `reviews the tracks read from the device in the steps of the Syride import`() {
+            // given
+            every { trackFiles.chooseFolder(any()) } answers { firstArg<(List<NewAttachment>) -> Unit>()(TRACKS) }
+            val wizard = afterSyride()
+
+            // when
+            wizard.chooseTracks(ImportSource.Device)
+
+            // then
+            assertThat(wizard.flow?.source).isEqualTo(ImportSource.Device)
+            assertThat(wizard.step).isEqualTo(ImportStep.Tracks)
+            assertThat(wizard.steps).contains(ImportStep.Account, ImportStep.Wings)
+            assertThat(hidesKnownTracks).isTrue()
+        }
+
+        @Test
+        fun `goes back from the review to the offer, not to the sources`() {
+            // given
+            every { trackFiles.choose(any()) } answers { firstArg<(List<NewAttachment>) -> Unit>()(TRACKS) }
+            val wizard = afterSyride().also { it.chooseTracks(ImportSource.IgcFiles) }
+
+            // when
+            wizard.back()
+
+            // then
+            assertThat(wizard.flow).isInstanceOf(ImportFlow.Syride::class.java)
+            assertThat(wizard.step).isEqualTo(ImportStep.Tracks)
+        }
+
+        @Test
+        fun `offers no way back from the offer, since the flights are saved`() {
+            // when
+            val wizard = afterSyride()
+
+            // then
+            assertThat(wizard.canGoBack).isFalse()
+        }
+
+        @Test
+        fun `lets the logbook show what was saved once the flights are imported`() {
+            // given
+            val wizard = afterSyride()
+
+            // when
+            wizard.imported()
+
+            // then
+            assertThat(savedCount).isEqualTo(1)
         }
     }
 }

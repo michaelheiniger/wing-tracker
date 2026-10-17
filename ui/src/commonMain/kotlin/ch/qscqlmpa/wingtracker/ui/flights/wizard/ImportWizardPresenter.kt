@@ -35,17 +35,32 @@ sealed interface ImportFlow {
     // The pilot has not got past the source's first choices, so picking another source loses little.
     val atStart: Boolean
 
+    // Where Back on the first step leads; null leads to the sources.
+    val previous: ImportFlow? get() = null
+
     class Syride(
         val presenter: SyrideImportPresenter,
     ) : ImportFlow {
         override val source = ImportSource.Syride
-        override val steps = listOf(ImportStep.Source, ImportStep.Account, ImportStep.Wings, ImportStep.Done)
+
+        // Flights whose track is still on Syride lead on to adding the tracks, which then attach to them (ADR 0026).
+        val offersTracks: Boolean get() = presenter.stage == SyrideStage.Done && presenter.withoutTrack > 0
+
+        override val steps: List<ImportStep>
+            get() =
+                listOfNotNull(
+                    ImportStep.Source,
+                    ImportStep.Account,
+                    ImportStep.Wings,
+                    ImportStep.Tracks.takeIf { offersTracks },
+                    ImportStep.Done,
+                )
         override val step: ImportStep
             get() =
                 when (presenter.stage) {
                     SyrideStage.Account, SyrideStage.Reading -> ImportStep.Account
                     SyrideStage.Wings, SyrideStage.Importing -> ImportStep.Wings
-                    SyrideStage.Done -> ImportStep.Done
+                    SyrideStage.Done -> if (offersTracks) ImportStep.Tracks else ImportStep.Done
                 }
         override val saved: Boolean get() = presenter.stage == SyrideStage.Done || presenter.updatedTimes != null
         override val hasUnsavedChoices: Boolean get() = presenter.stage == SyrideStage.Wings
@@ -80,8 +95,10 @@ sealed interface ImportFlow {
     class Tracks(
         override val source: ImportSource,
         val presenter: IgcBatchPresenter,
+        // The import that offered these tracks; its steps stay in the stepper and Back returns to its offer.
+        override val previous: ImportFlow? = null,
     ) : ImportFlow {
-        override val steps = listOf(ImportStep.Source, ImportStep.Tracks, ImportStep.Done)
+        override val steps = previous?.steps ?: listOf(ImportStep.Source, ImportStep.Tracks, ImportStep.Done)
 
         var done by mutableStateOf(false)
             internal set
@@ -105,6 +122,8 @@ class ImportWizardPresenter(
     private val newSyride: () -> SyrideImportPresenter,
     private val newSpreadsheet: () -> SpreadsheetImportPresenter,
     private val newTracks: (fromDevice: Boolean) -> IgcBatchPresenter,
+    // The logbook shows what was saved, and the wings a source created are offered for the tracks that follow.
+    private val onSaved: () -> Unit,
     private val onClose: () -> Unit,
 ) {
     var flow by mutableStateOf<ImportFlow?>(null)
@@ -118,7 +137,7 @@ class ImportWizardPresenter(
         get() = flow?.steps ?: listOf(ImportStep.Source, ImportStep.Details, ImportStep.Done)
     val step: ImportStep get() = flow?.step ?: ImportStep.Source
 
-    /** Only the first steps of a source go back to the sources; later steps have their own way back. */
+    /** Only the first steps of a source go back, to the sources or to the offer of tracks. */
     val canGoBack: Boolean
         get() = flow?.let { !it.saved && !it.busy && it.atStart } == true
 
@@ -136,29 +155,47 @@ class ImportWizardPresenter(
         spreadsheet.choose(onCancelled = { flow = null })
     }
 
-    fun chooseIgcFiles() = trackFiles.choose { openTracks(it, ImportSource.IgcFiles) }
-
-    fun chooseDevice() = trackFiles.chooseFolder { openTracks(it, ImportSource.Device) }
+    /**
+     * Picks track files, or a logger's folder for [ImportSource.Device]. Chosen from the offer after an import, the
+     * review continues the steps of that import.
+     */
+    fun chooseTracks(source: ImportSource) {
+        val offering = flow
+        val open = { files: List<NewAttachment> -> openTracks(files, source, offering) }
+        if (source == ImportSource.Device) trackFiles.chooseFolder(open) else trackFiles.choose(open)
+    }
 
     /** Tracks dropped on the logbook skip the source step, which still shows where they came from. */
     fun openTracks(
         files: List<NewAttachment>,
         source: ImportSource,
+        offeredBy: ImportFlow? = null,
     ) {
         trackFiles.dismissFailure()
         // A logger holds every track it ever recorded; listing the known ones again would bury the new ones.
         val tracks = newTracks(source == ImportSource.Device)
         tracks.load(files)
-        flow = ImportFlow.Tracks(source, tracks)
+        flow = ImportFlow.Tracks(source, tracks, offeredBy)
     }
 
     fun importTracks() {
         val tracks = flow as? ImportFlow.Tracks ?: return
-        tracks.presenter.import(onDone = { tracks.done = true })
+        tracks.presenter.import(
+            onDone = {
+                tracks.done = true
+                onSaved()
+            },
+        )
     }
 
+    /** Called once a source saved its flights. */
+    fun imported() = onSaved()
+
     fun back() {
-        if (canGoBack) flow = null
+        if (canGoBack) {
+            trackFiles.dismissFailure()
+            flow = flow?.previous
+        }
     }
 
     fun cancel() {
