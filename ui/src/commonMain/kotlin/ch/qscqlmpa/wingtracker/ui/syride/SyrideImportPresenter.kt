@@ -10,6 +10,7 @@ import ch.qscqlmpa.wingtracker.flights.syride.SyrideException
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlight
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideImportDraft
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideProblem
+import ch.qscqlmpa.wingtracker.flights.syride.UpdateSyrideTakeOffTimes
 import ch.qscqlmpa.wingtracker.settings.SaveSyrideUsername
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
@@ -31,6 +32,7 @@ class SyrideImportPresenter(
     private val scope: CoroutineScope,
     private val prepare: PrepareSyrideImport,
     private val import: ImportSyrideFlights,
+    private val updateTimes: UpdateSyrideTakeOffTimes,
     private val saveUsername: SaveSyrideUsername,
     initialUsername: String,
 ) {
@@ -44,6 +46,14 @@ class SyrideImportPresenter(
     var result by mutableStateOf<ImportResult<SyrideFlight>?>(null)
         private set
     var failure by mutableStateOf<Failure?>(null)
+        private set
+
+    /** Busy while flights imported earlier get their take-off time. */
+    var updatingTimes by mutableStateOf(false)
+        private set
+
+    /** How many flights imported earlier got their take-off time; null until the pilot asked for it. */
+    var updatedTimes by mutableStateOf<Int?>(null)
         private set
 
     private var reading: Job? = null
@@ -129,7 +139,30 @@ class SyrideImportPresenter(
         }
     }
 
+    /** Gives flights imported earlier Syride's take-off time; independent of importing new ones. */
+    fun updateTakeOffTimes() {
+        val updates = draft?.takeOffTimeUpdates.orEmpty()
+        if (updates.isEmpty() || updatingTimes) return
+        updatingTimes = true
+        failure = null
+        scope.launch {
+            try {
+                updatedTimes = updateTimes(updates)
+            } catch (e: CancellationException) {
+                throw e
+                // Any failure must reach the user as a message; it must never crash the window.
+            } catch (
+                @Suppress("TooGenericExceptionCaught") e: Exception,
+            ) {
+                failure = Failure(FailureKind.UpdateTakeOffTimes, e.message)
+            } finally {
+                updatingTimes = false
+            }
+        }
+    }
+
     private fun start(prepared: SyrideImportDraft) {
+        updatedTimes = null
         draft = prepared
         mapping.start(prepared.groups)
         stage = SyrideStage.Wings

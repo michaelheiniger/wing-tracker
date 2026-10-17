@@ -36,6 +36,7 @@ data class SyrideFlight(
             wingId = wingId,
             takeOffSite = siteName,
             notes = name,
+            takeOffTime = startTime,
             distanceKm = distanceKm,
             topAltitudeMeters = topAltitudeMeters,
             instrument = instrument,

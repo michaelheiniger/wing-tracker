@@ -7,6 +7,7 @@ import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.InMemoryWings
 import ch.qscqlmpa.wingtracker.flights.aFixedClock
 import ch.qscqlmpa.wingtracker.flights.aFlight
+import ch.qscqlmpa.wingtracker.flights.aFlightDetails
 import ch.qscqlmpa.wingtracker.flights.aWingInService
 import ch.qscqlmpa.wingtracker.flights.importing.ImportFailure
 import ch.qscqlmpa.wingtracker.flights.importing.NewWingSpec
@@ -116,6 +117,50 @@ class SyrideImportTest {
             }
 
         @Test
+        fun `offers Syride's start time for earlier flights whose take-off time is missing or differs`() =
+            runTest {
+                // given
+                val missing =
+                    aFlight("f-1", aFlightDetails(takeOffTime = null))
+                        .copy(importedFrom = ExternalReference(SYRIDE_SYSTEM, "flight:1"))
+                val different =
+                    aFlight("f-2", aFlightDetails(takeOffTime = LocalTime(13, 40)))
+                        .copy(importedFrom = ExternalReference(SYRIDE_SYSTEM, "flight:2"))
+                val same =
+                    aFlight("f-3", aFlightDetails(takeOffTime = LocalTime(13, 43)))
+                        .copy(importedFrom = ExternalReference(SYRIDE_SYSTEM, "flight:3"))
+                givenStored(flightList = listOf(missing, different, same))
+                coEvery { source.fetch("QSCQLMPA") } returns
+                    listOf(aSyrideFlight("flight:1"), aSyrideFlight("flight:2"), aSyrideFlight("flight:3"))
+
+                // when
+                val draft = prepare("QSCQLMPA")
+
+                // then
+                assertThat(draft.takeOffTimeUpdates).containsExactly(
+                    TakeOffTimeUpdate(FlightId("f-1"), LocalDate(2026, 9, 20), null, LocalTime(13, 43)),
+                    TakeOffTimeUpdate(FlightId("f-2"), LocalDate(2026, 9, 20), LocalTime(13, 40), LocalTime(13, 43)),
+                )
+            }
+
+        @Test
+        fun `offers no take-off time when Syride gives no start time`() =
+            runTest {
+                // given
+                val earlier =
+                    aFlight("f-1", aFlightDetails(takeOffTime = null))
+                        .copy(importedFrom = ExternalReference(SYRIDE_SYSTEM, "flight:1"))
+                givenStored(flightList = listOf(earlier))
+                coEvery { source.fetch("QSCQLMPA") } returns listOf(aSyrideFlight("flight:1").copy(startTime = null))
+
+                // when
+                val draft = prepare("QSCQLMPA")
+
+                // then
+                assertThat(draft.takeOffTimeUpdates).isEmpty()
+            }
+
+        @Test
         fun `suggests the existing wing with the same name`() =
             runTest {
                 // given
@@ -167,6 +212,7 @@ class SyrideImportTest {
                 assertThat(flight.details.distanceKm).isEqualTo(15.0)
                 assertThat(flight.details.topAltitudeMeters).isEqualTo(2464)
                 assertThat(flight.details.instrument).isEqualTo("Nav XL")
+                assertThat(flight.details.takeOffTime).isEqualTo(LocalTime(13, 43))
                 assertThat(flight.importedFrom).isEqualTo(ExternalReference(SYRIDE_SYSTEM, "flight:1"))
             }
 
@@ -315,6 +361,66 @@ class SyrideImportTest {
                 // then
                 assertThat(saved.map { it.importedFrom?.id }).containsExactly("flight:early", "flight:late")
                 assertThat(saved[0].loggedAt).isLessThan(saved[1].loggedAt)
+            }
+    }
+
+    @Nested
+    inner class UpdatingTakeOffTimes {
+        private val update = UpdateSyrideTakeOffTimes(flights)
+
+        @Test
+        fun `replaces the take-off time the pilot was shown with Syride's`() =
+            runTest {
+                // given
+                val stored = aFlight("f-1", aFlightDetails(takeOffTime = LocalTime(13, 40)))
+                givenStored(flightList = listOf(stored))
+                coEvery { flights.findById(FlightId("f-1")) } returns stored
+
+                // when
+                val count =
+                    update(
+                        listOf(TakeOffTimeUpdate(stored.id, stored.details.date, LocalTime(13, 40), LocalTime(13, 43))),
+                    )
+
+                // then
+                assertThat(count).isEqualTo(1)
+                assertThat(saved.single())
+                    .usingRecursiveComparison()
+                    .isEqualTo(stored.withDetails(stored.details.copy(takeOffTime = LocalTime(13, 43))))
+            }
+
+        @Test
+        fun `leaves a flight whose take-off time changed since the account was read`() =
+            runTest {
+                // given
+                val stored = aFlight("f-1", aFlightDetails(takeOffTime = LocalTime(13, 45)))
+                givenStored(flightList = listOf(stored))
+                coEvery { flights.findById(FlightId("f-1")) } returns stored
+
+                // when
+                val count =
+                    update(
+                        listOf(TakeOffTimeUpdate(stored.id, stored.details.date, LocalTime(13, 40), LocalTime(13, 43))),
+                    )
+
+                // then
+                assertThat(count).isEqualTo(0)
+                assertThat(saved).isEmpty()
+            }
+
+        @Test
+        fun `skips a flight deleted since the account was read`() =
+            runTest {
+                // given
+                givenStored()
+                coEvery { flights.findById(FlightId("f-1")) } returns null
+
+                // when
+                val count =
+                    update(listOf(TakeOffTimeUpdate(FlightId("f-1"), LocalDate(2026, 9, 20), null, LocalTime(13, 43))))
+
+                // then
+                assertThat(count).isEqualTo(0)
             }
     }
 }

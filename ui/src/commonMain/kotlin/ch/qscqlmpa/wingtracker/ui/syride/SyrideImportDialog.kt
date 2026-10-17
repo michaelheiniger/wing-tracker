@@ -9,12 +9,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import ch.qscqlmpa.wingtracker.ui.components.Severity
+import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.flights.importing.Busy
 import ch.qscqlmpa.wingtracker.ui.flights.importing.Buttons
 import ch.qscqlmpa.wingtracker.ui.flights.importing.Hint
@@ -33,9 +36,17 @@ import ch.qscqlmpa.wingtracker.ui.resources.syride_account_hint
 import ch.qscqlmpa.wingtracker.ui.resources.syride_already
 import ch.qscqlmpa.wingtracker.ui.resources.syride_read
 import ch.qscqlmpa.wingtracker.ui.resources.syride_reading
+import ch.qscqlmpa.wingtracker.ui.resources.syride_time_example
+import ch.qscqlmpa.wingtracker.ui.resources.syride_time_none
+import ch.qscqlmpa.wingtracker.ui.resources.syride_times_found
+import ch.qscqlmpa.wingtracker.ui.resources.syride_times_more
+import ch.qscqlmpa.wingtracker.ui.resources.syride_times_updated
+import ch.qscqlmpa.wingtracker.ui.resources.syride_times_why
 import ch.qscqlmpa.wingtracker.ui.resources.syride_title
+import ch.qscqlmpa.wingtracker.ui.resources.syride_update_times
 import ch.qscqlmpa.wingtracker.ui.resources.syride_username
 import ch.qscqlmpa.wingtracker.ui.resources.syride_wings_hint
+import ch.qscqlmpa.wingtracker.ui.toDisplay
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -106,6 +117,7 @@ private fun WingsStep(
 ) {
     val draft = checkNotNull(presenter.draft)
     if (draft.alreadyImported > 0) Hint(stringResource(Res.string.syride_already, draft.alreadyImported))
+    TakeOffTimes(presenter)
     if (draft.groups.isEmpty()) {
         Text(stringResource(Res.string.import_nothing_new))
     } else {
@@ -125,6 +137,44 @@ private fun WingsStep(
             enabled = presenter.importableCount > 0 && presenter.allReady,
         ) {
             Text(pluralStringResource(Res.plurals.import_count, presenter.importableCount, presenter.importableCount))
+        }
+    }
+}
+
+private const val TIME_EXAMPLES = 3
+
+/** Flights imported earlier that can get Syride's take-off time, with a few examples so the pilot sees the change. */
+@Composable
+private fun TakeOffTimes(presenter: SyrideImportPresenter) {
+    presenter.updatedTimes?.let {
+        StatusBadge(pluralStringResource(Res.plurals.syride_times_updated, it, it), Severity.Success)
+        return
+    }
+    val updates = checkNotNull(presenter.draft).takeOffTimeUpdates
+    if (updates.isEmpty()) return
+    val none = stringResource(Res.string.syride_time_none)
+    Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium) {
+        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(pluralStringResource(Res.plurals.syride_times_found, updates.size, updates.size))
+            updates.sortedByDescending { it.date }.take(TIME_EXAMPLES).forEach {
+                val stored = it.stored?.toDisplay() ?: none
+                Hint(
+                    stringResource(
+                        Res.string.syride_time_example,
+                        it.date.toDisplay(),
+                        stored,
+                        it.fromSyride.toDisplay(),
+                    ),
+                )
+            }
+            val more = updates.size - TIME_EXAMPLES
+            if (more > 0) Hint(pluralStringResource(Res.plurals.syride_times_more, more, more))
+            Hint(stringResource(Res.string.syride_times_why))
+            Buttons {
+                Button(onClick = presenter::updateTakeOffTimes, enabled = !presenter.updatingTimes) {
+                    Text(pluralStringResource(Res.plurals.syride_update_times, updates.size, updates.size))
+                }
+            }
         }
     }
 }

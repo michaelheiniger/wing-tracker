@@ -406,6 +406,25 @@
     <string name="import_new_incomplete">Vervollständige zuerst den neuen Schirm</string>
     <string name="import_edit_new">Bearbeiten</string>
     <string name="syride_already">%1$d Flüge wurden schon früher importiert und werden ausgelassen.</string>
+    <plurals name="syride_times_found">
+        <item quantity="one">%1$d davon kann die Startzeit von Syride übernehmen:</item>
+        <item quantity="other">%1$d davon können die Startzeit von Syride übernehmen:</item>
+    </plurals>
+    <string name="syride_times_why">Tracks, die du später importierst, werden dann mit diesen Flügen verknüpft. Eine Zeit, die du selbst eingegeben hast, wird ersetzt.</string>
+    <string name="syride_time_example">%1$s: %2$s → %3$s</string>
+    <string name="syride_time_none">keine</string>
+    <plurals name="syride_times_more">
+        <item quantity="one">…und %1$d weiterer</item>
+        <item quantity="other">…und %1$d weitere</item>
+    </plurals>
+    <plurals name="syride_update_times">
+        <item quantity="one">%1$d Startzeit aktualisieren</item>
+        <item quantity="other">%1$d Startzeiten aktualisieren</item>
+    </plurals>
+    <plurals name="syride_times_updated">
+        <item quantity="one">%1$d Startzeit aktualisiert.</item>
+        <item quantity="other">%1$d Startzeiten aktualisiert.</item>
+    </plurals>
     <string name="import_nothing_new">Es gibt keine neuen Flüge zu importieren.</string>
     <string name="import_back">Zurück</string>
     <string name="import_newwing_title">Neuer Schirm</string>
@@ -422,6 +441,7 @@
     <string name="failure_syride_unreachable">Syride ist nicht erreichbar: %1$s</string>
     <string name="failure_syride_changed">Die Seiten von Syride sehen anders aus als erwartet, deshalb können die Flüge nicht gelesen werden (%1$s). Die Anwendung braucht ein Update.</string>
     <string name="failure_import_syride">Die Flüge konnten nicht importiert werden: %1$s</string>
+    <string name="failure_update_takeoff_times">Die Startzeiten konnten nicht aktualisiert werden: %1$s</string>
     <plurals name="import_count">
         <item quantity="one">%1$d Flug importieren</item>
         <item quantity="other">%1$d Flüge importieren</item>

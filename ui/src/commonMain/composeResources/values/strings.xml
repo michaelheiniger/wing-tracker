@@ -406,6 +406,25 @@
     <string name="import_new_incomplete">Complete the new wing first</string>
     <string name="import_edit_new">Edit</string>
     <string name="syride_already">%1$d flights were already imported earlier and are left out.</string>
+    <plurals name="syride_times_found">
+        <item quantity="one">%1$d of them can get its take-off time from Syride:</item>
+        <item quantity="other">%1$d of them can get their take-off time from Syride:</item>
+    </plurals>
+    <string name="syride_times_why">Tracks you import later are then linked to these flights. A time you entered yourself is replaced.</string>
+    <string name="syride_time_example">%1$s: %2$s → %3$s</string>
+    <string name="syride_time_none">none</string>
+    <plurals name="syride_times_more">
+        <item quantity="one">…and %1$d more</item>
+        <item quantity="other">…and %1$d more</item>
+    </plurals>
+    <plurals name="syride_update_times">
+        <item quantity="one">Update %1$d take-off time</item>
+        <item quantity="other">Update %1$d take-off times</item>
+    </plurals>
+    <plurals name="syride_times_updated">
+        <item quantity="one">%1$d take-off time updated.</item>
+        <item quantity="other">%1$d take-off times updated.</item>
+    </plurals>
     <string name="import_nothing_new">There are no new flights to import.</string>
     <string name="import_back">Back</string>
     <string name="import_newwing_title">New wing</string>
@@ -422,6 +441,7 @@
     <string name="failure_syride_unreachable">Syride could not be reached: %1$s</string>
     <string name="failure_syride_changed">Syride's pages look different than expected, so the flights cannot be read (%1$s). The application needs an update.</string>
     <string name="failure_import_syride">The flights could not be imported: %1$s</string>
+    <string name="failure_update_takeoff_times">The take-off times could not be updated: %1$s</string>
     <plurals name="import_count">
         <item quantity="one">Import %1$d flight</item>
         <item quantity="other">Import %1$d flights</item>

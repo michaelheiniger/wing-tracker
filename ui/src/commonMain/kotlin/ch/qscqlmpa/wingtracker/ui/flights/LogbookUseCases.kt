@@ -11,6 +11,7 @@ import ch.qscqlmpa.wingtracker.flights.spreadsheet.OpenSpreadsheet
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.PrepareSpreadsheetImport
 import ch.qscqlmpa.wingtracker.flights.syride.ImportSyrideFlights
 import ch.qscqlmpa.wingtracker.flights.syride.PrepareSyrideImport
+import ch.qscqlmpa.wingtracker.flights.syride.UpdateSyrideTakeOffTimes
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReadAttachment
 import ch.qscqlmpa.wingtracker.settings.GetAppSettings
 import ch.qscqlmpa.wingtracker.settings.SaveDeviceFolder
@@ -27,6 +28,7 @@ class LogbookUseCases(
     val readAttachment: ReadAttachment,
     val prepareSyrideImport: PrepareSyrideImport,
     val importSyrideFlights: ImportSyrideFlights,
+    val updateSyrideTakeOffTimes: UpdateSyrideTakeOffTimes,
     val saveSyrideUsername: SaveSyrideUsername,
     val openSpreadsheet: OpenSpreadsheet,
     val prepareSpreadsheetImport: PrepareSpreadsheetImport,

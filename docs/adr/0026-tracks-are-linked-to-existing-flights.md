@@ -28,7 +28,7 @@ A track is either attached to an existing flight or creates a new one, and the p
 
 Tracks with no match are offered as new flights, unticked, since they are often recordings that were not flights.
 
-To make the second rule possible, flights store an optional take-off time. The Syride import fills it, also on flights it imported before, and the IGC import fills it from the detected take-off. Within a day, flights are ordered by it, and flights without one come after those with one.
+To make the second rule possible, flights store an optional take-off time. The Syride import fills it, also on flights it imported before once the pilot agreed, and the IGC import fills it from the detected take-off. Within a day, flights are ordered by it, and flights without one come after those with one.
 
 Attaching is a behaviour of the `Flight` aggregate: a flight has at most one track. An import never replaces a track that is already stored; a track matching such a flight can only create a new flight or be skipped. Attaching keeps the flight's details as they are.
 
@@ -39,3 +39,4 @@ Importing from Syride and then from the logger gives one flight per real flight,
 ## Amendments
 
 - 2026-10-17: A flight created from a track stores the detected take-off, not the first fix, so the field means what its name says; a logger is often switched on well before take-off. Matching is unaffected, since it compares a track's first fix with Syride's start time. Flights without a take-off time are listed after the timed ones of their day.
+- 2026-10-17: On flights imported before, Syride's start time replaces the stored take-off time, also one entered by hand, but only after the pilot saw how many flights change and agreed.

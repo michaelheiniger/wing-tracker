@@ -36,6 +36,7 @@ enum class FailureKind {
     SyrideUnreachable,
     SyridePagesChanged,
     ImportSyride,
+    UpdateTakeOffTimes,
     SpreadsheetUnreadable,
     SpreadsheetOldFormat,
     ImportSpreadsheet,

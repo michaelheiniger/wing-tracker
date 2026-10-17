@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.ui.syride
 
+import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.importing.ImportResult
 import ch.qscqlmpa.wingtracker.flights.importing.NewWingSpec
 import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
@@ -11,6 +12,8 @@ import ch.qscqlmpa.wingtracker.flights.syride.SyrideException
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlight
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideImportDraft
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideProblem
+import ch.qscqlmpa.wingtracker.flights.syride.TakeOffTimeUpdate
+import ch.qscqlmpa.wingtracker.flights.syride.UpdateSyrideTakeOffTimes
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.settings.SaveSyrideUsername
 import ch.qscqlmpa.wingtracker.ui.FailureKind
@@ -25,6 +28,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -53,6 +57,7 @@ private fun aDraft(vararg groups: WingGroup<SyrideFlight>) =
 class SyrideImportPresenterTest {
     private val prepare = mockk<PrepareSyrideImport>()
     private val import = mockk<ImportSyrideFlights>()
+    private val updateTimes = mockk<UpdateSyrideTakeOffTimes>()
     private val saveUsername = mockk<SaveSyrideUsername>(relaxUnitFun = true)
 
     private fun TestScope.presenter(username: String = "QSCQLMPA") =
@@ -60,6 +65,7 @@ class SyrideImportPresenterTest {
             TestScope(UnconfinedTestDispatcher(testScheduler)),
             prepare,
             import,
+            updateTimes,
             saveUsername,
             username,
         )
@@ -299,6 +305,47 @@ class SyrideImportPresenterTest {
                 // then
                 assertThat(presenter.failure?.kind).isEqualTo(FailureKind.ImportSyride)
                 assertThat(presenter.stage).isEqualTo(SyrideStage.Wings)
+            }
+    }
+
+    @Nested
+    inner class UpdatingTakeOffTimes {
+        private val update = TakeOffTimeUpdate(FlightId("flight-1"), LocalDate(2026, 9, 26), null, LocalTime(13, 43))
+
+        private fun TestScope.readWithUpdates(): SyrideImportPresenter {
+            coEvery { prepare("QSCQLMPA") } returns aDraft().copy(takeOffTimeUpdates = listOf(update))
+            return presenter().also { it.read() }
+        }
+
+        @Test
+        fun `updates the flights the account offered and reports how many`() =
+            runTest {
+                // given
+                coEvery { updateTimes(listOf(update)) } returns 1
+                val presenter = readWithUpdates()
+
+                // when
+                presenter.updateTakeOffTimes()
+
+                // then
+                assertThat(presenter.updatedTimes).isEqualTo(1)
+                assertThat(presenter.updatingTimes).isFalse()
+            }
+
+        @Test
+        fun `reports a failure and stays ready to try again`() =
+            runTest {
+                // given
+                coEvery { updateTimes(any()) } throws IOException("Disk full")
+                val presenter = readWithUpdates()
+
+                // when
+                presenter.updateTakeOffTimes()
+
+                // then
+                assertThat(presenter.failure?.kind).isEqualTo(FailureKind.UpdateTakeOffTimes)
+                assertThat(presenter.updatedTimes).isNull()
+                assertThat(presenter.updatingTimes).isFalse()
             }
     }
 }
