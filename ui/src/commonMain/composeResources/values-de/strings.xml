@@ -135,6 +135,8 @@
     <string name="flight_form_title_add">Flug erfassen</string>
     <string name="flight_form_title_edit">Flug bearbeiten</string>
     <string name="field_flight_date">Datum *</string>
+    <string name="field_flight_takeoff_time">Startzeit (hh:mm)</string>
+    <string name="flight_date_time">%1$s · %2$s</string>
     <string name="field_flight_wing">Gleitschirm *</string>
     <string name="field_flight_duration">Dauer (h:mm) *</string>
     <string name="field_takeoff_site">Startplatz</string>
@@ -143,6 +145,7 @@
     <string name="flight_wing_retired">%1$s (ausgemustert)</string>
 
     <string name="error_duration">Stunden:Minuten von mindestens einer Minute verwenden, z. B. 1:35</string>
+    <string name="error_time">Eine Uhrzeit als Stunden:Minuten verwenden, z. B. 13:05</string>
     <string name="error_number">Eine Zahl ab null verwenden</string>
     <string name="field_flight_distance">Distanz (km)</string>
     <string name="field_flight_top_altitude">Maximale Höhe (m)</string>

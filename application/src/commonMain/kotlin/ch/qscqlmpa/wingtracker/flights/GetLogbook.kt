@@ -55,7 +55,11 @@ class GetLogbook(
 
         val newestFirst =
             loadedFlights.items.sortedWith(
-                compareByDescending<Flight> { it.details.date }.thenByDescending { it.loggedAt },
+                compareByDescending<Flight> { it.details.date }
+                    // Without a take-off time a flight cannot be placed among the timed ones, so it goes after them.
+                    .thenByDescending { it.details.takeOffTime != null }
+                    .thenByDescending { it.details.takeOffTime }
+                    .thenByDescending { it.loggedAt },
             )
         val months =
             newestFirst

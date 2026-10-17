@@ -161,7 +161,8 @@ class IgcBatchPresenter(
     /** Returns null when the track was imported, otherwise the row marked with what went wrong. */
     private suspend fun importOne(row: IgcBatchRow): IgcBatchRow? {
         val draft = checkNotNull(row.draft)
-        val details = FlightDetails(draft.date, checkNotNull(draft.duration), wingOf(row))
+        val details =
+            FlightDetails(draft.date, checkNotNull(draft.duration), wingOf(row), takeOffTime = draft.takeOffTime)
         return try {
             importIgcFlight(details, row.file, draft.checksum)
             importedCount++

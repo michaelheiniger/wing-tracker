@@ -21,6 +21,7 @@ import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import java.nio.file.Path
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
@@ -67,6 +68,7 @@ fun aStoredFlight(
     id: String = "9d41c6a2-5b7e-4f08-8c13-2a6e0f9b7d35",
     wingId: String = "3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47",
     notes: String? = "Thermic, smooth air",
+    takeOffTime: LocalTime? = LocalTime(13, 5),
 ) = Flight(
     id = FlightId(id),
     details =
@@ -77,6 +79,7 @@ fun aStoredFlight(
             takeOffSite = "Niederhorn",
             landingSite = "Beatenbucht",
             notes = notes,
+            takeOffTime = takeOffTime,
         ),
     loggedAt = Instant.parse("2026-09-20T17:00:00Z"),
 )

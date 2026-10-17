@@ -135,6 +135,8 @@
     <string name="flight_form_title_add">Log flight</string>
     <string name="flight_form_title_edit">Edit flight</string>
     <string name="field_flight_date">Date *</string>
+    <string name="field_flight_takeoff_time">Take-off time (hh:mm)</string>
+    <string name="flight_date_time">%1$s · %2$s</string>
     <string name="field_flight_wing">Wing *</string>
     <string name="field_flight_duration">Duration (h:mm) *</string>
     <string name="field_takeoff_site">Take-off site</string>
@@ -143,6 +145,7 @@
     <string name="flight_wing_retired">%1$s (retired)</string>
 
     <string name="error_duration">Use hours:minutes of at least one minute, e.g. 1:35</string>
+    <string name="error_time">Use a time of day as hours:minutes, e.g. 13:05</string>
     <string name="error_number">Use a number of zero or more</string>
     <string name="field_flight_distance">Distance (km)</string>
     <string name="field_flight_top_altitude">Top altitude (m)</string>

@@ -12,6 +12,7 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import ch.qscqlmpa.wingtracker.gear.maintenance.withStoredFiles
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlin.time.Duration
 import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
@@ -27,6 +28,8 @@ data class IgcImportDraft(
     val date: LocalDate,
     val takeOff: Instant?,
     val landing: Instant?,
+    // The take-off as the flight records it: local and in whole minutes, like a time entered by hand.
+    val takeOffTime: LocalTime?,
     val duration: Duration?,
     // Set when this exact file was imported before; the pilot decides whether to import it again.
     val duplicateOf: Flight?,
@@ -35,6 +38,7 @@ data class IgcImportDraft(
 class PrepareIgcImport(
     private val reader: TrackReader,
     private val flights: FlightRepository,
+    private val clock: AppClock,
 ) {
     /** @throws InvalidTrackException when the file is not a readable track. */
     suspend operator fun invoke(file: NewAttachment): IgcImportDraft {
@@ -47,11 +51,14 @@ class PrepareIgcImport(
             date = read.track.date,
             takeOff = detected?.takeOff,
             landing = detected?.landing,
+            takeOffTime = detected?.takeOff?.let { clock.local(it).time.inWholeMinutes() },
             duration = detected?.durationInMinutes,
             duplicateOf = duplicate,
         )
     }
 }
+
+private fun LocalTime.inWholeMinutes() = LocalTime(hour, minute)
 
 /** Logs a flight with the original track attached. The same date rules apply as for a flight entered by hand. */
 @OptIn(ExperimentalUuidApi::class)

@@ -57,6 +57,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.action_dismiss
 import ch.qscqlmpa.wingtracker.ui.resources.delete_confirm
 import ch.qscqlmpa.wingtracker.ui.resources.flight_altitude
+import ch.qscqlmpa.wingtracker.ui.resources.flight_date_time
 import ch.qscqlmpa.wingtracker.ui.resources.flight_delete
 import ch.qscqlmpa.wingtracker.ui.resources.flight_delete_body
 import ch.qscqlmpa.wingtracker.ui.resources.flight_delete_title
@@ -345,7 +346,15 @@ private fun FlightCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text(details.date.toDisplay(), style = MaterialTheme.typography.titleMedium)
+            val time = details.takeOffTime
+            Text(
+                if (time == null) {
+                    details.date.toDisplay()
+                } else {
+                    stringResource(Res.string.flight_date_time, details.date.toDisplay(), time.toDisplay())
+                },
+                style = MaterialTheme.typography.titleMedium,
+            )
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(wingName, style = MaterialTheme.typography.titleMedium)
                 val sites =

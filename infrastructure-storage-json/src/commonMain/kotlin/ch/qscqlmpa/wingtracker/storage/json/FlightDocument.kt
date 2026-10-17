@@ -9,6 +9,7 @@ import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
@@ -36,6 +37,8 @@ internal data class FlightDocument(
     val instrument: String? = null,
     val importedFromSystem: String? = null,
     val importedFromId: String? = null,
+    // Added in schema 4: when the flight took off.
+    val takeOffTime: LocalTime? = null,
 ) {
     fun toDomain(): Flight =
         Flight(
@@ -48,6 +51,7 @@ internal data class FlightDocument(
                     takeOffSite = takeOffSite,
                     landingSite = landingSite,
                     notes = notes,
+                    takeOffTime = takeOffTime,
                     distanceKm = distanceKm,
                     topAltitudeMeters = topAltitudeMeters,
                     instrument = instrument,
@@ -68,9 +72,9 @@ internal data class FlightDocument(
     }
 
     companion object {
-        // Version 2 added the imported track, version 3 the details imported from other services. Older application
-        // versions treat newer data as unsupported and leave it untouched.
-        const val CURRENT_SCHEMA_VERSION = 3
+        // Version 2 added the imported track, version 3 the details imported from other services, version 4 the
+        // take-off time. Older application versions treat newer data as unsupported and leave it untouched.
+        const val CURRENT_SCHEMA_VERSION = 4
 
         fun from(flight: Flight) =
             FlightDocument(
@@ -94,6 +98,7 @@ internal data class FlightDocument(
                 instrument = flight.details.instrument,
                 importedFromSystem = flight.importedFrom?.system,
                 importedFromId = flight.importedFrom?.id,
+                takeOffTime = flight.details.takeOffTime,
             )
     }
 }

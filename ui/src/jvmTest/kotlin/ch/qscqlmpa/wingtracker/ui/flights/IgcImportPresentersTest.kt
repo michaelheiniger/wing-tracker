@@ -46,6 +46,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -80,6 +81,7 @@ private fun aDraft(duplicateOf: Flight? = null) =
         date = LocalDate(2026, 9, 20),
         takeOff = Instant.parse("2026-09-20T09:42:00Z"),
         landing = Instant.parse("2026-09-20T11:17:00Z"),
+        takeOffTime = LocalTime(9, 42),
         duration = 95.minutes,
         duplicateOf = duplicateOf,
     )
@@ -309,7 +311,7 @@ class IgcImportPresentersTest {
         private fun TestScope.batch() =
             IgcBatchPresenter(
                 scope(),
-                PrepareIgcImport(reader, flights),
+                PrepareIgcImport(reader, flights, clock),
                 ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported-${counter++}") },
                 WING_ID,
             )
@@ -374,7 +376,7 @@ class IgcImportPresentersTest {
                 val presenter =
                     IgcBatchPresenter(
                         scope(),
-                        PrepareIgcImport(reader, flights),
+                        PrepareIgcImport(reader, flights, clock),
                         ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported-${counter++}") },
                         WING_ID,
                         hideAlreadyImported = true,
@@ -463,7 +465,7 @@ class IgcImportPresentersTest {
         private fun TestScope.batch() =
             IgcBatchPresenter(
                 scope(),
-                PrepareIgcImport(reader, flights),
+                PrepareIgcImport(reader, flights, clock),
                 ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported-${counter++}") },
                 WING_ID,
             )
@@ -488,6 +490,27 @@ class IgcImportPresentersTest {
                         match { it.igcFile?.checksum == "sum-a" && it.details.duration.isPositive() },
                     )
                 }
+            }
+
+        @Test
+        fun `logs each flight with the take-off time found in its track`() =
+            runTest {
+                // given
+                val presenter = batch()
+                presenter.load(listOf(track("a.igc", "sum-a")))
+                val takeOffTime =
+                    checkNotNull(
+                        presenter.rows
+                            .single()
+                            .draft
+                            ?.takeOffTime,
+                    )
+
+                // when
+                presenter.import {}
+
+                // then
+                coVerify { flights.save(match { it.details.takeOffTime == takeOffTime }) }
             }
 
         @Test

@@ -5,6 +5,7 @@ import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.entry
 import org.junit.jupiter.api.Nested
@@ -16,6 +17,7 @@ import kotlin.time.Instant
 private fun aFlightFormInput() =
     FlightFormInput(
         date = "20-09-2026",
+        takeOffTime = "13:05",
         wingId = WingId("3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47"),
         duration = "1:35",
         takeOffSite = "Niederhorn",
@@ -45,6 +47,7 @@ class FlightFormTest {
                     takeOffSite = "Niederhorn",
                     landingSite = "Beatenbucht",
                     notes = "Thermic, smooth air",
+                    takeOffTime = LocalTime(13, 5),
                 )
             assertThat(result).usingRecursiveComparison().isEqualTo(FlightFormResult.Valid(expected))
         }
@@ -98,6 +101,42 @@ class FlightFormTest {
 
             // then
             assertThat((result as FlightFormResult.Valid).details.date).isEqualTo(LocalDate(2026, 9, 20))
+        }
+
+        @Test
+        fun `treats a blank take-off time as unknown`() {
+            // given
+            val input = aFlightFormInput().copy(takeOffTime = " ")
+
+            // when
+            val details = (input.validate() as FlightFormResult.Valid).details
+
+            // then
+            assertThat(details.takeOffTime).isNull()
+        }
+
+        @Test
+        fun `reads a take-off time typed with a single-digit hour`() {
+            // given
+            val input = aFlightFormInput().copy(takeOffTime = "9:40")
+
+            // when
+            val details = (input.validate() as FlightFormResult.Valid).details
+
+            // then
+            assertThat(details.takeOffTime).isEqualTo(LocalTime(9, 40))
+        }
+
+        @Test
+        fun `rejects a take-off time that is not a time of day`() {
+            // given
+            val input = aFlightFormInput().copy(takeOffTime = "25:10")
+
+            // when
+            val errors = errorsOf(input)
+
+            // then
+            assertThat(errors).containsEntry(FlightFormField.TakeOffTime, FlightFormError.InvalidTime)
         }
 
         @Test

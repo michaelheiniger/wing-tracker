@@ -7,6 +7,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.YearMonth
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -47,10 +48,72 @@ class GetLogbookTest {
             }
 
         @Test
-        fun `orders flights of the same day by when they were logged, latest first`() =
+        fun `orders flights of the same day by take-off time, latest first`() =
             runTest {
                 // given
-                val day = aFlightDetails(date = LocalDate(2026, 10, 2))
+                val day = LocalDate(2026, 10, 2)
+                val morning =
+                    aFlight(
+                        "f-1",
+                        aFlightDetails(date = day, takeOffTime = LocalTime(10, 15)),
+                        loggedAt = Instant.parse("2026-10-02T18:00:00Z"),
+                    )
+                val afternoon =
+                    aFlight(
+                        "f-2",
+                        aFlightDetails(date = day, takeOffTime = LocalTime(14, 40)),
+                        loggedAt = Instant.parse("2026-10-02T09:00:00Z"),
+                    )
+                givenFlights(morning, afternoon)
+
+                // when
+                val logbook = GetLogbook(flights, wings)()
+
+                // then
+                assertThat(
+                    logbook.months
+                        .single()
+                        .flights
+                        .map { it.id.value },
+                ).containsExactly("f-2", "f-1")
+            }
+
+        @Test
+        fun `lists flights of the same day without take-off time after the timed ones`() =
+            runTest {
+                // given
+                val day = LocalDate(2026, 10, 2)
+                val untimed =
+                    aFlight(
+                        "f-1",
+                        aFlightDetails(date = day, takeOffTime = null),
+                        loggedAt = Instant.parse("2026-10-02T18:00:00Z"),
+                    )
+                val timed =
+                    aFlight(
+                        "f-2",
+                        aFlightDetails(date = day, takeOffTime = LocalTime(10, 15)),
+                        loggedAt = Instant.parse("2026-10-02T09:00:00Z"),
+                    )
+                givenFlights(untimed, timed)
+
+                // when
+                val logbook = GetLogbook(flights, wings)()
+
+                // then
+                assertThat(
+                    logbook.months
+                        .single()
+                        .flights
+                        .map { it.id.value },
+                ).containsExactly("f-2", "f-1")
+            }
+
+        @Test
+        fun `orders flights of the same day without take-off time by when they were logged, latest first`() =
+            runTest {
+                // given
+                val day = aFlightDetails(date = LocalDate(2026, 10, 2), takeOffTime = null)
                 val morning = aFlight("f-1", day, loggedAt = Instant.parse("2026-10-02T09:00:00Z"))
                 val evening = aFlight("f-2", day, loggedAt = Instant.parse("2026-10-02T18:00:00Z"))
                 givenFlights(morning, evening)

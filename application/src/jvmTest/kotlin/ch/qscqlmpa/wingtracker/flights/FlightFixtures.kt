@@ -9,6 +9,7 @@ import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlin.time.Clock
 import kotlin.time.Duration
@@ -55,6 +56,7 @@ fun aFlightDetails(
     date: LocalDate = LocalDate(2026, 9, 20),
     duration: Duration = 95.minutes,
     wingId: WingId = WingId("3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47"),
+    takeOffTime: LocalTime? = LocalTime(13, 5),
 ) = FlightDetails(
     date = date,
     duration = duration,
@@ -62,6 +64,7 @@ fun aFlightDetails(
     takeOffSite = "Niederhorn",
     landingSite = "Beatenbucht",
     notes = "Thermic, smooth air",
+    takeOffTime = takeOffTime,
 )
 
 fun aFlight(

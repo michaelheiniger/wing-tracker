@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.flights.igc
 
+import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDateInFutureException
@@ -20,6 +21,8 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -55,7 +58,7 @@ class IgcImportTest {
                 givenStoredFlights()
 
                 // when
-                val draft = PrepareIgcImport(reader, flights)(FILE)
+                val draft = PrepareIgcImport(reader, flights, aFixedClock())(FILE)
 
                 // then
                 assertThat(draft.date).isEqualTo(LocalDate(2026, 9, 20))
@@ -67,6 +70,23 @@ class IgcImportTest {
             }
 
         @Test
+        fun `offers the detected take-off as the pilot's local time in whole minutes`() =
+            runTest {
+                // given
+                givenTrack(arrayOf(Leg.Still(10.minutes), Leg.Moving(75.minutes, 32.0), Leg.Still(5.minutes)))
+                givenStoredFlights()
+                val zurich = AppClock(zone = TimeZone.of("Europe/Zurich"))
+
+                // when
+                val draft = PrepareIgcImport(reader, flights, zurich)(FILE)
+
+                // then
+                val takeOff = zurich.local(checkNotNull(draft.takeOff)).time
+                assertThat(draft.takeOffTime).isEqualTo(LocalTime(takeOff.hour, takeOff.minute))
+                assertThat(draft.takeOffTime!!).isBetween(LocalTime(11, 9), LocalTime(11, 11))
+            }
+
+        @Test
         fun `offers no duration when the track never moves`() =
             runTest {
                 // given
@@ -74,11 +94,12 @@ class IgcImportTest {
                 givenStoredFlights()
 
                 // when
-                val draft = PrepareIgcImport(reader, flights)(FILE)
+                val draft = PrepareIgcImport(reader, flights, aFixedClock())(FILE)
 
                 // then
                 assertThat(draft.duration).isNull()
                 assertThat(draft.takeOff).isNull()
+                assertThat(draft.takeOffTime).isNull()
                 assertThat(draft.date).isEqualTo(LocalDate(2026, 9, 20))
             }
 
@@ -104,7 +125,7 @@ class IgcImportTest {
                 givenStoredFlights(aFlight("flight-0"), earlier)
 
                 // when
-                val draft = PrepareIgcImport(reader, flights)(FILE)
+                val draft = PrepareIgcImport(reader, flights, aFixedClock())(FILE)
 
                 // then
                 assertThat(draft.duplicateOf?.id).isEqualTo(FlightId("flight-1"))
@@ -118,7 +139,7 @@ class IgcImportTest {
                 givenStoredFlights()
 
                 // when
-                val failure = runCatching { PrepareIgcImport(reader, flights)(FILE) }.exceptionOrNull()
+                val failure = runCatching { PrepareIgcImport(reader, flights, aFixedClock())(FILE) }.exceptionOrNull()
 
                 // then
                 assertThat(failure).isInstanceOf(InvalidTrackException::class.java)

@@ -101,14 +101,42 @@ class JsonFlightRepositoryTest {
             }
 
         @Test
+        fun `reads a flight written before take-off times were kept`() =
+            runTest {
+                // given
+                val flight = aStoredFlight(takeOffTime = null)
+                repository.save(flight)
+                val file = dataDirectory.resolve("flights/${flight.id.value}.json")
+                val document = Json.parseToJsonElement(file.readText()).jsonObject
+                file.writeText(
+                    JsonObject(
+                        document.filterKeys { it != "takeOffTime" } + ("schemaVersion" to JsonPrimitive(3)),
+                    ).toString(),
+                )
+
+                // when
+                val found = repository.findById(flight.id)
+
+                // then
+                assertThat(found).usingRecursiveComparison().isEqualTo(flight)
+            }
+
+        @Test
         fun `reads a flight written before details could be imported`() =
             runTest {
                 // given
-                val flight = aStoredFlight()
+                val flight = aStoredFlight(takeOffTime = null)
                 repository.save(flight)
                 val file = dataDirectory.resolve("flights/${flight.id.value}.json")
                 val newerKeys =
-                    setOf("distanceKm", "topAltitudeMeters", "instrument", "importedFromSystem", "importedFromId")
+                    setOf(
+                        "distanceKm",
+                        "topAltitudeMeters",
+                        "instrument",
+                        "importedFromSystem",
+                        "importedFromId",
+                        "takeOffTime",
+                    )
                 val document = Json.parseToJsonElement(file.readText()).jsonObject
                 file.writeText(
                     JsonObject(
@@ -128,10 +156,10 @@ class JsonFlightRepositoryTest {
         fun `reads a flight written before tracks could be imported`() =
             runTest {
                 // given
-                val flight = aStoredFlight()
+                val flight = aStoredFlight(takeOffTime = null)
                 repository.save(flight)
                 val file = dataDirectory.resolve("flights/${flight.id.value}.json")
-                val newerKeys = setOf("igcAttachmentId", "igcFileName", "igcChecksum")
+                val newerKeys = setOf("igcAttachmentId", "igcFileName", "igcChecksum", "takeOffTime")
                 val document = Json.parseToJsonElement(file.readText()).jsonObject
                 file.writeText(
                     JsonObject(

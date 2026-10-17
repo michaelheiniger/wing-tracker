@@ -44,6 +44,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.field_flight_date
 import ch.qscqlmpa.wingtracker.ui.resources.field_flight_distance
 import ch.qscqlmpa.wingtracker.ui.resources.field_flight_duration
 import ch.qscqlmpa.wingtracker.ui.resources.field_flight_instrument
+import ch.qscqlmpa.wingtracker.ui.resources.field_flight_takeoff_time
 import ch.qscqlmpa.wingtracker.ui.resources.field_flight_top_altitude
 import ch.qscqlmpa.wingtracker.ui.resources.field_flight_wing
 import ch.qscqlmpa.wingtracker.ui.resources.field_landing_site
@@ -86,13 +87,24 @@ fun FlightDialog(
                     style = MaterialTheme.typography.headlineSmall,
                 )
 
-                DateField(
-                    label = stringResource(Res.string.field_flight_date),
-                    value = input.date,
-                    onValueChange = { v -> presenter.change { it.copy(date = v) } },
-                    errorText = errors[FlightFormField.Date]?.message(),
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                    DateField(
+                        label = stringResource(Res.string.field_flight_date),
+                        value = input.date,
+                        onValueChange = { v -> presenter.change { it.copy(date = v) } },
+                        errorText = errors[FlightFormField.Date]?.message(),
+                        modifier = Modifier.weight(1f),
+                    )
+                    OutlinedTextField(
+                        value = input.takeOffTime,
+                        onValueChange = { v -> presenter.change { it.copy(takeOffTime = v) } },
+                        label = { Text(stringResource(Res.string.field_flight_takeoff_time)) },
+                        isError = FlightFormField.TakeOffTime in errors,
+                        supportingText = { errors[FlightFormField.TakeOffTime]?.let { Text(it.message()) } },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
                 val date = parseDate(input.date)
                 val chosenWing = input.wingId?.let { id -> wings.firstOrNull { it.id == id } }
                 if (date != null && chosenWing?.wasInServiceOn(date) == false) {

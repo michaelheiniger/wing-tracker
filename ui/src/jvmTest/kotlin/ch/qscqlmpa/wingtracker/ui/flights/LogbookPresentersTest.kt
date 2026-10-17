@@ -207,7 +207,9 @@ class LogbookPresentersTest {
                 // then
                 assertThat(
                     input,
-                ).usingRecursiveComparison().isEqualTo(FlightFormInput(TODAY.toDisplay(), WingId("wing-2")))
+                ).usingRecursiveComparison().isEqualTo(
+                    FlightFormInput(date = TODAY.toDisplay(), wingId = WingId("wing-2")),
+                )
             }
 
         @Test

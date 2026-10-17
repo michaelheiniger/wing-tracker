@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.desktop
 
+import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.igc.PrepareIgcImport
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
@@ -9,6 +10,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.Locale
@@ -84,7 +86,7 @@ private fun realisticIgc(
 
 class IgcImportEndToEndTest {
     private val flights = mockk<FlightRepository>().also { coEvery { it.findAll() } returns LoadResult(emptyList()) }
-    private val prepare = PrepareIgcImport(Igc4jTrackReader(), flights)
+    private val prepare = PrepareIgcImport(Igc4jTrackReader(), flights, AppClock(zone = TimeZone.UTC))
 
     @Test
     fun `reads a realistic recording and finds the flight in it`() =

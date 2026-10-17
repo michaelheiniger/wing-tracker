@@ -28,10 +28,14 @@ A track is either attached to an existing flight or creates a new one, and the p
 
 Tracks with no match are offered as new flights, unticked, since they are often recordings that were not flights.
 
-To make the second rule possible, flights store an optional take-off time. The Syride import fills it, also on flights it imported before, and the IGC import fills it from the first fix. Within a day, flights are ordered by it.
+To make the second rule possible, flights store an optional take-off time. The Syride import fills it, also on flights it imported before, and the IGC import fills it from the detected take-off. Within a day, flights are ordered by it, and flights without one come after those with one.
 
 Attaching is a behaviour of the `Flight` aggregate: a flight has at most one track. An import never replaces a track that is already stored; a track matching such a flight can only create a new flight or be skipped. Attaching keeps the flight's details as they are.
 
 ## Consequences
 
 Importing from Syride and then from the logger gives one flight per real flight, with the richer Syride details and the original track. The flight format gains an optional field and a new schema version that older application versions treat as newer data. Flights recorded in another time zone than the computer's only get a possible match, and the pilot links them by hand. The matching rules depend on how Syride names files and reports start times; if that changes, exact matches stop and only possible matches remain, which the review makes visible rather than linking wrongly. Importing IGC files first and Syride afterwards still duplicates flights; linking in that direction is left for later.
+
+## Amendments
+
+- 2026-10-17: A flight created from a track stores the detected take-off, not the first fix, so the field means what its name says; a logger is often switched on well before take-off. Matching is unaffected, since it compares a track's first fix with Syride's start time. Flights without a take-off time are listed after the timed ones of their day.

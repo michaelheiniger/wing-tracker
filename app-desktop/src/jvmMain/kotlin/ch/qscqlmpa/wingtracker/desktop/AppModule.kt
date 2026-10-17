@@ -167,7 +167,7 @@ private fun flightsModule() =
         factory { LogFlight(get(), get(), get()) }
         factory { UpdateFlight(get(), get(), get()) }
         factory { DeleteFlight(get(), get()) }
-        factory { PrepareIgcImport(get(), get()) }
+        factory { PrepareIgcImport(get(), get(), get()) }
         factory { ImportIgcFlight(get(), get(), get(), get()) }
         factory { GetLogbook(get(), get()) }
         factory { PrepareSyrideImport(get(), get(), get()) }

@@ -7,6 +7,7 @@ import ch.qscqlmpa.wingtracker.flights.igc.PrepareIgcImport
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.Month
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.plus
@@ -66,6 +67,7 @@ class FlightSeeder(
                     wingId = wing.wing.id,
                     takeOffSite = SAMPLE_SITES[index].first,
                     landingSite = SAMPLE_SITES[index].second,
+                    takeOffTime = draft.takeOffTime,
                 )
             import(details, file, draft.checksum)
         }
@@ -79,7 +81,14 @@ class FlightSeeder(
         val site = SAMPLE_SITES[random.nextInt(SAMPLE_SITES.size)]
         val minutes = random.nextInt(MIN_FLIGHT_MINUTES, MAX_FLIGHT_MINUTES + 1)
         val note = if (random.nextInt(NOTE_ONE_IN) == 0) SAMPLE_NOTES[random.nextInt(SAMPLE_NOTES.size)] else null
-        logFlight(FlightDetails(date, minutes.minutes, seeded.wing.id, site.first, site.second, note))
+        // Some flights stay without a time, as many paper logbooks have none, so both orderings of a day show up.
+        val takeOffTime =
+            if (random.nextInt(UNTIMED_ONE_IN) == 0) {
+                null
+            } else {
+                LocalTime(random.nextInt(FIRST_TAKE_OFF_HOUR, LAST_TAKE_OFF_HOUR + 1), random.nextInt(MINUTES_PER_HOUR))
+            }
+        logFlight(FlightDetails(date, minutes.minutes, seeded.wing.id, site.first, site.second, note, takeOffTime))
     }
 
     // Flying days are rare in winter and a bit more than weekly in summer; weekends are likelier.
@@ -92,6 +101,10 @@ class FlightSeeder(
 
     private companion object {
         const val NOTE_ONE_IN = 6
+        const val UNTIMED_ONE_IN = 4
+        const val FIRST_TAKE_OFF_HOUR = 9
+        const val LAST_TAKE_OFF_HOUR = 17
+        const val MINUTES_PER_HOUR = 60
         const val WEEKEND_FIRST_ORDINAL = 5
         const val SUMMER_PERCENT = 6
         const val WINTER_PERCENT = 1

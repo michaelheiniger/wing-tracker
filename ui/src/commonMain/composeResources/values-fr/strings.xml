@@ -135,6 +135,8 @@
     <string name="flight_form_title_add">Saisir un vol</string>
     <string name="flight_form_title_edit">Modifier le vol</string>
     <string name="field_flight_date">Date *</string>
+    <string name="field_flight_takeoff_time">Heure de décollage (hh:mm)</string>
+    <string name="flight_date_time">%1$s · %2$s</string>
     <string name="field_flight_wing">Voile *</string>
     <string name="field_flight_duration">Durée (h:mm) *</string>
     <string name="field_takeoff_site">Décollage</string>
@@ -143,6 +145,7 @@
     <string name="flight_wing_retired">%1$s (retirée)</string>
 
     <string name="error_duration">Utiliser des heures:minutes d'au moins une minute, p. ex. 1:35</string>
+    <string name="error_time">Utiliser une heure au format heures:minutes, p. ex. 13:05</string>
     <string name="error_number">Utiliser un nombre supérieur ou égal à zéro</string>
     <string name="field_flight_distance">Distance (km)</string>
     <string name="field_flight_top_altitude">Altitude maximale (m)</string>
