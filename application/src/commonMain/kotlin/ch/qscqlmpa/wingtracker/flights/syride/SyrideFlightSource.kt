@@ -12,6 +12,15 @@ import kotlin.time.Duration
 /** The name Syride flights carry in [ch.qscqlmpa.wingtracker.flights.ExternalReference.system]. */
 const val SYRIDE_SYSTEM = "syride"
 
+/**
+ * The id of a Syride flight with a track. Flights and activities are numbered separately on Syride, so the kind is part
+ * of the id; tracks downloaded from Syride are named after the flight number (ADR 0026).
+ */
+fun syrideFlightId(flightNumber: String): String = "flight:$flightNumber"
+
+/** The id of a Syride entry without a track, which only has an activity number. */
+fun syrideActivityId(activityNumber: Int): String = "activity:$activityNumber"
+
 /** One flight of a Syride pilot. Flights logged without an instrument have no track ([hasTrack] is false). */
 data class SyrideFlight(
     // Stable on Syride, so a flight is recognised when the import is run again.

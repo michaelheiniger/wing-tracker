@@ -1,0 +1,62 @@
+package ch.qscqlmpa.wingtracker.flights
+
+import ch.qscqlmpa.wingtracker.attachments.Attachment
+import ch.qscqlmpa.wingtracker.attachments.AttachmentId
+import ch.qscqlmpa.wingtracker.gear.wing.WingId
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
+
+private fun aSyrideFlight() =
+    Flight(
+        id = FlightId("9d41c6a2-5b7e-4f08-8c13-2a6e0f9b7d35"),
+        details =
+            FlightDetails(
+                date = LocalDate(2026, 9, 26),
+                duration = 98.minutes,
+                wingId = WingId("3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47"),
+                takeOffSite = "Dent De Jaman",
+                notes = "Course Tour du Bocal vol 3",
+                takeOffTime = LocalTime(13, 43),
+                distanceKm = 15.0,
+                topAltitudeMeters = 2464,
+                instrument = "Nav XL",
+            ),
+        loggedAt = Instant.parse("2026-10-15T19:31:53Z"),
+        importedFrom = ExternalReference("syride", "flight:3720061"),
+    )
+
+private fun aTrack(checksum: String = "3b7e72f0c1d9") =
+    IgcFile(Attachment(AttachmentId("igc-1"), "114344.IGC"), checksum)
+
+class FlightTest {
+    @Nested
+    inner class AttachTrack {
+        @Test
+        fun `adds the track and keeps everything else`() {
+            // given
+            val flight = aSyrideFlight()
+
+            // when
+            val linked = flight.attachTrack(aTrack())
+
+            // then
+            assertThat(linked).usingRecursiveComparison().isEqualTo(flight.copy(igcFile = aTrack()))
+        }
+
+        @Test
+        fun `refuses to replace a track the flight already has`() {
+            // given
+            val flight = aSyrideFlight().attachTrack(aTrack())
+
+            // when / then
+            assertThatThrownBy { flight.attachTrack(aTrack(checksum = "9f0c41aa77e2")) }
+                .isInstanceOf(IllegalStateException::class.java)
+        }
+    }
+}

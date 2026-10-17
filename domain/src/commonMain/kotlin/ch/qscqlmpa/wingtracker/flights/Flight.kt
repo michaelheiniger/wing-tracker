@@ -13,6 +13,12 @@ data class Flight(
     val importedFrom: ExternalReference? = null,
 ) {
     fun withDetails(details: FlightDetails): Flight = copy(details = details)
+
+    /** Adds the track of a flight logged without one; a stored track is never replaced (ADR 0026). */
+    fun attachTrack(track: IgcFile): Flight {
+        check(igcFile == null) { "Flight ${id.value} already has a track" }
+        return copy(igcFile = track)
+    }
 }
 
 /** Identifies a flight in another system, e.g. [system] "syride" and the flight's id there. */
