@@ -65,12 +65,13 @@ class IgcImportTest {
                 assertThat(draft.fileName).isEqualTo(FILE.fileName)
                 assertThat(draft.checksum).isEqualTo(CHECKSUM)
                 assertThat(draft.duration!!).isBetween(74.minutes, 76.minutes)
-                assertThat(draft.takeOff).isNotNull()
+                assertThat(draft.takeOffTime).isNotNull()
+                assertThat(draft.landingTime).isNotNull()
                 assertThat(draft.duplicateOf).isNull()
             }
 
         @Test
-        fun `offers the detected take-off as the pilot's local time in whole minutes`() =
+        fun `offers the detected take-off and landing as the pilot's local time in whole minutes`() =
             runTest {
                 // given
                 givenTrack(arrayOf(Leg.Still(10.minutes), Leg.Moving(75.minutes, 32.0), Leg.Still(5.minutes)))
@@ -81,9 +82,9 @@ class IgcImportTest {
                 val draft = PrepareIgcImport(reader, flights, zurich)(FILE)
 
                 // then
-                val takeOff = zurich.local(checkNotNull(draft.takeOff)).time
-                assertThat(draft.takeOffTime).isEqualTo(LocalTime(takeOff.hour, takeOff.minute))
                 assertThat(draft.takeOffTime!!).isBetween(LocalTime(11, 9), LocalTime(11, 11))
+                assertThat(draft.takeOffTime.second).isZero()
+                assertThat(draft.landingTime!!).isBetween(LocalTime(12, 24), LocalTime(12, 26))
             }
 
         @Test
@@ -98,8 +99,8 @@ class IgcImportTest {
 
                 // then
                 assertThat(draft.duration).isNull()
-                assertThat(draft.takeOff).isNull()
                 assertThat(draft.takeOffTime).isNull()
+                assertThat(draft.landingTime).isNull()
                 assertThat(draft.date).isEqualTo(LocalDate(2026, 9, 20))
             }
 

@@ -14,7 +14,6 @@ import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlin.time.Duration
-import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -26,10 +25,9 @@ data class IgcImportDraft(
     val fileName: String,
     val checksum: String,
     val date: LocalDate,
-    val takeOff: Instant?,
-    val landing: Instant?,
-    // The take-off as the flight records it: local and in whole minutes, like a time entered by hand.
+    // Local and in whole minutes, as the logbook shows them and the flight records its take-off.
     val takeOffTime: LocalTime?,
+    val landingTime: LocalTime?,
     val duration: Duration?,
     // Set when this exact file was imported before; the pilot decides whether to import it again.
     val duplicateOf: Flight?,
@@ -49,9 +47,8 @@ class PrepareIgcImport(
             fileName = file.fileName,
             checksum = read.checksum,
             date = read.track.date,
-            takeOff = detected?.takeOff,
-            landing = detected?.landing,
             takeOffTime = detected?.takeOff?.let { clock.local(it).time.inWholeMinutes() },
+            landingTime = detected?.landing?.let { clock.local(it).time.inWholeMinutes() },
             duration = detected?.durationInMinutes,
             duplicateOf = duplicate,
         )

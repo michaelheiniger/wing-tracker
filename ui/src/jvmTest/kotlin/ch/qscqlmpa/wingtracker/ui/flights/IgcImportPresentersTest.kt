@@ -79,9 +79,8 @@ private fun aDraft(duplicateOf: Flight? = null) =
         fileName = FILE.fileName,
         checksum = CHECKSUM,
         date = LocalDate(2026, 9, 20),
-        takeOff = Instant.parse("2026-09-20T09:42:00Z"),
-        landing = Instant.parse("2026-09-20T11:17:00Z"),
-        takeOffTime = LocalTime(9, 42),
+        takeOffTime = LocalTime(11, 42),
+        landingTime = LocalTime(13, 17),
         duration = 95.minutes,
         duplicateOf = duplicateOf,
     )

@@ -52,13 +52,10 @@ import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_repeated
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_save
 import ch.qscqlmpa.wingtracker.ui.resources.igc_problem_unreadable
 import ch.qscqlmpa.wingtracker.ui.toDisplay
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val ROWS_MAX_HEIGHT_DP = 360
-private const val TWO_DIGITS = 2
 
 /** Review of the tracks about to be imported: tick the ones to import, and say on which wing each was flown. */
 @Composable
@@ -179,11 +176,11 @@ private fun TrackRow(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            val takeOff = draft?.takeOff
-            val landing = draft?.landing
+            val takeOff = draft?.takeOffTime
+            val landing = draft?.landingTime
             if (takeOff != null && landing != null) {
                 Text(
-                    stringResource(Res.string.igc_detected, takeOff.toUtcClock(), landing.toUtcClock()),
+                    stringResource(Res.string.igc_detected, takeOff.toDisplay(), landing.toDisplay()),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -244,8 +241,3 @@ private fun IgcRowProblem.severity(): Severity =
         IgcRowProblem.AlreadyImported, IgcRowProblem.RepeatedInSelection -> Severity.Warning
         else -> Severity.Critical
     }
-
-private fun kotlin.time.Instant.toUtcClock(): String {
-    val time = toLocalDateTime(TimeZone.UTC).time
-    return "${time.hour.toString().padStart(TWO_DIGITS, '0')}:${time.minute.toString().padStart(TWO_DIGITS, '0')}"
-}

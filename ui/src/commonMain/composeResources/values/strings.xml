@@ -335,7 +335,7 @@
     <string name="igc_batch_nothing_new">There is nothing new to import.</string>
     <string name="flight_warning_before_service">The wing was not in service yet on this day. The flight is saved anyway.</string>
     <string name="igc_pick_title">Choose a flight track</string>
-    <string name="igc_detected">Found in the track: take-off %1$s, landing %2$s (UTC)</string>
+    <string name="igc_detected">Found in the track: take-off %1$s, landing %2$s</string>
     <string name="igc_batch_title">Import flight tracks</string>
     <string name="igc_batch_wing_for_all">Wing for all tracks:</string>
     <plurals name="igc_batch_import">

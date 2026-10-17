@@ -10,6 +10,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -101,7 +102,7 @@ class IgcImportEndToEndTest {
             // then
             assertThat(draft.date).isEqualTo(LocalDate(2026, 9, 20))
             assertThat(draft.duration!!).isBetween(89.minutes, 91.minutes)
-            assertThat(draft.takeOff).isNotNull()
+            assertThat(draft.takeOffTime).isNotNull()
             assertThat(draft.checksum).matches("[0-9a-f]{64}")
         }
 
@@ -126,6 +127,7 @@ class IgcImportEndToEndTest {
 
             // then
             assertThat(draft.duration!!).isBetween(59.minutes, 61.minutes)
-            assertThat(draft.landing!!.toString()).startsWith("2026-09-21T")
+            assertThat(draft.takeOffTime!!).isBetween(LocalTime(23, 44), LocalTime(23, 46))
+            assertThat(draft.landingTime!!).isBetween(LocalTime(0, 44), LocalTime(0, 46))
         }
 }

@@ -335,7 +335,7 @@
     <string name="igc_batch_nothing_new">Il n'y a rien de nouveau à importer.</string>
     <string name="flight_warning_before_service">La voile n'était pas encore en service ce jour-là. Le vol est enregistré quand même.</string>
     <string name="igc_pick_title">Choisir une trace de vol</string>
-    <string name="igc_detected">Trouvé dans la trace : décollage %1$s, atterrissage %2$s (UTC)</string>
+    <string name="igc_detected">Trouvé dans la trace : décollage %1$s, atterrissage %2$s</string>
     <string name="igc_batch_title">Importer des traces de vol</string>
     <string name="igc_batch_wing_for_all">Voile pour toutes les traces :</string>
     <plurals name="igc_batch_import">

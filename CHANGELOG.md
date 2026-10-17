@@ -14,6 +14,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - The version of Wing Tracker is shown at the bottom of the navigation bar; clicking it opens what changed in that version on GitHub.
 
 ### Changed
+- When importing IGC files, the take-off and landing found in a track are shown in your computer's local time instead of UTC, matching the times in the logbook.
 - Without an internet connection, the Syride import and the update check and download now say so and suggest checking the connection, instead of showing an empty technical message.
 - After a connection problem, the button to read Syride flights or check for updates reads "Try again", and a failed update download offers "Try again" instead of sending you to the release page.
 - Reading flights from Syride and checking for updates can be cancelled while they wait, e.g. on a connection that hangs. Cancelling closes the connection right away instead of leaving it open until it times out.
