@@ -31,6 +31,7 @@ ADRs capture **why** wing-tracker is built the way it is. They use the
 | [0022](0022-spreadsheet-import-through-a-port.md) | Spreadsheet logbooks are imported through a port, matched by content | Accepted |
 | [0023](0023-logging-to-rotating-files.md) | Logging through a facade to rotating files in the platform log folder | Accepted |
 | [0024](0024-built-in-updater-notifies-and-hands-off.md) | The built-in updater checks GitHub Releases and hands the installer to the system | Accepted |
+| [0025](0025-windows-is-packaged-as-an-unsigned-per-user-msi.md) | Windows is packaged as an unsigned per-user MSI | Accepted |
 
 ## Rules
 
