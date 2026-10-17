@@ -12,6 +12,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Changed
 - After an update installs on Linux, the log no longer lists the other software on your computer that the package manager mentioned; that output is only kept when the install fails.
 
+### Removed
+- The Syride import no longer offers to correct flights it imported earlier with missing accents or cut-off names.
+
 ## [0.2.0] - 2026-10-17
 
 ### Added

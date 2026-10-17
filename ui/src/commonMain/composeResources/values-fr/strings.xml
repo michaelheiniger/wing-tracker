@@ -384,23 +384,6 @@
     <string name="import_new_incomplete">Complète d'abord la nouvelle voile</string>
     <string name="import_edit_new">Modifier</string>
     <string name="syride_already">%1$d vols avaient déjà été importés et sont laissés de côté.</string>
-    <plurals name="syride_corrections_found">
-        <item quantity="one">%1$d d'entre eux a été importé avec un nom ou un site tronqué ou mal écrit :</item>
-        <item quantity="other">%1$d d'entre eux ont été importés avec des noms ou des sites tronqués ou mal écrits :</item>
-    </plurals>
-    <plurals name="syride_corrections_more">
-        <item quantity="one">…et %1$d autre</item>
-        <item quantity="other">…et %1$d autres</item>
-    </plurals>
-    <string name="syride_correction_example">%1$s → %2$s</string>
-    <plurals name="syride_correct">
-        <item quantity="one">Corriger %1$d vol</item>
-        <item quantity="other">Corriger %1$d vols</item>
-    </plurals>
-    <plurals name="syride_corrected">
-        <item quantity="one">%1$d vol corrigé.</item>
-        <item quantity="other">%1$d vols corrigés.</item>
-    </plurals>
     <string name="import_nothing_new">Il n'y a aucun nouveau vol à importer.</string>
     <string name="import_back">Retour</string>
     <string name="import_newwing_title">Nouvelle voile</string>
@@ -416,7 +399,6 @@
     <string name="failure_syride_unreachable">Syride est injoignable : %1$s</string>
     <string name="failure_syride_changed">Les pages de Syride ne ressemblent pas à ce qui est attendu, les vols ne peuvent donc pas être lus (%1$s). L'application a besoin d'une mise à jour.</string>
     <string name="failure_import_syride">Les vols n'ont pas pu être importés : %1$s</string>
-    <string name="failure_correct_syride">Les vols n'ont pas pu être corrigés : %1$s</string>
     <plurals name="import_count">
         <item quantity="one">Importer %1$d vol</item>
         <item quantity="other">Importer %1$d vols</item>

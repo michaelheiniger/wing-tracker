@@ -7,7 +7,6 @@ import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.InMemoryWings
 import ch.qscqlmpa.wingtracker.flights.aFixedClock
 import ch.qscqlmpa.wingtracker.flights.aFlight
-import ch.qscqlmpa.wingtracker.flights.aFlightDetails
 import ch.qscqlmpa.wingtracker.flights.aWingInService
 import ch.qscqlmpa.wingtracker.flights.importing.ImportFailure
 import ch.qscqlmpa.wingtracker.flights.importing.NewWingSpec
@@ -38,35 +37,19 @@ private fun aSyrideFlight(
     date: LocalDate = LocalDate(2026, 9, 26),
     wing: SourceWing = BIRDY,
     startTime: LocalTime = LocalTime(13, 43),
-    name: String = "Course Tour du Bocal vol 3",
-    siteName: String = "Dent De Jaman",
-    earlierReading: EarlierReading? = null,
 ) = SyrideFlight(
     id = id,
     hasTrack = true,
-    name = name,
+    name = "Course Tour du Bocal vol 3",
     date = date,
     startTime = startTime,
     duration = 98.minutes,
-    siteName = siteName,
+    siteName = "Dent De Jaman",
     wing = wing,
     distanceKm = 15.0,
     topAltitudeMeters = 2464,
     instrument = "Nav XL",
-    earlierReading = earlierReading,
 )
-
-// What the earlier reader made of a flight named "Open de Jaman (RVL)" at "Pléiades".
-private val GARBLED = EarlierReading(name = "Open de Jaman", siteName = "Pl&eacute;iades")
-
-private fun aGarbledSyrideFlight() =
-    aSyrideFlight(name = "Open de Jaman (RVL)", siteName = "Pléiades", earlierReading = GARBLED)
-
-private fun anImportedFlight(
-    notes: String? = "Open de Jaman",
-    takeOffSite: String? = "Pl&eacute;iades",
-) = aFlight(id = "imported-1", details = aFlightDetails().copy(notes = notes, takeOffSite = takeOffSite))
-    .copy(importedFrom = ExternalReference(SYRIDE_SYSTEM, "flight:1"))
 
 class SyrideImportTest {
     private val source = mockk<SyrideFlightSource>()
@@ -155,134 +138,6 @@ class SyrideImportTest {
 
                 // when / then
                 assertThat(prepare("QSCQLMPA").groups.single().suggestedWingId).isNull()
-            }
-    }
-
-    @Nested
-    inner class FindingCorrections {
-        private val prepare get() = PrepareSyrideImport(source, flights, wings)
-
-        @Test
-        fun `offers to correct texts that are still what the earlier reader stored`() =
-            runTest {
-                // given
-                givenStored(flightList = listOf(anImportedFlight()))
-                coEvery { source.fetch("QSCQLMPA") } returns listOf(aGarbledSyrideFlight())
-
-                // when
-                val draft = prepare("QSCQLMPA")
-
-                // then
-                assertThat(draft.corrections).containsExactly(
-                    SyrideCorrection(
-                        FlightId("imported-1"),
-                        notes = TextCorrection("Open de Jaman", "Open de Jaman (RVL)"),
-                        takeOffSite = TextCorrection("Pl&eacute;iades", "Pléiades"),
-                    ),
-                )
-            }
-
-        @Test
-        fun `keeps a text the pilot changed and corrects the other one`() =
-            runTest {
-                // given
-                givenStored(flightList = listOf(anImportedFlight(notes = "Open de Jaman, 3rd place")))
-                coEvery { source.fetch("QSCQLMPA") } returns listOf(aGarbledSyrideFlight())
-
-                // when
-                val correction = prepare("QSCQLMPA").corrections.single()
-
-                // then
-                assertThat(correction.notes).isNull()
-                assertThat(correction.takeOffSite).isEqualTo(TextCorrection("Pl&eacute;iades", "Pléiades"))
-            }
-
-        @Test
-        fun `offers nothing for a flight the earlier reader read correctly`() =
-            runTest {
-                // given
-                givenStored(flightList = listOf(anImportedFlight(notes = "Course Tour du Bocal vol 3")))
-                coEvery { source.fetch("QSCQLMPA") } returns listOf(aSyrideFlight())
-
-                // when / then
-                assertThat(prepare("QSCQLMPA").corrections).isEmpty()
-            }
-
-        @Test
-        fun `offers nothing for a flight that is not imported yet`() =
-            runTest {
-                // given
-                givenStored()
-                coEvery { source.fetch("QSCQLMPA") } returns listOf(aGarbledSyrideFlight())
-
-                // when / then
-                assertThat(prepare("QSCQLMPA").corrections).isEmpty()
-            }
-    }
-
-    @Nested
-    inner class Correcting {
-        private val correct get() = CorrectSyrideImports(flights)
-        private val correction =
-            SyrideCorrection(
-                FlightId("imported-1"),
-                notes = TextCorrection("Open de Jaman", "Open de Jaman (RVL)"),
-                takeOffSite = TextCorrection("Pl&eacute;iades", "Pléiades"),
-            )
-
-        @Test
-        fun `corrects the texts and keeps everything else`() =
-            runTest {
-                // given
-                val stored = anImportedFlight()
-                givenStored(flightList = listOf(stored))
-                coEvery { flights.findById(FlightId("imported-1")) } returns stored
-
-                // when
-                val corrected = correct(listOf(correction))
-
-                // then
-                assertThat(corrected).isEqualTo(1)
-                assertThat(saved.single())
-                    .usingRecursiveComparison()
-                    .isEqualTo(
-                        stored.withDetails(
-                            stored.details.copy(notes = "Open de Jaman (RVL)", takeOffSite = "Pléiades"),
-                        ),
-                    )
-            }
-
-        @Test
-        fun `keeps a text the pilot changed after the account was read`() =
-            runTest {
-                // given
-                val stored = anImportedFlight(takeOffSite = "Les Pléiades, north take-off")
-                givenStored(flightList = listOf(stored))
-                coEvery { flights.findById(FlightId("imported-1")) } returns stored
-
-                // when
-                correct(listOf(correction))
-
-                // then
-                assertThat(saved.single().details.notes).isEqualTo("Open de Jaman (RVL)")
-                assertThat(saved.single().details.takeOffSite).isEqualTo("Les Pléiades, north take-off")
-            }
-
-        @Test
-        fun `skips a flight deleted meanwhile or already corrected`() =
-            runTest {
-                // given
-                val alreadyCorrected = anImportedFlight(notes = "Open de Jaman (RVL)", takeOffSite = "Pléiades")
-                givenStored(flightList = listOf(alreadyCorrected))
-                coEvery { flights.findById(FlightId("imported-1")) } returns alreadyCorrected
-                coEvery { flights.findById(FlightId("deleted")) } returns null
-
-                // when
-                val corrected = correct(listOf(correction, correction.copy(flightId = FlightId("deleted"))))
-
-                // then
-                assertThat(corrected).isZero()
-                coVerify(exactly = 0) { flights.save(any()) }
             }
     }
 

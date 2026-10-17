@@ -9,15 +9,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import ch.qscqlmpa.wingtracker.ui.components.Severity
-import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.flights.importing.Busy
 import ch.qscqlmpa.wingtracker.ui.flights.importing.Buttons
 import ch.qscqlmpa.wingtracker.ui.flights.importing.Hint
@@ -32,11 +29,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.import_count
 import ch.qscqlmpa.wingtracker.ui.resources.import_nothing_new
 import ch.qscqlmpa.wingtracker.ui.resources.syride_account_hint
 import ch.qscqlmpa.wingtracker.ui.resources.syride_already
-import ch.qscqlmpa.wingtracker.ui.resources.syride_correct
-import ch.qscqlmpa.wingtracker.ui.resources.syride_corrected
-import ch.qscqlmpa.wingtracker.ui.resources.syride_correction_example
-import ch.qscqlmpa.wingtracker.ui.resources.syride_corrections_found
-import ch.qscqlmpa.wingtracker.ui.resources.syride_corrections_more
 import ch.qscqlmpa.wingtracker.ui.resources.syride_read
 import ch.qscqlmpa.wingtracker.ui.resources.syride_reading
 import ch.qscqlmpa.wingtracker.ui.resources.syride_title
@@ -94,7 +86,6 @@ private fun WingsStep(
 ) {
     val draft = checkNotNull(presenter.draft)
     if (draft.alreadyImported > 0) Hint(stringResource(Res.string.syride_already, draft.alreadyImported))
-    Corrections(presenter)
     if (draft.groups.isEmpty()) {
         Text(stringResource(Res.string.import_nothing_new))
     } else {
@@ -114,35 +105,6 @@ private fun WingsStep(
             enabled = presenter.importableCount > 0 && presenter.allReady,
         ) {
             Text(pluralStringResource(Res.plurals.import_count, presenter.importableCount, presenter.importableCount))
-        }
-    }
-}
-
-private const val CORRECTION_EXAMPLES = 3
-
-/** Flights an earlier import garbled, with a few examples so the pilot sees what changes before saying yes. */
-@Composable
-private fun Corrections(presenter: SyrideImportPresenter) {
-    presenter.corrected?.let {
-        StatusBadge(pluralStringResource(Res.plurals.syride_corrected, it, it), Severity.Success)
-        return
-    }
-    val corrections = checkNotNull(presenter.draft).corrections
-    if (corrections.isEmpty()) return
-    val examples = corrections.flatMap { listOfNotNull(it.notes, it.takeOffSite) }.distinct()
-    Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium) {
-        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(pluralStringResource(Res.plurals.syride_corrections_found, corrections.size, corrections.size))
-            examples.take(CORRECTION_EXAMPLES).forEach {
-                Hint(stringResource(Res.string.syride_correction_example, it.stored, it.corrected))
-            }
-            val more = examples.size - CORRECTION_EXAMPLES
-            if (more > 0) Hint(pluralStringResource(Res.plurals.syride_corrections_more, more, more))
-            Buttons {
-                Button(onClick = presenter::correct, enabled = !presenter.correcting) {
-                    Text(pluralStringResource(Res.plurals.syride_correct, corrections.size, corrections.size))
-                }
-            }
         }
     }
 }

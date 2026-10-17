@@ -1,7 +1,6 @@
 package ch.qscqlmpa.wingtracker.syride
 
 import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
-import ch.qscqlmpa.wingtracker.flights.syride.EarlierReading
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlight
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -45,8 +44,7 @@ internal object SyrideActivityParser {
         val ids = cards.map { it.activityId() }
         // Told by the card's text, not by its fields, so a change in their markup shows as unreadable flights.
         val flightCards = cards.filter { "Flight name" in it.text() }
-        val earlier = EarlierSyrideReader.readPage(html)
-        val flights = flightCards.mapNotNull { card -> parseFlight(card)?.withEarlier(earlier[card.activityId()]) }
+        val flights = flightCards.mapNotNull { parseFlight(it) }
         return ParsedPage(ids, flights, flightCards.size - flights.size)
     }
 
@@ -83,16 +81,6 @@ internal object SyrideActivityParser {
             instrument = value("Used instrument"),
         )
     }
-
-    // Only kept where the earlier reader got the flight wrong, so a correct flight carries nothing to compare.
-    private fun SyrideFlight.withEarlier(reading: EarlierReading?) =
-        if (reading == null ||
-            (reading.name == name && reading.siteName == siteName)
-        ) {
-            this
-        } else {
-            copy(earlierReading = reading)
-        }
 
     private fun Element.activityId() = id().removePrefix(CARD_ID_PREFIX).toInt()
 

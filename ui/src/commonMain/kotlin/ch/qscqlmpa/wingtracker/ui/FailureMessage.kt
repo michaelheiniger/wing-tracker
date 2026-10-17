@@ -13,7 +13,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.error_months
 import ch.qscqlmpa.wingtracker.ui.resources.error_required
 import ch.qscqlmpa.wingtracker.ui.resources.failure_cancel_plan
 import ch.qscqlmpa.wingtracker.ui.resources.failure_change_data_folder
-import ch.qscqlmpa.wingtracker.ui.resources.failure_correct_syride
 import ch.qscqlmpa.wingtracker.ui.resources.failure_data_overlaps
 import ch.qscqlmpa.wingtracker.ui.resources.failure_data_same
 import ch.qscqlmpa.wingtracker.ui.resources.failure_data_unusable
@@ -77,7 +76,6 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.SyrideUnreachable to Res.string.failure_syride_unreachable,
         FailureKind.SyridePagesChanged to Res.string.failure_syride_changed,
         FailureKind.ImportSyride to Res.string.failure_import_syride,
-        FailureKind.CorrectSyride to Res.string.failure_correct_syride,
         FailureKind.SpreadsheetUnreadable to Res.string.failure_spreadsheet_unreadable,
         FailureKind.SpreadsheetOldFormat to Res.string.failure_spreadsheet_old_format,
         FailureKind.ImportSpreadsheet to Res.string.failure_import_spreadsheet,
