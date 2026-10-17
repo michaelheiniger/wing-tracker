@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -29,7 +30,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -41,12 +45,14 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.Flight
+import ch.qscqlmpa.wingtracker.flights.igc.TrackFix
 import ch.qscqlmpa.wingtracker.flights.syride.SYRIDE_SYSTEM
 import ch.qscqlmpa.wingtracker.maps.ReadMapTile
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.components.AppCard
 import ch.qscqlmpa.wingtracker.ui.flights.FlightNeighbours
 import ch.qscqlmpa.wingtracker.ui.flights.detail.map.FlightMap
+import ch.qscqlmpa.wingtracker.ui.flights.detail.profile.AltitudeProfile
 import ch.qscqlmpa.wingtracker.ui.flights.toDisplayNumber
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.message
@@ -152,7 +158,17 @@ private fun TrackView(
 ) {
     when (track) {
         is TrackState.Loaded -> {
-            FlightMap(track.track, readMapTile, modifier)
+            // Shared by the profile and the map, so pointing at one shows the place on the other.
+            var highlighted by remember(track) { mutableStateOf<TrackFix?>(null) }
+            Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                FlightMap(track.track, readMapTile, highlighted, Modifier.fillMaxWidth().weight(1f))
+                AltitudeProfile(
+                    track.track,
+                    highlighted,
+                    onHighlight = { highlighted = it },
+                    Modifier.fillMaxWidth().height(PROFILE_HEIGHT),
+                )
+            }
         }
 
         TrackState.Loading -> {
@@ -334,3 +350,4 @@ internal fun Fact(
 
 private val FACT_GROUP_WIDTH = 340.dp
 private val LABEL_WIDTH = 150.dp
+private val PROFILE_HEIGHT = 200.dp

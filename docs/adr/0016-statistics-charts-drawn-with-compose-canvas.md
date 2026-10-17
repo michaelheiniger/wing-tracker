@@ -17,3 +17,7 @@ We draw the charts ourselves with Compose Canvas in `ui`, with no chart dependen
 ## Consequences
 
 Full control of theming, accessibility and light/dark variants, and nothing to upgrade. Axes, labels and hover behaviour are code we maintain, and each new chart type costs drawing work. Revisit by superseding this ADR if the number or variety of charts grows.
+
+## Amendments
+
+- 2026-10-17: The altitude profile on a flight's page is drawn the same way and has a legend, but no table view: a table of a track's fixes would be long and of no use. The track card beside it carries its key numbers (take-off, landing and highest altitude, best climb, strongest sink) and stands in for the table; hovering reads out each fix. The flight is drawn in the map's track colour (ADR 0027) rather than a palette slot, so profile and map read as one.

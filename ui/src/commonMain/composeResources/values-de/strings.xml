@@ -694,4 +694,8 @@
     <string name="map_offline">Karte nicht verfügbar: nur der Track wird gezeigt</string>
     <string name="map_fit_flight">Ganzer Flug</string>
     <string name="map_attribution">Kartendaten © OpenStreetMap-Mitwirkende, SRTM · Kartenstil © OpenTopoMap (CC-BY-SA)</string>
+    <string name="profile_altitude">Höhe</string>
+    <string name="profile_legend_flight">Flug</string>
+    <string name="profile_legend_ground">Vor dem Start und nach der Landung</string>
+    <string name="profile_description">Höhenprofil des Tracks, bis %1$d m</string>
 </resources>

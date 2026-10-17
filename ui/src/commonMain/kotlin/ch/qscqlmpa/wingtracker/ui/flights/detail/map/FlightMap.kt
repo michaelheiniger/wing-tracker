@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Icon
@@ -47,6 +48,9 @@ import ovh.plrapps.mapcompose.api.addLayer
 import ovh.plrapps.mapcompose.api.addMarker
 import ovh.plrapps.mapcompose.api.addPath
 import ovh.plrapps.mapcompose.api.disableRotation
+import ovh.plrapps.mapcompose.api.hasMarker
+import ovh.plrapps.mapcompose.api.moveMarker
+import ovh.plrapps.mapcompose.api.removeMarker
 import ovh.plrapps.mapcompose.api.scrollTo
 import ovh.plrapps.mapcompose.api.snapScrollTo
 import ovh.plrapps.mapcompose.core.TileStreamProvider
@@ -69,6 +73,8 @@ private val HALO_WIDTH = 6.dp
 fun FlightMap(
     track: AnalysedTrack,
     readMapTile: ReadMapTile,
+    // The fix the pilot points at in the altitude profile, shown as a dot on the track.
+    highlighted: TrackFix?,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.extraColors.map
@@ -86,6 +92,7 @@ fun FlightMap(
     val scope = rememberCoroutineScope()
     val focus = remember(track) { track.focusArea()?.toBoundingBox() }
     LaunchedEffect(state) { focus?.let { state.snapScrollTo(it, FIT_PADDING) } }
+    LaunchedEffect(state, highlighted) { state.showHighlight(highlighted, colors) }
     val offline by missingTiles.collectAsState()
 
     Box(modifier = modifier.background(colors.background, MaterialTheme.shapes.medium)) {
@@ -204,6 +211,41 @@ private fun PlaceMarker(
         }
     }
 }
+
+private fun MapState.showHighlight(
+    fix: TrackFix?,
+    colors: MapColors,
+) {
+    if (fix == null) {
+        removeMarker(HIGHLIGHT)
+        return
+    }
+    val point = fix.toMapPoint()
+    if (hasMarker(HIGHLIGHT)) {
+        moveMarker(HIGHLIGHT, point.x, point.y)
+    } else {
+        // Centred on the fix, and above the take-off and landing markers it may pass.
+        addMarker(HIGHLIGHT, point.x, point.y, relativeOffset = CENTRED, zIndex = 1f, clickable = false) {
+            HighlightDot(colors)
+        }
+    }
+}
+
+@Composable
+private fun HighlightDot(colors: MapColors) {
+    Box(
+        Modifier
+            .size(HIGHLIGHT_SIZE)
+            .background(colors.trackHalo, CircleShape)
+            .padding(HIGHLIGHT_RING)
+            .background(colors.track, CircleShape),
+    )
+}
+
+private const val HIGHLIGHT = "highlight"
+private val CENTRED = Offset(-0.5f, -0.5f)
+private val HIGHLIGHT_SIZE = 14.dp
+private val HIGHLIGHT_RING = 3.dp
 
 private fun MapArea.toBoundingBox() = BoundingBox(xLeft = left, yTop = top, xRight = right, yBottom = bottom)
 

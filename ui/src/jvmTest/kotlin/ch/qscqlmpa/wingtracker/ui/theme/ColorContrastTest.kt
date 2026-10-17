@@ -2,6 +2,7 @@ package ch.qscqlmpa.wingtracker.ui.theme
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
+import ch.qscqlmpa.wingtracker.ui.statistics.ChartTheme
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -144,6 +145,22 @@ class ColorContrastTest {
                 pairs.mapNotNull { pair ->
                     val ratio = contrast(pair.foreground, pair.background)
                     "${pair.name} = ${"%.2f".format(ratio)}".takeIf { ratio < COMPONENT_MINIMUM }
+                }
+
+            // then
+            assertThat(tooLow).isEmpty()
+        }
+
+        @Test
+        fun `the track colour also stands out in the altitude profile in both modes`() {
+            // given
+            val surfaces = mapOf("light" to ChartTheme.Light.surface, "dark" to ChartTheme.Dark.surface)
+
+            // when
+            val tooLow =
+                surfaces.mapNotNull { (mode, surface) ->
+                    val ratio = contrast(MapPalette.track, surface)
+                    "$mode: track = ${"%.2f".format(ratio)}".takeIf { ratio < COMPONENT_MINIMUM }
                 }
 
             // then
