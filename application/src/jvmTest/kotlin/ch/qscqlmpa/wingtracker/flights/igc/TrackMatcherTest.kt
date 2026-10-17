@@ -57,6 +57,31 @@ class TrackMatcherTest {
         }
 
         @Test
+        fun `does not take a logger's time name for the number of an old Syride flight on another day`() {
+            // given
+            val old =
+                aSyrideFlight("f-1", date = LocalDate(2012, 7, 14), takeOffTime = null, syrideId = "flight:114344")
+
+            // when
+            val match = matcher.match(aTrack(fileName = "20260926/114344.IGC", duration = 40.minutes), listOf(old))
+
+            // then
+            assertThat(match).isNull()
+        }
+
+        @Test
+        fun `finds the Syride id of a downloaded track kept in a folder`() {
+            // given
+            val flight = aSyrideFlight("f-1", takeOffTime = null, syrideId = "flight:3271596")
+
+            // when
+            val match = matcher.match(aTrack(fileName = "Syride/3271596.igc"), listOf(flight))
+
+            // then
+            assertThat(match).isEqualTo(TrackMatch.Exact(flight, MatchReason.SyrideId))
+        }
+
+        @Test
         fun `never links to a Syride entry without a track that has the same number`() {
             // given
             val activity = aSyrideFlight("f-1", takeOffTime = null, syrideId = "activity:3271596")

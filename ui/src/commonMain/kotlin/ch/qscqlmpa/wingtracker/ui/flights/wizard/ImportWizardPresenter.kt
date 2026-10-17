@@ -180,7 +180,7 @@ class ImportWizardPresenter(
         offeredBy: ImportFlow? = null,
     ) {
         trackFiles.dismissFailure()
-        // A logger holds every track it ever recorded; listing the known ones again would bury the new ones.
+        // A logger might hold every track it ever recorded; listing the known ones again would bury the new ones.
         val tracks = newTracks(source == ImportSource.Device)
         tracks.load(files)
         flow = ImportFlow.Tracks(source, tracks, offeredBy)

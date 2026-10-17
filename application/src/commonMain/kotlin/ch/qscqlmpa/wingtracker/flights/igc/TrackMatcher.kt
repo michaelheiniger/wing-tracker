@@ -61,9 +61,14 @@ class TrackMatcher(
         track: TrackFacts,
         flights: List<Flight>,
     ): Flight? {
-        val number = SYRIDE_FILE_NAME.matchEntire(track.fileName)?.groupValues?.get(1) ?: return null
+        // A track read from a device keeps its folder in front of the file's own name.
+        val name = track.fileName.substringAfterLast('/')
+        val number = SYRIDE_FILE_NAME.matchEntire(name)?.groupValues?.get(1) ?: return null
         val reference = ExternalReference(SYRIDE_SYSTEM, syrideFlightId(number))
-        return flights.firstOrNull { it.importedFrom == reference }
+        // A logger names a track after its UTC time, which can equal the number of an old Syride flight; a download
+        // always shares the flight's day, such a coincidence almost never does.
+        val day = clock.local(track.firstFix).date
+        return flights.firstOrNull { it.importedFrom == reference && it.details.date == day }
     }
 
     private fun byTakeOffTime(

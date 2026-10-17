@@ -66,7 +66,6 @@ class DesktopFilePicker : FilePicker {
         }
     }
 
-    @OptIn(ExperimentalPathApi::class)
     override suspend fun pickFolder(
         title: String,
         extension: String,
@@ -80,14 +79,7 @@ class DesktopFilePicker : FilePicker {
         val root = folder.file.checkedPath()
         // A logger can hold years of tracks, so walking and reading them must not block the UI thread.
         return withContext(Dispatchers.IO) {
-            // NIO keeps the names' raw bytes, so tracks are still read when the system cannot decode their names.
-            val files =
-                root
-                    .walk()
-                    .filter { it.isRegularFile() && it.extension.equals(extension, ignoreCase = true) }
-                    .sortedBy { it.toString() }
-                    .map { NewAttachment(it.name, it.readBytes()) }
-                    .toList()
+            val files = readTracks(root, extension)
             PickedFolder(root.toString(), files)
         }
     }
