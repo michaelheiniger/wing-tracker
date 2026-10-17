@@ -122,6 +122,35 @@ interface LogLocation {
     suspend fun open()
 }
 
+/** How handing a downloaded installer to the system went. */
+sealed interface InstallOutcome {
+    data object Installed : InstallOutcome
+
+    // The pilot closed the system's password prompt.
+    data object Cancelled : InstallOutcome
+
+    data class Failed(
+        val detail: String?,
+    ) : InstallOutcome
+
+    /** The system offers no way to install from the app; [command] installs it by hand, when there is one. */
+    data class Manual(
+        val command: String?,
+    ) : InstallOutcome
+}
+
+/** Installs a verified update and starts its new version; each platform has its own installer (ADR 0024). */
+interface UpdateInstaller {
+    /** Hands the installer at [path] to the system, which asks for the rights it needs. */
+    suspend fun install(path: String): InstallOutcome
+
+    /** Shows the installer in the system's file manager, for installing it by hand. */
+    suspend fun showInFolder(path: String)
+
+    /** Starts the application again, so the installed version runs. */
+    fun restart()
+}
+
 class PlatformServices(
     val filePicker: FilePicker,
     val fileOpener: FileOpener,
@@ -129,6 +158,7 @@ class PlatformServices(
     val fileDrop: FileDrop,
     val dataLocation: DataLocation,
     val logLocation: LogLocation,
+    val updateInstaller: UpdateInstaller,
     // False when some file names cannot be opened on this system at all, which the user should hear about up front.
     val supportsAllFileNames: Boolean = true,
 )

@@ -74,4 +74,55 @@ class InstallationDirectoryTest {
             assertThat(InstallationDirectory.installerKind("Linux")).isEqualTo(InstallerKind.Deb)
         }
     }
+
+    @Nested
+    inner class DownloadFolder {
+        @Test
+        fun `uses XDG cache home on Linux when set`() {
+            // given / when
+            val path =
+                UpdateDownloadDirectory.resolve(
+                    false,
+                    "Linux",
+                    mapOf("XDG_CACHE_HOME" to "/home/michael/.c"),
+                    "/home/michael",
+                )
+
+            // then
+            assertThat(path).isEqualTo(Path.of("/home/michael/.c/wing-tracker/updates"))
+        }
+
+        @Test
+        fun `falls back to the cache folder on Linux`() {
+            // given / when
+            val path = UpdateDownloadDirectory.resolve(false, "Linux", emptyMap(), "/home/michael")
+
+            // then
+            assertThat(path).isEqualTo(Path.of("/home/michael/.cache/wing-tracker/updates"))
+        }
+
+        @Test
+        fun `uses the local profile on Windows`() {
+            // given / when
+            val path =
+                UpdateDownloadDirectory.resolve(
+                    false,
+                    "Windows 11",
+                    mapOf("LOCALAPPDATA" to "C:/Users/michael/AppData/Local"),
+                    "C:/Users/michael",
+                )
+
+            // then
+            assertThat(path).isEqualTo(Path.of("C:/Users/michael/AppData/Local/wing-tracker/cache/updates"))
+        }
+
+        @Test
+        fun `uses a separate folder in development mode`() {
+            // given / when
+            val path = UpdateDownloadDirectory.resolve(true, "Linux", emptyMap(), "/home/michael")
+
+            // then
+            assertThat(path).isEqualTo(Path.of("/home/michael/.cache/wing-tracker-dev/updates"))
+        }
+    }
 }

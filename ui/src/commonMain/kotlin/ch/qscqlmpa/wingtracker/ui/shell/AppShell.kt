@@ -65,7 +65,9 @@ import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import ch.qscqlmpa.wingtracker.ui.undo.LocalUndo
 import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
+import ch.qscqlmpa.wingtracker.ui.updates.InstallDialog
 import ch.qscqlmpa.wingtracker.ui.updates.UpdateBanner
+import ch.qscqlmpa.wingtracker.ui.updates.UpdateInstallPresenter
 import ch.qscqlmpa.wingtracker.ui.updates.UpdatePresenter
 import ch.qscqlmpa.wingtracker.ui.updates.UpdateUseCases
 import ch.qscqlmpa.wingtracker.ui.updates.WhatsNewDialog
@@ -115,6 +117,10 @@ fun AppShell(
         remember { DataLocationPresenter(scope, platform.dataLocation, chooseTitle, beforeChange = undo::flush) }
     val logLocation = remember { LogLocationPresenter(scope, platform.logLocation) }
     val updatePresenter = remember { UpdatePresenter(scope, updates) }
+    val installPresenter =
+        remember {
+            UpdateInstallPresenter(scope, updates.downloadUpdate, platform.updateInstaller, beforeRestart = undo::flush)
+        }
     // Shown once per start: the pilot can only fix it outside the application, then restart it.
     var fileNamesWarning by rememberSaveable { mutableStateOf(!platform.supportsAllFileNames) }
     // Set when the attention panel opens a piece of gear, consumed by the gear section.
@@ -156,7 +162,11 @@ fun AppShell(
                             )
                         }
                         if (updatePresenter.showsBanner) {
-                            UpdateBanner(updatePresenter, modifier = Modifier.fillMaxWidth().padding(16.dp))
+                            UpdateBanner(
+                                updatePresenter,
+                                installPresenter,
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            )
                         }
                         Box(modifier = Modifier.weight(1f)) {
                             when (current) {
@@ -198,6 +208,7 @@ fun AppShell(
                                         dataLocation,
                                         logLocation,
                                         updatePresenter,
+                                        installPresenter,
                                         appVersion,
                                     )
                                 }
@@ -205,7 +216,8 @@ fun AppShell(
                         }
                     }
                 }
-                WhatsNewDialog(updatePresenter)
+                WhatsNewDialog(updatePresenter, installPresenter)
+                InstallDialog(installPresenter, updatePresenter.update)
                 SnackbarHost(undo.snackbarHost, modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp))
             }
         }

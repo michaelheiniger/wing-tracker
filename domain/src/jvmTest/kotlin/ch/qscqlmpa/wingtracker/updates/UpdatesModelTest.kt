@@ -155,4 +155,90 @@ class UpdatesModelTest {
             assertThat(update.latest.version).isEqualTo(AppVersion(0, 1, 1))
         }
     }
+
+    @Nested
+    inner class InstallingFromTheApp {
+        @Test
+        fun `is possible when the release publishes its checksums`() {
+            // given
+            val published = listOf(aRelease("0.1.0", assets = listOf(aDebAsset("0.1.0"), aChecksumAsset("0.1.0"))))
+
+            // when
+            val update = AvailableUpdate.find(installed, published, InstallerKind.Deb, skipped = null)
+
+            // then
+            assertThat(update!!.installableFromApp).isTrue()
+            assertThat(update.latest.checksumFile).isEqualTo(aChecksumAsset("0.1.0"))
+        }
+
+        @Test
+        fun `is refused for a release without checksums`() {
+            // given
+            val published = listOf(aRelease("0.1.0"))
+
+            // when
+            val update = AvailableUpdate.find(installed, published, InstallerKind.Deb, skipped = null)
+
+            // then
+            assertThat(update!!.installableFromApp).isFalse()
+        }
+    }
+
+    @Nested
+    inner class ReadingChecksums {
+        private val debChecksum = "73cb3858a687a8494ca3323053016282f3dad39d42cf62ca4e79dda2aac7d9ac"
+        private val msiChecksum = "0f343b0931126a20f133d67c2b018a3b2a1e9d2e4b0e6c7d5f7e8a9b0c1d2e3f"
+
+        @Test
+        fun `reads what sha256sum writes, in text and binary mode`() {
+            // given
+            val text = "$debChecksum  wing-tracker_0.1.0_amd64.deb\n$msiChecksum *wing-tracker-0.1.0.msi\n"
+
+            // when
+            val checksums = Checksums.parse(text)
+
+            // then
+            assertThat(checksums.of("wing-tracker_0.1.0_amd64.deb")).isEqualTo(debChecksum)
+            assertThat(checksums.of("wing-tracker-0.1.0.msi")).isEqualTo(msiChecksum)
+        }
+
+        @Test
+        fun `matches a checksum whatever its letter case`() {
+            // given
+            val checksums = Checksums.parse("$debChecksum  wing-tracker_0.1.0_amd64.deb")
+
+            // when / then
+            assertThat(checksums.matches("wing-tracker_0.1.0_amd64.deb", debChecksum.uppercase())).isTrue()
+        }
+
+        @Test
+        fun `does not match a different checksum`() {
+            // given
+            val checksums = Checksums.parse("$debChecksum  wing-tracker_0.1.0_amd64.deb")
+
+            // when / then
+            assertThat(checksums.matches("wing-tracker_0.1.0_amd64.deb", msiChecksum)).isFalse()
+        }
+
+        @Test
+        fun `never matches a file that is not listed`() {
+            // given
+            val checksums = Checksums.parse("$debChecksum  wing-tracker_0.1.0_amd64.deb")
+
+            // when / then
+            assertThat(checksums.matches("wing-tracker_0.2.0_amd64.deb", debChecksum)).isFalse()
+        }
+
+        @Test
+        fun `ignores lines that are no checksum, including Windows line ends`() {
+            // given
+            val text = "# made by the release workflow\r\n\r\n$debChecksum  wing-tracker_0.1.0_amd64.deb\r\n"
+
+            // when
+            val checksums = Checksums.parse(text)
+
+            // then
+            assertThat(checksums.of("wing-tracker_0.1.0_amd64.deb")).isEqualTo(debChecksum)
+        }
+    }
 }

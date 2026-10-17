@@ -21,6 +21,9 @@ class AppModuleTest {
     @TempDir
     lateinit var installationDirectory: Path
 
+    @TempDir
+    lateinit var downloadDirectory: Path
+
     // Koin resolves at runtime (ADR 0007), so a missing binding must fail here instead of at app launch.
     @Test
     fun `every binding needed to start the application can be resolved`() {
@@ -28,7 +31,11 @@ class AppModuleTest {
         val koin =
             koinApplication {
                 modules(
-                    appModules(dataDirectory, installationDirectory = installationDirectory),
+                    appModules(
+                        dataDirectory,
+                        installationDirectory = installationDirectory,
+                        downloadDirectory = downloadDirectory,
+                    ),
                 )
             }.koin
 

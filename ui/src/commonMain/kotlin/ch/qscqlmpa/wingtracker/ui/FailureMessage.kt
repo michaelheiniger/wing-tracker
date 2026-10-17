@@ -26,6 +26,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_export_calendar
 import ch.qscqlmpa.wingtracker.ui.resources.failure_import_igc
 import ch.qscqlmpa.wingtracker.ui.resources.failure_import_spreadsheet
 import ch.qscqlmpa.wingtracker.ui.resources.failure_import_syride
+import ch.qscqlmpa.wingtracker.ui.resources.failure_install_update
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_attention
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_logbook
@@ -49,6 +50,8 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_syride_changed
 import ch.qscqlmpa.wingtracker.ui.resources.failure_syride_unreachable
 import ch.qscqlmpa.wingtracker.ui.resources.failure_syride_user
 import ch.qscqlmpa.wingtracker.ui.resources.failure_unsupported_path
+import ch.qscqlmpa.wingtracker.ui.resources.failure_update_checksum_mismatch
+import ch.qscqlmpa.wingtracker.ui.resources.failure_update_no_checksum
 import ch.qscqlmpa.wingtracker.ui.resources.failure_update_refused
 import ch.qscqlmpa.wingtracker.ui.resources.failure_update_unexpected
 import ch.qscqlmpa.wingtracker.ui.resources.failure_update_unreachable
@@ -82,6 +85,9 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.UpdateUnreachable to Res.string.failure_update_unreachable,
         FailureKind.UpdateRefused to Res.string.failure_update_refused,
         FailureKind.UpdateUnexpected to Res.string.failure_update_unexpected,
+        FailureKind.UpdateNoChecksum to Res.string.failure_update_no_checksum,
+        FailureKind.UpdateChecksumMismatch to Res.string.failure_update_checksum_mismatch,
+        FailureKind.InstallUpdate to Res.string.failure_install_update,
         FailureKind.SaveSettings to Res.string.failure_save_settings,
         FailureKind.LoadSettings to Res.string.failure_load_settings,
         FailureKind.Load to Res.string.failure_load,

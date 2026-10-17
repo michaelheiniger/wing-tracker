@@ -8,6 +8,7 @@ import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.updates.AvailableUpdate
 import ch.qscqlmpa.wingtracker.updates.CheckForUpdate
 import ch.qscqlmpa.wingtracker.updates.CheckTrigger
+import ch.qscqlmpa.wingtracker.updates.DownloadUpdate
 import ch.qscqlmpa.wingtracker.updates.GetUpdatePreferences
 import ch.qscqlmpa.wingtracker.updates.ReleaseProblem
 import ch.qscqlmpa.wingtracker.updates.SaveCheckAtStartup
@@ -22,6 +23,7 @@ class UpdateUseCases(
     val getUpdatePreferences: GetUpdatePreferences,
     val saveCheckAtStartup: SaveCheckAtStartup,
     val skipVersion: SkipVersion,
+    val downloadUpdate: DownloadUpdate,
 )
 
 /** The outcome of a check the pilot asked for; a check at startup only ever shows an update it found. */

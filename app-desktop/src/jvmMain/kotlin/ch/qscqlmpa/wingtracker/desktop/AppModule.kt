@@ -50,6 +50,7 @@ import ch.qscqlmpa.wingtracker.gear.wing.UpdateWingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingFlightLookup
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
 import ch.qscqlmpa.wingtracker.github.GitHubReleaseSource
+import ch.qscqlmpa.wingtracker.github.HttpReleaseDownloads
 import ch.qscqlmpa.wingtracker.igc.Igc4jTrackReader
 import ch.qscqlmpa.wingtracker.reminders.GetAttention
 import ch.qscqlmpa.wingtracker.reminders.GetCalendarEntries
@@ -84,7 +85,9 @@ import ch.qscqlmpa.wingtracker.ui.undo.UndoCoordinator
 import ch.qscqlmpa.wingtracker.ui.updates.UpdateUseCases
 import ch.qscqlmpa.wingtracker.updates.AppVersion
 import ch.qscqlmpa.wingtracker.updates.CheckForUpdate
+import ch.qscqlmpa.wingtracker.updates.DownloadUpdate
 import ch.qscqlmpa.wingtracker.updates.GetUpdatePreferences
+import ch.qscqlmpa.wingtracker.updates.ReleaseDownloads
 import ch.qscqlmpa.wingtracker.updates.ReleaseSource
 import ch.qscqlmpa.wingtracker.updates.SaveCheckAtStartup
 import ch.qscqlmpa.wingtracker.updates.SkipVersion
@@ -104,6 +107,7 @@ fun appModules(
     dataDirectory: Path,
     devMode: Boolean = false,
     installationDirectory: Path = InstallationDirectory.resolve(devMode),
+    downloadDirectory: Path = UpdateDownloadDirectory.resolve(devMode),
 ): List<Module> =
     listOf(
         storageModule(dataDirectory),
@@ -111,7 +115,7 @@ fun appModules(
         flightsModule(),
         maintenanceModule(),
         remindersModule(),
-        updatesModule(installationDirectory, devMode),
+        updatesModule(installationDirectory, downloadDirectory, devMode),
         uiModule(dataDirectory, devMode),
     )
 
@@ -228,9 +232,12 @@ private fun remindersModule() =
 
 private fun updatesModule(
     installationDirectory: Path,
+    downloadDirectory: Path,
     devMode: Boolean,
 ) = module {
-    single<ReleaseSource> { GitHubReleaseSource(RELEASE_REPOSITORY, "wing-tracker/${BuildInfo.VERSION}") }
+    val userAgent = "wing-tracker/${BuildInfo.VERSION}"
+    single<ReleaseSource> { GitHubReleaseSource(RELEASE_REPOSITORY, userAgent) }
+    single<ReleaseDownloads> { HttpReleaseDownloads(downloadDirectory, userAgent) }
     single<UpdatePreferencesRepository> { JsonUpdatePreferencesRepository(installationDirectory) }
     factory {
         // A development build has no release version and is never updated (ADR 0024).
@@ -240,7 +247,8 @@ private fun updatesModule(
     factory { GetUpdatePreferences(get()) }
     factory { SaveCheckAtStartup(get()) }
     factory { SkipVersion(get()) }
-    single { UpdateUseCases(get(), get(), get(), get()) }
+    factory { DownloadUpdate(get()) }
+    single { UpdateUseCases(get(), get(), get(), get(), get()) }
 }
 
 private fun uiModule(
@@ -255,6 +263,7 @@ private fun uiModule(
             DesktopFileDrop(),
             dataLocation(dataDirectory, devMode),
             DesktopLogLocation(DesktopLogging.directory(devMode)),
+            DesktopUpdateInstaller(InstallationDirectory.installerKind()),
             supportsAllFileNames(),
         )
     }

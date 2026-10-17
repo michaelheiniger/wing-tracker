@@ -23,6 +23,14 @@ data class Release(
 ) {
     fun installerFor(kind: InstallerKind): ReleaseAsset? =
         assets.firstOrNull { it.name.endsWith(".${kind.fileExtension}", ignoreCase = true) }
+
+    /** The checksums of the installers; releases made before the release workflow published them have none. */
+    val checksumFile: ReleaseAsset? get() = assets.firstOrNull { it.name == CHECKSUM_FILE_NAME }
+
+    companion object {
+        // The name the release workflow publishes the checksums under (ADR 0009).
+        const val CHECKSUM_FILE_NAME = "SHA256SUMS"
+    }
 }
 
 /**
@@ -39,6 +47,9 @@ data class AvailableUpdate(
     }
 
     val latest: Release get() = releases.first()
+
+    /** Only an installer whose checksum is published is installed from the app, so a broken download is caught. */
+    val installableFromApp: Boolean get() = latest.checksumFile != null
 
     companion object {
         /**

@@ -78,6 +78,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.theme_system
 import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import ch.qscqlmpa.wingtracker.ui.updates.UpdateBadge
+import ch.qscqlmpa.wingtracker.ui.updates.UpdateInstallPresenter
 import ch.qscqlmpa.wingtracker.ui.updates.UpdatePresenter
 import ch.qscqlmpa.wingtracker.ui.updates.UpdatesSection
 import org.jetbrains.compose.resources.stringResource
@@ -90,6 +91,7 @@ fun SettingsScreen(
     dataLocation: DataLocationPresenter,
     logLocation: LogLocationPresenter,
     updates: UpdatePresenter,
+    installer: UpdateInstallPresenter,
     appVersion: String,
 ) {
     Column(
@@ -112,7 +114,7 @@ fun SettingsScreen(
         CalendarSection(reminders)
         DataLocationSection(dataLocation)
         LogLocationSection(logLocation)
-        UpdatesSection(updates)
+        UpdatesSection(updates, installer)
         AboutSection(appVersion, updates)
         reminders.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
     }

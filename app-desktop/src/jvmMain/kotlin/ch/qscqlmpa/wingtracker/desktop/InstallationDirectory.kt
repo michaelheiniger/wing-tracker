@@ -40,3 +40,37 @@ object InstallationDirectory {
     fun installerKind(osName: String = System.getProperty("os.name")): InstallerKind =
         if ("win" in osName.lowercase()) InstallerKind.Msi else InstallerKind.Deb
 }
+
+/**
+ * Per-user cache location of each OS, where a downloaded update waits to be installed (ADR 0024). A cache, because
+ * losing it costs only a new download; development runs have their own folder.
+ */
+object UpdateDownloadDirectory {
+    fun resolve(
+        devMode: Boolean,
+        osName: String = System.getProperty("os.name"),
+        env: Map<String, String> = System.getenv(),
+        userHome: String = System.getProperty("user.home"),
+    ): Path {
+        val appFolder = if (devMode) "wing-tracker-dev" else "wing-tracker"
+        val os = osName.lowercase()
+        val base =
+            when {
+                "win" in os -> {
+                    Path(env["LOCALAPPDATA"] ?: "$userHome/AppData/Local").resolve(appFolder).resolve("cache")
+                }
+
+                "mac" in os -> {
+                    Path(userHome, "Library", "Caches", appFolder)
+                }
+
+                else -> {
+                    val cache =
+                        env["XDG_CACHE_HOME"]?.takeIf { it.isNotBlank() }?.let { Path(it) }
+                            ?: Path(userHome, ".cache")
+                    cache.resolve(appFolder)
+                }
+            }
+        return base.resolve("updates")
+    }
+}

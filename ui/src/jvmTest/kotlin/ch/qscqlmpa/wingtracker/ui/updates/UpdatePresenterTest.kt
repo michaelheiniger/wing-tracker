@@ -6,6 +6,7 @@ import ch.qscqlmpa.wingtracker.updates.AppVersion
 import ch.qscqlmpa.wingtracker.updates.AvailableUpdate
 import ch.qscqlmpa.wingtracker.updates.CheckForUpdate
 import ch.qscqlmpa.wingtracker.updates.CheckTrigger
+import ch.qscqlmpa.wingtracker.updates.DownloadUpdate
 import ch.qscqlmpa.wingtracker.updates.GetUpdatePreferences
 import ch.qscqlmpa.wingtracker.updates.Release
 import ch.qscqlmpa.wingtracker.updates.ReleaseAsset
@@ -54,7 +55,7 @@ class UpdatePresenterTest {
     private fun TestScope.presenter() =
         UpdatePresenter(
             TestScope(UnconfinedTestDispatcher(testScheduler)),
-            UpdateUseCases(checkForUpdate, getPreferences, saveCheckAtStartup, skipVersion),
+            UpdateUseCases(checkForUpdate, getPreferences, saveCheckAtStartup, skipVersion, mockk<DownloadUpdate>()),
         )
 
     private fun givenStartupFinds(result: UpdateCheckResult) {

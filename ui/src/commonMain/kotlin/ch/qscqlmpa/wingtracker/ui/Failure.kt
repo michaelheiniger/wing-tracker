@@ -44,6 +44,9 @@ enum class FailureKind {
     UpdateUnreachable,
     UpdateRefused,
     UpdateUnexpected,
+    UpdateNoChecksum,
+    UpdateChecksumMismatch,
+    InstallUpdate,
 }
 
 /** A technical [detail] travels with the kind; the screen wraps it in a message in the user's language. */

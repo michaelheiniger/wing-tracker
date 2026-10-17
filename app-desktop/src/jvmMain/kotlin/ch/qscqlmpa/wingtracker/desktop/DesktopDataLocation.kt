@@ -27,7 +27,6 @@ import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.relativeTo
 import kotlin.io.path.walk
 import kotlin.io.path.writeText
-import kotlin.system.exitProcess
 
 /**
  * The data folder on a desktop: [current] is in use now, [default] is the platform's choice, and the folder the pilot
@@ -82,14 +81,7 @@ class DesktopDataLocation(
 
     override suspend fun open() = openInFileManager(current)
 
-    override fun restart() {
-        // Started before exiting: a failed start must still leave the pilot with the application closed, not half-open.
-        val info = ProcessHandle.current().info()
-        info.command().ifPresent { command ->
-            runCatching { ProcessBuilder(listOf(command) + info.arguments().orElse(emptyArray())).inheritIO().start() }
-        }
-        exitProcess(0)
-    }
+    override fun restart() = restartApplication()
 
     private fun remember(target: Path) {
         if (target == default.toAbsolutePath().normalize()) {

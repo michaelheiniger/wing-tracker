@@ -38,9 +38,11 @@ import ch.qscqlmpa.wingtracker.ui.resources.update_check_now
 import ch.qscqlmpa.wingtracker.ui.resources.update_checking
 import ch.qscqlmpa.wingtracker.ui.resources.update_close
 import ch.qscqlmpa.wingtracker.ui.resources.update_download
+import ch.qscqlmpa.wingtracker.ui.resources.update_install
 import ch.qscqlmpa.wingtracker.ui.resources.update_later
 import ch.qscqlmpa.wingtracker.ui.resources.update_no_notes
 import ch.qscqlmpa.wingtracker.ui.resources.update_not_applicable
+import ch.qscqlmpa.wingtracker.ui.resources.update_not_installable
 import ch.qscqlmpa.wingtracker.ui.resources.update_release_title
 import ch.qscqlmpa.wingtracker.ui.resources.update_skip
 import ch.qscqlmpa.wingtracker.ui.resources.update_skipped
@@ -57,6 +59,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun UpdateBanner(
     presenter: UpdatePresenter,
+    installer: UpdateInstallPresenter,
     modifier: Modifier = Modifier,
 ) {
     val update = presenter.update ?: return
@@ -80,9 +83,13 @@ fun UpdateBanner(
                 modifier = Modifier.weight(1f),
             )
             TextButton(onClick = presenter::openWhatsNew) { Text(stringResource(Res.string.update_whats_new)) }
-            // Until the app installs updates itself, the release page is where the installer is.
-            TextButton(onClick = { uriHandler.openUri(update.latest.pageUrl) }) {
-                Text(stringResource(Res.string.update_download))
+            if (update.installableFromApp) {
+                TextButton(onClick = { installer.install(update) }) { Text(stringResource(Res.string.update_install)) }
+            } else {
+                // Without published checksums the app refuses to install; the release page still has the installer.
+                TextButton(onClick = { uriHandler.openUri(update.latest.pageUrl) }) {
+                    Text(stringResource(Res.string.update_download))
+                }
             }
             TextButton(onClick = presenter::skip) { Text(stringResource(Res.string.update_skip)) }
             TextButton(onClick = presenter::postpone) { Text(stringResource(Res.string.update_later)) }
@@ -92,7 +99,10 @@ fun UpdateBanner(
 
 /** The update part of the settings: the startup check, a manual check and what it found. */
 @Composable
-fun UpdatesSection(presenter: UpdatePresenter) {
+fun UpdatesSection(
+    presenter: UpdatePresenter,
+    installer: UpdateInstallPresenter,
+) {
     Text(
         stringResource(Res.string.update_title),
         style = MaterialTheme.typography.titleMedium,
@@ -115,7 +125,7 @@ fun UpdatesSection(presenter: UpdatePresenter) {
         }
         ManualCheckOutcome(presenter.manualCheck)
     }
-    presenter.update?.let { FoundUpdate(it, presenter) }
+    presenter.update?.let { FoundUpdate(it, presenter, installer) }
     presenter.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
 }
 
@@ -134,6 +144,7 @@ private fun ManualCheckOutcome(check: ManualCheck) {
 private fun FoundUpdate(
     update: AvailableUpdate,
     presenter: UpdatePresenter,
+    installer: UpdateInstallPresenter,
 ) {
     val uriHandler = LocalUriHandler.current
     val version = update.latest.version.toString()
@@ -144,9 +155,27 @@ private fun FoundUpdate(
             UpdateBadge(version)
         }
         TextButton(onClick = presenter::openWhatsNew) { Text(stringResource(Res.string.update_whats_new)) }
-        Button(onClick = { uriHandler.openUri(update.latest.pageUrl) }) {
-            Text(stringResource(Res.string.update_download))
-        }
+        InstallOrDownload(update, onInstall = { installer.install(update) }, onOpenPage = uriHandler::openUri)
+    }
+    if (!update.installableFromApp) {
+        Text(
+            stringResource(Res.string.update_not_installable),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun InstallOrDownload(
+    update: AvailableUpdate,
+    onInstall: () -> Unit,
+    onOpenPage: (String) -> Unit,
+) {
+    if (update.installableFromApp) {
+        Button(onClick = onInstall) { Text(stringResource(Res.string.update_install)) }
+    } else {
+        Button(onClick = { onOpenPage(update.latest.pageUrl) }) { Text(stringResource(Res.string.update_download)) }
     }
 }
 
@@ -171,7 +200,10 @@ fun UpdateBadge(version: String) {
 
 /** Every release since the installed one, newest first, so nothing that changed goes unseen. */
 @Composable
-fun WhatsNewDialog(presenter: UpdatePresenter) {
+fun WhatsNewDialog(
+    presenter: UpdatePresenter,
+    installer: UpdateInstallPresenter,
+) {
     val update = presenter.update
     if (!presenter.showsWhatsNew || update == null) return
     val uriHandler = LocalUriHandler.current
@@ -183,6 +215,7 @@ fun WhatsNewDialog(presenter: UpdatePresenter) {
                 modifier = Modifier.widthIn(max = 640.dp).heightIn(max = 480.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                if (!update.installableFromApp) Text(stringResource(Res.string.update_not_installable))
                 update.releases.forEachIndexed { index, release ->
                     if (index > 0) HorizontalDivider()
                     Text(
@@ -198,9 +231,14 @@ fun WhatsNewDialog(presenter: UpdatePresenter) {
             }
         },
         confirmButton = {
-            Button(onClick = { uriHandler.openUri(update.latest.pageUrl) }) {
-                Text(stringResource(Res.string.update_download))
-            }
+            InstallOrDownload(
+                update,
+                onInstall = {
+                    presenter.closeWhatsNew()
+                    installer.install(update)
+                },
+                onOpenPage = uriHandler::openUri,
+            )
         },
         dismissButton = {
             TextButton(onClick = presenter::closeWhatsNew) { Text(stringResource(Res.string.update_close)) }

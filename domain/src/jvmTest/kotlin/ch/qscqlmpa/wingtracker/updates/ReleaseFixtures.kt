@@ -8,6 +8,8 @@ fun aDebAsset(version: String = "0.1.0") =
 fun anMsiAsset(version: String = "0.1.0") =
     ReleaseAsset("wing-tracker-$version.msi", "$RELEASES/download/v$version/wing-tracker-$version.msi")
 
+fun aChecksumAsset(version: String = "0.1.0") = ReleaseAsset("SHA256SUMS", "$RELEASES/download/v$version/SHA256SUMS")
+
 fun aRelease(
     version: String = "0.1.0",
     assets: List<ReleaseAsset> = listOf(aDebAsset(version)),
