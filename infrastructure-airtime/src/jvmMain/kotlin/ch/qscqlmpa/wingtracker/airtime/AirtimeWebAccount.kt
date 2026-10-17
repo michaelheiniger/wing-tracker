@@ -138,6 +138,8 @@ class AirtimeWebAccount(
 
     override fun pilotPage(nick: String): String = "$baseUrl/pilot/${pathSegment(nick)}"
 
+    override fun flightPage(id: Long): String = "$baseUrl/flight/$id"
+
     private suspend fun call(
         request: AirtimeRequest,
         what: String,

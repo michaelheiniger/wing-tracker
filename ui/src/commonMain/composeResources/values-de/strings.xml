@@ -764,4 +764,12 @@
     <string name="failure_airtime_unreachable">air-time ist nicht erreichbar: %1$s</string>
     <string name="failure_airtime_unexpected">air-time hat unerwartet geantwortet (%1$s). Die App muss eventuell aktualisiert werden.</string>
     <string name="failure_export_airtime">Die Flüge konnten nicht gesendet werden: %1$s</string>
+    <string name="flight_detail_section_airtime">air-time</string>
+    <string name="flight_detail_airtime_sent">Gesendet</string>
+    <string name="flight_detail_airtime_not_sent">Nicht gesendet</string>
+    <string name="flight_detail_airtime_no_page">Seine Seite auf air-time ist nicht bekannt.</string>
+    <string name="flight_detail_airtime_forget_hint">Das Vergessen des Exports ändert nur dein Flugbuch, nichts auf air-time. Der nächste Export lässt den Flug aus, wenn air-time ihn noch hat, und sendet ihn sonst.</string>
+    <string name="flight_detail_airtime_forget">Export vergessen</string>
+    <string name="flight_detail_open_airtime">Auf air-time öffnen</string>
+    <string name="undo_export_forgotten">Export nach air-time vergessen</string>
 </resources>

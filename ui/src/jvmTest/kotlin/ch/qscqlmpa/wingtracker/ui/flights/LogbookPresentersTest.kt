@@ -5,8 +5,10 @@ import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
 import ch.qscqlmpa.wingtracker.flights.DeleteFlight
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
+import ch.qscqlmpa.wingtracker.flights.FlightExport
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
+import ch.qscqlmpa.wingtracker.flights.ForgetFlightExport
 import ch.qscqlmpa.wingtracker.flights.GetLogbook
 import ch.qscqlmpa.wingtracker.flights.LogFlight
 import ch.qscqlmpa.wingtracker.flights.UpdateFlight
@@ -108,6 +110,7 @@ class LogbookPresentersTest {
         deleteFlight = DeleteFlight(flights, attachments),
         readAttachment = ReadAttachment(attachments),
         fileOpener = opener,
+        forgetFlightExport = ForgetFlightExport(flights),
         initialSearch = initialSearch,
         onSearchChange = onSearchChange,
     )
@@ -424,6 +427,48 @@ class LogbookPresentersTest {
 
                 // then
                 assertThat(presenter.state.flight(october.id)).isNull()
+            }
+    }
+
+    @Nested
+    inner class ForgetExport {
+        private val sent = FlightExport("airtime", Instant.parse("2026-10-17T20:12:04Z"), "986")
+
+        @Test
+        fun `saves the flight without the record and shows it so`() =
+            runTest {
+                // given
+                val flight = aFlight("f-1", "wing-1").copy(exports = listOf(sent))
+                givenStored(listOf(flight))
+                coEvery { flights.findById(flight.id) } returns flight
+                val presenter = logbookPresenter()
+                presenter.refresh()
+                coEvery { flights.findAll() } returns LoadResult(listOf(flight.forgetExport("airtime")))
+
+                // when
+                presenter.forgetExport(flight.id, "airtime", UndoCoordinator(), TEXT)
+
+                // then
+                coVerify(exactly = 1) { flights.save(flight.forgetExport("airtime")) }
+                assertThat(presenter.state.flight(flight.id)?.exports).isEmpty()
+            }
+
+        @Test
+        fun `puts the record back when undone`() =
+            runTest {
+                // given
+                val flight = aFlight("f-1", "wing-1").copy(exports = listOf(sent))
+                givenStored(listOf(flight))
+                coEvery { flights.findById(flight.id) } returnsMany listOf(flight, flight.forgetExport("airtime"))
+                val presenter = logbookPresenter()
+                val undo = UndoCoordinator()
+                presenter.forgetExport(flight.id, "airtime", undo, TEXT)
+
+                // when
+                undo.pressUndo()
+
+                // then
+                coVerify(exactly = 1) { flights.save(flight) }
             }
     }
 

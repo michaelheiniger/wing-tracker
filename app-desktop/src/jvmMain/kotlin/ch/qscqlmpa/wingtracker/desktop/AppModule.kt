@@ -6,6 +6,7 @@ import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
 import ch.qscqlmpa.wingtracker.flights.DeleteFlight
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.FlightsOfWing
+import ch.qscqlmpa.wingtracker.flights.ForgetFlightExport
 import ch.qscqlmpa.wingtracker.flights.GetLogbook
 import ch.qscqlmpa.wingtracker.flights.LogFlight
 import ch.qscqlmpa.wingtracker.flights.UpdateFlight
@@ -212,11 +213,13 @@ private fun flightsModule() =
         factory { ExportFlightsToAirtime(get(), get(), get(), get()) }
         factory { GetAirtimePages(get()) }
         factory { SaveAirtimeNick(get()) }
+        factory { ForgetFlightExport(get()) }
         factory { OpenSpreadsheet(get()) }
         factory { PrepareSpreadsheetImport(get(), get()) }
         factory { ImportSpreadsheetFlights(get(), get(), get(), RegisterWing(get())) }
         single {
             LogbookUseCases(
+                get(),
                 get(),
                 get(),
                 get(),

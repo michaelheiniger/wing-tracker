@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.ui.flights
 
 import ch.qscqlmpa.wingtracker.flights.DeleteFlight
+import ch.qscqlmpa.wingtracker.flights.ForgetFlightExport
 import ch.qscqlmpa.wingtracker.flights.GetLogbook
 import ch.qscqlmpa.wingtracker.flights.LogFlight
 import ch.qscqlmpa.wingtracker.flights.UpdateFlight
@@ -30,6 +31,7 @@ class LogbookUseCases(
     val logFlight: LogFlight,
     val updateFlight: UpdateFlight,
     val deleteFlight: DeleteFlight,
+    val forgetFlightExport: ForgetFlightExport,
     val prepareIgcImport: PrepareIgcImport,
     val importIgcFlight: ImportIgcFlight,
     val attachIgcTrack: AttachIgcTrack,

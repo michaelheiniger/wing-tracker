@@ -5,7 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ch.qscqlmpa.wingtracker.flights.DeleteFlight
 import ch.qscqlmpa.wingtracker.flights.Flight
+import ch.qscqlmpa.wingtracker.flights.FlightExport
 import ch.qscqlmpa.wingtracker.flights.FlightId
+import ch.qscqlmpa.wingtracker.flights.ForgetFlightExport
 import ch.qscqlmpa.wingtracker.flights.GetLogbook
 import ch.qscqlmpa.wingtracker.flights.Logbook
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReadAttachment
@@ -84,6 +86,7 @@ class LogbookPresenter(
     private val deleteFlight: DeleteFlight,
     private val readAttachment: ReadAttachment,
     private val fileOpener: FileOpener,
+    private val forgetFlightExport: ForgetFlightExport,
     // The search outlives this presenter, so it is still there when the pilot comes back to the logbook.
     initialSearch: LogbookSearch = LogbookSearch(),
     private val onSearchChange: (LogbookSearch) -> Unit = {},
@@ -114,6 +117,28 @@ class LogbookPresenter(
                     perform(FailureKind.DeleteFlight) { deleteFlight(id) }
                     unhide(id)
                 },
+            )
+        }
+    }
+
+    /**
+     * Forgets at once that the flight was sent to [system], so the next export sends it again; Undo puts the record
+     * back. Nothing changes in the other system.
+     */
+    fun forgetExport(
+        id: FlightId,
+        system: String,
+        undo: UndoCoordinator,
+        text: UndoText,
+    ) {
+        scope.launch {
+            var forgotten: FlightExport? = null
+            perform(FailureKind.SaveFlight) { forgotten = forgetFlightExport(id, system) }
+            val export = forgotten ?: return@launch
+            undo.offer(
+                text,
+                onUndo = { run(FailureKind.SaveFlight) { forgetFlightExport.restore(id, export) } },
+                onExpire = {},
             )
         }
     }

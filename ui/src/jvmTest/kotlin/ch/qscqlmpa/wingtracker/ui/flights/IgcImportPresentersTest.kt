@@ -796,6 +796,8 @@ class IgcImportPresentersTest {
                             .DeleteFlight(flights, attachments),
                         ReadAttachment(attachments),
                         opener,
+                        ch.qscqlmpa.wingtracker.flights
+                            .ForgetFlightExport(flights),
                     )
 
                 // when
@@ -827,6 +829,8 @@ class IgcImportPresentersTest {
                             .DeleteFlight(flights, attachments),
                         ReadAttachment(attachments),
                         opener,
+                        ch.qscqlmpa.wingtracker.flights
+                            .ForgetFlightExport(flights),
                     )
 
                 // when

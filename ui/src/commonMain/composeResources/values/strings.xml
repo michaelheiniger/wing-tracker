@@ -764,4 +764,12 @@
     <string name="failure_airtime_unreachable">air-time could not be reached: %1$s</string>
     <string name="failure_airtime_unexpected">air-time answered something unexpected (%1$s). The application may need an update.</string>
     <string name="failure_export_airtime">The flights could not be sent: %1$s</string>
+    <string name="flight_detail_section_airtime">air-time</string>
+    <string name="flight_detail_airtime_sent">Sent</string>
+    <string name="flight_detail_airtime_not_sent">Not sent</string>
+    <string name="flight_detail_airtime_no_page">Its page on air-time is not known.</string>
+    <string name="flight_detail_airtime_forget_hint">Forgetting the export only changes your logbook, nothing on air-time. The next export leaves the flight out if air-time still has it, and sends it otherwise.</string>
+    <string name="flight_detail_airtime_forget">Forget the export</string>
+    <string name="flight_detail_open_airtime">Open on air-time</string>
+    <string name="undo_export_forgotten">Export to air-time forgotten</string>
 </resources>

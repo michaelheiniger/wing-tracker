@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.flights.airtime
 
+import ch.qscqlmpa.wingtracker.flights.Flight
 import kotlin.time.Instant
 
 /** The name air-time carries in [ch.qscqlmpa.wingtracker.flights.FlightExport.system]. */
@@ -102,6 +103,9 @@ interface AirtimeAccount {
 
     /** The pilot's public page, to look at the flights just sent. */
     fun pilotPage(nick: String): String
+
+    /** The page of one flight, by its id on air-time. */
+    fun flightPage(id: Long): String
 }
 
 /** The air-time pages the pilot is sent to; their addresses are the adapter's business. */
@@ -111,4 +115,12 @@ class GetAirtimePages(
     fun tokenPage(): String = account.tokenPage()
 
     fun pilotPage(nick: String): String = account.pilotPage(nick.trim())
+
+    /** The flight's page on air-time; null when it was not exported there or its id is not known. */
+    fun flightPage(flight: Flight): String? =
+        flight
+            .exportTo(AIRTIME_SYSTEM)
+            ?.externalId
+            ?.toLongOrNull()
+            ?.let { account.flightPage(it) }
 }

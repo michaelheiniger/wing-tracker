@@ -44,6 +44,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.Flight
+import ch.qscqlmpa.wingtracker.flights.airtime.AIRTIME_SYSTEM
 import ch.qscqlmpa.wingtracker.flights.igc.TrackFix
 import ch.qscqlmpa.wingtracker.flights.syride.SYRIDE_SYSTEM
 import ch.qscqlmpa.wingtracker.maps.ReadMapTile
@@ -59,6 +60,11 @@ import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.flight_altitude
 import ch.qscqlmpa.wingtracker.ui.resources.flight_date_time
 import ch.qscqlmpa.wingtracker.ui.resources.flight_delete
+import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_airtime_forget
+import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_airtime_forget_hint
+import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_airtime_no_page
+import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_airtime_not_sent
+import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_airtime_sent
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_back
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_date
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_distance
@@ -71,8 +77,10 @@ import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_later
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_logged_at
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_missing
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_no_notes
+import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_open_airtime
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_open_syride
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_open_track
+import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_section_airtime
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_section_flight
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_section_notes
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_section_origin
@@ -148,14 +156,14 @@ private fun Page(
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) { Facts(flight, wingName, track) }
+            ) { Facts(flight, wingName, track, actions) }
         } else {
             Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 TrackView(track, readMapTile, Modifier.weight(1f).fillMaxHeight())
                 Column(
                     modifier = Modifier.width(FACT_GROUP_WIDTH).fillMaxHeight().verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) { Facts(flight, wingName, track) }
+                ) { Facts(flight, wingName, track, actions) }
             }
         }
     }
@@ -252,6 +260,9 @@ private fun Header(
         actions.onOpenSyride?.let { open ->
             OutlinedButton(onClick = open) { Text(stringResource(Res.string.flight_detail_open_syride)) }
         }
+        actions.onOpenAirtime?.let { open ->
+            OutlinedButton(onClick = open) { Text(stringResource(Res.string.flight_detail_open_airtime)) }
+        }
         OutlinedButton(onClick = actions.onDelete) {
             Icon(Icons.Default.Delete, contentDescription = null)
             Text(stringResource(Res.string.flight_delete), modifier = Modifier.padding(start = 8.dp))
@@ -275,6 +286,7 @@ private fun Facts(
     flight: Flight,
     wingName: String,
     track: TrackState,
+    actions: FlightDetailActions,
 ) {
     val details = flight.details
     FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -300,6 +312,7 @@ private fun Facts(
             Fact(Res.string.flight_detail_instrument, details.instrument)
         }
         TrackFacts(track)
+        AirtimeFacts(flight, actions)
         FactGroup(stringResource(Res.string.flight_detail_section_origin)) {
             if (flight.importedFrom?.system == SYRIDE_SYSTEM) {
                 Fact(Res.string.flight_detail_imported_from, stringResource(Res.string.flight_detail_syride))
@@ -327,6 +340,39 @@ private fun Facts(
                 )
             } else {
                 Text(notes)
+            }
+        }
+    }
+}
+
+/** Whether the flight was sent to air-time; forgetting it only changes the logbook, never air-time. */
+@Composable
+private fun AirtimeFacts(
+    flight: Flight,
+    actions: FlightDetailActions,
+) {
+    val export = flight.exportTo(AIRTIME_SYSTEM)
+    FactGroup(stringResource(Res.string.flight_detail_section_airtime)) {
+        val sent =
+            export?.at?.toLocalDateTime(TimeZone.currentSystemDefault())?.let {
+                stringResource(Res.string.flight_date_time, it.date.toDisplay(), it.time.toDisplay())
+            }
+        Fact(Res.string.flight_detail_airtime_sent, sent ?: stringResource(Res.string.flight_detail_airtime_not_sent))
+        if (export != null) {
+            if (actions.onOpenAirtime == null) {
+                Text(
+                    stringResource(Res.string.flight_detail_airtime_no_page),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Text(
+                stringResource(Res.string.flight_detail_airtime_forget_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            TextButton(onClick = actions.onForgetAirtimeExport) {
+                Text(stringResource(Res.string.flight_detail_airtime_forget))
             }
         }
     }

@@ -30,6 +30,15 @@ data class Flight(
         return copy(exports = exports + FlightExport(system, at, externalId))
     }
 
+    fun exportTo(system: String): FlightExport? = exports.firstOrNull { it.system == system }
+
+    /** Drops the record of the export to [system], e.g. after deleting the flight there, so it can be sent again. */
+    fun forgetExport(system: String): Flight = copy(exports = exports.filterNot { it.system == system })
+
+    /** Puts a forgotten record back, unless the flight was exported to that system again meanwhile. */
+    fun restoreExport(export: FlightExport): Flight =
+        if (isExportedTo(export.system)) this else copy(exports = exports + export)
+
     fun withDetails(details: FlightDetails): Flight = copy(details = details)
 
     /** Adds the track of a flight logged without one; a stored track is never replaced (ADR 0026). */

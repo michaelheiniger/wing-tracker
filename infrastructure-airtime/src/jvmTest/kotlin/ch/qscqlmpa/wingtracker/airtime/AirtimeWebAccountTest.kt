@@ -318,6 +318,7 @@ class AirtimeWebAccountTest {
             // when / then
             assertThat(account.tokenPage()).isEqualTo("$BASE_URL/settings")
             assertThat(account.pilotPage("Jean Dé")).isEqualTo("$BASE_URL/pilot/Jean%20D%C3%A9")
+            assertThat(account.flightPage(986)).isEqualTo("$BASE_URL/flight/986")
         }
     }
 

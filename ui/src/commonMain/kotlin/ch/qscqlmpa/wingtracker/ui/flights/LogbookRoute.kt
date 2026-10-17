@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightFilter
 import ch.qscqlmpa.wingtracker.flights.FlightId
+import ch.qscqlmpa.wingtracker.flights.airtime.AIRTIME_SYSTEM
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
@@ -43,6 +44,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.igc_drop_hint
 import ch.qscqlmpa.wingtracker.ui.resources.igc_pick_folder_title
 import ch.qscqlmpa.wingtracker.ui.resources.igc_pick_title
 import ch.qscqlmpa.wingtracker.ui.resources.spreadsheet_pick_title
+import ch.qscqlmpa.wingtracker.ui.resources.undo_export_forgotten
 import ch.qscqlmpa.wingtracker.ui.resources.undo_flight_discarded
 import ch.qscqlmpa.wingtracker.ui.spreadsheet.SpreadsheetImportPresenter
 import ch.qscqlmpa.wingtracker.ui.syride.SyrideImportPresenter
@@ -91,6 +93,7 @@ fun LogbookRoute(
                 useCases.deleteFlight,
                 useCases.readAttachment,
                 platform.fileOpener,
+                useCases.forgetFlightExport,
                 search,
                 onSearchChange,
             )
@@ -327,6 +330,9 @@ private fun FlightPage(
     LaunchedEffect(flight.id, flight.igcFile) { track.load(flight) }
     val syridePage by produceState<String?>(null, flight.id) { value = useCases.getSyrideFlightPage(flight) }
     val uriHandler = LocalUriHandler.current
+    val airtimePage = useCases.airtimeExport.pages.flightPage(flight)
+    val undo = LocalUndo.current
+    val forgotten = undoText(Res.string.undo_export_forgotten)
     FlightDetailScreen(
         flight = flight,
         wingName = wingName,
@@ -342,6 +348,8 @@ private fun FlightPage(
                 onOpenTrack = { presenter.openTrack(flight) },
                 onDelete = { deleting = true },
                 onOpenSyride = syridePage?.let { page -> { uriHandler.openUri(page) } },
+                onOpenAirtime = airtimePage?.let { page -> { uriHandler.openUri(page) } },
+                onForgetAirtimeExport = { presenter.forgetExport(flight.id, AIRTIME_SYSTEM, undo, forgotten) },
             ),
     )
     if (deleting) {

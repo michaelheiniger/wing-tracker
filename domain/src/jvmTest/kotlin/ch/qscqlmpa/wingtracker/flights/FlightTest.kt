@@ -95,4 +95,40 @@ class FlightTest {
                 .isInstanceOf(IllegalStateException::class.java)
         }
     }
+
+    @Nested
+    inner class ForgetAndRestoreExport {
+        private val sent = FlightExport("airtime", Instant.parse("2026-10-17T20:12:04Z"), "986")
+
+        @Test
+        fun `forgets the record of one system only`() {
+            // given
+            val flight = aSyrideFlight().copy(exports = listOf(sent, FlightExport("xcontest", sent.at)))
+
+            // when
+            val forgotten = flight.forgetExport("airtime")
+
+            // then
+            assertThat(forgotten.exports).containsExactly(FlightExport("xcontest", sent.at))
+        }
+
+        @Test
+        fun `puts a forgotten record back`() {
+            // given
+            val flight = aSyrideFlight().copy(exports = listOf(sent)).forgetExport("airtime")
+
+            // when / then
+            assertThat(flight.restoreExport(sent).exports).containsExactly(sent)
+        }
+
+        @Test
+        fun `keeps a newer export instead of the record put back`() {
+            // given
+            val newer = FlightExport("airtime", Instant.parse("2026-10-18T09:00:00Z"), "1560")
+            val flight = aSyrideFlight().copy(exports = listOf(newer))
+
+            // when / then
+            assertThat(flight.restoreExport(sent).exports).containsExactly(newer)
+        }
+    }
 }
