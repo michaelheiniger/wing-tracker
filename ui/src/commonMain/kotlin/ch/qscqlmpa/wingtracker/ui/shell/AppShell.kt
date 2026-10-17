@@ -43,6 +43,7 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
 import ch.qscqlmpa.wingtracker.ui.components.FileNamesBanner
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookRoute
+import ch.qscqlmpa.wingtracker.ui.flights.LogbookSearch
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.GearRoute
 import ch.qscqlmpa.wingtracker.ui.gear.GearUseCases
@@ -131,6 +132,8 @@ fun AppShell(
     var fileNamesWarning by rememberSaveable { mutableStateOf(!platform.supportsAllFileNames) }
     // Set when the attention panel opens a piece of gear, consumed by the gear section.
     var pendingGear by remember { mutableStateOf<GearRef?>(null) }
+    // Kept here, outside the logbook, so a search survives a look at the gear; it is gone after a restart.
+    var logbookSearch by remember { mutableStateOf(LogbookSearch()) }
 
     // Reminders are computed on demand (ADR 0012), so they are refreshed whenever the pilot moves between sections.
     LaunchedEffect(destination) { attentionPresenter.refresh() }
@@ -183,6 +186,8 @@ fun AppShell(
                                         useCases = logbookUseCases,
                                         platform = platform,
                                         attention = attentionPresenter.state.attention,
+                                        search = logbookSearch,
+                                        onSearchChange = { logbookSearch = it },
                                         onOpenGear = { ref ->
                                             pendingGear = ref
                                             destination = Destination.Gear.name

@@ -99,14 +99,18 @@ class LogbookPresentersTest {
         coEvery { wings.findAll() } returns LoadResult(wingList)
     }
 
-    private fun TestScope.logbookPresenter() =
-        LogbookPresenter(
-            scope = TestScope(UnconfinedTestDispatcher(testScheduler)),
-            getLogbook = GetLogbook(flights, wings),
-            deleteFlight = DeleteFlight(flights, attachments),
-            readAttachment = ReadAttachment(attachments),
-            fileOpener = opener,
-        )
+    private fun TestScope.logbookPresenter(
+        initialSearch: LogbookSearch = LogbookSearch(),
+        onSearchChange: (LogbookSearch) -> Unit = {},
+    ) = LogbookPresenter(
+        scope = TestScope(UnconfinedTestDispatcher(testScheduler)),
+        getLogbook = GetLogbook(flights, wings),
+        deleteFlight = DeleteFlight(flights, attachments),
+        readAttachment = ReadAttachment(attachments),
+        fileOpener = opener,
+        initialSearch = initialSearch,
+        onSearchChange = onSearchChange,
+    )
 
     @Nested
     inner class Logbook {
@@ -235,6 +239,103 @@ class LogbookPresentersTest {
 
                 // then
                 assertThat(input.wingId).isEqualTo(cloudSurfer.id)
+            }
+    }
+
+    @Nested
+    inner class Search {
+        private val onSkyDancer = aFlight("f-1", "wing-1", date = LocalDate(2026, 9, 20))
+        private val onCloudSurfer = aFlight("f-2", "wing-2", date = LocalDate(2026, 10, 2))
+
+        @Test
+        fun `shows only the matching flights but keeps every flight visible`() =
+            runTest {
+                // given
+                givenStored(listOf(onSkyDancer, onCloudSurfer))
+                val presenter = logbookPresenter()
+                presenter.refresh()
+
+                // when
+                presenter.search(LogbookSearch(wingIds = setOf(skyDancer.id)))
+
+                // then
+                assertThat(
+                    presenter.state.shown
+                        ?.months
+                        ?.flatMap { it.flights },
+                ).containsExactly(onSkyDancer)
+                assertThat(presenter.state.visible?.flightCount).isEqualTo(2)
+            }
+
+        @Test
+        fun `hands every change on so the search outlives the presenter`() =
+            runTest {
+                // given
+                givenStored(listOf(onSkyDancer))
+                val changes = mutableListOf<LogbookSearch>()
+                val presenter = logbookPresenter(onSearchChange = { changes += it })
+                val search = LogbookSearch(text = "dancer")
+
+                // when
+                presenter.search(search)
+
+                // then
+                assertThat(changes).containsExactly(search)
+            }
+
+        @Test
+        fun `starts with the search the pilot left`() =
+            runTest {
+                // given
+                givenStored(listOf(onSkyDancer, onCloudSurfer))
+                val presenter = logbookPresenter(initialSearch = LogbookSearch(from = "01-10-2026"))
+
+                // when
+                presenter.refresh()
+
+                // then
+                assertThat(
+                    presenter.state.shown
+                        ?.months
+                        ?.flatMap { it.flights },
+                ).containsExactly(onCloudSurfer)
+            }
+
+        @Test
+        fun `ignores a date until it is a real day`() =
+            runTest {
+                // given
+                givenStored(listOf(onSkyDancer, onCloudSurfer))
+                val presenter = logbookPresenter()
+                presenter.refresh()
+
+                // when
+                presenter.search(LogbookSearch(from = "01-10-20"))
+
+                // then
+                assertThat(presenter.state.search.isActive).isFalse()
+                assertThat(presenter.state.search.isBlank).isFalse()
+                assertThat(presenter.state.shown?.flightCount).isEqualTo(2)
+            }
+
+        @Test
+        fun `does not change the wing a new flight starts with`() =
+            runTest {
+                // given
+                givenStored(
+                    listOf(
+                        aFlight("f-1", "wing-1", loggedAt = "2026-09-20T17:00:00Z"),
+                        aFlight("f-2", "wing-2", loggedAt = "2026-10-05T12:00:00Z"),
+                    ),
+                )
+                val presenter = logbookPresenter()
+                presenter.refresh()
+
+                // when
+                presenter.search(LogbookSearch(wingIds = setOf(skyDancer.id)))
+
+                // then
+                assertThat(presenter.state.newFlightInput(TODAY).wingId).isEqualTo(cloudSurfer.id)
             }
     }
 

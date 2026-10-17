@@ -1,5 +1,7 @@
 package ch.qscqlmpa.wingtracker.flights.spreadsheet
 
+import ch.qscqlmpa.wingtracker.shared.folded
+
 /** What a column of a logbook spreadsheet can hold. */
 enum class FlightField {
     Date,
@@ -70,27 +72,10 @@ data class ColumnMapping(
 
         private fun normalize(header: String): String =
             header
-                .lowercase()
-                .map { ACCENTS[it] ?: it }
-                .joinToString("")
+                .folded()
                 .replace(Regex("[^a-z0-9]+"), " ")
                 .trim()
 
-        private val ACCENTS =
-            mapOf(
-                'é' to 'e',
-                'è' to 'e',
-                'ê' to 'e',
-                'à' to 'a',
-                'â' to 'a',
-                'ä' to 'a',
-                'ö' to 'o',
-                'ô' to 'o',
-                'ü' to 'u',
-                'û' to 'u',
-                'ç' to 'c',
-                'î' to 'i',
-            )
         private val ALTITUDE_WORDS =
             setOf("altitude", "alt", "hohe", "hoehe", "hauteur", "denivele", "elevation", "height")
         private val DURATION_WORDS = setOf("duration", "duree", "dauer", "flugzeit", "airtime", "time", "temps")

@@ -28,11 +28,15 @@ data class LogbookState(
     val failure: Failure? = null,
     // Deleted flights wait here until the pilot can no longer undo, so Undo only has to show them again.
     val hiddenFlights: Set<FlightId> = emptySet(),
+    val search: LogbookSearch = LogbookSearch(),
 ) {
     val loading: Boolean get() = logbook == null && failure == null
 
-    /** The logbook as the pilot should see it: without the flights that are about to be deleted. */
-    val shown: Logbook? get() = logbook?.without(hiddenFlights)
+    /** Every flight the pilot still has: without the ones that are about to be deleted. */
+    val visible: Logbook? get() = logbook?.without(hiddenFlights)
+
+    /** The flights listed: the [visible] ones that match the search. */
+    val shown: Logbook? get() = visible?.filtered(search.toFilter())
 
     /**
      * Date defaults to today and the wing to the one flown last, because a pilot usually logs a flight
@@ -40,8 +44,9 @@ data class LogbookState(
      */
     fun newFlightInput(today: LocalDate): FlightFormInput {
         val wings = logbook?.wings.orEmpty()
+        // Searching for an older flight must not change which wing a new flight starts with.
         val lastFlown =
-            shown
+            visible
                 ?.months
                 ?.flatMap { it.flights }
                 ?.maxByOrNull { it.loggedAt }
@@ -61,9 +66,18 @@ class LogbookPresenter(
     private val deleteFlight: DeleteFlight,
     private val readAttachment: ReadAttachment,
     private val fileOpener: FileOpener,
+    // The search outlives this presenter, so it is still there when the pilot comes back to the logbook.
+    initialSearch: LogbookSearch = LogbookSearch(),
+    private val onSearchChange: (LogbookSearch) -> Unit = {},
 ) {
-    var state by mutableStateOf(LogbookState())
+    var state by mutableStateOf(LogbookState(search = initialSearch))
         private set
+
+    /** Filtering needs no reload: the logbook is already in memory. */
+    fun search(search: LogbookSearch) {
+        state = state.copy(search = search)
+        onSearchChange(search)
+    }
 
     fun refresh() = run(FailureKind.LoadLogbook) { }
 

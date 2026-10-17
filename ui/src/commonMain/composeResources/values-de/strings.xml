@@ -92,6 +92,15 @@
     <string name="logbook_empty_action">Ersten Flug erfassen</string>
     <string name="logbook_month_header">%1$s %2$d</string>
     <string name="logbook_month_summary">%1$s · %2$s</string>
+    <string name="logbook_search_label">Flüge suchen</string>
+    <string name="logbook_search_placeholder">Startplatz, Notizen, Schirm…</string>
+    <string name="logbook_search_clear_text">Text löschen</string>
+    <string name="logbook_search_from">Von</string>
+    <string name="logbook_search_to">Bis</string>
+    <string name="logbook_search_clear">Suche zurücksetzen</string>
+    <string name="logbook_search_result">Treffer: %1$s · %2$s</string>
+    <string name="logbook_search_none_title">Keine passenden Flüge</string>
+    <string name="logbook_search_none_body">Kein Flug passt zu deiner Suche. Ändere oder lösche sie, um deine Flüge wieder zu sehen.</string>
     <plurals name="flights_count">
         <item quantity="one">%1$d Flug</item>
         <item quantity="other">%1$d Flüge</item>

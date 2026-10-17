@@ -115,6 +115,51 @@ class GetLogbookTest {
     }
 
     @Nested
+    inner class Filtered {
+        @Test
+        fun `keeps only matching flights and drops months left without any`() =
+            runTest {
+                // given
+                val september =
+                    aFlight(
+                        "f-1",
+                        aFlightDetails(date = LocalDate(2026, 9, 20), wingId = skyDancer.id, duration = 60.minutes),
+                    )
+                val october =
+                    aFlight(
+                        "f-2",
+                        aFlightDetails(date = LocalDate(2026, 10, 2), wingId = cloudSurfer.id, duration = 30.minutes),
+                    )
+                givenFlights(september, october)
+                val logbook = GetLogbook(flights, wings)()
+
+                // when
+                val filtered = logbook.filtered(FlightFilter(text = "dancer"))
+
+                // then
+                assertThat(filtered.months.map { it.month }).containsExactly(YearMonth(2026, 9))
+                assertThat(filtered.flightCount).isEqualTo(1)
+                assertThat(filtered.total).isEqualTo(60.minutes)
+            }
+
+        @Test
+        fun `keeps the lifetime hours of every wing`() =
+            runTest {
+                // given
+                val flight = aFlight("f-1", aFlightDetails(duration = 90.minutes, wingId = skyDancer.id))
+                givenFlights(flight)
+                val logbook = GetLogbook(flights, wings)()
+
+                // when
+                val filtered = logbook.filtered(FlightFilter(text = "fiesch"))
+
+                // then
+                assertThat(filtered.isEmpty).isTrue()
+                assertThat(filtered.hoursByWing).isEqualTo(logbook.hoursByWing)
+            }
+    }
+
+    @Nested
     inner class Problems {
         @Test
         fun `reports unreadable files from both flights and wings`() =

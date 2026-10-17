@@ -92,6 +92,15 @@
     <string name="logbook_empty_action">Log your first flight</string>
     <string name="logbook_month_header">%1$s %2$d</string>
     <string name="logbook_month_summary">%1$s · %2$s</string>
+    <string name="logbook_search_label">Search flights</string>
+    <string name="logbook_search_placeholder">Site, notes, wing…</string>
+    <string name="logbook_search_clear_text">Clear text</string>
+    <string name="logbook_search_from">From</string>
+    <string name="logbook_search_to">To</string>
+    <string name="logbook_search_clear">Clear search</string>
+    <string name="logbook_search_result">%1$s found · %2$s</string>
+    <string name="logbook_search_none_title">No matching flights</string>
+    <string name="logbook_search_none_body">No flight matches your search. Change or clear it to see your flights again.</string>
     <plurals name="flights_count">
         <item quantity="one">%1$d flight</item>
         <item quantity="other">%1$d flights</item>

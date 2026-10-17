@@ -64,6 +64,8 @@ fun LogbookRoute(
     useCases: LogbookUseCases,
     platform: PlatformServices,
     attention: Attention,
+    search: LogbookSearch,
+    onSearchChange: (LogbookSearch) -> Unit,
     onOpenGear: (GearRef) -> Unit,
     onGoToGear: () -> Unit,
 ) {
@@ -76,6 +78,8 @@ fun LogbookRoute(
                 useCases.deleteFlight,
                 useCases.readAttachment,
                 platform.fileOpener,
+                search,
+                onSearchChange,
             )
         }
     val pickTitle = stringResource(Res.string.igc_pick_title)
@@ -108,7 +112,7 @@ fun LogbookRoute(
             onFailed = importer::dropFailed,
         )
     val wings =
-        presenter.state.shown
+        presenter.state.visible
             ?.wings
             .orEmpty()
     Box(modifier = Modifier.fillMaxSize().then(dropTarget)) {

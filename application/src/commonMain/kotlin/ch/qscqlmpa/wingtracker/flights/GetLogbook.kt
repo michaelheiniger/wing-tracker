@@ -23,6 +23,26 @@ data class Logbook(
     val unreadable: List<UnreadableRecord>,
 ) {
     val isEmpty: Boolean get() = months.isEmpty()
+
+    val flightCount: Int get() = months.sumOf { it.flights.size }
+
+    val total: Duration get() = months.fold(Duration.ZERO) { sum, month -> sum + month.total }
+
+    /**
+     * Only the flights matching [filter], still grouped by month. [hoursByWing] stays the lifetime total, because it
+     * tells the pilot about the wing (e.g. when its next check is due), not about the search.
+     */
+    fun filtered(filter: FlightFilter): Logbook {
+        if (!filter.isActive) return this
+        val names = wings.associate { it.id to it.details.name }
+        return copy(
+            months =
+                months
+                    .map { month ->
+                        month.copy(flights = month.flights.filter { filter.matches(it, names[it.details.wingId]) })
+                    }.filter { it.flights.isNotEmpty() },
+        )
+    }
 }
 
 class GetLogbook(

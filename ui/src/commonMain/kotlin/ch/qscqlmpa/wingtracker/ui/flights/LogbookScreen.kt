@@ -75,6 +75,10 @@ import ch.qscqlmpa.wingtracker.ui.resources.logbook_month_summary
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_no_wings_action
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_no_wings_body
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_no_wings_title
+import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_clear
+import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_none_body
+import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_none_title
+import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_result
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_title
 import ch.qscqlmpa.wingtracker.ui.resources.month_names
 import ch.qscqlmpa.wingtracker.ui.resources.undo_flight_deleted
@@ -105,7 +109,7 @@ fun LogbookScreen(
     onGoToGear: () -> Unit,
 ) {
     val state = presenter.state
-    val logbook = state.shown
+    val logbook = state.visible
     var flightToDelete by remember { mutableStateOf<Flight?>(null) }
 
     Scaffold(
@@ -148,10 +152,15 @@ fun LogbookScreen(
             if (state.loading) {
                 CircularProgressIndicator(modifier = Modifier.padding(24.dp))
             } else if (logbook != null) {
-                LogbookBody(logbook, onLogFlight, onEditFlight, presenter::openTrack, onGoToGear, onDelete = {
-                    flightToDelete =
-                        it
-                })
+                LogbookBody(
+                    logbook,
+                    LogbookSearchBinding(state.search, checkNotNull(state.shown), presenter::search),
+                    onLogFlight,
+                    onEditFlight,
+                    presenter::openTrack,
+                    onGoToGear,
+                    onDelete = { flightToDelete = it },
+                )
             }
         }
     }
@@ -185,9 +194,17 @@ fun LogbookScreen(
     }
 }
 
+/** The search as typed, the flights it leaves and how to change it. */
+private class LogbookSearchBinding(
+    val search: LogbookSearch,
+    val shown: Logbook,
+    val onChange: (LogbookSearch) -> Unit,
+)
+
 @Composable
 private fun LogbookBody(
     logbook: Logbook,
+    search: LogbookSearchBinding,
     onLogFlight: () -> Unit,
     onEdit: (Flight) -> Unit,
     onOpenTrack: (Flight) -> Unit,
@@ -214,7 +231,7 @@ private fun LogbookBody(
         }
 
         else -> {
-            LogbookContent(logbook, onEdit, onOpenTrack, onDelete)
+            LogbookContent(logbook, search, onEdit, onOpenTrack, onDelete)
         }
     }
 }
@@ -222,6 +239,7 @@ private fun LogbookBody(
 @Composable
 private fun LogbookContent(
     logbook: Logbook,
+    search: LogbookSearchBinding,
     onEdit: (Flight) -> Unit,
     onOpenTrack: (Flight) -> Unit,
     onDelete: (Flight) -> Unit,
@@ -235,8 +253,29 @@ private fun LogbookContent(
             )
         }
     }
+    LogbookSearchBar(search.search, logbook.wings, search.onChange)
+    val shown = search.shown
+    if (search.search.isActive) {
+        Text(
+            stringResource(
+                Res.string.logbook_search_result,
+                pluralStringResource(Res.plurals.flights_count, shown.flightCount, shown.flightCount),
+                formatDuration(shown.total),
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    if (shown.isEmpty) {
+        EmptyState(
+            title = stringResource(Res.string.logbook_search_none_title),
+            body = stringResource(Res.string.logbook_search_none_body),
+            action = stringResource(Res.string.logbook_search_clear),
+            onAction = { search.onChange(LogbookSearch()) },
+        )
+        return
+    }
     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
-        logbook.months.forEach { month ->
+        shown.months.forEach { month ->
             item(key = "month-${month.month}") { MonthHeader(month) }
             items(month.flights, key = { it.id.value }) { flight ->
                 val wingName =
