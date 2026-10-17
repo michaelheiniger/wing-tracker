@@ -13,6 +13,8 @@ class ChartTheme private constructor(
     val textPrimary: Color,
     val textSecondary: Color,
     val grid: Color,
+    // The terrain under a track in the altitude profile; apart from the palette, which must not change.
+    val ground: Color,
     private val palette: List<Color>,
     private val other: Color,
 ) {
@@ -32,6 +34,7 @@ class ChartTheme private constructor(
                 textPrimary = Color(0xFF0B0B0B),
                 textSecondary = Color(0xFF52514E),
                 grid = Color(0xFFE4E3DF),
+                ground = Color(0xFF8C765A),
                 palette = LIGHT.map(::Color),
                 other = Color(0xFF75746F),
             )
@@ -41,6 +44,7 @@ class ChartTheme private constructor(
                 textPrimary = Color(0xFFF0EFEC),
                 textSecondary = Color(0xFFC3C2B7),
                 grid = Color(0xFF383835),
+                ground = Color(0xFFA8957B),
                 palette = DARK.map(::Color),
                 other = Color(0xFF8F8E88),
             )

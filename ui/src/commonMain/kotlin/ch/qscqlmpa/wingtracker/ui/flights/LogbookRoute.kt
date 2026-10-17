@@ -109,7 +109,7 @@ fun LogbookRoute(
     // The flight shown on its own page instead of the list; the list keeps its search and scroll position meanwhile.
     var openFlight by remember { mutableStateOf<FlightId?>(null) }
     val listState = rememberLazyListState()
-    val trackPresenter = remember { FlightTrackPresenter(useCases.readFlightTrack) }
+    val trackPresenter = remember { FlightTrackPresenter(useCases.readFlightTrack, useCases.readGroundProfile) }
 
     LaunchedEffect(Unit) { presenter.refresh() }
 

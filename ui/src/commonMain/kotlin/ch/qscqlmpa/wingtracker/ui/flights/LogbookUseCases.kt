@@ -8,6 +8,7 @@ import ch.qscqlmpa.wingtracker.flights.igc.AttachIgcTrack
 import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
 import ch.qscqlmpa.wingtracker.flights.igc.PrepareIgcImport
 import ch.qscqlmpa.wingtracker.flights.igc.ReadFlightTrack
+import ch.qscqlmpa.wingtracker.flights.igc.ReadGroundProfile
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.ImportSpreadsheetFlights
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.OpenSpreadsheet
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.PrepareSpreadsheetImport
@@ -45,4 +46,5 @@ class LogbookUseCases(
     val readFlightTrack: ReadFlightTrack,
     val readMapTile: ReadMapTile,
     val getSyrideFlightPage: GetSyrideFlightPage,
+    val readGroundProfile: ReadGroundProfile,
 )

@@ -696,10 +696,15 @@
     <string name="map_attribution">Données © contributeurs OpenStreetMap, SRTM · Style © OpenTopoMap (CC-BY-SA)</string>
     <string name="profile_altitude">Altitude</string>
     <string name="profile_legend_flight">Vol</string>
-    <string name="profile_legend_ground">Avant le décollage et après l'atterrissage</string>
+    <string name="profile_legend_outside_flight">Avant le décollage et après l'atterrissage</string>
     <string name="profile_description">Profil d'altitude de la trace, jusqu'à %1$d m</string>
     <string name="map_climb_below">Sous %1$s m/s</string>
     <string name="map_climb_range">%1$s à %2$s m/s</string>
     <string name="map_climb_from">%1$s m/s et plus</string>
     <string name="flight_detail_open_syride">Ouvrir sur Syride</string>
+    <string name="profile_legend_terrain">Sol</string>
+    <string name="profile_ground_above">Au-dessus du sol</string>
+    <string name="profile_ground_incomplete">Le sol n'a pas pu être chargé partout, p. ex. sans connexion Internet.</string>
+    <string name="profile_ground_source">Sol : Terrain Tiles (AWS Open Data ; SRTM, EU-DEM, swissALTI3D et autres)</string>
+    <string name="failure_read_ground">Le sol sous la trace n'a pas pu être lu : %1$s</string>
 </resources>

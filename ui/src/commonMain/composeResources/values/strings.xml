@@ -696,10 +696,15 @@
     <string name="map_attribution">Map data © OpenStreetMap contributors, SRTM · Map style © OpenTopoMap (CC-BY-SA)</string>
     <string name="profile_altitude">Altitude</string>
     <string name="profile_legend_flight">Flight</string>
-    <string name="profile_legend_ground">Before take-off and after landing</string>
+    <string name="profile_legend_outside_flight">Before take-off and after landing</string>
     <string name="profile_description">Altitude profile of the track, up to %1$d m</string>
     <string name="map_climb_below">Below %1$s m/s</string>
     <string name="map_climb_range">%1$s to %2$s m/s</string>
     <string name="map_climb_from">%1$s m/s and more</string>
     <string name="flight_detail_open_syride">Open on Syride</string>
+    <string name="profile_legend_terrain">Ground</string>
+    <string name="profile_ground_above">Above ground</string>
+    <string name="profile_ground_incomplete">The ground could not be loaded everywhere, e.g. without an internet connection.</string>
+    <string name="profile_ground_source">Ground: Terrain Tiles (AWS Open Data; SRTM, EU-DEM, swissALTI3D and others)</string>
+    <string name="failure_read_ground">The ground under the track could not be read: %1$s</string>
 </resources>

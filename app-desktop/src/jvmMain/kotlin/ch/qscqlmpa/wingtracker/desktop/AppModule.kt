@@ -12,6 +12,7 @@ import ch.qscqlmpa.wingtracker.flights.igc.AttachIgcTrack
 import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
 import ch.qscqlmpa.wingtracker.flights.igc.PrepareIgcImport
 import ch.qscqlmpa.wingtracker.flights.igc.ReadFlightTrack
+import ch.qscqlmpa.wingtracker.flights.igc.ReadGroundProfile
 import ch.qscqlmpa.wingtracker.flights.igc.TrackReader
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.ImportSpreadsheetFlights
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.OpenSpreadsheet
@@ -58,7 +59,9 @@ import ch.qscqlmpa.wingtracker.github.HttpReleaseDownloads
 import ch.qscqlmpa.wingtracker.igc.Igc4jTrackReader
 import ch.qscqlmpa.wingtracker.maps.MapTileSource
 import ch.qscqlmpa.wingtracker.maps.ReadMapTile
+import ch.qscqlmpa.wingtracker.maps.TerrainElevationSource
 import ch.qscqlmpa.wingtracker.maptiles.OpenTopoMapTileSource
+import ch.qscqlmpa.wingtracker.maptiles.TerrariumElevationSource
 import ch.qscqlmpa.wingtracker.reminders.GetAttention
 import ch.qscqlmpa.wingtracker.reminders.GetCalendarEntries
 import ch.qscqlmpa.wingtracker.reminders.GetStartNotification
@@ -213,6 +216,7 @@ private fun flightsModule() =
                 get(),
                 get(),
                 get(),
+                get(),
             )
         }
         factory { GetStatistics(get(), get(), get()) }
@@ -252,8 +256,11 @@ private fun mapsModule(tileDirectory: Path) =
     module {
         // Tile services ask to be told who fetches and how to reach them (ADR 0027).
         val userAgent = "wing-tracker/${BuildInfo.VERSION} (+https://github.com/$RELEASE_REPOSITORY)"
-        single<MapTileSource> { OpenTopoMapTileSource(tileDirectory, userAgent) }
+        // Each source keeps its own tiles, so each is trimmed within its own limit.
+        single<MapTileSource> { OpenTopoMapTileSource(tileDirectory.resolve("opentopomap"), userAgent) }
+        single<TerrainElevationSource> { TerrariumElevationSource(tileDirectory.resolve("terrain"), userAgent) }
         factory { ReadMapTile(get()) }
+        factory { ReadGroundProfile(get()) }
     }
 
 private fun updatesModule(

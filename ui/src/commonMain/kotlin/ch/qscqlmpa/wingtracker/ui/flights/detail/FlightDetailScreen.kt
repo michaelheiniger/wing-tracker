@@ -176,6 +176,8 @@ private fun TrackView(
                 FlightMap(track.track, readMapTile, highlighted, Modifier.fillMaxWidth().weight(1f))
                 AltitudeProfile(
                     track.track,
+                    track.ground,
+                    track.groundFailure,
                     highlighted,
                     onHighlight = { highlighted = it },
                     Modifier.fillMaxWidth().height(PROFILE_HEIGHT),

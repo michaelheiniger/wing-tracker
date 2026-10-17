@@ -166,7 +166,11 @@ class ColorContrastTest {
                 surfaces.mapNotNull { (mode, surface) ->
                     val ratio = contrast(MapPalette.track, surface)
                     "$mode: track = ${"%.2f".format(ratio)}".takeIf { ratio < COMPONENT_MINIMUM }
-                }
+                } +
+                    listOf("light" to ChartTheme.Light, "dark" to ChartTheme.Dark).mapNotNull { (mode, theme) ->
+                        val ratio = contrast(theme.ground, theme.surface)
+                        "$mode: ground = ${"%.2f".format(ratio)}".takeIf { ratio < COMPONENT_MINIMUM }
+                    }
 
             // then
             assertThat(tooLow).isEmpty()

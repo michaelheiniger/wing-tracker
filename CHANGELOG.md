@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
+- The altitude profile of a flight shows the ground under the track, from an open terrain model. Pointing at the profile also gives the ground altitude and your height above ground. The ground is kept on your computer like the map, so flights viewed before show it offline too; otherwise a note says it could not be loaded.
 - All text in Wing Tracker can be selected and copied, including values such as dates, sites and altitudes, in the main window and in dialogs. Drag across text to select it and press Ctrl+C to copy it. Axis labels drawn in charts are the exception; their values show when you point at the chart.
 - A flight imported from Syride with a track there has an "Open on Syride" button on its page, which opens the flight on Syride in your browser. It uses the Syride account saved for the import.
 - The map of a flight colours the track by climb and sink: light blue for sinking down to 1.2 m/s, dark blue for stronger sink, green for weak climb, orange and red for stronger climb, with a legend giving the m/s of each colour. Flights whose track has no altitudes are drawn in a single colour.

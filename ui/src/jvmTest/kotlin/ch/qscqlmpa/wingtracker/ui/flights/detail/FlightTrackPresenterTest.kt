@@ -7,8 +7,11 @@ import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.flights.igc.AnalysedTrack
+import ch.qscqlmpa.wingtracker.flights.igc.GroundPoint
+import ch.qscqlmpa.wingtracker.flights.igc.GroundProfile
 import ch.qscqlmpa.wingtracker.flights.igc.InvalidTrackException
 import ch.qscqlmpa.wingtracker.flights.igc.ReadFlightTrack
+import ch.qscqlmpa.wingtracker.flights.igc.ReadGroundProfile
 import ch.qscqlmpa.wingtracker.flights.igc.TrackFix
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.ui.FailureKind
@@ -38,9 +41,17 @@ private val A_TRACK =
         statistics = null,
     )
 
+private val GROUND =
+    GroundProfile(listOf(GroundPoint(Instant.parse("2026-09-20T09:00:00Z"), 1950)), complete = true)
+
 class FlightTrackPresenterTest {
     private val readFlightTrack = mockk<ReadFlightTrack>()
-    private val presenter = FlightTrackPresenter(readFlightTrack)
+    private val readGroundProfile = mockk<ReadGroundProfile>()
+    private val presenter = FlightTrackPresenter(readFlightTrack, readGroundProfile)
+
+    init {
+        coEvery { readGroundProfile(any()) } returns GROUND
+    }
 
     @Nested
     inner class Load {
@@ -55,7 +66,39 @@ class FlightTrackPresenterTest {
                 presenter.load(flight)
 
                 // then
-                assertThat(presenter.state).isEqualTo(TrackState.Loaded(A_TRACK))
+                assertThat(presenter.state).isEqualTo(TrackState.Loaded(A_TRACK, GROUND))
+            }
+
+        @Test
+        fun `reads the ground under the track once the track is shown`() =
+            runTest {
+                // given
+                val flight = aFlight()
+                coEvery { readFlightTrack(flight) } returns A_TRACK
+
+                // when
+                presenter.load(flight)
+
+                // then
+                assertThat((presenter.state as TrackState.Loaded).ground).isEqualTo(GROUND)
+            }
+
+        @Test
+        fun `shows the track without ground when the ground cannot be read`() =
+            runTest {
+                // given
+                val flight = aFlight()
+                coEvery { readFlightTrack(flight) } returns A_TRACK
+                coEvery { readGroundProfile(A_TRACK) } throws IllegalStateException("Disk full")
+
+                // when
+                presenter.load(flight)
+
+                // then
+                val loaded = presenter.state as TrackState.Loaded
+                assertThat(loaded.track).isEqualTo(A_TRACK)
+                assertThat(loaded.ground).isNull()
+                assertThat(loaded.groundFailure?.kind).isEqualTo(FailureKind.ReadGround)
             }
 
         @Test

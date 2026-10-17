@@ -35,14 +35,21 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.igc.AnalysedTrack
+import ch.qscqlmpa.wingtracker.flights.igc.GroundProfile
 import ch.qscqlmpa.wingtracker.flights.igc.TrackFix
+import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.flights.detail.map.segments
+import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.flight_altitude
 import ch.qscqlmpa.wingtracker.ui.resources.profile_altitude
 import ch.qscqlmpa.wingtracker.ui.resources.profile_description
+import ch.qscqlmpa.wingtracker.ui.resources.profile_ground_above
+import ch.qscqlmpa.wingtracker.ui.resources.profile_ground_incomplete
+import ch.qscqlmpa.wingtracker.ui.resources.profile_ground_source
 import ch.qscqlmpa.wingtracker.ui.resources.profile_legend_flight
-import ch.qscqlmpa.wingtracker.ui.resources.profile_legend_ground
+import ch.qscqlmpa.wingtracker.ui.resources.profile_legend_outside_flight
+import ch.qscqlmpa.wingtracker.ui.resources.profile_legend_terrain
 import ch.qscqlmpa.wingtracker.ui.statistics.AxisScale
 import ch.qscqlmpa.wingtracker.ui.statistics.ChartTheme
 import ch.qscqlmpa.wingtracker.ui.statistics.ChartTooltip
@@ -62,11 +69,13 @@ import ch.qscqlmpa.wingtracker.ui.toDisplay
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
 
 private const val MAX_TIME_TICKS = 6
 private const val FLIGHT_FILL_ALPHA = 0.15f
+private const val GROUND_FILL_ALPHA = 0.35f
 private val RIGHT_PAD = 16.dp
 
 /**
@@ -77,6 +86,9 @@ private val RIGHT_PAD = 16.dp
 @Composable
 fun AltitudeProfile(
     track: AnalysedTrack,
+    // Null while it is being read; drawn under the flight once it is there.
+    ground: GroundProfile?,
+    groundFailure: Failure?,
     highlighted: TrackFix?,
     onHighlight: (TrackFix?) -> Unit,
     modifier: Modifier = Modifier,
@@ -86,17 +98,34 @@ fun AltitudeProfile(
     val theme = if (LocalDarkTheme.current) ChartTheme.Dark else ChartTheme.Light
     val flightColor = MaterialTheme.extraColors.map.track
     val maxAltitude = fixes.maxOf { checkNotNull(it.altitudeMeters) }
+    val shownGround = ground?.takeIf { it.points.size >= 2 }
+    val top = maxOf(maxAltitude, shownGround?.points?.maxOf { it.elevationMeters } ?: 0)
     val description = stringResource(Res.string.profile_description, maxAltitude)
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Legend(flightColor, theme)
+        Legend(flightColor, theme, withGround = shownGround != null)
         ProfileChart(
-            ProfileData(track, fixes, niceScale(maxAltitude.toDouble())),
+            ProfileData(track, fixes, niceScale(top.toDouble()), shownGround),
             ProfileColors(flightColor, theme),
             highlighted,
             onHighlight,
             Modifier.fillMaxWidth().weight(1f).semantics { contentDescription = description },
         )
+        GroundNote(ground, groundFailure)
     }
+}
+
+/** Where the ground comes from, as its sources ask, and whether part of it is missing. */
+@Composable
+private fun GroundNote(
+    ground: GroundProfile?,
+    failure: Failure?,
+) {
+    val style = MaterialTheme.typography.labelSmall
+    failure?.let { Text(it.message(), style = style, color = MaterialTheme.colorScheme.error) }
+    if (ground == null) return
+    val color = MaterialTheme.colorScheme.onSurfaceVariant
+    if (!ground.complete) Text(stringResource(Res.string.profile_ground_incomplete), style = style, color = color)
+    if (ground.points.isNotEmpty()) Text(stringResource(Res.string.profile_ground_source), style = style, color = color)
 }
 
 private class ProfileData(
@@ -104,6 +133,7 @@ private class ProfileData(
     // Only fixes with an altitude, which is all a profile can draw.
     val fixes: List<TrackFix>,
     val scale: AxisScale,
+    val ground: GroundProfile?,
 ) {
     val start: Instant = fixes.first().time
     val end: Instant = fixes.last().time
@@ -118,10 +148,12 @@ private class ProfileColors(
 private fun Legend(
     flightColor: Color,
     theme: ChartTheme,
+    withGround: Boolean,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
         LegendItem(flightColor, stringResource(Res.string.profile_legend_flight))
-        LegendItem(theme.otherColor, stringResource(Res.string.profile_legend_ground))
+        LegendItem(theme.otherColor, stringResource(Res.string.profile_legend_outside_flight))
+        if (withGround) LegendItem(theme.ground, stringResource(Res.string.profile_legend_terrain))
     }
 }
 
@@ -178,8 +210,14 @@ private fun ProfileChart(
                         flown to colors.flight,
                     ).filter { it.first.size >= 2 }.map { (part, color) -> plot.lineOf(part, data) to color }
                 val fill = flown.takeIf { it.size >= 2 }?.let { plot.areaUnder(it, data) }
+                val ground = data.ground?.let { plot.groundLineOf(it, data) }
                 onDrawBehind {
                     drawValueAxis(plot, data.scale, valueLabels, measurer, labelStyle, colors.theme.grid)
+                    // Under the flight, which is what the pilot reads first.
+                    ground?.let { (line, area) ->
+                        drawPath(area, colors.theme.ground.copy(alpha = GROUND_FILL_ALPHA))
+                        drawPath(line, colors.theme.ground, style = Stroke(1.5.dp.toPx()))
+                    }
                     ticks.forEachIndexed { index, tick ->
                         val label = measurer.measure(timeLabels[index], labelStyle)
                         val x = plot.xOf(tick, data)
@@ -204,21 +242,58 @@ private fun ProfileChart(
             val tooltipWidth = with(LocalDensity.current) { TOOLTIP_WIDTH.toPx() }
             val offset = tooltipOffset(position, size.width, tooltipWidth)
             val time = cursor.time.toLocalDateTime(zone).time
+            val altitude = checkNotNull(cursor.altitudeMeters)
+            val groundHere = data.ground?.elevationAt(cursor.time)?.roundToInt()
             ChartTooltip(
                 title = "${time.toDisplay()}:${time.second.toString().padStart(2, '0')}",
                 rows =
-                    listOf(
+                    listOfNotNull(
                         TooltipRow(
                             colors.flight,
                             stringResource(Res.string.profile_altitude),
-                            stringResource(Res.string.flight_altitude, checkNotNull(cursor.altitudeMeters)),
+                            stringResource(Res.string.flight_altitude, altitude),
                         ),
+                        groundHere?.let {
+                            TooltipRow(
+                                colors.theme.ground,
+                                stringResource(Res.string.profile_legend_terrain),
+                                stringResource(Res.string.flight_altitude, it),
+                            )
+                        },
+                        groundHere?.let {
+                            TooltipRow(
+                                null,
+                                stringResource(Res.string.profile_ground_above),
+                                stringResource(Res.string.flight_altitude, altitude - it),
+                            )
+                        },
                     ),
                 theme = colors.theme,
                 modifier = Modifier.offset { offset },
             )
         }
     }
+}
+
+/** The ground's outline and the area under it, down to the axis. */
+private fun PlotArea.groundLineOf(
+    ground: GroundProfile,
+    data: ProfileData,
+): Pair<Path, Path> {
+    val points = ground.points.map { Offset(xOf(it.time, data), yOf(it.elevationMeters.toDouble(), data.scale)) }
+    val line =
+        Path().apply {
+            moveTo(points.first().x, points.first().y)
+            points.drop(1).forEach { lineTo(it.x, it.y) }
+        }
+    val area =
+        Path().apply {
+            addPath(line)
+            lineTo(points.last().x, bottom)
+            lineTo(points.first().x, bottom)
+            close()
+        }
+    return line to area
 }
 
 private fun PlotArea.xOf(
