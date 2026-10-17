@@ -24,6 +24,9 @@ class AppModuleTest {
     @TempDir
     lateinit var downloadDirectory: Path
 
+    @TempDir
+    lateinit var mapTileDirectory: Path
+
     // Koin resolves at runtime (ADR 0007), so a missing binding must fail here instead of at app launch.
     @Test
     fun `every binding needed to start the application can be resolved`() {
@@ -35,6 +38,7 @@ class AppModuleTest {
                         dataDirectory,
                         installationDirectory = installationDirectory,
                         downloadDirectory = downloadDirectory,
+                        mapTileDirectory = mapTileDirectory,
                     ),
                 )
             }.koin

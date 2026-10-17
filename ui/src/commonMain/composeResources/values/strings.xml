@@ -689,4 +689,9 @@
     <string name="flight_detail_max_sink">Strongest sink</string>
     <string name="flight_detail_vertical_speed">%1$s m/s</string>
     <string name="flight_detail_no_flight_in_track">The track never moves for long enough to show a flight, so there is nothing to work out from it.</string>
+    <string name="map_take_off">Take-off</string>
+    <string name="map_landing">Landing</string>
+    <string name="map_offline">Map not available: showing the track only</string>
+    <string name="map_fit_flight">Whole flight</string>
+    <string name="map_attribution">Map data © OpenStreetMap contributors, SRTM · Map style © OpenTopoMap (CC-BY-SA)</string>
 </resources>

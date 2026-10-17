@@ -42,10 +42,10 @@ object InstallationDirectory {
 }
 
 /**
- * Per-user cache location of each OS, where a downloaded update waits to be installed (ADR 0024). A cache, because
- * losing it costs only a new download; development runs have their own folder.
+ * Per-user cache location of each OS, for what this installation can fetch again: a downloaded update waiting to be
+ * installed (ADR 0024) and map tiles (ADR 0027). Development runs have their own folder.
  */
-object UpdateDownloadDirectory {
+object CacheDirectory {
     fun resolve(
         devMode: Boolean,
         osName: String = System.getProperty("os.name"),
@@ -54,23 +54,41 @@ object UpdateDownloadDirectory {
     ): Path {
         val appFolder = if (devMode) "wing-tracker-dev" else "wing-tracker"
         val os = osName.lowercase()
-        val base =
-            when {
-                "win" in os -> {
-                    Path(env["LOCALAPPDATA"] ?: "$userHome/AppData/Local").resolve(appFolder).resolve("cache")
-                }
-
-                "mac" in os -> {
-                    Path(userHome, "Library", "Caches", appFolder)
-                }
-
-                else -> {
-                    val cache =
-                        env["XDG_CACHE_HOME"]?.takeIf { it.isNotBlank() }?.let { Path(it) }
-                            ?: Path(userHome, ".cache")
-                    cache.resolve(appFolder)
-                }
+        return when {
+            "win" in os -> {
+                Path(env["LOCALAPPDATA"] ?: "$userHome/AppData/Local").resolve(appFolder).resolve("cache")
             }
-        return base.resolve("updates")
+
+            "mac" in os -> {
+                Path(userHome, "Library", "Caches", appFolder)
+            }
+
+            else -> {
+                val cache =
+                    env["XDG_CACHE_HOME"]?.takeIf { it.isNotBlank() }?.let { Path(it) }
+                        ?: Path(userHome, ".cache")
+                cache.resolve(appFolder)
+            }
+        }
     }
+}
+
+/** Where a downloaded update waits to be installed; losing it costs only a new download (ADR 0024). */
+object UpdateDownloadDirectory {
+    fun resolve(
+        devMode: Boolean,
+        osName: String = System.getProperty("os.name"),
+        env: Map<String, String> = System.getenv(),
+        userHome: String = System.getProperty("user.home"),
+    ): Path = CacheDirectory.resolve(devMode, osName, env, userHome).resolve("updates")
+}
+
+/** Where fetched map tiles are kept, so a flight viewed before shows its map offline too (ADR 0027). */
+object MapTileDirectory {
+    fun resolve(
+        devMode: Boolean,
+        osName: String = System.getProperty("os.name"),
+        env: Map<String, String> = System.getenv(),
+        userHome: String = System.getProperty("user.home"),
+    ): Path = CacheDirectory.resolve(devMode, osName, env, userHome).resolve("map-tiles")
 }

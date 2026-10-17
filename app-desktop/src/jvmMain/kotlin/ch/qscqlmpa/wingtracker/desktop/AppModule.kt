@@ -55,6 +55,9 @@ import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
 import ch.qscqlmpa.wingtracker.github.GitHubReleaseSource
 import ch.qscqlmpa.wingtracker.github.HttpReleaseDownloads
 import ch.qscqlmpa.wingtracker.igc.Igc4jTrackReader
+import ch.qscqlmpa.wingtracker.maps.MapTileSource
+import ch.qscqlmpa.wingtracker.maps.ReadMapTile
+import ch.qscqlmpa.wingtracker.maptiles.OpenTopoMapTileSource
 import ch.qscqlmpa.wingtracker.reminders.GetAttention
 import ch.qscqlmpa.wingtracker.reminders.GetCalendarEntries
 import ch.qscqlmpa.wingtracker.reminders.GetStartNotification
@@ -111,6 +114,7 @@ fun appModules(
     devMode: Boolean = false,
     installationDirectory: Path = InstallationDirectory.resolve(devMode),
     downloadDirectory: Path = UpdateDownloadDirectory.resolve(devMode),
+    mapTileDirectory: Path = MapTileDirectory.resolve(devMode),
 ): List<Module> =
     listOf(
         storageModule(dataDirectory),
@@ -119,6 +123,7 @@ fun appModules(
         maintenanceModule(),
         remindersModule(),
         updatesModule(installationDirectory, downloadDirectory, devMode),
+        mapsModule(mapTileDirectory),
         uiModule(dataDirectory, devMode),
     )
 
@@ -204,6 +209,7 @@ private fun flightsModule() =
                 get(),
                 get(),
                 get(),
+                get(),
             )
         }
         factory { GetStatistics(get(), get(), get()) }
@@ -237,6 +243,14 @@ private fun remindersModule() =
         factory { SaveDeviceFolder(get()) }
         single { RemindersUseCases(get(), get(), get(), get()) }
         single { StartupReminder(get(), get(), TrayNotifier()) }
+    }
+
+private fun mapsModule(tileDirectory: Path) =
+    module {
+        // Tile services ask to be told who fetches and how to reach them (ADR 0027).
+        val userAgent = "wing-tracker/${BuildInfo.VERSION} (+https://github.com/$RELEASE_REPOSITORY)"
+        single<MapTileSource> { OpenTopoMapTileSource(tileDirectory, userAgent) }
+        factory { ReadMapTile(get()) }
     }
 
 private fun updatesModule(

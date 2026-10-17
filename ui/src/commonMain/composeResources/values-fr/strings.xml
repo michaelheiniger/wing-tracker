@@ -689,4 +689,9 @@
     <string name="flight_detail_max_sink">Plus forte descente</string>
     <string name="flight_detail_vertical_speed">%1$s m/s</string>
     <string name="flight_detail_no_flight_in_track">La trace ne bouge jamais assez longtemps pour montrer un vol, on ne peut donc rien en tirer.</string>
+    <string name="map_take_off">Décollage</string>
+    <string name="map_landing">Atterrissage</string>
+    <string name="map_offline">Carte indisponible : seule la trace est affichée</string>
+    <string name="map_fit_flight">Vol entier</string>
+    <string name="map_attribution">Données © contributeurs OpenStreetMap, SRTM · Style © OpenTopoMap (CC-BY-SA)</string>
 </resources>

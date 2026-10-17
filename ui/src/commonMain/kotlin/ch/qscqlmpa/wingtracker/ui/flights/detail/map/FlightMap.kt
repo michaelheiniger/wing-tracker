@@ -1,0 +1,210 @@
+package ch.qscqlmpa.wingtracker.ui.flights.detail.map
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import ch.qscqlmpa.wingtracker.flights.igc.AnalysedTrack
+import ch.qscqlmpa.wingtracker.flights.igc.TrackFix
+import ch.qscqlmpa.wingtracker.maps.ReadMapTile
+import ch.qscqlmpa.wingtracker.maps.TileCoordinates
+import ch.qscqlmpa.wingtracker.ui.components.Severity
+import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
+import ch.qscqlmpa.wingtracker.ui.resources.Res
+import ch.qscqlmpa.wingtracker.ui.resources.map_attribution
+import ch.qscqlmpa.wingtracker.ui.resources.map_fit_flight
+import ch.qscqlmpa.wingtracker.ui.resources.map_landing
+import ch.qscqlmpa.wingtracker.ui.resources.map_offline
+import ch.qscqlmpa.wingtracker.ui.resources.map_take_off
+import ch.qscqlmpa.wingtracker.ui.theme.MapColors
+import ch.qscqlmpa.wingtracker.ui.theme.extraColors
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.io.Buffer
+import org.jetbrains.compose.resources.stringResource
+import ovh.plrapps.mapcompose.api.BoundingBox
+import ovh.plrapps.mapcompose.api.addLayer
+import ovh.plrapps.mapcompose.api.addMarker
+import ovh.plrapps.mapcompose.api.addPath
+import ovh.plrapps.mapcompose.api.disableRotation
+import ovh.plrapps.mapcompose.api.scrollTo
+import ovh.plrapps.mapcompose.api.snapScrollTo
+import ovh.plrapps.mapcompose.core.TileStreamProvider
+import ovh.plrapps.mapcompose.ui.MapUI
+import ovh.plrapps.mapcompose.ui.state.MapState
+
+private const val TILE_SIZE = 256
+
+// Room around the flight when the map opens, as a share of the map's size, so the markers are not cut off.
+private val FIT_PADDING = Offset(0.2f, 0.2f)
+
+private val TRACK_WIDTH = 3.dp
+private val HALO_WIDTH = 6.dp
+
+/**
+ * The track on a topographic map (ADR 0027): the flight strong, the recording before and after it faded, with
+ * markers at take-off and landing. Without tiles, e.g. offline, the track is still drawn on a plain background.
+ */
+@Composable
+fun FlightMap(
+    track: AnalysedTrack,
+    readMapTile: ReadMapTile,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.extraColors.map
+    val takeOffText = stringResource(Res.string.map_take_off)
+    val landingText = stringResource(Res.string.map_landing)
+    // Tiles are fetched on the library's worker threads; a flow is safe to set from there.
+    val missingTiles = remember(track) { MutableStateFlow(false) }
+    val state =
+        remember(track) {
+            mapStateFor(track, readMapTile, missingTiles).apply {
+                drawTrack(track, colors)
+                drawMarkers(track, takeOffText, landingText, colors)
+            }
+        }
+    val scope = rememberCoroutineScope()
+    val focus = remember(track) { track.focusArea()?.toBoundingBox() }
+    LaunchedEffect(state) { focus?.let { state.snapScrollTo(it, FIT_PADDING) } }
+    val offline by missingTiles.collectAsState()
+
+    Box(modifier = modifier.background(colors.background, MaterialTheme.shapes.medium)) {
+        MapUI(state = state)
+        if (offline) {
+            StatusBadge(
+                stringResource(Res.string.map_offline),
+                Severity.Warning,
+                modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
+            )
+        }
+        if (focus != null) {
+            Surface(
+                modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 2.dp,
+            ) {
+                TextButton(onClick = { scope.launch { state.scrollTo(focus, FIT_PADDING) } }) {
+                    Text(stringResource(Res.string.map_fit_flight))
+                }
+            }
+        }
+        // The tiles' licence asks for it wherever they are shown.
+        Text(
+            stringResource(Res.string.map_attribution),
+            modifier =
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .background(colors.trackHalo.copy(alpha = ATTRIBUTION_ALPHA))
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            style = MaterialTheme.typography.labelSmall,
+            // On the tiles, which keep their look in dark mode too.
+            color = colors.trackGround,
+        )
+    }
+}
+
+private fun mapStateFor(
+    track: AnalysedTrack,
+    readMapTile: ReadMapTile,
+    missingTiles: MutableStateFlow<Boolean>,
+): MapState {
+    val maxZoom = readMapTile.maxZoom
+    val fullSize = TILE_SIZE shl maxZoom
+    val start = track.focusArea()
+    return MapState(levelCount = maxZoom + 1, fullWidth = fullSize, fullHeight = fullSize, tileSize = TILE_SIZE) {
+        // Beyond the most detailed tiles the map would only get blurry.
+        maxScale(1.0)
+        start?.let { scroll((it.left + it.right) / 2, (it.top + it.bottom) / 2) }
+    }.apply {
+        disableRotation()
+        addLayer(
+            TileStreamProvider { row, col, zoom ->
+                val bytes = readMapTile(TileCoordinates(zoom, x = col, y = row))
+                if (bytes == null) missingTiles.value = true
+                bytes?.let { Buffer().apply { write(it) } }
+            },
+        )
+    }
+}
+
+private fun MapState.drawTrack(
+    track: AnalysedTrack,
+    colors: MapColors,
+) {
+    val segments = track.segments()
+    listOf(
+        Triple("before", segments.before, colors.trackGround),
+        Triple("after", segments.after, colors.trackGround),
+        Triple("flown", segments.flown, colors.track),
+    ).forEachIndexed { index, (name, fixes, color) ->
+        if (fixes.size < 2) return@forEachIndexed
+        val points = fixes.map { it.toMapPoint().let { p -> p.x to p.y } }
+        // The outline lies under its line, and the flight over the ground parts where they meet.
+        addPath("$name-halo", width = HALO_WIDTH, color = colors.trackHalo, zIndex = index * 2f) { addPoints(points) }
+        addPath(name, width = TRACK_WIDTH, color = color, zIndex = index * 2f + 1) { addPoints(points) }
+    }
+}
+
+private fun MapState.drawMarkers(
+    track: AnalysedTrack,
+    takeOffText: String,
+    landingText: String,
+    colors: MapColors,
+) {
+    val flown = track.flown.ifEmpty { return }
+    addPlace("take-off", flown.first(), takeOffText, colors.track)
+    addPlace("landing", flown.last(), landingText, colors.track)
+}
+
+private fun MapState.addPlace(
+    id: String,
+    fix: TrackFix,
+    text: String,
+    tint: Color,
+) {
+    val point = fix.toMapPoint()
+    addMarker(id, point.x, point.y, clickable = false) { PlaceMarker(text, tint) }
+}
+
+/** Icon and text, so take-off and landing are told apart without relying on colour (ADR 0019). */
+@Composable
+private fun PlaceMarker(
+    text: String,
+    tint: Color,
+) {
+    Surface(shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.surface, shadowElevation = 2.dp) {
+        Row(
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Icon(Icons.Default.Place, contentDescription = null, tint = tint, modifier = Modifier.size(16.dp))
+            Text(text, style = MaterialTheme.typography.labelMedium)
+        }
+    }
+}
+
+private fun MapArea.toBoundingBox() = BoundingBox(xLeft = left, yTop = top, xRight = right, yBottom = bottom)
+
+private const val ATTRIBUTION_ALPHA = 0.8f

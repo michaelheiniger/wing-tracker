@@ -32,6 +32,7 @@ include(
     ":infrastructure-syride",
     ":infrastructure-spreadsheet",
     ":infrastructure-github-releases",
+    ":infrastructure-map-tiles",
     ":ui",
     ":app-desktop",
     ":architecture-test",

@@ -60,6 +60,7 @@ kotlin {
             implementation(project(":infrastructure-syride"))
             implementation(project(":infrastructure-spreadsheet"))
             implementation(project(":infrastructure-github-releases"))
+            implementation(project(":infrastructure-map-tiles"))
             implementation(libs.compose.material3)
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)

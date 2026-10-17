@@ -16,6 +16,7 @@ import ch.qscqlmpa.wingtracker.flights.syride.ImportSyrideFlights
 import ch.qscqlmpa.wingtracker.flights.syride.PrepareSyrideImport
 import ch.qscqlmpa.wingtracker.flights.syride.UpdateSyrideTakeOffTimes
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReadAttachment
+import ch.qscqlmpa.wingtracker.maps.ReadMapTile
 import ch.qscqlmpa.wingtracker.settings.GetAppSettings
 import ch.qscqlmpa.wingtracker.settings.SaveDeviceFolder
 import ch.qscqlmpa.wingtracker.settings.SaveSyrideUsername
@@ -41,4 +42,5 @@ class LogbookUseCases(
     val getAppSettings: GetAppSettings,
     val saveDeviceFolder: SaveDeviceFolder,
     val readFlightTrack: ReadFlightTrack,
+    val readMapTile: ReadMapTile,
 )

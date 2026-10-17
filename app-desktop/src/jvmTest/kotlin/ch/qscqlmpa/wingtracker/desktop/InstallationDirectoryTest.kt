@@ -125,4 +125,31 @@ class InstallationDirectoryTest {
             assertThat(path).isEqualTo(Path.of("/home/michael/.cache/wing-tracker-dev/updates"))
         }
     }
+
+    @Nested
+    inner class MapTileFolder {
+        @Test
+        fun `sits in the cache folder next to the update downloads`() {
+            // given / when
+            val path = MapTileDirectory.resolve(false, "Linux", emptyMap(), "/home/michael")
+
+            // then
+            assertThat(path).isEqualTo(Path.of("/home/michael/.cache/wing-tracker/map-tiles"))
+        }
+
+        @Test
+        fun `uses the local profile on Windows`() {
+            // given / when
+            val path =
+                MapTileDirectory.resolve(
+                    false,
+                    "Windows 11",
+                    mapOf("LOCALAPPDATA" to "C:/Users/michael/AppData/Local"),
+                    "C:/Users/michael",
+                )
+
+            // then
+            assertThat(path).isEqualTo(Path.of("C:/Users/michael/AppData/Local/wing-tracker/cache/map-tiles"))
+        }
+    }
 }

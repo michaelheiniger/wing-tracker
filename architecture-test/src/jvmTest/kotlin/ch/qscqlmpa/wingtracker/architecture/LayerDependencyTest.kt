@@ -162,4 +162,19 @@ class LayerDependencyTest {
             )
         }
     }
+
+    @Nested
+    inner class InfrastructureMapTiles {
+        @Test
+        fun `does not depend on ui, storage or the composition root`() {
+            assertNoImportStartsWith(
+                "infrastructure-map-tiles",
+                "$base.ui",
+                "$base.desktop",
+                "$base.storage",
+                "androidx.compose",
+                *loggingBackends,
+            )
+        }
+    }
 }

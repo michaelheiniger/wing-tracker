@@ -111,7 +111,27 @@ class ExtraColors(
     val warning: Color,
     val warningContainer: Color,
     val onWarningContainer: Color,
+    // The map's tiles look the same in light and dark, so its colours do too (ADR 0027).
+    val map: MapColors = MapPalette,
 )
+
+/** The flown part of a track, the recording before and after it, the outline that lifts both off any terrain. */
+@Immutable
+class MapColors(
+    val track: Color,
+    val trackGround: Color,
+    val trackHalo: Color,
+    // Shown where no tile could be had, e.g. offline.
+    val background: Color,
+)
+
+internal val MapPalette =
+    MapColors(
+        track = hex(0xD81B60),
+        trackGround = hex(0x5F6368),
+        trackHalo = hex(0xFFFFFF),
+        background = hex(0xE8E4DA),
+    )
 
 internal val LightExtraColors =
     ExtraColors(

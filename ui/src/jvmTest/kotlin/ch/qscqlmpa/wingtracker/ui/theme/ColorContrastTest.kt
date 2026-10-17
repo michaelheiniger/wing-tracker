@@ -126,6 +126,32 @@ class ColorContrastTest {
     }
 
     @Nested
+    inner class Map {
+        @Test
+        fun `the track stands out from its outline and from the map's plain background`() {
+            // given
+            val map = MapPalette
+            val pairs =
+                listOf(
+                    Pair("track on halo", map.track, map.trackHalo),
+                    Pair("ground on halo", map.trackGround, map.trackHalo),
+                    Pair("track on background", map.track, map.background),
+                    Pair("ground on background", map.trackGround, map.background),
+                )
+
+            // when
+            val tooLow =
+                pairs.mapNotNull { pair ->
+                    val ratio = contrast(pair.foreground, pair.background)
+                    "${pair.name} = ${"%.2f".format(ratio)}".takeIf { ratio < COMPONENT_MINIMUM }
+                }
+
+            // then
+            assertThat(tooLow).isEmpty()
+        }
+    }
+
+    @Nested
     inner class Meaning {
         @Test
         fun `the dark scheme is not just the light scheme`() {

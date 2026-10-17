@@ -1,11 +1,14 @@
 package ch.qscqlmpa.wingtracker.ui.flights.detail
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -38,9 +42,11 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.syride.SYRIDE_SYSTEM
+import ch.qscqlmpa.wingtracker.maps.ReadMapTile
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.components.AppCard
 import ch.qscqlmpa.wingtracker.ui.flights.FlightNeighbours
+import ch.qscqlmpa.wingtracker.ui.flights.detail.map.FlightMap
 import ch.qscqlmpa.wingtracker.ui.flights.toDisplayNumber
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.message
@@ -82,7 +88,8 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * Everything known about one flight. Esc goes back to the list, and the arrow keys step to the earlier or later
- * flight of the current search, so a pilot can go through a series of flights without the mouse.
+ * flight of the current search, so a pilot can go through a series of flights without the mouse. A flight with a
+ * track shows its map beside the data, which scroll on their own, so scrolling the page never zooms the map.
  */
 @Composable
 fun FlightDetailScreen(
@@ -90,6 +97,7 @@ fun FlightDetailScreen(
     wingName: String,
     neighbours: FlightNeighbours,
     track: TrackState,
+    readMapTile: ReadMapTile,
     failure: Failure?,
     actions: FlightDetailActions,
 ) {
@@ -113,13 +121,47 @@ fun FlightDetailScreen(
                         }
                     target?.let(actions.onOpen)
                     target != null
-                }.verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                }.padding(horizontal = 24.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Header(flight, wingName, neighbours, actions)
         failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
-        Facts(flight, wingName, track)
+        if (flight.igcFile == null) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) { Facts(flight, wingName, track) }
+        } else {
+            Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                TrackView(track, readMapTile, Modifier.weight(1f).fillMaxHeight())
+                Column(
+                    modifier = Modifier.width(FACT_GROUP_WIDTH).fillMaxHeight().verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) { Facts(flight, wingName, track) }
+            }
+        }
+    }
+}
+
+/** The map once the track is read; the facts beside it explain when it cannot be. */
+@Composable
+private fun TrackView(
+    track: TrackState,
+    readMapTile: ReadMapTile,
+    modifier: Modifier,
+) {
+    when (track) {
+        is TrackState.Loaded -> {
+            FlightMap(track.track, readMapTile, modifier)
+        }
+
+        TrackState.Loading -> {
+            Box(modifier, contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+        }
+
+        is TrackState.Failed, TrackState.None -> {
+            Box(modifier.background(MaterialTheme.colorScheme.surfaceContainerLow, MaterialTheme.shapes.medium))
+        }
     }
 }
 
@@ -291,4 +333,4 @@ internal fun Fact(
 }
 
 private val FACT_GROUP_WIDTH = 340.dp
-private val LABEL_WIDTH = 130.dp
+private val LABEL_WIDTH = 150.dp

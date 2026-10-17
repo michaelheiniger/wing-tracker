@@ -25,6 +25,7 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
+import ch.qscqlmpa.wingtracker.maps.ReadMapTile
 import ch.qscqlmpa.wingtracker.reminders.Attention
 import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightDetailActions
 import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightDetailScreen
@@ -145,6 +146,7 @@ fun LogbookRoute(
             FlightPage(
                 presenter,
                 trackPresenter,
+                useCases.readMapTile,
                 shownFlight,
                 onOpen = { openFlight = it },
                 onEdit = { dialog = LogbookDialog.Edit(shownFlight) },
@@ -287,6 +289,7 @@ private fun importWizard(
 private fun FlightPage(
     presenter: LogbookPresenter,
     track: FlightTrackPresenter,
+    readMapTile: ReadMapTile,
     flight: Flight,
     onOpen: (FlightId?) -> Unit,
     onEdit: () -> Unit,
@@ -300,6 +303,7 @@ private fun FlightPage(
         wingName = wingName,
         neighbours = presenter.state.neighboursOf(flight.id),
         track = track.state,
+        readMapTile = readMapTile,
         failure = presenter.state.failure,
         actions =
             FlightDetailActions(

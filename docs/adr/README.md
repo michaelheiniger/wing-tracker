@@ -33,6 +33,7 @@ ADRs capture **why** wing-tracker is built the way it is. They use the
 | [0024](0024-built-in-updater-notifies-and-hands-off.md) | The built-in updater checks GitHub Releases and hands the installer to the system | Accepted |
 | [0025](0025-windows-is-packaged-as-an-unsigned-per-user-msi.md) | Windows is packaged as an unsigned per-user MSI | Accepted |
 | [0026](0026-tracks-are-linked-to-existing-flights.md) | Tracks are linked to existing flights | Accepted |
+| [0027](0027-flight-map-with-mapcompose-and-a-tile-port.md) | The flight map is drawn with MapCompose from tiles behind a port | Accepted |
 
 ## Rules
 
