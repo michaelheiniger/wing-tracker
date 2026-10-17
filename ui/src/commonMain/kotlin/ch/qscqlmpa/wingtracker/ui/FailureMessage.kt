@@ -38,6 +38,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_open_data_folder
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_log_folder
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_report
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_track
+import ch.qscqlmpa.wingtracker.ui.resources.failure_read_track
 import ch.qscqlmpa.wingtracker.ui.resources.failure_retire
 import ch.qscqlmpa.wingtracker.ui.resources.failure_save
 import ch.qscqlmpa.wingtracker.ui.resources.failure_save_check
@@ -66,6 +67,7 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.ExportCalendar to Res.string.failure_export_calendar,
         FailureKind.ImportIgc to Res.string.failure_import_igc,
         FailureKind.OpenTrack to Res.string.failure_open_track,
+        FailureKind.ReadTrack to Res.string.failure_read_track,
         FailureKind.DropNoIgc to Res.string.failure_drop_no_igc,
         FailureKind.NoIgcInFolder to Res.string.failure_no_igc_in_folder,
         FailureKind.OpenDataFolder to Res.string.failure_open_data_folder,

@@ -89,6 +89,7 @@ fun FlightDetailScreen(
     flight: Flight,
     wingName: String,
     neighbours: FlightNeighbours,
+    track: TrackState,
     failure: Failure?,
     actions: FlightDetailActions,
 ) {
@@ -118,7 +119,7 @@ fun FlightDetailScreen(
     ) {
         Header(flight, wingName, neighbours, actions)
         failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
-        Facts(flight, wingName)
+        Facts(flight, wingName, track)
     }
 }
 
@@ -198,6 +199,7 @@ private fun StepButton(
 private fun Facts(
     flight: Flight,
     wingName: String,
+    track: TrackState,
 ) {
     val details = flight.details
     FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -222,6 +224,7 @@ private fun Facts(
             )
             Fact(Res.string.flight_detail_instrument, details.instrument)
         }
+        TrackFacts(track)
         FactGroup(stringResource(Res.string.flight_detail_section_origin)) {
             if (flight.importedFrom?.system == SYRIDE_SYSTEM) {
                 Fact(Res.string.flight_detail_imported_from, stringResource(Res.string.flight_detail_syride))
@@ -255,7 +258,7 @@ private fun Facts(
 }
 
 @Composable
-private fun FactGroup(
+internal fun FactGroup(
     title: String,
     content: @Composable () -> Unit,
 ) {
@@ -269,7 +272,7 @@ private fun FactGroup(
 
 /** Every field is listed, also an empty one, so the pilot sees what is missing and can add it by editing. */
 @Composable
-private fun Fact(
+internal fun Fact(
     label: StringResource,
     value: String?,
 ) {

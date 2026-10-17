@@ -28,6 +28,7 @@ import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.reminders.Attention
 import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightDetailActions
 import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightDetailScreen
+import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightTrackPresenter
 import ch.qscqlmpa.wingtracker.ui.flights.wizard.ImportSource
 import ch.qscqlmpa.wingtracker.ui.flights.wizard.ImportWizard
 import ch.qscqlmpa.wingtracker.ui.flights.wizard.ImportWizardPresenter
@@ -106,6 +107,7 @@ fun LogbookRoute(
     // The flight shown on its own page instead of the list; the list keeps its search and scroll position meanwhile.
     var openFlight by remember { mutableStateOf<FlightId?>(null) }
     val listState = rememberLazyListState()
+    val trackPresenter = remember { FlightTrackPresenter(useCases.readFlightTrack) }
 
     LaunchedEffect(Unit) { presenter.refresh() }
 
@@ -142,6 +144,7 @@ fun LogbookRoute(
         } else {
             FlightPage(
                 presenter,
+                trackPresenter,
                 shownFlight,
                 onOpen = { openFlight = it },
                 onEdit = { dialog = LogbookDialog.Edit(shownFlight) },
@@ -283,16 +286,20 @@ private fun importWizard(
 @Composable
 private fun FlightPage(
     presenter: LogbookPresenter,
+    track: FlightTrackPresenter,
     flight: Flight,
     onOpen: (FlightId?) -> Unit,
     onEdit: () -> Unit,
 ) {
     var deleting by remember { mutableStateOf(false) }
     val wingName = presenter.state.visible.wingNameOf(flight)
+    // Read again when the pilot steps to another flight or attaches a track to this one.
+    LaunchedEffect(flight.id, flight.igcFile) { track.load(flight) }
     FlightDetailScreen(
         flight = flight,
         wingName = wingName,
         neighbours = presenter.state.neighboursOf(flight.id),
+        track = track.state,
         failure = presenter.state.failure,
         actions =
             FlightDetailActions(

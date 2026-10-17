@@ -7,6 +7,7 @@ import ch.qscqlmpa.wingtracker.flights.UpdateFlight
 import ch.qscqlmpa.wingtracker.flights.igc.AttachIgcTrack
 import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
 import ch.qscqlmpa.wingtracker.flights.igc.PrepareIgcImport
+import ch.qscqlmpa.wingtracker.flights.igc.ReadFlightTrack
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.ImportSpreadsheetFlights
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.OpenSpreadsheet
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.PrepareSpreadsheetImport
@@ -39,4 +40,5 @@ class LogbookUseCases(
     val importSpreadsheetFlights: ImportSpreadsheetFlights,
     val getAppSettings: GetAppSettings,
     val saveDeviceFolder: SaveDeviceFolder,
+    val readFlightTrack: ReadFlightTrack,
 )

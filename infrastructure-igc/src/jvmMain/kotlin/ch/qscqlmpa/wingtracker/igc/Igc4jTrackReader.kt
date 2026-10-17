@@ -11,6 +11,8 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.plus
+import ru.paragliding.igc4j.model.FixValidity
+import ru.paragliding.igc4j.model.IGCTrackPoint
 import ru.paragliding.igc4j.parser.IGCParser
 import ru.paragliding.igc4j.parser.InvalidIGCFormatException
 import java.io.ByteArrayInputStream
@@ -55,12 +57,7 @@ class Igc4jTrackReader : TrackReader {
         return ReadTrack(
             FlightTrack(
                 date,
-                fixesOf(
-                    date,
-                    parsed.points.map {
-                        Triple(it.timestamp, it.lat, it.lon)
-                    },
-                ),
+                fixesOf(date, parsed.points),
             ),
             sha256(bytes),
         )
@@ -68,16 +65,24 @@ class Igc4jTrackReader : TrackReader {
 
     private fun fixesOf(
         startDate: LocalDate,
-        points: List<Triple<Long, Double, Double>>,
+        points: List<IGCTrackPoint>,
     ): List<TrackFix> {
         var dayOffset = 0
         var previous = -1L
-        return points.map { (millisOfDay, latitude, longitude) ->
+        return points.map { point ->
+            val millisOfDay = point.timestamp
             // Times only count up within a day; a smaller time than before means midnight UTC has passed.
             if (millisOfDay < previous) dayOffset++
             previous = millisOfDay
             val day = startDate.plus(dayOffset, DateTimeUnit.DAY)
-            TrackFix(day.atStartOfDayIn(TimeZone.UTC) + millisOfDay.milliseconds, latitude, longitude)
+            TrackFix(
+                day.atStartOfDayIn(TimeZone.UTC) + millisOfDay.milliseconds,
+                point.lat,
+                point.lon,
+                // Loggers write zero for an altitude they do not have; a paraglider is never really at sea level.
+                gpsAltitudeMeters = point.gpsAltitude.takeIf { point.validity == FixValidity.A && it != 0 },
+                pressureAltitudeMeters = point.barometricAltitude.takeIf { it != 0 },
+            )
         }
     }
 

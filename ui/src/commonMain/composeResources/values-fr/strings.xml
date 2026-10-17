@@ -679,4 +679,14 @@
     <string name="flight_detail_logged_at">Ajouté au carnet</string>
     <string name="flight_detail_missing">Non enregistré</string>
     <string name="flight_detail_no_notes">Aucune note</string>
+    <string name="failure_read_track">La trace de ce vol n'a pas pu être lue : %1$s</string>
+    <string name="flight_detail_section_track">Selon la trace</string>
+    <string name="flight_detail_landing_time">Heure d'atterrissage</string>
+    <string name="flight_detail_takeoff_altitude">Altitude de décollage</string>
+    <string name="flight_detail_landing_altitude">Altitude d'atterrissage</string>
+    <string name="flight_detail_max_altitude">Point le plus haut</string>
+    <string name="flight_detail_best_climb">Meilleure montée</string>
+    <string name="flight_detail_max_sink">Plus forte descente</string>
+    <string name="flight_detail_vertical_speed">%1$s m/s</string>
+    <string name="flight_detail_no_flight_in_track">La trace ne bouge jamais assez longtemps pour montrer un vol, on ne peut donc rien en tirer.</string>
 </resources>

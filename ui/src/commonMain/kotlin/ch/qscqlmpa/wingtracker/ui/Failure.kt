@@ -24,6 +24,7 @@ enum class FailureKind {
     ExportCalendar,
     ImportIgc,
     OpenTrack,
+    ReadTrack,
     DropNoIgc,
     NoIgcInFolder,
     OpenDataFolder,

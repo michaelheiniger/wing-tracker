@@ -7,7 +7,17 @@ data class TrackFix(
     val time: Instant,
     val latitude: Double,
     val longitude: Double,
-)
+    // Null when the logger had no three-dimensional position fix.
+    val gpsAltitudeMeters: Int? = null,
+    // Null when the logger has no barometer.
+    val pressureAltitudeMeters: Int? = null,
+) {
+    /**
+     * GPS altitude is close to the height above sea level, as flight viewers show it; the pressure altitude refers to
+     * the standard atmosphere and so depends on the weather. It only stands in when the logger had no GPS altitude.
+     */
+    val altitudeMeters: Int? get() = gpsAltitudeMeters ?: pressureAltitudeMeters
+}
 
 /** [date] is the UTC date of the first fix, as written in the file header; [fixes] are in chronological order. */
 data class FlightTrack(

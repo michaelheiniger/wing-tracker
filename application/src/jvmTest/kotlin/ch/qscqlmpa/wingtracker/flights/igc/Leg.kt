@@ -6,15 +6,19 @@ import kotlin.time.Duration
 sealed interface Leg {
     val duration: Duration
     val speedKmh: Double
+    val climbMetersPerSecond: Double
 
     data class Still(
         override val duration: Duration,
     ) : Leg {
         override val speedKmh = 0.0
+        override val climbMetersPerSecond = 0.0
     }
 
     data class Moving(
         override val duration: Duration,
         override val speedKmh: Double,
+        // Negative while sinking.
+        override val climbMetersPerSecond: Double = 0.0,
     ) : Leg
 }

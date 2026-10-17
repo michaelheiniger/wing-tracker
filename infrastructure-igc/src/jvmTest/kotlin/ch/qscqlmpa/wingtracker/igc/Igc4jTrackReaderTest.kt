@@ -14,8 +14,10 @@ private fun bRecord(
     time: String,
     latitude: String = "4642345N",
     longitude: String = "00748210E",
+    validity: Char = 'A',
+    pressureAltitude: String = "01198",
     gpsAltitude: String = "01234",
-) = "B$time$latitude${longitude}A00000$gpsAltitude"
+) = "B$time$latitude$longitude$validity$pressureAltitude$gpsAltitude"
 
 private fun igc(
     dateHeader: String? = "HFDTE200926",
@@ -92,6 +94,60 @@ class Igc4jTrackReaderTest {
                 Instant.parse("2026-09-21T00:00:05Z"),
                 Instant.parse("2026-09-21T00:00:10Z"),
             )
+        }
+    }
+
+    @Nested
+    inner class Altitudes {
+        @Test
+        fun `reads the GPS and the pressure altitude`() {
+            // given
+            val bytes = igc(fixes = arrayOf(bRecord("094512", pressureAltitude = "01198", gpsAltitude = "01234")))
+
+            // when
+            val fix =
+                reader
+                    .read(bytes)
+                    .track.fixes
+                    .single()
+
+            // then
+            assertThat(fix.gpsAltitudeMeters).isEqualTo(1234)
+            assertThat(fix.pressureAltitudeMeters).isEqualTo(1198)
+        }
+
+        @Test
+        fun `has no GPS altitude without a three-dimensional fix`() {
+            // given
+            val bytes = igc(fixes = arrayOf(bRecord("094512", validity = 'V', gpsAltitude = "01234")))
+
+            // when
+            val fix =
+                reader
+                    .read(bytes)
+                    .track.fixes
+                    .single()
+
+            // then
+            assertThat(fix.gpsAltitudeMeters).isNull()
+            assertThat(fix.altitudeMeters).isEqualTo(1198)
+        }
+
+        @Test
+        fun `has no altitude where the logger wrote zero`() {
+            // given
+            val bytes = igc(fixes = arrayOf(bRecord("094512", pressureAltitude = "00000", gpsAltitude = "00000")))
+
+            // when
+            val fix =
+                reader
+                    .read(bytes)
+                    .track.fixes
+                    .single()
+
+            // then
+            assertThat(fix.gpsAltitudeMeters).isNull()
+            assertThat(fix.pressureAltitudeMeters).isNull()
         }
     }
 

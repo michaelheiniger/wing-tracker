@@ -679,4 +679,14 @@
     <string name="flight_detail_logged_at">Added to the logbook</string>
     <string name="flight_detail_missing">Not recorded</string>
     <string name="flight_detail_no_notes">No notes</string>
+    <string name="failure_read_track">The track of this flight could not be read: %1$s</string>
+    <string name="flight_detail_section_track">From the track</string>
+    <string name="flight_detail_landing_time">Landing time</string>
+    <string name="flight_detail_takeoff_altitude">Take-off altitude</string>
+    <string name="flight_detail_landing_altitude">Landing altitude</string>
+    <string name="flight_detail_max_altitude">Highest altitude</string>
+    <string name="flight_detail_best_climb">Best climb</string>
+    <string name="flight_detail_max_sink">Strongest sink</string>
+    <string name="flight_detail_vertical_speed">%1$s m/s</string>
+    <string name="flight_detail_no_flight_in_track">The track never moves for long enough to show a flight, so there is nothing to work out from it.</string>
 </resources>
