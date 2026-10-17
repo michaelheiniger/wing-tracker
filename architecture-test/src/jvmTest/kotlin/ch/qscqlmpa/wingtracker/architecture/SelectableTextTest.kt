@@ -4,6 +4,7 @@ import com.lemonappdev.konsist.api.Konsist
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.io.path.Path
 
 /**
  * Every text can be selected. A popup is laid out apart from the window and fails when its text joins the window's
@@ -31,7 +32,8 @@ class SelectableTextTest {
                     .scopeFromDirectory(
                         "ui/src",
                     ).files
-                    .filterNot { it.path.endsWith("components/Popups.kt") }
+                    // Compared as paths, since Windows separates folders differently.
+                    .filterNot { Path(it.path).endsWith(Path("components", "Popups.kt")) }
 
             // when
             val violations =
