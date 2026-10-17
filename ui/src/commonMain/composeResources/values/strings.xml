@@ -654,4 +654,29 @@
     <string name="update_cancel">Cancel</string>
     <string name="update_installs_on_restart">Version %1$s is ready. Wing Tracker closes, installs it and opens again; this takes a minute.</string>
     <string name="update_install_and_restart">Install and restart</string>
+
+    <string name="flight_detail_back">Back to logbook</string>
+    <string name="flight_detail_earlier">Earlier flight</string>
+    <string name="flight_detail_later">Later flight</string>
+    <string name="flight_detail_open_track">Open track</string>
+    <string name="flight_detail_section_flight">Flight</string>
+    <string name="flight_detail_section_sites">Sites</string>
+    <string name="flight_detail_section_tracking">Tracking</string>
+    <string name="flight_detail_section_notes">Notes</string>
+    <string name="flight_detail_section_origin">Origin</string>
+    <string name="flight_detail_date">Date</string>
+    <string name="flight_detail_takeoff_time">Take-off time</string>
+    <string name="flight_detail_duration">Duration</string>
+    <string name="flight_detail_wing">Wing</string>
+    <string name="flight_detail_takeoff_site">Take-off</string>
+    <string name="flight_detail_landing_site">Landing</string>
+    <string name="flight_detail_distance">Distance</string>
+    <string name="flight_detail_top_altitude">Top altitude</string>
+    <string name="flight_detail_instrument">Instrument</string>
+    <string name="flight_detail_imported_from">Imported from</string>
+    <string name="flight_detail_syride">Syride</string>
+    <string name="flight_detail_track_file">Track file</string>
+    <string name="flight_detail_logged_at">Added to the logbook</string>
+    <string name="flight_detail_missing">Not recorded</string>
+    <string name="flight_detail_no_notes">No notes</string>
 </resources>

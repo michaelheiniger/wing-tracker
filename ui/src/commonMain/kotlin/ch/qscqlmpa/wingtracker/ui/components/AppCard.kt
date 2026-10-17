@@ -18,13 +18,23 @@ import androidx.compose.ui.unit.dp
 fun AppCard(
     modifier: Modifier = Modifier,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
+    // A card that opens something shows hover and press feedback, so the pilot sees it can be clicked.
+    onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        content = content,
-    )
+    val colors = CardDefaults.cardColors(containerColor = containerColor)
+    val elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    val border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    if (onClick == null) {
+        Card(modifier = modifier, colors = colors, elevation = elevation, border = border, content = content)
+    } else {
+        Card(
+            onClick = onClick,
+            modifier = modifier,
+            colors = colors,
+            elevation = elevation,
+            border = border,
+            content = content,
+        )
+    }
 }

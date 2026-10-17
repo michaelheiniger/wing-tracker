@@ -38,6 +38,19 @@ data class LogbookState(
     /** The flights listed: the [visible] ones that match the search. */
     val shown: Logbook? get() = visible?.filtered(search.toFilter())
 
+    /** A flight the pilot still has, also one the search no longer lists, e.g. after editing it. */
+    fun flight(id: FlightId): Flight? =
+        visible?.months?.firstNotNullOfOrNull { m -> m.flights.firstOrNull { it.id == id } }
+
+    /** The listed flights around [id], so the pilot can step through the search without going back to the list. */
+    fun neighboursOf(id: FlightId): FlightNeighbours {
+        val listed = shown?.months?.flatMap { it.flights }.orEmpty()
+        val index = listed.indexOfFirst { it.id == id }
+        if (index < 0) return FlightNeighbours(earlier = null, later = null)
+        // The list is newest first.
+        return FlightNeighbours(earlier = listed.getOrNull(index + 1), later = listed.getOrNull(index - 1))
+    }
+
     /**
      * Date defaults to today and the wing to the one flown last, because a pilot usually logs a flight
      * right after landing, on the same wing as the previous one.
@@ -59,6 +72,11 @@ data class LogbookState(
         return FlightFormInput(date = today.toDisplay(), wingId = wingId)
     }
 }
+
+data class FlightNeighbours(
+    val earlier: Flight?,
+    val later: Flight?,
+)
 
 class LogbookPresenter(
     private val scope: CoroutineScope,

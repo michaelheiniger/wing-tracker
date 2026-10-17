@@ -654,4 +654,29 @@
     <string name="update_cancel">Annuler</string>
     <string name="update_installs_on_restart">La version %1$s est prête. Wing Tracker se ferme, l'installe et se rouvre ; cela prend une minute.</string>
     <string name="update_install_and_restart">Installer et redémarrer</string>
+
+    <string name="flight_detail_back">Retour au carnet de vol</string>
+    <string name="flight_detail_earlier">Vol précédent</string>
+    <string name="flight_detail_later">Vol suivant</string>
+    <string name="flight_detail_open_track">Ouvrir la trace</string>
+    <string name="flight_detail_section_flight">Vol</string>
+    <string name="flight_detail_section_sites">Sites</string>
+    <string name="flight_detail_section_tracking">Enregistrement</string>
+    <string name="flight_detail_section_notes">Notes</string>
+    <string name="flight_detail_section_origin">Origine</string>
+    <string name="flight_detail_date">Date</string>
+    <string name="flight_detail_takeoff_time">Heure de décollage</string>
+    <string name="flight_detail_duration">Durée</string>
+    <string name="flight_detail_wing">Voile</string>
+    <string name="flight_detail_takeoff_site">Décollage</string>
+    <string name="flight_detail_landing_site">Atterrissage</string>
+    <string name="flight_detail_distance">Distance</string>
+    <string name="flight_detail_top_altitude">Altitude maximale</string>
+    <string name="flight_detail_instrument">Instrument</string>
+    <string name="flight_detail_imported_from">Importé de</string>
+    <string name="flight_detail_syride">Syride</string>
+    <string name="flight_detail_track_file">Fichier de trace</string>
+    <string name="flight_detail_logged_at">Ajouté au carnet</string>
+    <string name="flight_detail_missing">Non enregistré</string>
+    <string name="flight_detail_no_notes">Aucune note</string>
 </resources>

@@ -7,12 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -53,18 +53,13 @@ import ch.qscqlmpa.wingtracker.ui.icons.BarChartIcon
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.reminders.AttentionPanel
 import ch.qscqlmpa.wingtracker.ui.resources.Res
-import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.action_dismiss
-import ch.qscqlmpa.wingtracker.ui.resources.delete_confirm
 import ch.qscqlmpa.wingtracker.ui.resources.flight_altitude
 import ch.qscqlmpa.wingtracker.ui.resources.flight_date_time
 import ch.qscqlmpa.wingtracker.ui.resources.flight_delete
-import ch.qscqlmpa.wingtracker.ui.resources.flight_delete_body
-import ch.qscqlmpa.wingtracker.ui.resources.flight_delete_title
 import ch.qscqlmpa.wingtracker.ui.resources.flight_distance
 import ch.qscqlmpa.wingtracker.ui.resources.flight_edit
 import ch.qscqlmpa.wingtracker.ui.resources.flight_sites
-import ch.qscqlmpa.wingtracker.ui.resources.flight_unknown_wing
 import ch.qscqlmpa.wingtracker.ui.resources.flights_count
 import ch.qscqlmpa.wingtracker.ui.resources.igc_open_track
 import ch.qscqlmpa.wingtracker.ui.resources.igc_track_chip
@@ -85,14 +80,11 @@ import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_result
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_search_statistics
 import ch.qscqlmpa.wingtracker.ui.resources.logbook_title
 import ch.qscqlmpa.wingtracker.ui.resources.month_names
-import ch.qscqlmpa.wingtracker.ui.resources.undo_flight_deleted
 import ch.qscqlmpa.wingtracker.ui.resources.unreadable_kept
 import ch.qscqlmpa.wingtracker.ui.resources.unreadable_quarantined
 import ch.qscqlmpa.wingtracker.ui.resources.wing_hours_total
 import ch.qscqlmpa.wingtracker.ui.theme.extraColors
 import ch.qscqlmpa.wingtracker.ui.toDisplay
-import ch.qscqlmpa.wingtracker.ui.undo.LocalUndo
-import ch.qscqlmpa.wingtracker.ui.undo.undoText
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
@@ -103,12 +95,15 @@ fun LogbookScreen(
     presenter: LogbookPresenter,
     importFailure: Failure?,
     onLogFlight: () -> Unit,
+    onOpenFlight: (Flight) -> Unit,
     onEditFlight: (Flight) -> Unit,
     onImport: () -> Unit,
     onOpenStatistics: () -> Unit,
     attention: Attention,
     onOpenAttention: (GearRef) -> Unit,
     onGoToGear: () -> Unit,
+    // Owned by the route, so the list is where the pilot left it after looking at a flight.
+    listState: LazyListState,
 ) {
     val state = presenter.state
     val logbook = state.visible
@@ -151,44 +146,33 @@ fun LogbookScreen(
                 LogbookBody(
                     logbook,
                     LogbookSearchBinding(state.search, checkNotNull(state.shown), presenter::search, onOpenStatistics),
+                    FlightActions(onOpenFlight, onEditFlight, presenter::openTrack, onDelete = { flightToDelete = it }),
+                    listState,
                     onLogFlight,
-                    onEditFlight,
-                    presenter::openTrack,
                     onGoToGear,
-                    onDelete = { flightToDelete = it },
                 )
             }
         }
     }
 
     flightToDelete?.let { flight ->
-        val undo = LocalUndo.current
-        val undoText = undoText(Res.string.undo_flight_deleted)
-        val wingName =
-            logbook
-                ?.wings
-                ?.firstOrNull { it.id == flight.details.wingId }
-                ?.details
-                ?.name
-                ?: stringResource(Res.string.flight_unknown_wing)
-        AlertDialog(
-            onDismissRequest = { flightToDelete = null },
-            title = { Text(stringResource(Res.string.flight_delete_title)) },
-            text = { Text(stringResource(Res.string.flight_delete_body, flight.details.date.toDisplay(), wingName)) },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        presenter.delete(flight.id, undo, undoText)
-                        flightToDelete = null
-                    },
-                ) { Text(stringResource(Res.string.delete_confirm)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { flightToDelete = null }) { Text(stringResource(Res.string.action_cancel)) }
-            },
+        DeleteFlightDialog(
+            flight,
+            logbook.wingNameOf(flight),
+            presenter,
+            onDeleted = { flightToDelete = null },
+            onDismiss = { flightToDelete = null },
         )
     }
 }
+
+/** What can be done with a flight in the list. */
+private class FlightActions(
+    val onOpen: (Flight) -> Unit,
+    val onEdit: (Flight) -> Unit,
+    val onOpenTrack: (Flight) -> Unit,
+    val onDelete: (Flight) -> Unit,
+)
 
 /** The search as typed, the flights it leaves and how to change it. */
 private class LogbookSearchBinding(
@@ -202,11 +186,10 @@ private class LogbookSearchBinding(
 private fun LogbookBody(
     logbook: Logbook,
     search: LogbookSearchBinding,
+    actions: FlightActions,
+    listState: LazyListState,
     onLogFlight: () -> Unit,
-    onEdit: (Flight) -> Unit,
-    onOpenTrack: (Flight) -> Unit,
     onGoToGear: () -> Unit,
-    onDelete: (Flight) -> Unit,
 ) {
     when {
         logbook.wings.isEmpty() -> {
@@ -228,7 +211,7 @@ private fun LogbookBody(
         }
 
         else -> {
-            LogbookContent(logbook, search, onEdit, onOpenTrack, onDelete)
+            LogbookContent(logbook, search, actions, listState)
         }
     }
 }
@@ -237,9 +220,8 @@ private fun LogbookBody(
 private fun LogbookContent(
     logbook: Logbook,
     search: LogbookSearchBinding,
-    onEdit: (Flight) -> Unit,
-    onOpenTrack: (Flight) -> Unit,
-    onDelete: (Flight) -> Unit,
+    actions: FlightActions,
+    listState: LazyListState,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         logbook.wings.filter { it.isActive }.forEach { wing ->
@@ -279,19 +261,15 @@ private fun LogbookContent(
         )
         return
     }
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
+    LazyColumn(
+        state = listState,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(top = 8.dp),
+    ) {
         shown.months.forEach { month ->
             item(key = "month-${month.month}") { MonthHeader(month) }
             items(month.flights, key = { it.id.value }) { flight ->
-                val wingName =
-                    logbook.wings
-                        .firstOrNull { it.id == flight.details.wingId }
-                        ?.details
-                        ?.name
-                        ?: stringResource(Res.string.flight_unknown_wing)
-                FlightCard(flight, wingName, onEdit = {
-                    onEdit(flight)
-                }, onOpenTrack = { onOpenTrack(flight) }, onDelete = { onDelete(flight) })
+                FlightCard(flight, logbook.wingNameOf(flight), actions)
             }
         }
     }
@@ -326,13 +304,11 @@ private fun MonthHeader(month: LogbookMonth) {
 private fun FlightCard(
     flight: Flight,
     wingName: String,
-    onEdit: () -> Unit,
-    onOpenTrack: () -> Unit,
-    onDelete: () -> Unit,
+    actions: FlightActions,
 ) {
     val details = flight.details
     val openTrackDescription = stringResource(Res.string.igc_open_track)
-    AppCard(modifier = Modifier.fillMaxWidth()) {
+    AppCard(modifier = Modifier.fillMaxWidth(), onClick = { actions.onOpen(flight) }) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -378,16 +354,16 @@ private fun FlightCard(
             }
             if (flight.igcFile != null) {
                 AssistChip(
-                    onClick = onOpenTrack,
+                    onClick = { actions.onOpenTrack(flight) },
                     label = { Text(stringResource(Res.string.igc_track_chip)) },
                     modifier = Modifier.semantics { contentDescription = openTrackDescription },
                 )
             }
             Text(formatDuration(details.duration), style = MaterialTheme.typography.titleMedium)
-            IconButton(onClick = onEdit) {
+            IconButton(onClick = { actions.onEdit(flight) }) {
                 Icon(Icons.Default.Edit, contentDescription = stringResource(Res.string.flight_edit))
             }
-            IconButton(onClick = onDelete) {
+            IconButton(onClick = { actions.onDelete(flight) }) {
                 Icon(Icons.Default.Delete, contentDescription = stringResource(Res.string.flight_delete))
             }
         }

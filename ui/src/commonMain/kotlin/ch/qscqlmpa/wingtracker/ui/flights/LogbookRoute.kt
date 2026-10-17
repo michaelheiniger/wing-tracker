@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,10 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightFilter
+import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
+import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.reminders.Attention
+import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightDetailActions
+import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightDetailScreen
 import ch.qscqlmpa.wingtracker.ui.flights.wizard.ImportSource
 import ch.qscqlmpa.wingtracker.ui.flights.wizard.ImportWizard
 import ch.qscqlmpa.wingtracker.ui.flights.wizard.ImportWizardPresenter
@@ -98,6 +103,9 @@ fun LogbookRoute(
         }
     var dropHover by remember { mutableStateOf(false) }
     var dialog by remember { mutableStateOf<LogbookDialog?>(null) }
+    // The flight shown on its own page instead of the list; the list keeps its search and scroll position meanwhile.
+    var openFlight by remember { mutableStateOf<FlightId?>(null) }
+    val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) { presenter.refresh() }
 
@@ -115,23 +123,33 @@ fun LogbookRoute(
         presenter.state.visible
             ?.wings
             .orEmpty()
+    val shownFlight = openFlight?.let { presenter.state.flight(it) }
     Box(modifier = Modifier.fillMaxSize().then(dropTarget)) {
-        LogbookScreen(
-            presenter = presenter,
-            importFailure = importer.failure,
-            onLogFlight = { dialog = LogbookDialog.New() },
-            onEditFlight = { dialog = LogbookDialog.Edit(it) },
-            onImport = { dialog = LogbookDialog.Import() },
-            onOpenStatistics = { onOpenStatistics(presenter.state.search.toFilter()) },
-            attention = attention,
-            onOpenAttention = onOpenGear,
-            onGoToGear = onGoToGear,
-        )
+        if (shownFlight == null) {
+            LogbookScreen(
+                presenter = presenter,
+                importFailure = importer.failure,
+                onLogFlight = { dialog = LogbookDialog.New() },
+                onOpenFlight = { openFlight = it.id },
+                onEditFlight = { dialog = LogbookDialog.Edit(it) },
+                onImport = { dialog = LogbookDialog.Import() },
+                onOpenStatistics = { onOpenStatistics(presenter.state.search.toFilter()) },
+                attention = attention,
+                onOpenAttention = onOpenGear,
+                onGoToGear = onGoToGear,
+                listState = listState,
+            )
+        } else {
+            FlightPage(
+                presenter,
+                shownFlight,
+                onOpen = { openFlight = it },
+                onEdit = { dialog = LogbookDialog.Edit(shownFlight) },
+            )
+        }
         if (dropHover) DropOverlay()
     }
 
-    val undo = LocalUndo.current
-    val discardedText = undoText(Res.string.undo_flight_discarded)
     val closeDialog = {
         dialog = null
         presenter.refresh()
@@ -160,35 +178,56 @@ fun LogbookRoute(
         }
 
         else -> {
-            val formPresenter =
-                remember(current) {
-                    val fresh = presenter.state.newFlightInput(today())
-                    val editing = (current as? LogbookDialog.Edit)?.flight
-                    val start = (current as? LogbookDialog.New)?.restored ?: fresh
-                    FlightFormPresenter(
-                        scope = scope,
-                        logFlight = useCases.logFlight,
-                        updateFlight = useCases.updateFlight,
-                        initial = editing?.let { FlightFormInput.from(it) } ?: start,
-                        editing = editing,
-                    )
-                }
-            FlightDialog(
-                presenter = formPresenter,
-                wings = wings,
-                onClose = {
-                    closeDialog()
-                    // Only typed-in input is worth taking back; an untouched dialog closes silently.
-                    if (current is LogbookDialog.New && formPresenter.hasUnsavedInput) {
-                        val typed = formPresenter.input
-                        scope.launch {
-                            undo.offer(discardedText, onUndo = { dialog = LogbookDialog.New(typed) }, onExpire = {})
-                        }
-                    }
-                },
+            FlightFormHost(
+                current,
+                presenter,
+                useCases,
+                wings,
+                onClose = closeDialog,
+                onRestore = { dialog = LogbookDialog.New(it) },
             )
         }
     }
+}
+
+/** The form for a new or an edited flight; [onRestore] reopens a new flight the pilot discarded and took back. */
+@Composable
+private fun FlightFormHost(
+    current: LogbookDialog,
+    presenter: LogbookPresenter,
+    useCases: LogbookUseCases,
+    wings: List<Wing>,
+    onClose: () -> Unit,
+    onRestore: (FlightFormInput) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    val undo = LocalUndo.current
+    val discardedText = undoText(Res.string.undo_flight_discarded)
+    val formPresenter =
+        remember(current) {
+            val fresh = presenter.state.newFlightInput(today())
+            val editing = (current as? LogbookDialog.Edit)?.flight
+            val start = (current as? LogbookDialog.New)?.restored ?: fresh
+            FlightFormPresenter(
+                scope = scope,
+                logFlight = useCases.logFlight,
+                updateFlight = useCases.updateFlight,
+                initial = editing?.let { FlightFormInput.from(it) } ?: start,
+                editing = editing,
+            )
+        }
+    FlightDialog(
+        presenter = formPresenter,
+        wings = wings,
+        onClose = {
+            onClose()
+            // Only typed-in input is worth taking back; an untouched dialog closes silently.
+            if (current is LogbookDialog.New && formPresenter.hasUnsavedInput) {
+                val typed = formPresenter.input
+                scope.launch { undo.offer(discardedText, onUndo = { onRestore(typed) }, onExpire = {}) }
+            }
+        },
+    )
 }
 
 private fun importWizard(
@@ -239,6 +278,42 @@ private fun importWizard(
     onSaved = onSaved,
     onClose = onClose,
 )
+
+/** One flight on its own page; [onOpen] with null goes back to the list. */
+@Composable
+private fun FlightPage(
+    presenter: LogbookPresenter,
+    flight: Flight,
+    onOpen: (FlightId?) -> Unit,
+    onEdit: () -> Unit,
+) {
+    var deleting by remember { mutableStateOf(false) }
+    val wingName = presenter.state.visible.wingNameOf(flight)
+    FlightDetailScreen(
+        flight = flight,
+        wingName = wingName,
+        neighbours = presenter.state.neighboursOf(flight.id),
+        failure = presenter.state.failure,
+        actions =
+            FlightDetailActions(
+                onBack = { onOpen(null) },
+                onOpen = { onOpen(it.id) },
+                onEdit = onEdit,
+                onOpenTrack = { presenter.openTrack(flight) },
+                onDelete = { deleting = true },
+            ),
+    )
+    if (deleting) {
+        DeleteFlightDialog(
+            flight,
+            wingName,
+            presenter,
+            // A deleted flight has no page any more; Undo brings it back in the list.
+            onDeleted = { onOpen(null) },
+            onDismiss = { deleting = false },
+        )
+    }
+}
 
 /** Shown while files are held over the logbook, so the pilot knows the drop will be accepted. */
 @Composable

@@ -342,6 +342,92 @@ class LogbookPresentersTest {
     }
 
     @Nested
+    inner class SteppingThroughFlights {
+        private val september = aFlight("f-1", "wing-1", date = LocalDate(2026, 9, 20))
+        private val october = aFlight("f-2", "wing-2", date = LocalDate(2026, 10, 2))
+        private val lateOctober = aFlight("f-3", "wing-1", date = LocalDate(2026, 10, 9))
+
+        @Test
+        fun `offers the earlier and the later flight of the list`() =
+            runTest {
+                // given
+                givenStored(listOf(september, october, lateOctober))
+                val presenter = logbookPresenter()
+                presenter.refresh()
+
+                // when
+                val neighbours = presenter.state.neighboursOf(october.id)
+
+                // then
+                assertThat(neighbours).isEqualTo(FlightNeighbours(earlier = september, later = lateOctober))
+            }
+
+        @Test
+        fun `offers nothing beyond the first and the last flight`() =
+            runTest {
+                // given
+                givenStored(listOf(september, lateOctober))
+                val presenter = logbookPresenter()
+                presenter.refresh()
+
+                // when
+                val oldest = presenter.state.neighboursOf(september.id)
+                val newest = presenter.state.neighboursOf(lateOctober.id)
+
+                // then
+                assertThat(oldest.earlier).isNull()
+                assertThat(newest.later).isNull()
+            }
+
+        @Test
+        fun `steps only through the flights the search lists`() =
+            runTest {
+                // given
+                givenStored(listOf(september, october, lateOctober))
+                val presenter = logbookPresenter(initialSearch = LogbookSearch(wingIds = setOf(skyDancer.id)))
+                presenter.refresh()
+
+                // when
+                val neighbours = presenter.state.neighboursOf(lateOctober.id)
+
+                // then
+                assertThat(neighbours.earlier).isEqualTo(september)
+            }
+
+        @Test
+        fun `still shows a flight the search no longer lists, without neighbours`() =
+            runTest {
+                // given
+                givenStored(listOf(september, october))
+                val presenter = logbookPresenter(initialSearch = LogbookSearch(wingIds = setOf(skyDancer.id)))
+                presenter.refresh()
+
+                // when
+                val flight = presenter.state.flight(october.id)
+                val neighbours = presenter.state.neighboursOf(october.id)
+
+                // then
+                assertThat(flight).isEqualTo(october)
+                assertThat(neighbours).isEqualTo(FlightNeighbours(earlier = null, later = null))
+            }
+
+        @Test
+        fun `no longer finds a flight that is being deleted`() =
+            runTest {
+                // given
+                givenStored(listOf(september, october))
+                val presenter = logbookPresenter()
+                presenter.refresh()
+
+                // when
+                presenter.delete(october.id, UndoCoordinator(), TEXT)
+
+                // then
+                assertThat(presenter.state.flight(october.id)).isNull()
+            }
+    }
+
+    @Nested
     inner class UndoingADelete {
         @Test
         fun `hides the flight at once but keeps it stored`() =
