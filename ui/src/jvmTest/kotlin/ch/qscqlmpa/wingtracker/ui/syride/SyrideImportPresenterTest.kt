@@ -20,6 +20,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -132,6 +133,23 @@ class SyrideImportPresenterTest {
                 coEvery { prepare(any()) } throws IOException("offline")
                 presenter.read()
                 assertThat(presenter.failure?.kind).isEqualTo(FailureKind.SyrideUnreachable)
+            }
+
+        @Test
+        fun `stops reading when the pilot cancels and goes back to the account step`() =
+            runTest {
+                // given
+                coEvery { prepare(any()) } coAnswers { awaitCancellation() }
+                val presenter = presenter().also { it.read() }
+
+                // when
+                presenter.cancelReading()
+
+                // then
+                assertThat(presenter.stage).isEqualTo(SyrideStage.Account)
+                assertThat(presenter.failure).isNull()
+                assertThat(presenter.canRead).isTrue()
+                coVerify(exactly = 0) { saveUsername(any()) }
             }
 
         @Test

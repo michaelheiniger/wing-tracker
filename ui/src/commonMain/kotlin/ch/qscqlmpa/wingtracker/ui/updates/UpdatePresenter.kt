@@ -16,6 +16,7 @@ import ch.qscqlmpa.wingtracker.updates.SkipVersion
 import ch.qscqlmpa.wingtracker.updates.UpdateCheckResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class UpdateUseCases(
@@ -69,6 +70,8 @@ class UpdatePresenter(
     var showsWhatsNew by mutableStateOf(false)
         private set
 
+    private var checking: Job? = null
+
     val showsBanner: Boolean get() = update?.skipped == false && !postponed
 
     val showsBadge: Boolean get() = update?.skipped == false
@@ -83,30 +86,38 @@ class UpdatePresenter(
 
     fun checkNow() {
         manualCheck = ManualCheck.Checking
-        guarded(FailureKind.LoadSettings) {
-            manualCheck =
-                when (val result = useCases.checkForUpdate(CheckTrigger.Manual)) {
-                    is UpdateCheckResult.Available -> {
-                        // Asking again brings back an update skipped or postponed earlier.
-                        update = result.update.copy(skipped = false)
-                        postponed = false
-                        ManualCheck.Found
-                    }
+        checking =
+            guarded(FailureKind.LoadSettings) {
+                manualCheck =
+                    when (val result = useCases.checkForUpdate(CheckTrigger.Manual)) {
+                        is UpdateCheckResult.Available -> {
+                            // Asking again brings back an update skipped or postponed earlier.
+                            update = result.update.copy(skipped = false)
+                            postponed = false
+                            ManualCheck.Found
+                        }
 
-                    UpdateCheckResult.UpToDate -> {
-                        update = null
-                        ManualCheck.UpToDate
-                    }
+                        UpdateCheckResult.UpToDate -> {
+                            update = null
+                            ManualCheck.UpToDate
+                        }
 
-                    UpdateCheckResult.NotApplicable, UpdateCheckResult.Disabled -> {
-                        ManualCheck.NotApplicable
-                    }
+                        UpdateCheckResult.NotApplicable, UpdateCheckResult.Disabled -> {
+                            ManualCheck.NotApplicable
+                        }
 
-                    is UpdateCheckResult.Failed -> {
-                        ManualCheck.Failed(Failure(result.problem.failureKind(), result.detail))
+                        is UpdateCheckResult.Failed -> {
+                            ManualCheck.Failed(Failure(result.problem.failureKind(), result.detail))
+                        }
                     }
-                }
-        }
+            }
+    }
+
+    /** Stops a check that keeps waiting, e.g. on a connection that hangs. */
+    fun cancelCheck() {
+        if (manualCheck != ManualCheck.Checking) return
+        checking?.cancel()
+        manualCheck = ManualCheck.Idle
     }
 
     fun openWhatsNew() {
@@ -139,7 +150,7 @@ class UpdatePresenter(
     private fun guarded(
         kind: FailureKind,
         action: suspend () -> Unit,
-    ) {
+    ): Job =
         scope.launch {
             try {
                 failure = null
@@ -154,7 +165,6 @@ class UpdatePresenter(
                 if (manualCheck == ManualCheck.Checking) manualCheck = ManualCheck.Idle
             }
         }
-    }
 }
 
 private fun ReleaseProblem.failureKind(): FailureKind =

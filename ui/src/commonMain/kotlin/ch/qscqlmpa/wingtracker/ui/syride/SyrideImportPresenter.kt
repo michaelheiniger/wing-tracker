@@ -17,6 +17,7 @@ import ch.qscqlmpa.wingtracker.ui.flights.importing.WingChoice
 import ch.qscqlmpa.wingtracker.ui.flights.importing.WingMapping
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /** Where the import is: ask for the account, read it, decide about the wings, or show what happened. */
@@ -45,6 +46,8 @@ class SyrideImportPresenter(
     var failure by mutableStateOf<Failure?>(null)
         private set
 
+    private var reading: Job? = null
+
     val canRead: Boolean get() = username.isNotBlank() && stage == SyrideStage.Account
 
     /** Flights that will be imported with the current choices; a new wing that is still incomplete holds back. */
@@ -72,24 +75,33 @@ class SyrideImportPresenter(
         val name = username.trim()
         stage = SyrideStage.Reading
         failure = null
-        scope.launch {
-            try {
-                val prepared = prepare(name)
-                saveUsername(name)
-                start(prepared)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: SyrideException) {
-                failure = Failure(e.problem.failureKind(), e.message.takeIf { e.problem != SyrideProblem.UserNotFound })
-                stage = SyrideStage.Account
-                // Any failure must reach the user as a message; it must never crash the window.
-            } catch (
-                @Suppress("TooGenericExceptionCaught") e: Exception,
-            ) {
-                failure = Failure(FailureKind.SyrideUnreachable, e.message)
-                stage = SyrideStage.Account
+        reading =
+            scope.launch {
+                try {
+                    val prepared = prepare(name)
+                    saveUsername(name)
+                    start(prepared)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: SyrideException) {
+                    val detail = e.message.takeIf { e.problem != SyrideProblem.UserNotFound }
+                    failure = Failure(e.problem.failureKind(), detail)
+                    stage = SyrideStage.Account
+                    // Any failure must reach the user as a message; it must never crash the window.
+                } catch (
+                    @Suppress("TooGenericExceptionCaught") e: Exception,
+                ) {
+                    failure = Failure(FailureKind.SyrideUnreachable, e.message)
+                    stage = SyrideStage.Account
+                }
             }
-        }
+    }
+
+    /** Stops a read that keeps waiting, e.g. on a connection that hangs; the pilot is back at the account step. */
+    fun cancelReading() {
+        if (stage != SyrideStage.Reading) return
+        reading?.cancel()
+        stage = SyrideStage.Account
     }
 
     fun back() {

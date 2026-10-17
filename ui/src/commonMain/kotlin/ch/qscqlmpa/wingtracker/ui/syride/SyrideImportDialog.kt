@@ -51,7 +51,7 @@ fun SyrideImportDialog(
                 Text(stringResource(Res.string.syride_title), style = MaterialTheme.typography.headlineSmall)
                 when (presenter.stage) {
                     SyrideStage.Account -> AccountStep(presenter, onClose)
-                    SyrideStage.Reading -> Busy(stringResource(Res.string.syride_reading))
+                    SyrideStage.Reading -> ReadingStep(presenter)
                     SyrideStage.Wings -> WingsStep(presenter, onClose)
                     SyrideStage.Importing -> Busy(null)
                     SyrideStage.Done -> ImportDone(presenter.result, onClose)
@@ -91,6 +91,12 @@ private fun AccountStep(
             )
         }
     }
+}
+
+@Composable
+private fun ReadingStep(presenter: SyrideImportPresenter) {
+    Busy(stringResource(Res.string.syride_reading))
+    Buttons { TextButton(onClick = presenter::cancelReading) { Text(stringResource(Res.string.action_cancel)) } }
 }
 
 @Composable

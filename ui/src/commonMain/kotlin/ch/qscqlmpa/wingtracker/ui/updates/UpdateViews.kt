@@ -31,6 +31,7 @@ import ch.qscqlmpa.wingtracker.ui.icons.UpdateIcon
 import ch.qscqlmpa.wingtracker.ui.isWorthRetrying
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
+import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.action_try_again
 import ch.qscqlmpa.wingtracker.ui.resources.update_available
 import ch.qscqlmpa.wingtracker.ui.resources.update_badge
@@ -136,20 +137,36 @@ fun UpdatesSection(
                 ),
             )
         }
-        ManualCheckOutcome(presenter.manualCheck)
+        ManualCheckOutcome(presenter.manualCheck, onCancel = presenter::cancelCheck)
     }
     presenter.update?.let { FoundUpdate(it, presenter, installer) }
     presenter.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
 }
 
 @Composable
-private fun ManualCheckOutcome(check: ManualCheck) {
+private fun ManualCheckOutcome(
+    check: ManualCheck,
+    onCancel: () -> Unit,
+) {
     when (check) {
-        ManualCheck.Checking -> Text(stringResource(Res.string.update_checking))
-        ManualCheck.UpToDate -> Text(stringResource(Res.string.update_up_to_date))
-        ManualCheck.NotApplicable -> Text(stringResource(Res.string.update_not_applicable))
-        is ManualCheck.Failed -> Text(check.failure.message(), color = MaterialTheme.colorScheme.error)
-        ManualCheck.Idle, ManualCheck.Found -> Unit
+        ManualCheck.Checking -> {
+            Text(stringResource(Res.string.update_checking))
+            TextButton(onClick = onCancel) { Text(stringResource(Res.string.action_cancel)) }
+        }
+
+        ManualCheck.UpToDate -> {
+            Text(stringResource(Res.string.update_up_to_date))
+        }
+
+        ManualCheck.NotApplicable -> {
+            Text(stringResource(Res.string.update_not_applicable))
+        }
+
+        is ManualCheck.Failed -> {
+            Text(check.failure.message(), color = MaterialTheme.colorScheme.error)
+        }
+
+        ManualCheck.Idle, ManualCheck.Found -> {}
     }
 }
 

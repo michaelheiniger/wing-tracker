@@ -19,6 +19,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -244,6 +245,21 @@ class UpdatePresenterTest {
 
                 // then
                 assertThat(presenter.manualCheck).isEqualTo(ManualCheck.Failed(Failure(FailureKind.NoConnection, null)))
+            }
+
+        @Test
+        fun `stops checking when the pilot cancels`() =
+            runTest {
+                // given
+                coEvery { checkForUpdate(CheckTrigger.Manual) } coAnswers { awaitCancellation() }
+                val presenter = presenter().also { it.checkNow() }
+
+                // when
+                presenter.cancelCheck()
+
+                // then
+                assertThat(presenter.manualCheck).isEqualTo(ManualCheck.Idle)
+                assertThat(presenter.failure).isNull()
             }
 
         @Test

@@ -14,6 +14,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Changed
 - Without an internet connection, the Syride import and the update check and download now say so and suggest checking the connection, instead of showing an empty technical message.
 - After a connection problem, the button to read Syride flights or check for updates reads "Try again", and a failed update download offers "Try again" instead of sending you to the release page.
+- Reading flights from Syride and checking for updates can be cancelled while they wait, e.g. on a connection that hangs.
 - After an update installs on Linux, the log no longer lists the other software on your computer that the package manager mentioned; that output is only kept when the install fails.
 
 ### Removed
