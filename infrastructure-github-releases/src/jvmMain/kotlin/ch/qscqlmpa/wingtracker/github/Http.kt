@@ -7,8 +7,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStream
+import java.net.ConnectException
 import java.net.URI
+import java.net.UnknownHostException
 import java.net.http.HttpClient
+import java.net.http.HttpConnectTimeoutException
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.time.Duration
@@ -87,8 +90,17 @@ private suspend fun <T> send(
             block()
         } catch (e: IOException) {
             logger.warn(e) { "GitHub could not be reached at $url" }
-            throw ReleaseSourceException(ReleaseProblem.Unreachable, e.message, e)
+            throw ReleaseSourceException(problemOf(e), e.message, e)
         }
+    }
+
+/** Tells a connection that could not be made, most likely because this computer is offline, from one that broke. */
+internal fun problemOf(e: IOException): ReleaseProblem =
+    when (e) {
+        // The JDK reports an unknown host and a missing network alike, as a connection that could not be made.
+        is ConnectException, is UnknownHostException, is HttpConnectTimeoutException -> ReleaseProblem.NoConnection
+
+        else -> ReleaseProblem.Unreachable
     }
 
 /** Throws what a status other than OK means for the pilot; [what] says what was being done, for the log. */

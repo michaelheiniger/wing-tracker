@@ -40,6 +40,9 @@ enum class FailureKind {
     SpreadsheetOldFormat,
     ImportSpreadsheet,
     UnsupportedPath,
+
+    // Shared by every feature that goes online, since the remedy is the same.
+    NoConnection,
     UpdateUnreachable,
     UpdateRefused,
     UpdateUnexpected,

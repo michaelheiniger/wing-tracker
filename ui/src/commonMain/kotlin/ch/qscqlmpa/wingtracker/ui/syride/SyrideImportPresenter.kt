@@ -127,6 +127,7 @@ class SyrideImportPresenter(
 private fun SyrideProblem.failureKind() =
     when (this) {
         SyrideProblem.UserNotFound -> FailureKind.SyrideUserNotFound
+        SyrideProblem.NoConnection -> FailureKind.NoConnection
         SyrideProblem.Unreachable -> FailureKind.SyrideUnreachable
         SyrideProblem.PagesChanged -> FailureKind.SyridePagesChanged
     }

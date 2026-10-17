@@ -114,5 +114,19 @@ class DownloadUpdateTest {
                 // then
                 assertThat(result).isEqualTo(DownloadResult.Failed(DownloadProblem.Unreachable, "Connection reset"))
             }
+
+        @Test
+        fun `reports that no connection could be made`() =
+            runTest {
+                // given
+                coEvery { downloads.readText(sums) } throws ReleaseSourceException(ReleaseProblem.NoConnection)
+
+                // when
+                val result = download()
+
+                // then
+                assertThat(result).isEqualTo(DownloadResult.Failed(DownloadProblem.NoConnection, "NoConnection"))
+                coVerify(exactly = 0) { downloads.download(any(), any()) }
+            }
     }
 }

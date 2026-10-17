@@ -415,6 +415,7 @@
     <string name="import_failure_save">could not be saved: %1$s</string>
     <string name="action_close">Close</string>
     <string name="failure_syride_user">No Syride pilot with this name was found.</string>
+    <string name="failure_no_connection">Could not connect. Check that this computer is connected to the internet, then try again.</string>
     <string name="failure_syride_unreachable">Syride could not be reached: %1$s</string>
     <string name="failure_syride_changed">Syride's pages look different than expected, so the flights cannot be read (%1$s). The application needs an update.</string>
     <string name="failure_import_syride">The flights could not be imported: %1$s</string>

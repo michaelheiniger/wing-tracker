@@ -415,6 +415,7 @@
     <string name="import_failure_save">enregistrement impossible : %1$s</string>
     <string name="action_close">Fermer</string>
     <string name="failure_syride_user">Aucun pilote Syride de ce nom n'a été trouvé.</string>
+    <string name="failure_no_connection">Connexion impossible. Vérifiez que cet ordinateur est connecté à internet, puis réessayez.</string>
     <string name="failure_syride_unreachable">Syride est injoignable : %1$s</string>
     <string name="failure_syride_changed">Les pages de Syride ne ressemblent pas à ce qui est attendu, les vols ne peuvent donc pas être lus (%1$s). L'application a besoin d'une mise à jour.</string>
     <string name="failure_import_syride">Les vols n'ont pas pu être importés : %1$s</string>

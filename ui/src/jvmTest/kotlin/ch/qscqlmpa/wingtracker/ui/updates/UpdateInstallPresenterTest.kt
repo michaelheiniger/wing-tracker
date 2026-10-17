@@ -121,6 +121,20 @@ class UpdateInstallPresenterTest {
             }
 
         @Test
+        fun `says so when no connection could be made`() =
+            runTest {
+                // given
+                givenDownloaded(DownloadResult.Failed(DownloadProblem.NoConnection, null))
+                val presenter = presenter()
+
+                // when
+                presenter.install(anUpdate)
+
+                // then
+                assertThat(presenter.state).isEqualTo(InstallState.Failed(Failure(FailureKind.NoConnection, null)))
+            }
+
+        @Test
         fun `keeps the file when the pilot closes the password prompt, and tries again without downloading`() =
             runTest {
                 // given

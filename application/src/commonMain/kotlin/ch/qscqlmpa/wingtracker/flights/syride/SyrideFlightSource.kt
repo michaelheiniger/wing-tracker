@@ -44,6 +44,9 @@ data class SyrideFlight(
 
 enum class SyrideProblem {
     UserNotFound,
+
+    // No connection could be made: most likely this computer is offline.
+    NoConnection,
     Unreachable,
 
     // The pages no longer look the way the reader expects; this is the fragile part of the integration (ADR 0021).

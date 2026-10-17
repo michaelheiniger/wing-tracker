@@ -32,6 +32,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_load_logbook
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_maintenance
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_settings
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_statistics
+import ch.qscqlmpa.wingtracker.ui.resources.failure_no_connection
 import ch.qscqlmpa.wingtracker.ui.resources.failure_no_igc_in_folder
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_data_folder
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_log_folder
@@ -80,6 +81,7 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.SpreadsheetOldFormat to Res.string.failure_spreadsheet_old_format,
         FailureKind.ImportSpreadsheet to Res.string.failure_import_spreadsheet,
         FailureKind.UnsupportedPath to Res.string.failure_unsupported_path,
+        FailureKind.NoConnection to Res.string.failure_no_connection,
         FailureKind.UpdateUnreachable to Res.string.failure_update_unreachable,
         FailureKind.UpdateRefused to Res.string.failure_update_refused,
         FailureKind.UpdateUnexpected to Res.string.failure_update_unexpected,

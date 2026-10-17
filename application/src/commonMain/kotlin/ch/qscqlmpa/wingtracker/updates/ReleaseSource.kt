@@ -1,7 +1,10 @@
 package ch.qscqlmpa.wingtracker.updates
 
 enum class ReleaseProblem {
-    // Offline, a timeout or a server error: worth trying again later.
+    // No connection could be made: most likely this computer is offline.
+    NoConnection,
+
+    // Connected, but the answer did not come (timeout, cut-off transfer, server error): worth trying again later.
     Unreachable,
 
     // The server declined, e.g. too many checks from this network for now.

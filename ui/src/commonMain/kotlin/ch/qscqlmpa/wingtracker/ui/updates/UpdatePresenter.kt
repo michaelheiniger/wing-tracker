@@ -159,6 +159,7 @@ class UpdatePresenter(
 
 private fun ReleaseProblem.failureKind(): FailureKind =
     when (this) {
+        ReleaseProblem.NoConnection -> FailureKind.NoConnection
         ReleaseProblem.Unreachable -> FailureKind.UpdateUnreachable
         ReleaseProblem.Refused -> FailureKind.UpdateRefused
         ReleaseProblem.Unexpected -> FailureKind.UpdateUnexpected

@@ -125,6 +125,10 @@ class SyrideImportPresenterTest {
                 presenter.read()
                 assertThat(presenter.failure?.kind).isEqualTo(FailureKind.SyridePagesChanged)
 
+                coEvery { prepare(any()) } throws SyrideException(SyrideProblem.NoConnection)
+                presenter.read()
+                assertThat(presenter.failure?.kind).isEqualTo(FailureKind.NoConnection)
+
                 coEvery { prepare(any()) } throws IOException("offline")
                 presenter.read()
                 assertThat(presenter.failure?.kind).isEqualTo(FailureKind.SyrideUnreachable)

@@ -152,6 +152,7 @@ private fun DownloadResult.Failed.failure(): Failure =
         when (problem) {
             DownloadProblem.NoChecksum -> FailureKind.UpdateNoChecksum
             DownloadProblem.ChecksumMismatch -> FailureKind.UpdateChecksumMismatch
+            DownloadProblem.NoConnection -> FailureKind.NoConnection
             DownloadProblem.Unreachable -> FailureKind.UpdateUnreachable
             DownloadProblem.Refused -> FailureKind.UpdateRefused
             DownloadProblem.Unexpected -> FailureKind.UpdateUnexpected

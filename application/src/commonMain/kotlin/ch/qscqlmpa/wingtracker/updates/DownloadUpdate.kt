@@ -30,6 +30,7 @@ enum class DownloadProblem {
 
     // What arrived is not what was published: the download is corrupt, incomplete or altered.
     ChecksumMismatch,
+    NoConnection,
     Unreachable,
     Refused,
     Unexpected,
@@ -78,6 +79,7 @@ class DownloadUpdate(
 
 private fun ReleaseProblem.asDownloadProblem(): DownloadProblem =
     when (this) {
+        ReleaseProblem.NoConnection -> DownloadProblem.NoConnection
         ReleaseProblem.Unreachable -> DownloadProblem.Unreachable
         ReleaseProblem.Refused -> DownloadProblem.Refused
         ReleaseProblem.Unexpected -> DownloadProblem.Unexpected

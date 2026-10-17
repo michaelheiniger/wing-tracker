@@ -232,6 +232,21 @@ class UpdatePresenterTest {
             }
 
         @Test
+        fun `says so when no connection could be made`() =
+            runTest {
+                // given
+                coEvery { checkForUpdate(CheckTrigger.Manual) } returns
+                    UpdateCheckResult.Failed(ReleaseProblem.NoConnection, null)
+                val presenter = presenter()
+
+                // when
+                presenter.checkNow()
+
+                // then
+                assertThat(presenter.manualCheck).isEqualTo(ManualCheck.Failed(Failure(FailureKind.NoConnection, null)))
+            }
+
+        @Test
         fun `says a development build is never updated`() =
             runTest {
                 // given
