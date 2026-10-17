@@ -23,6 +23,12 @@ private const val FLIGHT_PREFIX = "flight:"
 /** Whether a flight came from Syride with a track there, which can then be imported and attached to it. */
 fun ExternalReference.isSyrideFlightWithTrack(): Boolean = system == SYRIDE_SYSTEM && id.startsWith(FLIGHT_PREFIX)
 
+/** Syride's number of a flight with a track; null for anything else, which has no flight page there. */
+fun ExternalReference.syrideFlightNumber(): String? =
+    id.removePrefix(FLIGHT_PREFIX).takeIf {
+        isSyrideFlightWithTrack()
+    }
+
 /**
  * The id of a Syride flight without a track. Syride calls such an entry an activity and only gives it an activity
  * number; the prefix uses the app's own words, so stored data does not depend on Syride's vocabulary.
@@ -83,4 +89,10 @@ class SyrideException(
 interface SyrideFlightSource {
     /** @throws SyrideException when the pilot is unknown, Syride cannot be reached or its pages changed. */
     suspend fun fetch(username: String): List<SyrideFlight>
+
+    /** The address of a flight's page on Syride, to open in the browser. */
+    fun flightPage(
+        username: String,
+        flightNumber: String,
+    ): String
 }

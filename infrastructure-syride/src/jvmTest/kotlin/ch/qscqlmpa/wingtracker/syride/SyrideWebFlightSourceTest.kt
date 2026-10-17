@@ -65,6 +65,33 @@ class SyrideWebFlightSourceTest {
     }
 
     @Nested
+    inner class FlightPage {
+        @Test
+        fun `points to the flight on the pilot's Syride profile`() {
+            // given
+            val source = source(profile = "", pages = emptyList())
+
+            // when
+            val page = source.flightPage("michael", "3720061")
+
+            // then
+            assertThat(page).isEqualTo("https://syride.com/en/pilots/michael/3720061")
+        }
+
+        @Test
+        fun `writes spaces in the account name as Syride does`() {
+            // given
+            val source = source(profile = "", pages = emptyList())
+
+            // when
+            val page = source.flightPage("Jean Müller", "3720061")
+
+            // then
+            assertThat(page).isEqualTo("https://syride.com/en/pilots/Jean_M%C3%BCller/3720061")
+        }
+    }
+
+    @Nested
     inner class Problems {
         @Test
         fun `reports an unknown pilot, which Syride answers with pilot id 0`() =

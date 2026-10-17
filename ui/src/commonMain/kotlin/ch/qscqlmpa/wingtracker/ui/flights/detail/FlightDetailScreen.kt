@@ -72,6 +72,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_later
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_logged_at
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_missing
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_no_notes
+import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_open_syride
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_open_track
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_section_flight
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_section_notes
@@ -234,6 +235,9 @@ private fun Header(
             OutlinedButton(onClick = actions.onOpenTrack) {
                 Text(stringResource(Res.string.flight_detail_open_track))
             }
+        }
+        actions.onOpenSyride?.let { open ->
+            OutlinedButton(onClick = open) { Text(stringResource(Res.string.flight_detail_open_syride)) }
         }
         OutlinedButton(onClick = actions.onDelete) {
             Icon(Icons.Default.Delete, contentDescription = null)

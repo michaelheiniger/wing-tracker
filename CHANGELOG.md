@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
+- A flight imported from Syride with a track there has an "Open on Syride" button on its page, which opens the flight on Syride in your browser. It uses the Syride account saved for the import.
 - The map of a flight can colour the track by climb and sink: blue while sinking, green for weak climb, orange and red for stronger climb, with a legend giving the m/s of each colour. Switch between "Flight" and "Climb/sink" on the map; Wing Tracker remembers your choice. Flights whose track has no altitudes keep the single colour.
 - Below the map, an altitude profile shows the altitude over time, the flight in the colour of the track on the map and the time before take-off and after landing in grey. Pointing at it shows the time and altitude, and a dot marks the same moment on the map.
 - A flight with a track shows it on a topographic map (OpenTopoMap) next to its data: the flight from take-off to landing in a strong colour, what the logger recorded before and after it faded, and markers at take-off and landing. Drag to move, scroll or double-click to zoom, and "Whole flight" frames it again. Map tiles are kept on your computer, so flights viewed before also show their map offline; otherwise the track is drawn on a plain background with a note that the map is not available.

@@ -703,4 +703,5 @@
     <string name="map_climb_sink">Sinking (below %1$s m/s)</string>
     <string name="map_climb_range">%1$s to %2$s m/s</string>
     <string name="map_climb_from">%1$s m/s and more</string>
+    <string name="flight_detail_open_syride">Open on Syride</string>
 </resources>

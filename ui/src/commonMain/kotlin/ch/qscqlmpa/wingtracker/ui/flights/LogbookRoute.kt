@@ -12,11 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightFilter
@@ -25,7 +27,6 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
-import ch.qscqlmpa.wingtracker.maps.ReadMapTile
 import ch.qscqlmpa.wingtracker.reminders.Attention
 import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightDetailActions
 import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightDetailScreen
@@ -151,7 +152,7 @@ fun LogbookRoute(
                 presenter,
                 trackPresenter,
                 coloringPresenter,
-                useCases.readMapTile,
+                useCases,
                 shownFlight,
                 onOpen = { openFlight = it },
                 onEdit = { dialog = LogbookDialog.Edit(shownFlight) },
@@ -295,7 +296,7 @@ private fun FlightPage(
     presenter: LogbookPresenter,
     track: FlightTrackPresenter,
     coloring: TrackColoringPresenter,
-    readMapTile: ReadMapTile,
+    useCases: LogbookUseCases,
     flight: Flight,
     onOpen: (FlightId?) -> Unit,
     onEdit: () -> Unit,
@@ -304,12 +305,14 @@ private fun FlightPage(
     val wingName = presenter.state.visible.wingNameOf(flight)
     // Read again when the pilot steps to another flight or attaches a track to this one.
     LaunchedEffect(flight.id, flight.igcFile) { track.load(flight) }
+    val syridePage by produceState<String?>(null, flight.id) { value = useCases.getSyrideFlightPage(flight) }
+    val uriHandler = LocalUriHandler.current
     FlightDetailScreen(
         flight = flight,
         wingName = wingName,
         neighbours = presenter.state.neighboursOf(flight.id),
         track = track.state,
-        mapSetup = MapSetup(readMapTile, coloring.coloring, coloring::choose),
+        mapSetup = MapSetup(useCases.readMapTile, coloring.coloring, coloring::choose),
         failure = presenter.state.failure ?: coloring.failure,
         actions =
             FlightDetailActions(
@@ -318,6 +321,7 @@ private fun FlightPage(
                 onEdit = onEdit,
                 onOpenTrack = { presenter.openTrack(flight) },
                 onDelete = { deleting = true },
+                onOpenSyride = syridePage?.let { page -> { uriHandler.openUri(page) } },
             ),
     )
     if (deleting) {

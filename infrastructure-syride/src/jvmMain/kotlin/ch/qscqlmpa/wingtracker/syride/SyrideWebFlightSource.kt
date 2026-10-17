@@ -37,6 +37,12 @@ class SyrideWebFlightSource(
     private val fetchPage: suspend (url: String, referer: String) -> String = ::httpGet,
     private val pause: suspend () -> Unit = { delay(PAUSE_MILLIS) },
 ) : SyrideFlightSource {
+    // Built the way Syride's own pages build it: spaces in the account name become underscores.
+    override fun flightPage(
+        username: String,
+        flightNumber: String,
+    ): String = "$BASE/en/pilots/${URLEncoder.encode(username.replace(' ', '_'), Charsets.UTF_8)}/$flightNumber"
+
     override suspend fun fetch(username: String): List<SyrideFlight> {
         val profile = "$BASE/en/pilots/${URLEncoder.encode(username, Charsets.UTF_8)}"
         val rider = riderId(fetchPage(profile, profile))

@@ -9,4 +9,6 @@ class FlightDetailActions(
     val onEdit: () -> Unit,
     val onOpenTrack: () -> Unit,
     val onDelete: () -> Unit,
+    // Null when the flight has no page on Syride, which hides the button.
+    val onOpenSyride: (() -> Unit)? = null,
 )
