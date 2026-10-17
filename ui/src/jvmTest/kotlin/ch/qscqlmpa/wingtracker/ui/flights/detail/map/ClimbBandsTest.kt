@@ -30,8 +30,10 @@ class ClimbBandsTest {
     inner class ClimbBandOf {
         @ParameterizedTest(name = "{0} m/s is {1}")
         @CsvSource(
-            "-3.2, Sink",
-            "-0.1, Sink",
+            "-3.2, StrongSink",
+            "-1.21, StrongSink",
+            "-1.2, WeakSink",
+            "-0.1, WeakSink",
             "0.0, WeakClimb",
             "0.9, WeakClimb",
             "1.0, ModerateClimb",
@@ -67,7 +69,7 @@ class ClimbBandsTest {
             val runs = track.climbRuns()
 
             // then
-            assertThat(runs.map { it.band }).containsExactly(ClimbBand.Sink, ClimbBand.StrongClimb)
+            assertThat(runs.map { it.band }).containsExactly(ClimbBand.WeakSink, ClimbBand.StrongClimb)
             assertThat(runs[0].fixes).containsExactly(FIXES[0], FIXES[1], FIXES[2])
             assertThat(runs[1].fixes).containsExactly(FIXES[2], FIXES[3], FIXES[4])
         }

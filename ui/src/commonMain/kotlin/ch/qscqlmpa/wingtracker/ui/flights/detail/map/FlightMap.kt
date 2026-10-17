@@ -198,7 +198,8 @@ private fun MapState.colorFlight(
 
 internal fun MapColors.colorOf(band: ClimbBand): Color =
     when (band) {
-        ClimbBand.Sink -> sink
+        ClimbBand.StrongSink -> strongSink
+        ClimbBand.WeakSink -> weakSink
         ClimbBand.WeakClimb -> weakClimb
         ClimbBand.ModerateClimb -> moderateClimb
         ClimbBand.StrongClimb -> strongClimb

@@ -16,9 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.ui.flights.toDisplayNumber
 import ch.qscqlmpa.wingtracker.ui.resources.Res
+import ch.qscqlmpa.wingtracker.ui.resources.map_climb_below
 import ch.qscqlmpa.wingtracker.ui.resources.map_climb_from
 import ch.qscqlmpa.wingtracker.ui.resources.map_climb_range
-import ch.qscqlmpa.wingtracker.ui.resources.map_climb_sink
 import ch.qscqlmpa.wingtracker.ui.theme.MapColors
 import org.jetbrains.compose.resources.stringResource
 
@@ -28,6 +28,7 @@ internal fun ClimbLegend(
     colors: MapColors,
     modifier: Modifier = Modifier,
 ) {
+    val weakSink = WEAK_SINK_FROM.toDisplayNumber()
     val weak = WEAK_CLIMB_FROM.toDisplayNumber()
     val moderate = MODERATE_CLIMB_FROM.toDisplayNumber()
     val strong = STRONG_CLIMB_FROM.toDisplayNumber()
@@ -36,7 +37,8 @@ internal fun ClimbLegend(
             ClimbBand.StrongClimb to stringResource(Res.string.map_climb_from, strong),
             ClimbBand.ModerateClimb to stringResource(Res.string.map_climb_range, moderate, strong),
             ClimbBand.WeakClimb to stringResource(Res.string.map_climb_range, weak, moderate),
-            ClimbBand.Sink to stringResource(Res.string.map_climb_sink, weak),
+            ClimbBand.WeakSink to stringResource(Res.string.map_climb_range, weakSink, weak),
+            ClimbBand.StrongSink to stringResource(Res.string.map_climb_below, weakSink),
         )
     Surface(
         modifier = modifier,
