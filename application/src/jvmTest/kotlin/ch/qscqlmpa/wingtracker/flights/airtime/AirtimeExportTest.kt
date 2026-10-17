@@ -94,7 +94,15 @@ class AirtimeExportTest {
         coEvery { account.flightStarts(NICK) } returns startsOnAirtime
         coEvery { account.takeOffs() } returns takeOffs
         coEvery { attachments.read(AttachmentId("igc-1")) } returns IGC_BYTES
+        every { trackReader.read(IGC_BYTES) } returns aTrackStartingAt(Instant.parse("2026-09-20T13:05:12Z"))
+        coEvery { account.flightsStartingBetween(NICK, any(), any()) } returns emptyList()
     }
+
+    private fun aTrackStartingAt(firstFix: Instant) =
+        ReadTrack(
+            FlightTrack(LocalDate(2026, 9, 20), listOf(TrackFix(firstFix, 46.6876, 7.7987, 1932))),
+            "3b7e72f0c1d9",
+        )
 
     private suspend fun prepare() =
         PrepareAirtimeExport(account, flights, wings, attachments, trackReader, aFixedClock())(" $NICK ", TOKEN)
@@ -193,19 +201,12 @@ class AirtimeExportTest {
             }
 
         @Test
-        fun `compares a flight without a take-off time by the first fix of its track`() =
+        fun `compares a flight with a track by its first fix, which air-time takes as its start`() =
             runTest {
                 // given
-                val flight = aTrackedFlight(takeOffTime = null)
+                val flight = aTrackedFlight(takeOffTime = LocalTime(13, 8))
                 givenStored(listOf(flight), startsOnAirtime = listOf(Instant.parse("2026-09-20T13:04:10Z")))
-                every { trackReader.read(IGC_BYTES) } returns
-                    ReadTrack(
-                        FlightTrack(
-                            LocalDate(2026, 9, 20),
-                            listOf(TrackFix(Instant.parse("2026-09-20T13:04:55Z"), 46.6876, 7.7987, 1932)),
-                        ),
-                        "3b7e72f0c1d9",
-                    )
+                every { trackReader.read(IGC_BYTES) } returns aTrackStartingAt(Instant.parse("2026-09-20T13:04:55Z"))
 
                 // when
                 val draft = prepare()
@@ -377,6 +378,48 @@ class AirtimeExportTest {
                 // then
                 assertThat(saved.map { it.id }).containsExactly(FlightId("flight-1"))
                 assertThat(result).isEqualTo(AirtimeExportResult(1, 0, AirtimeProblem.NoConnection))
+            }
+
+        @Test
+        fun `keeps the id air-time gave the flight just sent, looked up in the minute it starts`() =
+            runTest {
+                // given
+                givenStored(listOf(aTrackedFlight()))
+                val draft = prepare()
+                coEvery {
+                    account.flightsStartingBetween(
+                        NICK,
+                        Instant.parse("2026-09-20T13:05:00Z"),
+                        Instant.parse("2026-09-20T13:05:59Z"),
+                    )
+                } returns
+                    listOf(
+                        AirtimeFlight(986, Instant.parse("2026-09-20T13:05:12Z")),
+                        AirtimeFlight(1204, Instant.parse("2026-09-20T13:05:12Z")),
+                    )
+
+                // when
+                export(TOKEN, draft, setOf(FlightId("flight-1")), emptyMap())
+
+                // then
+                assertThat(saved.single().exports).containsExactly(FlightExport(AIRTIME_SYSTEM, NOW, "1204"))
+            }
+
+        @Test
+        fun `still marks the flight sent when its id cannot be looked up`() =
+            runTest {
+                // given
+                givenStored(listOf(aManualFlight()))
+                val draft = prepare()
+                coEvery { account.flightsStartingBetween(any(), any(), any()) } throws
+                    AirtimeException(AirtimeProblem.Unreachable)
+
+                // when
+                val result = export(TOKEN, draft, setOf(FlightId("flight-2")), emptyMap())
+
+                // then
+                assertThat(saved.single().exports).containsExactly(FlightExport(AIRTIME_SYSTEM, NOW))
+                assertThat(result.failure).isNull()
             }
 
         @Test

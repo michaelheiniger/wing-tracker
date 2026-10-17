@@ -105,7 +105,7 @@ class JsonFlightRepositoryTest {
         fun `restores the services the flight was exported to`() =
             runTest {
                 // given
-                val exported = aStoredFlight().markExported("airtime", Instant.parse("2026-10-17T20:12:04Z"))
+                val exported = aStoredFlight().markExported("airtime", Instant.parse("2026-10-17T20:12:04Z"), "986")
                 repository.save(exported)
 
                 // when

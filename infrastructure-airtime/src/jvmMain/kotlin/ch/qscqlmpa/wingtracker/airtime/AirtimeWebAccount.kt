@@ -2,6 +2,7 @@ package ch.qscqlmpa.wingtracker.airtime
 
 import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeAccount
 import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeException
+import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeFlight
 import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeGlider
 import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeProblem
 import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeTakeOff
@@ -81,6 +82,20 @@ class AirtimeWebAccount(
         return starts
     }
 
+    override suspend fun flightsStartingBetween(
+        nick: String,
+        from: Instant,
+        to: Instant,
+    ): List<AirtimeFlight> {
+        // air-time includes both ends; a window of minutes holds far fewer flights than one page.
+        val url = "$baseUrl/v0/flights?pilots=${pathSegment(nick)}&after=$from&before=$to&limit=$PAGE_SIZE"
+        val page =
+            read<FlightPageJson>(call(AirtimeRequest("GET", url), "Looking up a flight of $nick"), "A flight list")
+        return page.flights.mapNotNull { flight ->
+            flight.id?.let { AirtimeFlight(it, parseInstant(flight.startTime)) }
+        }
+    }
+
     override suspend fun takeOffs(): List<AirtimeTakeOff> {
         val answer = call(AirtimeRequest("GET", "$baseUrl/v0/takeoffs"), "Listing the take-off sites")
         return read<TakeOffsJson>(answer, "The take-off list").takeoffs.map { AirtimeTakeOff(it.id, it.name) }
@@ -155,30 +170,30 @@ class AirtimeWebAccount(
         logger.warn { "$what failed: air-time answered ${answer.status} ${answer.body.take(LOGGED_BODY_CHARS)}" }
         throw AirtimeException(problem, "air-time answered ${answer.status}")
     }
-
-    private inline fun <reified T> read(
-        answer: AirtimeAnswer,
-        what: String,
-    ): T =
-        try {
-            json.decodeFromString<T>(answer.body)
-        } catch (e: SerializationException) {
-            logger.warn(e) { "$what from air-time could not be read" }
-            throw AirtimeException(AirtimeProblem.UnexpectedAnswer, e.message, e)
-        } catch (e: IllegalArgumentException) {
-            logger.warn(e) { "$what from air-time could not be read" }
-            throw AirtimeException(AirtimeProblem.UnexpectedAnswer, e.message, e)
-        }
-
-    private fun parseInstant(text: String): Instant =
-        try {
-            Instant.parse(text)
-        } catch (e: IllegalArgumentException) {
-            throw AirtimeException(AirtimeProblem.UnexpectedAnswer, "Unreadable start time '$text'", e)
-        }
 }
 
 private const val LOGGED_BODY_CHARS = 500
+
+private inline fun <reified T> read(
+    answer: AirtimeAnswer,
+    what: String,
+): T =
+    try {
+        json.decodeFromString<T>(answer.body)
+    } catch (e: SerializationException) {
+        logger.warn(e) { "$what from air-time could not be read" }
+        throw AirtimeException(AirtimeProblem.UnexpectedAnswer, e.message, e)
+    } catch (e: IllegalArgumentException) {
+        logger.warn(e) { "$what from air-time could not be read" }
+        throw AirtimeException(AirtimeProblem.UnexpectedAnswer, e.message, e)
+    }
+
+private fun parseInstant(text: String): Instant =
+    try {
+        Instant.parse(text)
+    } catch (e: IllegalArgumentException) {
+        throw AirtimeException(AirtimeProblem.UnexpectedAnswer, "Unreadable start time '$text'", e)
+    }
 
 // A nick is typed by the pilot, so it is encoded before it becomes part of an address.
 private fun pathSegment(nick: String) = URLEncoder.encode(nick, Charsets.UTF_8).replace("+", "%20")
@@ -231,6 +246,8 @@ private class FlightPageJson(
 @Serializable
 private class FlightSummaryJson(
     @SerialName("start_time") val startTime: String,
+    // Optional in air-time's description of the answer, though every flight has one.
+    val id: Long? = null,
 )
 
 @Serializable

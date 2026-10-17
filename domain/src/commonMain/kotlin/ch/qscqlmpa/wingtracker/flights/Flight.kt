@@ -20,12 +20,14 @@ data class Flight(
 
     fun isExportedTo(system: String): Boolean = exports.any { it.system == system }
 
+    /** [externalId] is the flight's id in [system], when it could be found out, so it can be deleted there later. */
     fun markExported(
         system: String,
         at: Instant,
+        externalId: String? = null,
     ): Flight {
         check(!isExportedTo(system)) { "Flight ${id.value} was already exported to $system" }
-        return copy(exports = exports + FlightExport(system, at))
+        return copy(exports = exports + FlightExport(system, at, externalId))
     }
 
     fun withDetails(details: FlightDetails): Flight = copy(details = details)
@@ -47,12 +49,14 @@ data class ExternalReference(
     }
 }
 
-/** Records that a flight was sent to [system], e.g. "airtime", and when. */
+/** Records that a flight was sent to [system], e.g. "airtime", when, and its id there when it is known. */
 data class FlightExport(
     val system: String,
     val at: Instant,
+    val externalId: String? = null,
 ) {
     init {
         require(system.isNotBlank()) { "An export needs a system" }
+        require(externalId == null || externalId.isNotBlank()) { "An external id cannot be blank" }
     }
 }

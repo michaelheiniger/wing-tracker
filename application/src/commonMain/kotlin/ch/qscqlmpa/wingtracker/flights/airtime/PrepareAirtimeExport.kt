@@ -24,6 +24,8 @@ data class AirtimeExportCandidate(
     // air-time's site of the same name; only manual entries carry one.
     val takeOffId: Long?,
     val newGlider: WingId? = null,
+    // When air-time will see the flight start; it finds the flight's id there once sent. Null when unknown.
+    val start: Instant? = null,
 ) {
     // Sent as its stored track when it has one, otherwise as a manual entry.
     val withTrack: Boolean get() = flight.igcFile != null
@@ -92,7 +94,14 @@ class PrepareAirtimeExport(
             if (reason != null) {
                 skipped += SkippedAirtimeFlight(flight, reason)
             } else {
-                candidates += AirtimeExportCandidate(flight, checkNotNull(wing), gliders[GliderKey.of(wing)]?.id, null)
+                candidates +=
+                    AirtimeExportCandidate(
+                        flight,
+                        checkNotNull(wing),
+                        gliders[GliderKey.of(wing)]?.id,
+                        null,
+                        start = start,
+                    )
             }
         }
         // Wings that share brand, model and size share one glider, which is created once.
@@ -105,10 +114,13 @@ class PrepareAirtimeExport(
         return AirtimeExportDraft(nick.trim(), complete, newGliders, skipped, exported.size)
     }
 
-    /** The take-off time, or else the first fix of the stored track; null when neither is known. */
+    /**
+     * Where air-time starts the flight: at the first fix of a track it is sent, which can be minutes before the
+     * take-off detected in it; otherwise at the take-off time. Null when neither is known.
+     */
     private suspend fun startOf(flight: Flight): Instant? =
-        flight.details.takeOffTime?.let { clock.instant(LocalDateTime(flight.details.date, it)) }
-            ?: flight.igcFile?.let { firstFixOf(it) }
+        flight.igcFile?.let { firstFixOf(it) }
+            ?: flight.details.takeOffTime?.let { clock.instant(LocalDateTime(flight.details.date, it)) }
 
     private suspend fun firstFixOf(igc: IgcFile): Instant? =
         try {
@@ -164,6 +176,6 @@ internal data class GliderKey(
 }
 
 // air-time keeps seconds, the logbook only minutes, so starts are compared to the minute.
-private fun Instant.minute(): Long = epochSeconds.floorDiv(SECONDS_PER_MINUTE)
+internal fun Instant.minute(): Long = epochSeconds.floorDiv(SECONDS_PER_MINUTE)
 
-private const val SECONDS_PER_MINUTE = 60L
+internal const val SECONDS_PER_MINUTE = 60L

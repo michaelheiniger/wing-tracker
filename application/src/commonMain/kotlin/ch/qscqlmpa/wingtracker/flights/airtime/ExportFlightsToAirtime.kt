@@ -7,6 +7,8 @@ import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import kotlinx.datetime.LocalDateTime
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -66,7 +68,8 @@ class ExportFlightsToAirtime(
                 val flight = flights.findById(candidate.flight.id)?.takeUnless { it.isExportedTo(AIRTIME_SYSTEM) }
                 if (flight != null) {
                     send(token, flight, gliderId, candidate.takeOffId)
-                    flights.save(flight.markExported(AIRTIME_SYSTEM, clock.now()))
+                    val airtimeId = idOnAirtime(draft.nick, candidate.start)
+                    flights.save(flight.markExported(AIRTIME_SYSTEM, clock.now(), airtimeId?.toString()))
                     exported++
                 }
                 onProgress(index + 1, selection.size)
@@ -75,6 +78,27 @@ class ExportFlightsToAirtime(
             return AirtimeExportResult(exported, gliderIds.size, e.problem)
         }
         return AirtimeExportResult(exported, gliderIds.size)
+    }
+
+    /**
+     * air-time answers a new flight with no id, so it is looked up among the flights starting in the same minute
+     * (ADR 0029). Should there be several, the newest is the one just sent.
+     */
+    private suspend fun idOnAirtime(
+        nick: String,
+        start: Instant?,
+    ): Long? {
+        if (start == null) return null
+        val from = Instant.fromEpochSeconds(start.minute() * SECONDS_PER_MINUTE)
+        return try {
+            account
+                .flightsStartingBetween(nick, from, from + LAST_SECOND_OF_MINUTE)
+                .filter { it.start.minute() == start.minute() }
+                .maxOfOrNull { it.id }
+        } catch (_: AirtimeException) {
+            // The flight is on air-time already; without its id it is still marked, so it is never sent twice.
+            null
+        }
     }
 
     private suspend fun send(
@@ -96,3 +120,5 @@ class ExportFlightsToAirtime(
         )
     }
 }
+
+private val LAST_SECOND_OF_MINUTE = 59.seconds

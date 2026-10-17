@@ -23,6 +23,12 @@ data class NewAirtimeGlider(
     val colour: String,
 )
 
+/** A flight of the pilot on air-time. */
+data class AirtimeFlight(
+    val id: Long,
+    val start: Instant,
+)
+
 data class AirtimeTakeOff(
     val id: Long,
     val name: String,
@@ -69,6 +75,13 @@ interface AirtimeAccount {
 
     /** When each flight the pilot has on air-time started. */
     suspend fun flightStarts(nick: String): List<Instant>
+
+    /** The pilot's flights starting from [from] to [to], both included. */
+    suspend fun flightsStartingBetween(
+        nick: String,
+        from: Instant,
+        to: Instant,
+    ): List<AirtimeFlight>
 
     suspend fun takeOffs(): List<AirtimeTakeOff>
 

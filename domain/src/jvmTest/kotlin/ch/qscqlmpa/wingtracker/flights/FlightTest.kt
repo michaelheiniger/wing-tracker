@@ -77,6 +77,15 @@ class FlightTest {
         }
 
         @Test
+        fun `keeps the flight's id in the other system`() {
+            // when
+            val exported = aSyrideFlight().markExported("airtime", Instant.parse("2026-10-17T20:12:04Z"), "986")
+
+            // then
+            assertThat(exported.exports.single().externalId).isEqualTo("986")
+        }
+
+        @Test
         fun `refuses to mark a flight exported twice to the same system`() {
             // given
             val flight = aSyrideFlight().markExported("airtime", Instant.parse("2026-10-17T20:12:04Z"))

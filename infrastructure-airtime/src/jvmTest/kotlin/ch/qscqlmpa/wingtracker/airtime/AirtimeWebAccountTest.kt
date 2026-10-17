@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.airtime
 
 import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeException
+import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeFlight
 import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeGlider
 import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeProblem
 import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeTakeOff
@@ -177,6 +178,31 @@ class AirtimeWebAccountTest {
                     .isInstanceOfSatisfying(AirtimeException::class.java) {
                         assertThat(it.problem).isEqualTo(AirtimeProblem.UnexpectedAnswer)
                     }
+            }
+    }
+
+    @Nested
+    inner class FlightsStartingBetween {
+        @Test
+        fun `asks for the pilot's flights in the window and reads their id and start`() =
+            runTest {
+                // when
+                val flights =
+                    account(AirtimeAnswer(200, sample("flights-page.json"))).flightsStartingBetween(
+                        "QSCQLMPA",
+                        Instant.parse("2026-04-24T13:08:00Z"),
+                        Instant.parse("2026-04-24T13:08:59Z"),
+                    )
+
+                // then
+                assertThat(sent.single().url).isEqualTo(
+                    "$BASE_URL/v0/flights?pilots=QSCQLMPA" +
+                        "&after=2026-04-24T13:08:00Z&before=2026-04-24T13:08:59Z&limit=200",
+                )
+                assertThat(flights).containsExactly(
+                    AirtimeFlight(986, Instant.parse("2026-04-24T13:08:42Z")),
+                    AirtimeFlight(987, Instant.parse("2026-04-18T15:13:06Z")),
+                )
             }
     }
 

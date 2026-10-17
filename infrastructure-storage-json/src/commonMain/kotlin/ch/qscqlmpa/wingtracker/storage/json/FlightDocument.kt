@@ -104,7 +104,7 @@ internal data class FlightDocument(
                 importedFromSystem = flight.importedFrom?.system,
                 importedFromId = flight.importedFrom?.id,
                 takeOffTime = flight.details.takeOffTime,
-                exports = flight.exports.map { FlightExportDocument(it.system, it.at.toString()) },
+                exports = flight.exports.map { FlightExportDocument(it.system, it.at.toString(), it.externalId) },
             )
     }
 }
@@ -114,6 +114,7 @@ internal data class FlightExportDocument(
     val system: String,
     // ISO-8601 text, like [FlightDocument.loggedAt].
     val at: String,
+    val externalId: String? = null,
 ) {
-    fun toDomain() = FlightExport(system, Instant.parse(at))
+    fun toDomain() = FlightExport(system, Instant.parse(at), externalId)
 }
