@@ -84,7 +84,8 @@ compose.desktop {
         // Its banner would only clutter the console and the log.
         jvmArgs += listOf("-Dkotlin-logging.logStartupMessage=false")
         nativeDistributions {
-            targetFormats(TargetFormat.Deb)
+            // Each is built only on its own OS (ADR 0009, ADR 0025).
+            targetFormats(TargetFormat.Deb, TargetFormat.Msi)
             packageName = "wing-tracker"
             // The packaged runtime only holds the JDK modules listed here, and a missing one fails only when its code
             // first runs; verifyRuntimeModules (part of check) catches that. Every module the code refers to is
@@ -94,7 +95,17 @@ compose.desktop {
             linux {
                 iconFile.set(project.file("icons/icon.png"))
             }
-            windows { iconFile.set(project.file("icons/icon.ico")) }
+            windows {
+                iconFile.set(project.file("icons/icon.ico"))
+                // Per user, so installing and updating need no administrator rights (ADR 0025).
+                perUserInstall = true
+                // Below the per-user programs folder, apart from the folders holding the log and the update files.
+                installationPath = "Programs\\wing-tracker"
+                // Never change it: it is how a newer installer recognises the installed version and replaces it.
+                upgradeUuid = "9415c329-c70d-485e-8ab3-30d18fdeb4dc"
+                menu = true
+                shortcut = true
+            }
             macOS { iconFile.set(project.file("icons/icon.icns")) }
             packageVersion = appVersion.get()
         }

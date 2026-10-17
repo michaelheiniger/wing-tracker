@@ -38,7 +38,7 @@ Build logic lives in `build-logic` convention plugins (`wingtracker.kmp-module`,
 - Fill the dev folder with sample data: `./gradlew seedDevData` (resets it first; code in `app-desktop/src/jvmDev`, never shipped)
 - One class: `./gradlew :<module>:jvmTest --tests '<fully.qualified.ClassName>'`
 - One case: `./gradlew :<module>:jvmTest --tests '<fully.qualified.ClassName>.<method name>'`
-- Package: `./gradlew :app-desktop:packageDeb`
+- Package: `./gradlew :app-desktop:packageDeb` (Linux) or `:app-desktop:packageMsi` (Windows)
 
 ## Tests
 Test pyramid: many fast unit tests (domain, application), fewer integration tests (storage adapters; Testcontainers when a real DB/service is involved), few UI/end-to-end tests. Tests live in `jvmTest`.

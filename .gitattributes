@@ -1,4 +1,5 @@
-* text=auto
+# LF everywhere, so tests and resources read the same on Windows as on Linux (ADR 0025).
+* text=auto eol=lf
 *.bat text eol=crlf
 gradlew text eol=lf
 *.sh text eol=lf

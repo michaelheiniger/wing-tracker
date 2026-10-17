@@ -53,11 +53,11 @@ Versions follow Semantic Versioning (`MAJOR.MINOR.PATCH`); a hotfix is a patch r
 
 1. Make sure the user-facing changes are listed under `Unreleased` in `CHANGELOG.md` and that `./gradlew check` passes on `main`.
 2. Run the **Release** workflow from the Actions tab on `main` and enter the version (or `gh workflow run release.yml -f version=X.Y.Z`).
-3. The workflow dates the `Unreleased` section as the new version and starts a fresh one, builds and checks the Linux package, and only then commits the changelog, creates the `vX.Y.Z` tag and publishes a GitHub Release with that version's changelog section, the package and a `SHA256SUMS` file the built-in updater checks downloads against (ADR 0024). It fails, changing nothing, when `Unreleased` is empty, the version already exists, or the build fails.
+3. The workflow checks and builds the Linux package and the Windows installer, each on its own OS (ADR 0025). Only when both succeed does it date the `Unreleased` section as the new version (starting a fresh one), commit the changelog, create the `vX.Y.Z` tag and publish a GitHub Release with that version's changelog section, both installers and a `SHA256SUMS` file the built-in updater checks downloads against (ADR 0024). It fails, changing nothing, when `Unreleased` is empty, the version already exists, or a build fails.
 
-To rehearse a release, tick **dry run** (`-f dry_run=true`): the package and its `SHA256SUMS` are built and uploaded as a workflow artifact, and nothing is committed, tagged or published.
+To rehearse a release, tick **dry run** (`-f dry_run=true`): both installers and their `SHA256SUMS` are built and uploaded as a workflow artifact, and nothing is committed, tagged or published.
 
-To build a package locally: `./gradlew :app-desktop:packageDeb -PappVersion=X.Y.Z`; the result is under `app-desktop/build/compose/binaries`.
+To build a package locally: `./gradlew :app-desktop:packageDeb -PappVersion=X.Y.Z` on Linux, `packageMsi` on Windows; the result is under `app-desktop/build/compose/binaries`. The Windows installer is not signed (ADR 0025), so Windows asks to confirm the first install.
 
 ## Application icon
 The icon is drawn by `design/generate-icon.py` (needs Python and Pillow) and written to `app-desktop/icons` (installer) and `app-desktop/src/jvmMain/resources` (window and notification). Change the geometry in the script and run `python3 design/generate-icon.py` to regenerate every size; do not edit the images by hand.

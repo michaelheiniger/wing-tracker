@@ -1,8 +1,9 @@
 name: Release
 
-# Releasing = running this workflow by hand with the version (ADR 0009). It dates the Unreleased section of
-# CHANGELOG.md, builds and checks the package, and only then commits the changelog, tags and publishes.
-# A dry run does everything up to the build and uploads the package as an artifact, but changes nothing.
+# Releasing = running this workflow by hand with the version (ADR 0009). Each OS builds and checks its installer in its
+# own job (ADR 0025); only when all succeed does the last job compute the checksums, date the Unreleased section of
+# CHANGELOG.md, commit it, tag and publish. A dry run builds everything and uploads the installers as an artifact,
+# but changes nothing.
 on:
   workflow_dispatch:
     inputs:
@@ -10,7 +11,7 @@ on:
         description: Version to release, as MAJOR.MINOR.PATCH without a leading v
         required: true
       dry_run:
-        description: Dry run (build and upload the package only; no commit, tag or release)
+        description: Dry run (build and upload the installers only; no commit, tag or release)
         type: boolean
         default: false
 
@@ -22,12 +23,14 @@ concurrency:
   group: release
   cancel-in-progress: false
 
+env:
+  VERSION: ${{ inputs.version }}
+  DRY_RUN: ${{ inputs.dry_run }}
+
 jobs:
-  release:
+  # Fails fast, before the long builds, when the request cannot be released.
+  prepare:
     runs-on: ubuntu-24.04
-    env:
-      VERSION: ${{ inputs.version }}
-      DRY_RUN: ${{ inputs.dry_run }}
     steps:
       - name: Check the request
         run: |
@@ -49,8 +52,28 @@ jobs:
             echo "The tag v$VERSION already exists" >&2
             exit 1
           fi
-      - name: Date the Unreleased changelog section
+      - name: Check that there is something to release
+        # Dates the section in this job's copy only; the publish job does it for real once everything is built.
         run: scripts/changelog-release.sh "$VERSION"
+
+  build:
+    needs: prepare
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            task: packageDeb
+            format: deb
+          - os: windows-2025
+            task: packageMsi
+            format: msi
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        # Git's bash on Windows too, so the steps read the same on both.
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
@@ -58,28 +81,46 @@ jobs:
           java-version: 21
       - uses: gradle/actions/setup-gradle@v6
       - name: Install packaging tools
+        if: matrix.format == 'deb'
         # jpackage builds the .deb with these; installing them keeps the build independent of the runner image.
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fakeroot dpkg-dev
       - name: Build and verify
-        run: ./gradlew check :app-desktop:packageDeb -PappVersion="$VERSION"
-      - name: Compute checksums
-        # The built-in updater refuses an installer whose checksum does not match this file (ADR 0024). Computed
-        # next to the packages, so the file lists bare file names, the same ones the release assets get.
-        working-directory: app-desktop/build/compose/binaries/main/deb
-        run: |
-          sha256sum *.deb > SHA256SUMS
-          sha256sum --check --strict SHA256SUMS
-      - name: Upload the package
+        run: ./gradlew check :app-desktop:${{ matrix.task }} -PappVersion="$VERSION"
+      - name: Upload the installer
         uses: actions/upload-artifact@v7
         with:
-          name: wing-tracker-${{ env.VERSION }}-deb
-          path: |
-            app-desktop/build/compose/binaries/main/deb/*.deb
-            app-desktop/build/compose/binaries/main/deb/SHA256SUMS
+          name: installer-${{ matrix.format }}
+          path: app-desktop/build/compose/binaries/main/${{ matrix.format }}/*.${{ matrix.format }}
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Collect the installers
+        uses: actions/download-artifact@v7
+        with:
+          pattern: installer-*
+          path: release
+          merge-multiple: true
+      - name: Compute checksums
+        # The built-in updater refuses an installer whose checksum does not match this file (ADR 0024). Computed
+        # next to the installers, so the file lists bare file names, the same ones the release assets get.
+        working-directory: release
+        run: |
+          sha256sum *.deb *.msi > SHA256SUMS
+          sha256sum --check --strict SHA256SUMS
+      - name: Upload the release files
+        uses: actions/upload-artifact@v7
+        with:
+          name: wing-tracker-${{ env.VERSION }}
+          path: release/*
           if-no-files-found: error
       - name: Commit the changelog and tag the release
         if: env.DRY_RUN != 'true'
         run: |
+          scripts/changelog-release.sh "$VERSION"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add CHANGELOG.md
@@ -96,5 +137,4 @@ jobs:
           gh release create "v$VERSION" \
             --title "v$VERSION" \
             --notes-file release-notes.md \
-            app-desktop/build/compose/binaries/main/deb/*.deb \
-            app-desktop/build/compose/binaries/main/deb/SHA256SUMS
+            release/*
