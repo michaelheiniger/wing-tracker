@@ -138,6 +138,10 @@ class ColorContrastTest {
                     Pair("ground on halo", map.trackGround, map.trackHalo),
                     Pair("track on background", map.track, map.background),
                     Pair("ground on background", map.trackGround, map.background),
+                    Pair("sink on halo", map.sink, map.trackHalo),
+                    Pair("weak climb on halo", map.weakClimb, map.trackHalo),
+                    Pair("moderate climb on halo", map.moderateClimb, map.trackHalo),
+                    Pair("strong climb on halo", map.strongClimb, map.trackHalo),
                 )
 
             // when

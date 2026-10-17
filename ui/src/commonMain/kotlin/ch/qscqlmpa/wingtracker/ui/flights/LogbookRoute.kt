@@ -30,6 +30,8 @@ import ch.qscqlmpa.wingtracker.reminders.Attention
 import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightDetailActions
 import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightDetailScreen
 import ch.qscqlmpa.wingtracker.ui.flights.detail.FlightTrackPresenter
+import ch.qscqlmpa.wingtracker.ui.flights.detail.TrackColoringPresenter
+import ch.qscqlmpa.wingtracker.ui.flights.detail.map.MapSetup
 import ch.qscqlmpa.wingtracker.ui.flights.wizard.ImportSource
 import ch.qscqlmpa.wingtracker.ui.flights.wizard.ImportWizard
 import ch.qscqlmpa.wingtracker.ui.flights.wizard.ImportWizardPresenter
@@ -109,6 +111,9 @@ fun LogbookRoute(
     var openFlight by remember { mutableStateOf<FlightId?>(null) }
     val listState = rememberLazyListState()
     val trackPresenter = remember { FlightTrackPresenter(useCases.readFlightTrack) }
+    val coloringPresenter =
+        remember { TrackColoringPresenter(scope, useCases.getAppSettings, useCases.saveTrackColoring) }
+    LaunchedEffect(Unit) { coloringPresenter.load() }
 
     LaunchedEffect(Unit) { presenter.refresh() }
 
@@ -145,6 +150,7 @@ fun LogbookRoute(
             FlightPage(
                 presenter,
                 trackPresenter,
+                coloringPresenter,
                 useCases.readMapTile,
                 shownFlight,
                 onOpen = { openFlight = it },
@@ -288,6 +294,7 @@ private fun importWizard(
 private fun FlightPage(
     presenter: LogbookPresenter,
     track: FlightTrackPresenter,
+    coloring: TrackColoringPresenter,
     readMapTile: ReadMapTile,
     flight: Flight,
     onOpen: (FlightId?) -> Unit,
@@ -302,8 +309,8 @@ private fun FlightPage(
         wingName = wingName,
         neighbours = presenter.state.neighboursOf(flight.id),
         track = track.state,
-        readMapTile = readMapTile,
-        failure = presenter.state.failure,
+        mapSetup = MapSetup(readMapTile, coloring.coloring, coloring::choose),
+        failure = presenter.state.failure ?: coloring.failure,
         actions =
             FlightDetailActions(
                 onBack = { onOpen(null) },

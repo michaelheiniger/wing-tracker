@@ -68,6 +68,7 @@ import ch.qscqlmpa.wingtracker.settings.SaveInterfaceScale
 import ch.qscqlmpa.wingtracker.settings.SaveReminderLeadTimes
 import ch.qscqlmpa.wingtracker.settings.SaveSyrideUsername
 import ch.qscqlmpa.wingtracker.settings.SaveThemeMode
+import ch.qscqlmpa.wingtracker.settings.SaveTrackColoring
 import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import ch.qscqlmpa.wingtracker.spreadsheet.FileSpreadsheetReader
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
@@ -210,6 +211,7 @@ private fun flightsModule() =
                 get(),
                 get(),
                 get(),
+                get(),
             )
         }
         factory { GetStatistics(get(), get(), get()) }
@@ -241,6 +243,7 @@ private fun remindersModule() =
         factory { SaveInterfaceScale(get()) }
         factory { SaveSyrideUsername(get()) }
         factory { SaveDeviceFolder(get()) }
+        factory { SaveTrackColoring(get()) }
         single { RemindersUseCases(get(), get(), get(), get()) }
         single { StartupReminder(get(), get(), TrayNotifier()) }
     }

@@ -3,6 +3,7 @@ package ch.qscqlmpa.wingtracker.storage.json
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
 import ch.qscqlmpa.wingtracker.settings.AppSettings
 import ch.qscqlmpa.wingtracker.settings.ThemeMode
+import ch.qscqlmpa.wingtracker.settings.TrackColoring
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import org.assertj.core.api.Assertions.assertThat
@@ -76,6 +77,7 @@ class JsonSettingsRepositoryTest {
                         lastReminderNotificationOn = LocalDate(2026, 10, 10),
                         interfaceScalePercent = 150,
                         deviceFolder = "/run/media/michael/SYRIDE1",
+                        trackColoring = TrackColoring.ClimbSink,
                     )
                 repository.save(saved)
 
@@ -84,6 +86,22 @@ class JsonSettingsRepositoryTest {
 
                 // then
                 assertThat(settings).usingRecursiveComparison().isEqualTo(saved)
+            }
+
+        @Test
+        fun `shows tracks in one colour for a settings file written before the colouring existed`() =
+            runTest {
+                // given
+                dataDirectory
+                    .resolve("settings.json")
+                    .writeText("""{"schemaVersion": 5, "deviceFolder": "/run/media/michael/SYRIDE1"}""")
+
+                // when
+                val settings = repository.load()
+
+                // then
+                assertThat(settings.trackColoring).isEqualTo(TrackColoring.Flight)
+                assertThat(settings.deviceFolder).isEqualTo("/run/media/michael/SYRIDE1")
             }
 
         @Test

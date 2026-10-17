@@ -46,3 +46,11 @@ class SaveSyrideUsername(
         settings.save(settings.load().copy(syrideUsername = username.trim().ifEmpty { null }))
     }
 }
+
+class SaveTrackColoring(
+    private val settings: SettingsRepository,
+) {
+    suspend operator fun invoke(coloring: TrackColoring) {
+        settings.save(settings.load().copy(trackColoring = coloring))
+    }
+}

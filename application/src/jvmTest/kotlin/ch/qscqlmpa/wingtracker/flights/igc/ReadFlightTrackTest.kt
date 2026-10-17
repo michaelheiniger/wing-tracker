@@ -115,6 +115,28 @@ class ReadFlightTrackTest {
             }
 
         @Test
+        fun `gives the climb rate along the flight, so the map can colour it`() =
+            runTest {
+                // given
+                givenTrack(
+                    Leg.Still(10.minutes),
+                    Leg.Moving(10.minutes, 32.0, climbMetersPerSecond = 2.5),
+                    Leg.Moving(10.minutes, 32.0, climbMetersPerSecond = -1.5),
+                    Leg.Still(10.minutes),
+                )
+
+                // when
+                val track = checkNotNull(readFlightTrack(aTrackedFlight()))
+
+                // then
+                val climbing = track.climbRates.first { it.from == at(15.minutes) }
+                val sinking = track.climbRates.first { it.from == at(25.minutes) }
+                assertThat(climbing.metersPerSecond).isCloseTo(2.5, within(0.01))
+                assertThat(sinking.metersPerSecond).isCloseTo(-1.5, within(0.01))
+                assertThat(track.climbRates.map { it.from }).isSorted()
+            }
+
+        @Test
         fun `has no altitudes when the logger recorded none`() =
             runTest {
                 // given

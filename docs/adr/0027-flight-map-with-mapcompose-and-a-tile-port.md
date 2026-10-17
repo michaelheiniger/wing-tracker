@@ -21,3 +21,7 @@ A flight's page shows its track on a map. Compose Multiplatform has no map. Opti
 ## Consequences
 
 The map works with a few calls instead of tile and gesture code of our own, and changing the tile provider only touches the adapter. We follow a small third-party library whose release cycle must keep up with Compose Multiplatform; replacing it touches the map composable only, since the port and the cache stay. Viewing a flight online loads tiles from a volunteer-run service, which the cache keeps to a minimum; tiles of flights never viewed online are not available offline.
+
+## Amendments
+
+- 2026-10-17: The flight can also be coloured by climb and sink, in bands whose limits are named constants next to the colouring in `ui`. The climb rates come from the application layer with the track statistics (ADR 0018), so both use the same averaging. The colours are map colours of the theme, each with a legend in metres per second (ADR 0019). The pilot's choice is remembered in the settings (schema version 6).

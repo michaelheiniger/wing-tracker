@@ -47,11 +47,11 @@ import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.igc.TrackFix
 import ch.qscqlmpa.wingtracker.flights.syride.SYRIDE_SYSTEM
-import ch.qscqlmpa.wingtracker.maps.ReadMapTile
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.components.AppCard
 import ch.qscqlmpa.wingtracker.ui.flights.FlightNeighbours
 import ch.qscqlmpa.wingtracker.ui.flights.detail.map.FlightMap
+import ch.qscqlmpa.wingtracker.ui.flights.detail.map.MapSetup
 import ch.qscqlmpa.wingtracker.ui.flights.detail.profile.AltitudeProfile
 import ch.qscqlmpa.wingtracker.ui.flights.toDisplayNumber
 import ch.qscqlmpa.wingtracker.ui.formatDuration
@@ -103,7 +103,7 @@ fun FlightDetailScreen(
     wingName: String,
     neighbours: FlightNeighbours,
     track: TrackState,
-    readMapTile: ReadMapTile,
+    mapSetup: MapSetup,
     failure: Failure?,
     actions: FlightDetailActions,
 ) {
@@ -139,7 +139,7 @@ fun FlightDetailScreen(
             ) { Facts(flight, wingName, track) }
         } else {
             Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                TrackView(track, readMapTile, Modifier.weight(1f).fillMaxHeight())
+                TrackView(track, mapSetup, Modifier.weight(1f).fillMaxHeight())
                 Column(
                     modifier = Modifier.width(FACT_GROUP_WIDTH).fillMaxHeight().verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -153,7 +153,7 @@ fun FlightDetailScreen(
 @Composable
 private fun TrackView(
     track: TrackState,
-    readMapTile: ReadMapTile,
+    mapSetup: MapSetup,
     modifier: Modifier,
 ) {
     when (track) {
@@ -161,7 +161,7 @@ private fun TrackView(
             // Shared by the profile and the map, so pointing at one shows the place on the other.
             var highlighted by remember(track) { mutableStateOf<TrackFix?>(null) }
             Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                FlightMap(track.track, readMapTile, highlighted, Modifier.fillMaxWidth().weight(1f))
+                FlightMap(track.track, mapSetup, highlighted, Modifier.fillMaxWidth().weight(1f))
                 AltitudeProfile(
                     track.track,
                     highlighted,

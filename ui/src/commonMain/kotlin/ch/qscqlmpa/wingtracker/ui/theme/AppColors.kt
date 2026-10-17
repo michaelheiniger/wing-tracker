@@ -123,6 +123,11 @@ class MapColors(
     val trackHalo: Color,
     // Shown where no tile could be had, e.g. offline.
     val background: Color,
+    // The climb/sink colouring, from sinking to strong climb.
+    val sink: Color,
+    val weakClimb: Color,
+    val moderateClimb: Color,
+    val strongClimb: Color,
 )
 
 internal val MapPalette =
@@ -131,6 +136,10 @@ internal val MapPalette =
         trackGround = hex(0x5F6368),
         trackHalo = hex(0xFFFFFF),
         background = hex(0xE8E4DA),
+        sink = hex(0x1565C0),
+        weakClimb = hex(0x2E7D32),
+        moderateClimb = hex(0xEF6C00),
+        strongClimb = hex(0xC62828),
     )
 
 internal val LightExtraColors =

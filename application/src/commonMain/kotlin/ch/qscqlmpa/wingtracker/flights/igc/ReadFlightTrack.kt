@@ -5,6 +5,7 @@ import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
 import ch.qscqlmpa.wingtracker.flights.Flight
 import kotlinx.datetime.LocalTime
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 // Climb and sink are averaged over this much time, like a vario does, so one noisy altitude cannot make a record.
 private val VERTICAL_SPEED_WINDOW = 20.seconds
@@ -18,10 +19,18 @@ data class AnalysedTrack(
     // Null when the track never really moves; it is then still shown, but has no statistics.
     val flight: DetectedFlight?,
     val statistics: TrackStatistics?,
+    // Along the flight, in chronological order; empty when the logger recorded no altitudes.
+    val climbRates: List<ClimbRate> = emptyList(),
 ) {
     /** The fixes from take-off to landing. */
     val flown: List<TrackFix> get() = flight?.let { f -> fixes.filter { it.time in f.takeOff..f.landing } }.orEmpty()
 }
+
+/** The average vertical speed over the window that starts at [from]; negative while sinking. */
+data class ClimbRate(
+    val from: Instant,
+    val metersPerSecond: Double,
+)
 
 /** Times are the pilot's local ones, like in the logbook; altitudes are null when the logger recorded none. */
 data class TrackStatistics(
@@ -49,14 +58,19 @@ class ReadFlightTrack(
         val fixes = reader.read(attachments.read(igc.attachment.id)).track.fixes
         val detected = detectFlight(fixes)
         val analysed = AnalysedTrack(fixes, detected, statistics = null)
-        return analysed.copy(statistics = detected?.let { statisticsOf(it, analysed.flown) })
+        val climbRates = climbRates(analysed.flown)
+        return analysed.copy(
+            statistics = detected?.let { statisticsOf(it, analysed.flown, climbRates) },
+            climbRates = climbRates,
+        )
     }
 
     private fun statisticsOf(
         detected: DetectedFlight,
         flown: List<TrackFix>,
+        climbRates: List<ClimbRate>,
     ): TrackStatistics {
-        val speeds = verticalSpeeds(flown)
+        val speeds = climbRates.map { it.metersPerSecond }
         return TrackStatistics(
             takeOffTime = clock.local(detected.takeOff).time.inWholeSeconds(),
             landingTime = clock.local(detected.landing).time.inWholeSeconds(),
@@ -70,9 +84,9 @@ class ReadFlightTrack(
 }
 
 /** For each fix with an altitude, the average vertical speed to the first fix at least the window later. */
-private fun verticalSpeeds(fixes: List<TrackFix>): List<Double> {
+private fun climbRates(fixes: List<TrackFix>): List<ClimbRate> {
     val withAltitude = fixes.filter { it.altitudeMeters != null }
-    val speeds = mutableListOf<Double>()
+    val speeds = mutableListOf<ClimbRate>()
     var k = 0
     for (i in withAltitude.indices) {
         if (k < i) k = i
@@ -80,7 +94,7 @@ private fun verticalSpeeds(fixes: List<TrackFix>): List<Double> {
         val seconds = (withAltitude[k].time - withAltitude[i].time).inWholeMilliseconds / MILLIS_PER_SECOND
         if (seconds < MIN_VERTICAL_MEASURE_SECONDS) continue
         val climbed = checkNotNull(withAltitude[k].altitudeMeters) - checkNotNull(withAltitude[i].altitudeMeters)
-        speeds += climbed / seconds
+        speeds += ClimbRate(withAltitude[i].time, climbed / seconds)
     }
     return speeds
 }

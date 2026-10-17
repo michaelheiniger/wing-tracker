@@ -69,6 +69,22 @@ class SettingsUseCasesTest {
     }
 
     @Nested
+    inner class SavingTheTrackColoring {
+        @Test
+        fun `changes the colouring and keeps the other settings`() =
+            runTest {
+                // given
+                coEvery { settings.load() } returns stored
+
+                // when
+                SaveTrackColoring(settings)(TrackColoring.ClimbSink)
+
+                // then
+                coVerify(exactly = 1) { settings.save(stored.copy(trackColoring = TrackColoring.ClimbSink)) }
+            }
+    }
+
+    @Nested
     inner class SavingTheInterfaceScale {
         @Test
         fun `changes the size and keeps the other settings`() =
