@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+- The version of Wing Tracker is shown at the bottom of the navigation bar; clicking it opens what changed in that version on GitHub.
+
 ## [0.2.0] - 2026-10-17
 
 ### Added
