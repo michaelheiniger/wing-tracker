@@ -1,0 +1,76 @@
+{
+  "$schema": "https://air-time.net/schemas/GetPilotFlightsBody.json",
+  "flights": [
+    {
+      "id": 986,
+      "pilot_id": 168,
+      "pilot_nick": "QSCQLMPA",
+      "pilot_name": "Michael",
+      "pilot_avatar": "https://s.gravatar.com/avatar/00000000000000000000000000000000?s=480",
+      "pilot_profile_picture_id": "00000000-0000-0000-0000-000000000000",
+      "type": "site flight",
+      "start_time": "2026-04-24T13:08:42Z",
+      "end_time": "2026-04-24T14:51:45Z",
+      "takeoff_name": "Sonchaux",
+      "takeoff_coords": "46.417883,6.951200",
+      "takeoff_id": 4,
+      "takeoff_country": "CH",
+      "statistics": {
+        "id": "",
+        "duration": "1h 43m",
+        "distance": 4.119297444763214,
+        "compounded_distance": 55.356836118431595,
+        "average_speed_ms": 2.749474365194889,
+        "average_speed_kmh": 9.8981077147016,
+        "max_speed_ms": 13.417633533394582,
+        "max_speed_kmh": 48.3034807202205,
+        "top_altitude": 1996,
+        "max_gain": 584,
+        "max_climb_rate": 2.1666666666666665,
+        "scores": {
+          "FAI": 17,
+          "FFVL": 16.95,
+          "XContest": 18.43
+        }
+      },
+      "comment_count": 0,
+      "photo_count": 0
+    },
+    {
+      "id": 987,
+      "pilot_id": 168,
+      "pilot_nick": "QSCQLMPA",
+      "pilot_name": "Michael",
+      "pilot_avatar": "https://s.gravatar.com/avatar/00000000000000000000000000000000?s=480",
+      "pilot_profile_picture_id": "00000000-0000-0000-0000-000000000000",
+      "type": "site flight",
+      "start_time": "2026-04-18T15:13:06Z",
+      "end_time": "2026-04-18T15:26:21Z",
+      "takeoff_name": "Sonchaux",
+      "takeoff_coords": "46.417883,6.951200",
+      "takeoff_id": 4,
+      "takeoff_country": "CH",
+      "statistics": {
+        "id": "",
+        "duration": "13m",
+        "distance": 4.079574768518837,
+        "compounded_distance": 7.787510807169438,
+        "average_speed_ms": 7.79874213836478,
+        "average_speed_kmh": 28.07547169811321,
+        "max_speed_ms": 13.63988667458094,
+        "max_speed_kmh": 49.103592028491384,
+        "top_altitude": 1410,
+        "max_gain": 0,
+        "max_climb_rate": 0.07692307692307693,
+        "scores": {
+          "FAI": 6.2,
+          "FFVL": 8.65,
+          "XContest": 6.19
+        }
+      },
+      "comment_count": 0,
+      "photo_count": 0
+    }
+  ],
+  "has_more": false
+}

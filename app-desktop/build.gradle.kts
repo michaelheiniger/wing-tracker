@@ -58,6 +58,7 @@ kotlin {
             implementation(project(":infrastructure-storage-json"))
             implementation(project(":infrastructure-igc"))
             implementation(project(":infrastructure-syride"))
+            implementation(project(":infrastructure-airtime"))
             implementation(project(":infrastructure-spreadsheet"))
             implementation(project(":infrastructure-github-releases"))
             implementation(project(":infrastructure-map-tiles"))

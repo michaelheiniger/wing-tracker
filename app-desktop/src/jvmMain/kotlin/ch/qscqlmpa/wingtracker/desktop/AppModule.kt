@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.desktop
 
 import ch.qscqlmpa.wingtracker.AppClock
+import ch.qscqlmpa.wingtracker.airtime.AirtimeWebAccount
 import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
 import ch.qscqlmpa.wingtracker.flights.DeleteFlight
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
@@ -8,6 +9,7 @@ import ch.qscqlmpa.wingtracker.flights.FlightsOfWing
 import ch.qscqlmpa.wingtracker.flights.GetLogbook
 import ch.qscqlmpa.wingtracker.flights.LogFlight
 import ch.qscqlmpa.wingtracker.flights.UpdateFlight
+import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeAccount
 import ch.qscqlmpa.wingtracker.flights.igc.AttachIgcTrack
 import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
 import ch.qscqlmpa.wingtracker.flights.igc.PrepareIgcImport
@@ -109,6 +111,9 @@ import java.nio.file.Path
 // Where releases are published (ADR 0009, ADR 0024).
 private const val RELEASE_REPOSITORY = "michaelheiniger/wing-tracker"
 
+// Where flights are exported to (ADR 0029).
+private const val AIRTIME_URL = "https://air-time.net"
+
 /**
  * Composition root: the only place where layers get wired together (ADR 0007). Split by feature so each module
  * stays small enough to read at a glance.
@@ -136,6 +141,12 @@ private fun storageModule(dataDirectory: Path) =
         single { AppClock() }
         single<TrackReader> { Igc4jTrackReader() }
         single<SyrideFlightSource> { SyrideWebFlightSource() }
+        single<AirtimeAccount> {
+            AirtimeWebAccount(
+                AIRTIME_URL,
+                "wing-tracker/${BuildInfo.VERSION} (+https://github.com/$RELEASE_REPOSITORY)",
+            )
+        }
         single<SpreadsheetReader> { FileSpreadsheetReader() }
         single<WingRepository> { JsonWingRepository(dataDirectory) }
         single<HarnessRepository> { JsonHarnessRepository(dataDirectory) }
