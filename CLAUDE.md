@@ -38,6 +38,7 @@ Build logic lives in `build-logic` convention plugins (`wingtracker.kmp-module`,
 - Fix formatting: `./gradlew spotlessApply`
 - Run (dev): `./gradlew :app-desktop:run -Pwingtracker.dev=true`
 - Fill the dev folder with sample data: `./gradlew seedDevData` (resets it first; code in `app-desktop/src/jvmDev`, never shipped)
+- See a UI change in the real app (headless start, clicks, screenshots): the `run-app` skill in `.claude/skills/run-app`
 - One class: `./gradlew :<module>:jvmTest --tests '<fully.qualified.ClassName>'`
 - One case: `./gradlew :<module>:jvmTest --tests '<fully.qualified.ClassName>.<method name>'`
 - Package: `./gradlew :app-desktop:packageDeb` (Linux) or `:app-desktop:packageMsi` (Windows)
