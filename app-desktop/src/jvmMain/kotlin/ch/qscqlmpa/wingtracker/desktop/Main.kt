@@ -30,6 +30,7 @@ import ch.qscqlmpa.wingtracker.settings.SaveThemeMode
 import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
 import ch.qscqlmpa.wingtracker.ui.backup.BackupUseCases
+import ch.qscqlmpa.wingtracker.ui.backup.CloudStorageUseCases
 import ch.qscqlmpa.wingtracker.ui.errors.UnexpectedErrorContent
 import ch.qscqlmpa.wingtracker.ui.errors.UnexpectedErrors
 import ch.qscqlmpa.wingtracker.ui.errors.unexpectedErrorTitle
@@ -170,6 +171,7 @@ private fun ApplicationScope.MainWindow(
                 maintenanceUseCases = koin.get<MaintenanceUseCases>(),
                 reminders = koin.get<RemindersUseCases>(),
                 backups = koin.get<BackupUseCases>(),
+                cloudStorageUseCases = koin.get<CloudStorageUseCases>(),
                 updates = koin.get<UpdateUseCases>(),
                 platform = koin.get<PlatformServices>(),
                 themePreference = themePreference,

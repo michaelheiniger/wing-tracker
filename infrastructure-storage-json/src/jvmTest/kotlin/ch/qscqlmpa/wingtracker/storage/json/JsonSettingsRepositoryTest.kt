@@ -1,6 +1,8 @@
 package ch.qscqlmpa.wingtracker.storage.json
 
 import ch.qscqlmpa.wingtracker.backup.BackupReminder
+import ch.qscqlmpa.wingtracker.backup.CloudProvider
+import ch.qscqlmpa.wingtracker.backup.CloudStorageSettings
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
 import ch.qscqlmpa.wingtracker.settings.AppSettings
 import ch.qscqlmpa.wingtracker.settings.ThemeMode
@@ -81,6 +83,15 @@ class JsonSettingsRepositoryTest {
                         airtimeNick = "qscqlmpa",
                         lastBackupAt = Instant.parse("2026-10-18T12:30:00Z"),
                         backupReminder = BackupReminder(enabled = false, days = 60),
+                        cloudStorage =
+                            CloudStorageSettings(
+                                provider = CloudProvider.MegaS4,
+                                region = "eu-amsterdam-1",
+                                endpoint = null,
+                                bucket = "wing-tracker-backups",
+                                accessKeyId = "AKIAMEGAS4EXAMPLE",
+                                keepLast = 10,
+                            ),
                     )
                 repository.save(saved)
 

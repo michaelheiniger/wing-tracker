@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.settings
 
 import ch.qscqlmpa.wingtracker.backup.BackupReminder
+import ch.qscqlmpa.wingtracker.backup.CloudStorageSettings
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
 import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
@@ -21,6 +22,8 @@ data class AppSettings(
     // Remembered so the pilot can see how old their last backup is (ADR 0031).
     val lastBackupAt: Instant? = null,
     val backupReminder: BackupReminder = BackupReminder(),
+    // Null until the pilot sets up a bucket to upload backups to (ADR 0032).
+    val cloudStorage: CloudStorageSettings? = null,
 ) {
     init {
         require(interfaceScalePercent == null || interfaceScalePercent in MIN_SCALE_PERCENT..MAX_SCALE_PERCENT) {

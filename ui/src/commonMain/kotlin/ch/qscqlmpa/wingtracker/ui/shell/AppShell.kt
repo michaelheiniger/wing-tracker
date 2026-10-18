@@ -46,6 +46,9 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
 import ch.qscqlmpa.wingtracker.ui.backup.BackupPresenter
 import ch.qscqlmpa.wingtracker.ui.backup.BackupUseCases
+import ch.qscqlmpa.wingtracker.ui.backup.CloudSecret
+import ch.qscqlmpa.wingtracker.ui.backup.CloudStoragePresenter
+import ch.qscqlmpa.wingtracker.ui.backup.CloudStorageUseCases
 import ch.qscqlmpa.wingtracker.ui.backup.RestorePresenter
 import ch.qscqlmpa.wingtracker.ui.backup.RestoreTitles
 import ch.qscqlmpa.wingtracker.ui.components.FileNamesBanner
@@ -111,6 +114,7 @@ fun AppShell(
     maintenanceUseCases: MaintenanceUseCases,
     reminders: RemindersUseCases,
     backups: BackupUseCases,
+    cloudStorageUseCases: CloudStorageUseCases,
     updates: UpdateUseCases,
     platform: PlatformServices,
     themePreference: ThemePreference,
@@ -147,6 +151,9 @@ fun AppShell(
                 onCreated = attentionPresenter::refresh,
             )
         }
+    // One for the whole run, so a secret key kept for the session serves every upload.
+    val cloudSecret = remember { CloudSecret(platform.credentialStore) }
+    val cloudStorage = remember { CloudStoragePresenter(scope, cloudStorageUseCases, cloudSecret) }
     val restoreTitles =
         RestoreTitles(stringResource(Res.string.restore_pick_title), stringResource(Res.string.restore_folder_title))
     val restore =
@@ -171,6 +178,7 @@ fun AppShell(
     LaunchedEffect(destination) { attentionPresenter.refresh() }
     LaunchedEffect(Unit) { reminderSettings.load() }
     LaunchedEffect(Unit) { backup.load() }
+    LaunchedEffect(Unit) { cloudStorage.load() }
     // Once per start (ADR 0012 rules out checking in the background).
     LaunchedEffect(Unit) { updatePresenter.start() }
 
@@ -274,6 +282,7 @@ fun AppShell(
                                             reminderSettings,
                                             backup,
                                             restore,
+                                            cloudStorage,
                                             dataLocation,
                                             logLocation,
                                             updatePresenter,

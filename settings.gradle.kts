@@ -31,6 +31,7 @@ include(
     ":infrastructure-igc",
     ":infrastructure-syride",
     ":infrastructure-airtime",
+    ":infrastructure-s3",
     ":infrastructure-spreadsheet",
     ":infrastructure-github-releases",
     ":infrastructure-map-tiles",

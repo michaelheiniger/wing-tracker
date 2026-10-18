@@ -149,6 +149,21 @@ class LayerDependencyTest {
     }
 
     @Nested
+    inner class InfrastructureS3 {
+        @Test
+        fun `does not depend on ui, storage or the composition root`() {
+            assertNoImportStartsWith(
+                "infrastructure-s3",
+                "$base.ui",
+                "$base.desktop",
+                "$base.storage",
+                "androidx.compose",
+                *loggingBackends,
+            )
+        }
+    }
+
+    @Nested
     inner class InfrastructureSpreadsheet {
         @Test
         fun `does not depend on ui, storage or the composition root`() {

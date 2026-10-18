@@ -1,6 +1,8 @@
 package ch.qscqlmpa.wingtracker.storage.json
 
 import ch.qscqlmpa.wingtracker.backup.BackupReminder
+import ch.qscqlmpa.wingtracker.backup.CloudProvider
+import ch.qscqlmpa.wingtracker.backup.CloudStorageSettings
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
 import ch.qscqlmpa.wingtracker.settings.AppSettings
 import ch.qscqlmpa.wingtracker.settings.ThemeMode
@@ -30,6 +32,8 @@ internal data class SettingsDocument(
     // Also schema 7, which no release has used yet: when to remind the pilot to back up.
     val backupReminderEnabled: Boolean = true,
     val backupReminderDays: Int = BackupReminder.DEFAULT_DAYS,
+    // Also schema 7: the bucket backups are uploaded to; its secret key is kept by the OS (ADR 0032).
+    val cloudStorage: CloudStorageDocument? = null,
 ) {
     fun toDomain(): AppSettings =
         AppSettings(
@@ -42,6 +46,7 @@ internal data class SettingsDocument(
             airtimeNick = airtimeNick,
             lastBackupAt = lastBackupAt?.let(Instant::parse),
             backupReminder = BackupReminder(backupReminderEnabled, backupReminderDays),
+            cloudStorage = cloudStorage?.toDomain(),
         )
 
     companion object {
@@ -60,6 +65,32 @@ internal data class SettingsDocument(
                 lastBackupAt = settings.lastBackupAt?.toString(),
                 backupReminderEnabled = settings.backupReminder.enabled,
                 backupReminderDays = settings.backupReminder.days,
+                cloudStorage = settings.cloudStorage?.let(CloudStorageDocument::from),
+            )
+    }
+}
+
+@Serializable
+internal data class CloudStorageDocument(
+    val provider: String,
+    val region: String,
+    val endpoint: String? = null,
+    val bucket: String,
+    val accessKeyId: String,
+    val keepLast: Int? = null,
+) {
+    fun toDomain() =
+        CloudStorageSettings(CloudProvider.valueOf(provider), region, endpoint, bucket, accessKeyId, keepLast)
+
+    companion object {
+        fun from(cloud: CloudStorageSettings) =
+            CloudStorageDocument(
+                cloud.provider.name,
+                cloud.region,
+                cloud.endpoint,
+                cloud.bucket,
+                cloud.accessKeyId,
+                cloud.keepLast,
             )
     }
 }

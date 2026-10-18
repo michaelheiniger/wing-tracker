@@ -111,6 +111,9 @@ enum class FormError {
     InvalidCount,
     InvalidMonths,
     InvalidDays,
+    InvalidRegion,
+    InvalidEndpoint,
+    InvalidBackupCount,
 }
 
 sealed interface WingFormResult {

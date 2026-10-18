@@ -41,6 +41,13 @@ enum class FailureKind {
     BackupDamaged,
     BackupNewerFormat,
     RestoreFolderNotEmpty,
+    CloudCheck,
+    CloudUnreachable,
+    CloudKeysRefused,
+    CloudNoSuchBucket,
+    CloudAccessDenied,
+    CloudClockOff,
+    CloudUnexpected,
     SyrideUserNotFound,
     SyrideUnreachable,
     SyridePagesChanged,
@@ -80,6 +87,7 @@ private val WORTH_RETRYING =
         FailureKind.SyrideUnreachable,
         FailureKind.AirtimeUnreachable,
         FailureKind.UpdateUnreachable,
+        FailureKind.CloudUnreachable,
     )
 
 /** Whether doing the same again soon may well succeed, so the screen offers to try again. */

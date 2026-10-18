@@ -4,12 +4,15 @@ import androidx.compose.runtime.Composable
 import ch.qscqlmpa.wingtracker.ui.gear.wing.FormError
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.error_amount
+import ch.qscqlmpa.wingtracker.ui.resources.error_backup_count
 import ch.qscqlmpa.wingtracker.ui.resources.error_count
 import ch.qscqlmpa.wingtracker.ui.resources.error_currency
 import ch.qscqlmpa.wingtracker.ui.resources.error_date
 import ch.qscqlmpa.wingtracker.ui.resources.error_days
+import ch.qscqlmpa.wingtracker.ui.resources.error_endpoint
 import ch.qscqlmpa.wingtracker.ui.resources.error_hours
 import ch.qscqlmpa.wingtracker.ui.resources.error_months
+import ch.qscqlmpa.wingtracker.ui.resources.error_region
 import ch.qscqlmpa.wingtracker.ui.resources.error_required
 import ch.qscqlmpa.wingtracker.ui.resources.failure_airtime_pilot
 import ch.qscqlmpa.wingtracker.ui.resources.failure_airtime_token
@@ -20,6 +23,13 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_backup_inside_data
 import ch.qscqlmpa.wingtracker.ui.resources.failure_backup_newer_format
 import ch.qscqlmpa.wingtracker.ui.resources.failure_cancel_plan
 import ch.qscqlmpa.wingtracker.ui.resources.failure_change_data_folder
+import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_bucket
+import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_check
+import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_clock
+import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_denied
+import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_keys
+import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_unexpected
+import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_unreachable
 import ch.qscqlmpa.wingtracker.ui.resources.failure_complete_syride_flights
 import ch.qscqlmpa.wingtracker.ui.resources.failure_create_backup
 import ch.qscqlmpa.wingtracker.ui.resources.failure_data_overlaps
@@ -98,6 +108,13 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.BackupDamaged to Res.string.failure_backup_damaged,
         FailureKind.BackupNewerFormat to Res.string.failure_backup_newer_format,
         FailureKind.RestoreFolderNotEmpty to Res.string.failure_restore_folder_not_empty,
+        FailureKind.CloudCheck to Res.string.failure_cloud_check,
+        FailureKind.CloudUnreachable to Res.string.failure_cloud_unreachable,
+        FailureKind.CloudKeysRefused to Res.string.failure_cloud_keys,
+        FailureKind.CloudNoSuchBucket to Res.string.failure_cloud_bucket,
+        FailureKind.CloudAccessDenied to Res.string.failure_cloud_denied,
+        FailureKind.CloudClockOff to Res.string.failure_cloud_clock,
+        FailureKind.CloudUnexpected to Res.string.failure_cloud_unexpected,
         FailureKind.SyrideUserNotFound to Res.string.failure_syride_user,
         FailureKind.SyrideUnreachable to Res.string.failure_syride_unreachable,
         FailureKind.SyridePagesChanged to Res.string.failure_syride_changed,
@@ -158,4 +175,7 @@ fun FormError.message(): String =
         FormError.InvalidCount -> stringResource(Res.string.error_count)
         FormError.InvalidMonths -> stringResource(Res.string.error_months)
         FormError.InvalidDays -> stringResource(Res.string.error_days)
+        FormError.InvalidRegion -> stringResource(Res.string.error_region)
+        FormError.InvalidEndpoint -> stringResource(Res.string.error_endpoint)
+        FormError.InvalidBackupCount -> stringResource(Res.string.error_backup_count)
     }

@@ -38,6 +38,7 @@ ADRs capture **why** wing-tracker is built the way it is. They use the
 | [0029](0029-airtime-export-through-a-port.md) | Flights are exported to air-time through its API, with a token kept by the OS | Accepted |
 | [0030](0030-site-names-are-kept-per-source.md) | Site names are kept per source | Accepted |
 | [0031](0031-backups-are-archives-of-the-data-folder.md) | Backups are archives of the data folder, restored into a new folder | Accepted |
+| [0032](0032-backups-are-uploaded-to-s3-compatible-storage.md) | Backups are uploaded to S3-compatible storage through a port, signed by the application | Accepted |
 
 ## Rules
 

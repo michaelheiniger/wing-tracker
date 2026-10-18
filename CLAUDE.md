@@ -25,6 +25,7 @@ Modules by layer (ADR 0004); dependencies point inwards:
 - `infrastructure-igc`: JVM-only adapter for the `TrackReader` port (igc4j, ADR 0018).
 - `infrastructure-syride`: JVM-only adapter for the `SyrideFlightSource` port; reads public Syride pages (ADR 0021).
 - `infrastructure-airtime`: JVM-only adapter for the `AirtimeAccount` port; exports flights through air-time's API (ADR 0029).
+- `infrastructure-s3`: JVM-only adapter for the `CloudStorage` port; uploads backups to S3-compatible storage such as MEGA S4, signing requests itself (ADR 0032).
 - `infrastructure-spreadsheet`: JVM-only adapter for the `SpreadsheetReader` port; reads ODS and XLSX logbooks (ADR 0022).
 - `infrastructure-github-releases`: JVM-only adapter for the `ReleaseSource` port; lists published releases for the built-in updater (ADR 0024).
 - `architecture-test`: Konsist rules enforcing the layering.

@@ -4,10 +4,13 @@ import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.airtime.AirtimeWebAccount
 import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
 import ch.qscqlmpa.wingtracker.backup.BackupArchive
+import ch.qscqlmpa.wingtracker.backup.CheckCloudStorage
+import ch.qscqlmpa.wingtracker.backup.CloudStorage
 import ch.qscqlmpa.wingtracker.backup.CreateBackup
 import ch.qscqlmpa.wingtracker.backup.GetBackupStatus
 import ch.qscqlmpa.wingtracker.backup.InspectBackup
 import ch.qscqlmpa.wingtracker.backup.RestoreBackup
+import ch.qscqlmpa.wingtracker.backup.SaveCloudStorage
 import ch.qscqlmpa.wingtracker.flights.DeleteFlight
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.FlightsOfWing
@@ -79,6 +82,7 @@ import ch.qscqlmpa.wingtracker.reminders.GetAttention
 import ch.qscqlmpa.wingtracker.reminders.GetCalendarEntries
 import ch.qscqlmpa.wingtracker.reminders.GetStartNotification
 import ch.qscqlmpa.wingtracker.reminders.MarkStartNotificationShown
+import ch.qscqlmpa.wingtracker.s3.S3CloudStorage
 import ch.qscqlmpa.wingtracker.settings.GetAppSettings
 import ch.qscqlmpa.wingtracker.settings.SaveAirtimeNick
 import ch.qscqlmpa.wingtracker.settings.SaveBackupReminder
@@ -102,6 +106,7 @@ import ch.qscqlmpa.wingtracker.syride.SyrideWebFlightSource
 import ch.qscqlmpa.wingtracker.ui.airtime.AirtimeExportUseCases
 import ch.qscqlmpa.wingtracker.ui.airtime.AirtimeToken
 import ch.qscqlmpa.wingtracker.ui.backup.BackupUseCases
+import ch.qscqlmpa.wingtracker.ui.backup.CloudStorageUseCases
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.GearUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
@@ -301,7 +306,11 @@ private fun backupModule(dataDirectory: Path) =
         factory { CreateBackup(get(), get(), get(), BuildInfo.VERSION) }
         factory { InspectBackup(get(), get(), BuildInfo.VERSION) }
         factory { RestoreBackup(get()) }
+        single<CloudStorage> { S3CloudStorage("wing-tracker/${BuildInfo.VERSION}") }
+        factory { SaveCloudStorage(get()) }
+        factory { CheckCloudStorage(get()) }
         single { BackupUseCases(get(), get(), get(), get()) }
+        single { CloudStorageUseCases(get(), get(), get()) }
     }
 
 private fun mapsModule(tileDirectory: Path) =
