@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -17,10 +18,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.ui.components.DateField
 import ch.qscqlmpa.wingtracker.ui.resources.Res
@@ -39,6 +42,8 @@ import org.jetbrains.compose.resources.stringResource
 internal fun LogbookSearchBar(
     search: LogbookSearch,
     wings: List<Wing>,
+    // The types the logbook holds; a pilot who never sets one is not offered to search by it.
+    types: Set<FlightType>,
     onChange: (LogbookSearch) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -83,10 +88,12 @@ internal fun LogbookSearchBar(
             )
         }
         // A single wing would always be selected, so the chips only help once there is a choice.
-        if (wings.size > 1 || !search.isBlank) {
+        val typeChoices = FlightType.entries.filter { it in types || it in search.types }
+        if (wings.size > 1 || typeChoices.isNotEmpty() || !search.isBlank) {
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.Center,
+                itemVerticalAlignment = Alignment.CenterVertically,
             ) {
                 if (wings.size > 1) {
                     wings.forEach { wing ->
@@ -104,6 +111,24 @@ internal fun LogbookSearchBar(
                         )
                     }
                 }
+                // Wings and types are different questions; the line keeps the two groups apart.
+                if (wings.size > 1 && typeChoices.isNotEmpty()) {
+                    VerticalDivider(modifier = Modifier.height(TYPE_DIVIDER_HEIGHT))
+                }
+                typeChoices.forEach { type ->
+                    val selected = type in search.types
+                    FilterChip(
+                        selected = selected,
+                        onClick = { onChange(search.toggle(type)) },
+                        label = { Text(type.label()) },
+                        leadingIcon =
+                            if (selected) {
+                                { Icon(Icons.Default.Check, contentDescription = null) }
+                            } else {
+                                null
+                            },
+                    )
+                }
                 if (!search.isBlank) {
                     TextButton(onClick = { onChange(LogbookSearch()) }) {
                         Icon(Icons.Default.Clear, contentDescription = null)
@@ -116,3 +141,4 @@ internal fun LogbookSearchBar(
 }
 
 private val DATE_FIELD_WIDTH = 200.dp
+private val TYPE_DIVIDER_HEIGHT = 24.dp

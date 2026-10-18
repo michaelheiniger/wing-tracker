@@ -16,7 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.FlightFilter
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
+import ch.qscqlmpa.wingtracker.ui.flights.label
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_search_banner
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_search_from
@@ -73,6 +75,11 @@ private fun describe(
             wings
                 .filter { it.id in filter.wingIds }
                 .joinToString(", ") { it.details.name }
+                .takeIf { it.isNotEmpty() },
+            FlightType.entries
+                .filter { it in filter.types }
+                .map { it.label() }
+                .joinToString(", ")
                 .takeIf { it.isNotEmpty() },
             when {
                 from != null && to != null -> stringResource(Res.string.statistics_search_range, from, to)

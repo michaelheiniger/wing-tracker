@@ -14,8 +14,11 @@ data class FlightFilter(
     val wingIds: Set<WingId> = emptySet(),
     val from: LocalDate? = null,
     val to: LocalDate? = null,
+    // Empty means any type; a flight of unknown type only matches then.
+    val types: Set<FlightType> = emptySet(),
 ) {
-    val isActive: Boolean get() = words.isNotEmpty() || wingIds.isNotEmpty() || from != null || to != null
+    val isActive: Boolean
+        get() = words.isNotEmpty() || wingIds.isNotEmpty() || from != null || to != null || types.isNotEmpty()
 
     private val words: List<String> = text.folded().split(WHITESPACE).filter { it.isNotEmpty() }
 
@@ -28,6 +31,7 @@ data class FlightFilter(
         if (wingIds.isNotEmpty() && details.wingId !in wingIds) return false
         if (from != null && details.date < from) return false
         if (to != null && details.date > to) return false
+        if (types.isNotEmpty() && details.type !in types) return false
         if (words.isEmpty()) return true
         val searchable =
             // Every source's name, so a flight is found by the Syride name also after the pilot renamed the site.

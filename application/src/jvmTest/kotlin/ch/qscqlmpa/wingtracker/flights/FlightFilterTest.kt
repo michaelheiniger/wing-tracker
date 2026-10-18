@@ -142,6 +142,24 @@ class FlightFilterTest {
         }
 
         @Test
+        fun `keeps only the flights of the chosen types, leaving out those of unknown type`() {
+            // given
+            val hike = aFlight(details = aFlightDetails().copy(type = FlightType.HikeAndFly))
+            val unknown = aFlight(details = aFlightDetails().copy(type = null))
+            val filter = FlightFilter(types = setOf(FlightType.HikeAndFly))
+
+            // when
+            val hikeMatches = filter.matches(hike, wingName)
+            val unknownMatches = filter.matches(unknown, wingName)
+            val siteMatches = FlightFilter(types = setOf(FlightType.Site)).matches(hike, wingName)
+
+            // then
+            assertThat(hikeMatches).isTrue()
+            assertThat(unknownMatches).isFalse()
+            assertThat(siteMatches).isFalse()
+        }
+
+        @Test
         fun `includes flights on the first and the last day of the range`() {
             // given
             val day = flight.details.date

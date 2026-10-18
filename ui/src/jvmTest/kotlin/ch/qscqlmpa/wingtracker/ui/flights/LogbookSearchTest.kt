@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.ui.flights
 
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -41,6 +42,24 @@ class LogbookSearchTest {
 
             // then
             assertThat(reversed).isFalse()
+        }
+    }
+
+    @Nested
+    inner class ToggleType {
+        @Test
+        fun `adds a type to the search and removes it again`() {
+            // given
+            val search = LogbookSearch()
+
+            // when
+            val added = search.toggle(FlightType.HikeAndFly)
+            val removed = added.toggle(FlightType.HikeAndFly)
+
+            // then
+            assertThat(added.toFilter().types).containsExactly(FlightType.HikeAndFly)
+            assertThat(added.isBlank).isFalse()
+            assertThat(removed.isBlank).isTrue()
         }
     }
 }

@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.ui.flights
 
 import ch.qscqlmpa.wingtracker.flights.FlightFilter
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.ui.parseDate
 
@@ -10,11 +11,13 @@ data class LogbookSearch(
     val wingIds: Set<WingId> = emptySet(),
     val from: String = "",
     val to: String = "",
+    val types: Set<FlightType> = emptySet(),
 ) {
     val isActive: Boolean get() = toFilter().isActive
 
     // Unlike [isActive], also true for a half-typed date, which the pilot may still want to clear.
-    val isBlank: Boolean get() = text.isBlank() && wingIds.isEmpty() && from.isBlank() && to.isBlank()
+    val isBlank: Boolean
+        get() = text.isBlank() && wingIds.isEmpty() && from.isBlank() && to.isBlank() && types.isEmpty()
 
     // Such a range matches no flight; the pilot has to be told why, or the logbook just looks empty.
     val isRangeReversed: Boolean get() {
@@ -23,7 +26,9 @@ data class LogbookSearch(
         return start > end
     }
 
-    fun toFilter(): FlightFilter = FlightFilter(text, wingIds, parseDate(from), parseDate(to))
+    fun toFilter(): FlightFilter = FlightFilter(text, wingIds, parseDate(from), parseDate(to), types)
+
+    fun toggle(type: FlightType): LogbookSearch = copy(types = if (type in types) types - type else types + type)
 
     fun toggle(wingId: WingId): LogbookSearch =
         copy(

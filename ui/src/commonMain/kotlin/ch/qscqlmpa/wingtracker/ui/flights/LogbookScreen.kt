@@ -221,7 +221,7 @@ private fun LogbookContent(
             )
         }
     }
-    LogbookSearchBar(search.search, logbook.wings, search.onChange)
+    LogbookSearchBar(search.search, logbook.wings, logbook.types, search.onChange)
     val shown = search.shown
     if (search.search.isActive) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {

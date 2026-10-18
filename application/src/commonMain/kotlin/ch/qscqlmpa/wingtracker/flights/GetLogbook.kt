@@ -26,6 +26,9 @@ data class Logbook(
 
     val flightCount: Int get() = months.sumOf { it.flights.size }
 
+    /** The flight types the logbook holds, so searching by type is only offered once there is something to find. */
+    val types: Set<FlightType> get() = months.flatMap { it.flights }.mapNotNull { it.details.type }.toSet()
+
     val total: Duration get() = months.fold(Duration.ZERO) { sum, month -> sum + month.total }
 
     /**
