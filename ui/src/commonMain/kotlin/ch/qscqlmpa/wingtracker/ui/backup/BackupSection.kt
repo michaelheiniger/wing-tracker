@@ -79,8 +79,17 @@ fun BackupSection(
         } ?: stringResource(Res.string.backup_never),
         style = MaterialTheme.typography.bodyLarge,
     )
+    // Backing up and restoring on rows of their own, so the four buttons of a set-up bucket fit the page.
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         BackupButtons(presenter)
+        if (presenter.busy) {
+            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+            Text(
+                stringResource(if (presenter.uploading) Res.string.backup_uploading else Res.string.backup_in_progress),
+            )
+        }
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         val canRestore = !presenter.busy && restore.step == null
         if (presenter.cloud == null) {
             OutlinedButton(onClick = restore::start, enabled = canRestore) {
@@ -93,12 +102,6 @@ fun BackupSection(
             OutlinedButton(onClick = restore::startFromCloud, enabled = canRestore) {
                 Text(stringResource(Res.string.backup_restore_cloud))
             }
-        }
-        if (presenter.busy) {
-            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-            Text(
-                stringResource(if (presenter.uploading) Res.string.backup_uploading else Res.string.backup_in_progress),
-            )
         }
     }
     presenter.outcome?.let { BackupOutcomeText(it) }
