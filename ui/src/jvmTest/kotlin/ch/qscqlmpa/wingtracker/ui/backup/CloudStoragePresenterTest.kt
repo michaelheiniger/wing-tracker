@@ -19,6 +19,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -76,8 +77,51 @@ class CloudStoragePresenterTest {
                 // then
                 assertThat(presenter.input).isEqualTo(CloudStorageInput.from(BUCKET))
                 assertThat(presenter.input.secretKey).isEmpty()
-                assertThat(presenter.configured).isTrue()
+                assertThat(presenter.stored).isEqualTo(BUCKET)
                 assertThat(presenter.secretStored).isTrue()
+                assertThat(presenter.editing).isFalse()
+            }
+    }
+
+    @Nested
+    inner class CancelEdit {
+        @Test
+        fun `puts back what is saved and closes the form`() =
+            runTest {
+                // given
+                givenStored(BUCKET, SECRET)
+                val presenter = presenter().also { it.load() }
+                presenter.edit()
+                presenter.change { it.copy(bucket = "", secretKey = "an3w/S3cr3t") }
+                presenter.save()
+
+                // when
+                presenter.cancelEdit()
+
+                // then
+                assertThat(presenter.input).isEqualTo(CloudStorageInput.from(BUCKET))
+                assertThat(presenter.errors).isEmpty()
+                assertThat(presenter.editing).isFalse()
+                coVerify(exactly = 0) { settings.save(any()) }
+            }
+
+        @Test
+        fun `stops a running test`() =
+            runTest {
+                // given
+                givenStored(BUCKET, SECRET)
+                coEvery { storage.check(any()) } coAnswers { awaitCancellation() }
+                val presenter = presenter().also { it.load() }
+                presenter.edit()
+                presenter.test()
+
+                // when
+                presenter.cancelEdit()
+
+                // then
+                assertThat(presenter.busy).isFalse()
+                assertThat(presenter.outcome).isNull()
+                assertThat(presenter.failure).isNull()
             }
     }
 
@@ -99,15 +143,18 @@ class CloudStoragePresenterTest {
                 coVerify(exactly = 1) { settings.save(AppSettings(cloudStorage = BUCKET)) }
                 assertThat(presenter.outcome).isEqualTo(CloudStorageOutcome.Saved(SecretKeeping.System))
                 assertThat(presenter.input.secretKey).isEmpty()
+                assertThat(presenter.stored).isEqualTo(BUCKET)
+                assertThat(presenter.editing).isFalse()
                 assertThat(changed).isEqualTo(1)
             }
 
         @Test
-        fun `saves nothing while the form is incomplete`() =
+        fun `saves nothing and keeps the form open while it is incomplete`() =
             runTest {
                 // given
                 givenStored(null, null)
                 val presenter = presenter().also { it.load() }
+                presenter.edit()
                 presenter.change { CloudStorageInput.from(BUCKET) }
 
                 // when
@@ -115,6 +162,7 @@ class CloudStoragePresenterTest {
 
                 // then
                 assertThat(presenter.errors).containsOnlyKeys(CloudStorageField.SecretKey)
+                assertThat(presenter.editing).isTrue()
                 coVerify(exactly = 0) { settings.save(any()) }
             }
     }
@@ -182,7 +230,7 @@ class CloudStoragePresenterTest {
                 // then
                 coVerify(exactly = 1) { settings.save(AppSettings(cloudStorage = null)) }
                 coVerify(exactly = 1) { credentials.delete(STORE_KEY) }
-                assertThat(presenter.configured).isFalse()
+                assertThat(presenter.stored).isNull()
                 assertThat(presenter.input).isEqualTo(CloudStorageInput())
             }
     }

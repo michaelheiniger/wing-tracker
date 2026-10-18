@@ -454,6 +454,16 @@
     <string name="cloud_test">Verbindung testen</string>
     <string name="cloud_testing">Verbinde…</string>
     <string name="cloud_remove">Entfernen</string>
+    <string name="cloud_not_set_up">Nicht eingerichtet: Sicherungen können nur als Datei gespeichert werden.</string>
+    <string name="cloud_set_up">Einrichten…</string>
+    <string name="cloud_edit">Bearbeiten…</string>
+    <string name="cloud_summary">%1$s · %2$s</string>
+    <string name="cloud_summary_bucket">Bucket %1$s · %2$s</string>
+    <plurals name="cloud_keep_last">
+        <item quantity="one">behält die letzte Sicherung</item>
+        <item quantity="other">behält die letzten %1$d Sicherungen</item>
+    </plurals>
+    <string name="cloud_keep_all">behält alle Sicherungen</string>
     <string name="cloud_saved">Gespeichert.</string>
     <string name="cloud_saved_system">Gespeichert. Der geheime Schlüssel wird im Passwortspeicher deines Systems aufbewahrt.</string>
     <string name="cloud_saved_session">Gespeichert. Dein System bietet keinen Passwortspeicher, deshalb wird der geheime Schlüssel nur bis zum Schliessen der App aufbewahrt. Unter Linux das Paket libsecret-tools installieren, um ihn zu behalten.</string>
@@ -480,7 +490,7 @@
     </plurals>
     <string name="backup_cleanup_failed">Die Sicherung ist hochgeladen, aber ältere Sicherungen konnten nicht gelöscht werden: %1$s</string>
     <string name="failure_upload_backup">Die Sicherung konnte nicht hochgeladen werden: %1$s</string>
-    <string name="failure_cloud_secret_missing">Der geheime Schlüssel deines Cloud-Speichers wird nicht mehr aufbewahrt. Gib ihn unter Cloud-Speicher erneut ein und speichere.</string>
+    <string name="failure_cloud_secret_missing">Der geheime Schlüssel deines Cloud-Speichers wird nicht mehr aufbewahrt. Gib ihn unter Cloud-Speicher mit «Bearbeiten…» erneut ein und speichere.</string>
     <string name="backup_restore_file">Aus einer Datei wiederherstellen…</string>
     <string name="backup_restore_cloud">Aus dem Cloud-Speicher wiederherstellen…</string>
     <string name="restore_cloud_title">Sicherungen in deinem Cloud-Speicher</string>

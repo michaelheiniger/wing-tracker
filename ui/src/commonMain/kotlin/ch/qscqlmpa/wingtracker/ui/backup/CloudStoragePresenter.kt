@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import ch.qscqlmpa.wingtracker.backup.CheckCloudStorage
 import ch.qscqlmpa.wingtracker.backup.CloudProblem
 import ch.qscqlmpa.wingtracker.backup.CloudStorageException
+import ch.qscqlmpa.wingtracker.backup.CloudStorageSettings
 import ch.qscqlmpa.wingtracker.backup.SaveCloudStorage
 import ch.qscqlmpa.wingtracker.settings.GetAppSettings
 import ch.qscqlmpa.wingtracker.ui.Failure
@@ -17,6 +18,7 @@ import ch.qscqlmpa.wingtracker.ui.platform.SecretKeeping
 import ch.qscqlmpa.wingtracker.ui.toFailure
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /** Use cases the cloud storage settings need; passed in so this module never sees the DI framework. */
@@ -56,7 +58,14 @@ class CloudStoragePresenter(
         private set
     var errors by mutableStateOf<Map<CloudStorageField, FormError>>(emptyMap())
         private set
-    var configured by mutableStateOf(false)
+
+    /** What is saved, for the summary; the form may hold changes not saved yet. */
+    var stored by mutableStateOf<CloudStorageSettings?>(null)
+        private set
+    val configured: Boolean get() = stored != null
+
+    /** Whether the form is open; it is closed once saved, and reset to what is saved when cancelled. */
+    var editing by mutableStateOf(false)
         private set
     var secretStored by mutableStateOf(false)
         private set
@@ -67,13 +76,30 @@ class CloudStoragePresenter(
     var failure by mutableStateOf<Failure?>(null)
         private set
 
+    private var check: Job? = null
+
     fun load() =
         attempt(FailureKind.LoadSettings) {
-            val stored = useCases.getAppSettings().cloudStorage
-            configured = stored != null
-            input = stored?.let(CloudStorageInput::from) ?: CloudStorageInput()
+            stored = useCases.getAppSettings().cloudStorage
+            input = formOfStored()
             secretStored = secret.current() != null
         }
+
+    fun edit() {
+        editing = true
+        outcome = null
+        failure = null
+    }
+
+    /** Drops what was typed, and stops a running test whose answer would no longer match the form. */
+    fun cancelEdit() {
+        check?.cancel()
+        editing = false
+        input = formOfStored()
+        errors = emptyMap()
+        outcome = null
+        failure = null
+    }
 
     fun change(update: (CloudStorageInput) -> CloudStorageInput) {
         input = update(input)
@@ -85,7 +111,8 @@ class CloudStoragePresenter(
         attempt(FailureKind.SaveSettings) {
             val keeping = valid.secretKey?.let { secret.keep(it) }
             useCases.saveCloudStorage(valid.settings)
-            configured = true
+            stored = valid.settings
+            editing = false
             secretStored = true
             input = input.copy(secretKey = "")
             outcome = CloudStorageOutcome.Saved(keeping)
@@ -96,29 +123,32 @@ class CloudStoragePresenter(
     /** Tries what is typed, saved or not, so a mistake shows before the first upload. */
     fun test() {
         val valid = validated() ?: return
-        attempt(FailureKind.CloudCheck) {
-            busy = true
-            try {
-                val key = valid.secretKey ?: checkNotNull(secret.current()) { "No secret key is kept" }
-                useCases.checkCloudStorage(valid.settings.target(key))
-                outcome = CloudStorageOutcome.Connected
-            } finally {
-                busy = false
+        check =
+            attempt(FailureKind.CloudCheck) {
+                busy = true
+                try {
+                    val key = valid.secretKey ?: checkNotNull(secret.current()) { "No secret key is kept" }
+                    useCases.checkCloudStorage(valid.settings.target(key))
+                    outcome = CloudStorageOutcome.Connected
+                } finally {
+                    busy = false
+                }
             }
-        }
     }
 
     fun remove() =
         attempt(FailureKind.SaveSettings) {
             useCases.saveCloudStorage(null)
             secret.forget()
-            configured = false
+            stored = null
             secretStored = false
             input = CloudStorageInput()
             errors = emptyMap()
             outcome = CloudStorageOutcome.Removed
             onChanged()
         }
+
+    private fun formOfStored() = stored?.let(CloudStorageInput::from) ?: CloudStorageInput()
 
     private fun validated(): CloudStorageFormResult.Valid? {
         outcome = null
@@ -138,7 +168,7 @@ class CloudStoragePresenter(
     private fun attempt(
         kind: FailureKind,
         action: suspend () -> Unit,
-    ) {
+    ): Job =
         scope.launch {
             try {
                 failure = null
@@ -154,7 +184,6 @@ class CloudStoragePresenter(
                 failure = e.toFailure(kind)
             }
         }
-    }
 }
 
 internal fun CloudProblem.failureKind(): FailureKind =

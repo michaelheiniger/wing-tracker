@@ -454,6 +454,16 @@
     <string name="cloud_test">Tester la connexion</string>
     <string name="cloud_testing">Connexion…</string>
     <string name="cloud_remove">Retirer</string>
+    <string name="cloud_not_set_up">Pas configuré : les sauvegardes ne peuvent être enregistrées que comme fichiers.</string>
+    <string name="cloud_set_up">Configurer…</string>
+    <string name="cloud_edit">Modifier…</string>
+    <string name="cloud_summary">%1$s · %2$s</string>
+    <string name="cloud_summary_bucket">Bucket %1$s · %2$s</string>
+    <plurals name="cloud_keep_last">
+        <item quantity="one">garde la dernière sauvegarde</item>
+        <item quantity="other">garde les %1$d dernières sauvegardes</item>
+    </plurals>
+    <string name="cloud_keep_all">garde toutes les sauvegardes</string>
     <string name="cloud_saved">Enregistré.</string>
     <string name="cloud_saved_system">Enregistré. La clé secrète est gardée par le trousseau de ton système.</string>
     <string name="cloud_saved_session">Enregistré. Ton système n'offre pas de trousseau de mots de passe : la clé secrète n'est conservée que jusqu'à la fermeture de l'application. Sous Linux, installe le paquet libsecret-tools pour la conserver.</string>
@@ -480,7 +490,7 @@
     </plurals>
     <string name="backup_cleanup_failed">La sauvegarde est envoyée, mais les plus anciennes n'ont pas pu être supprimées : %1$s</string>
     <string name="failure_upload_backup">La sauvegarde n'a pas pu être envoyée : %1$s</string>
-    <string name="failure_cloud_secret_missing">La clé secrète de ton stockage en ligne n'est plus conservée. Saisis-la à nouveau sous Stockage en ligne et enregistre.</string>
+    <string name="failure_cloud_secret_missing">La clé secrète de ton stockage en ligne n'est plus conservée. Saisis-la à nouveau sous Stockage en ligne avec « Modifier… » et enregistre.</string>
     <string name="backup_restore_file">Restaurer depuis un fichier…</string>
     <string name="backup_restore_cloud">Restaurer depuis le stockage en ligne…</string>
     <string name="restore_cloud_title">Sauvegardes dans ton stockage en ligne</string>

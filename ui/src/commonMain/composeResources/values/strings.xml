@@ -454,6 +454,16 @@
     <string name="cloud_test">Test connection</string>
     <string name="cloud_testing">Connecting…</string>
     <string name="cloud_remove">Remove</string>
+    <string name="cloud_not_set_up">Not set up: backups can only be saved as files.</string>
+    <string name="cloud_set_up">Set up…</string>
+    <string name="cloud_edit">Edit…</string>
+    <string name="cloud_summary">%1$s · %2$s</string>
+    <string name="cloud_summary_bucket">Bucket %1$s · %2$s</string>
+    <plurals name="cloud_keep_last">
+        <item quantity="one">keeps the last backup</item>
+        <item quantity="other">keeps the last %1$d backups</item>
+    </plurals>
+    <string name="cloud_keep_all">keeps every backup</string>
     <string name="cloud_saved">Saved.</string>
     <string name="cloud_saved_system">Saved. The secret key is kept by your system's password store.</string>
     <string name="cloud_saved_session">Saved. Your system offers no password store, so the secret key is only kept until the app closes. On Linux, install the libsecret-tools package to keep it.</string>
@@ -480,7 +490,7 @@
     </plurals>
     <string name="backup_cleanup_failed">The backup is uploaded, but older backups could not be deleted: %1$s</string>
     <string name="failure_upload_backup">The backup could not be uploaded: %1$s</string>
-    <string name="failure_cloud_secret_missing">The secret key of your cloud storage is no longer kept. Enter it again under Cloud storage and save.</string>
+    <string name="failure_cloud_secret_missing">The secret key of your cloud storage is no longer kept. Enter it again under Cloud storage with Edit… and save.</string>
     <string name="backup_restore_file">Restore from a file…</string>
     <string name="backup_restore_cloud">Restore from cloud storage…</string>
     <string name="restore_cloud_title">Backups in your cloud storage</string>
