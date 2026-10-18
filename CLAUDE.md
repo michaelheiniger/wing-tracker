@@ -29,7 +29,7 @@ Modules by layer (ADR 0004); dependencies point inwards:
 - `infrastructure-github-releases`: JVM-only adapter for the `ReleaseSource` port; lists published releases for the built-in updater (ADR 0024).
 - `architecture-test`: Konsist rules enforcing the layering.
 
-Bounded contexts (gear, flights, maintenance, plus the supporting `updates`) are packages inside each module. Base package equals the Gradle `group` (ADR 0005). Domain and application never reference Koin, Compose or serialization frameworks.
+Bounded contexts (gear, flights, maintenance, plus the supporting `updates` and `backup`) are packages inside each module. Base package equals the Gradle `group` (ADR 0005). Domain and application never reference Koin, Compose or serialization frameworks.
 
 Build logic lives in `build-logic` convention plugins (`wingtracker.kmp-module`, `wingtracker.compose`, `wingtracker.quality`). Dependency versions live only in `gradle/libs.versions.toml`.
 

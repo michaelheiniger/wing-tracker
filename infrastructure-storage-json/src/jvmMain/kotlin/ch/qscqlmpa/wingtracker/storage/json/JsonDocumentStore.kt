@@ -76,17 +76,6 @@ internal class JsonDocumentStore(
             logger.warn { "Moved unreadable $name from $directory to $target" }
         }
 
-    private fun moveReplacing(
-        source: Path,
-        target: Path,
-    ) {
-        try {
-            Files.move(source, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
-        } catch (_: AtomicMoveNotSupportedException) {
-            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING)
-        }
-    }
-
     companion object {
         const val QUARANTINE_FOLDER = "quarantine"
 
@@ -98,5 +87,17 @@ internal class JsonDocumentStore(
             directory = dataDirectory.resolve(name),
             quarantineDirectory = dataDirectory.resolve(QUARANTINE_FOLDER).resolve(name),
         )
+    }
+}
+
+/** Puts a completely written file in place in one step where the file system allows it. */
+internal fun moveReplacing(
+    source: Path,
+    target: Path,
+) {
+    try {
+        Files.move(source, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+    } catch (_: AtomicMoveNotSupportedException) {
+        Files.move(source, target, StandardCopyOption.REPLACE_EXISTING)
     }
 }

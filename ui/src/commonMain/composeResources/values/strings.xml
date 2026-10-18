@@ -389,7 +389,7 @@
     <string name="undo_plan_cancelled">Planned check cancelled</string>
     <string name="undo_flight_discarded">Flight discarded</string>
     <string name="settings_data_title">Data folder</string>
-    <string name="settings_data_hint">Your logbook, gear and attached files are stored in this folder. To back them up, copy it.</string>
+    <string name="settings_data_hint">Your logbook, gear and attached files are stored in this folder.</string>
     <string name="settings_data_open">Open folder</string>
     <string name="settings_data_change">Change…</string>
     <string name="settings_data_default">Use the default folder</string>
@@ -397,6 +397,20 @@
     <string name="settings_log_title">Log</string>
     <string name="settings_log_hint">Wing Tracker notes what it does and any unexpected errors in this folder. If something goes wrong, attaching these files to your bug report helps find out why. They can contain the names of your files and folders.</string>
     <string name="settings_log_open">Open folder</string>
+    <string name="backup_title">Backup</string>
+    <string name="backup_hint">A backup is one file holding your flights, gear, settings and attached files. Keep it away from this computer, for example on a USB drive or in your cloud storage.</string>
+    <string name="backup_last">Last backup: %1$s</string>
+    <string name="backup_never">No backup made yet.</string>
+    <string name="backup_create">Back up now…</string>
+    <string name="backup_save_title">Save the backup</string>
+    <string name="backup_in_progress">Backing up…</string>
+    <string name="backup_saved">Backup saved to %1$s</string>
+    <plurals name="backup_saved_content">
+        <item quantity="one">%1$d file, %2$s MB</item>
+        <item quantity="other">%1$d files, %2$s MB</item>
+    </plurals>
+    <string name="failure_create_backup">The backup could not be made: %1$s</string>
+    <string name="failure_backup_inside_data">A backup cannot be saved inside the data folder, or the next backup would contain it. Choose another folder, ideally on another drive.</string>
     <string name="data_change_title">Change the data folder</string>
     <string name="data_change_body">New folder: %1$s</string>
     <string name="data_change_move_hint">Your current data can be moved there: everything is copied, checked and only then removed from the old folder.</string>

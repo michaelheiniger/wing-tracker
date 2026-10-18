@@ -2,6 +2,7 @@ package ch.qscqlmpa.wingtracker.settings
 
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
 import kotlinx.datetime.LocalDate
+import kotlin.time.Instant
 
 data class AppSettings(
     val themeMode: ThemeMode = ThemeMode.System,
@@ -16,6 +17,8 @@ data class AppSettings(
     val airtimeNick: String? = null,
     // Remembered so the next import from a device opens the folder chooser where the logger was last found.
     val deviceFolder: String? = null,
+    // Remembered so the pilot can see how old their last backup is (ADR 0031).
+    val lastBackupAt: Instant? = null,
 ) {
     init {
         require(interfaceScalePercent == null || interfaceScalePercent in MIN_SCALE_PERCENT..MAX_SCALE_PERCENT) {

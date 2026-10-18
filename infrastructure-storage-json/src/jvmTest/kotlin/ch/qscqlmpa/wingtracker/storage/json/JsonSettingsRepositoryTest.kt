@@ -14,6 +14,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.writeText
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 
 class JsonSettingsRepositoryTest {
     @TempDir
@@ -77,6 +78,7 @@ class JsonSettingsRepositoryTest {
                         interfaceScalePercent = 150,
                         deviceFolder = "/run/media/michael/SYRIDE1",
                         airtimeNick = "qscqlmpa",
+                        lastBackupAt = Instant.parse("2026-10-18T12:30:00Z"),
                     )
                 repository.save(saved)
 

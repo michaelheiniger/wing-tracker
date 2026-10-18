@@ -25,6 +25,7 @@ import io.github.vinceglb.filekit.dialogs.openDirectoryPicker
 import io.github.vinceglb.filekit.dialogs.openFilePicker
 import io.github.vinceglb.filekit.dialogs.openFileSaver
 import io.github.vinceglb.filekit.name
+import io.github.vinceglb.filekit.path
 import io.github.vinceglb.filekit.readBytes
 import io.github.vinceglb.filekit.write
 import kotlinx.coroutines.CancellationException
@@ -118,16 +119,27 @@ class DesktopFileSaver : FileSaver {
         suggestedName: String,
         bytes: ByteArray,
     ): String? {
+        val chosen = openDialog(title, suggestedName) ?: return null
+        chosen.write(bytes)
+        return chosen.name
+    }
+
+    override suspend fun choose(
+        title: String,
+        suggestedName: String,
+    ): String? = openDialog(title, suggestedName)?.path
+
+    private suspend fun openDialog(
+        title: String,
+        suggestedName: String,
+    ): PlatformFile? {
         val extension = suggestedName.substringAfterLast('.', "")
-        val chosen =
-            FileKit.openFileSaver(
+        return FileKit
+            .openFileSaver(
                 suggestedName = suggestedName.removeSuffix(".$extension").removeSuffix("."),
                 defaultExtension = extension,
                 dialogSettings = FileKitDialogSettings(title = title),
-            ) ?: return null
-        chosen.file.checkedPath()
-        chosen.write(bytes)
-        return chosen.name
+            )?.also { it.file.checkedPath() }
     }
 }
 

@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.settings.ThemeMode
+import ch.qscqlmpa.wingtracker.ui.backup.BackupPresenter
+import ch.qscqlmpa.wingtracker.ui.backup.BackupSection
 import ch.qscqlmpa.wingtracker.ui.components.AppAlertDialog
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.reminders.ExportOutcome
@@ -87,6 +89,7 @@ fun SettingsScreen(
     themePreference: ThemePreference,
     scalePreference: InterfaceScalePreference,
     reminders: ReminderSettingsPresenter,
+    backup: BackupPresenter,
     dataLocation: DataLocationPresenter,
     logLocation: LogLocationPresenter,
     updates: UpdatePresenter,
@@ -111,6 +114,7 @@ fun SettingsScreen(
         ScaleSection(scalePreference)
         RemindersSection(reminders)
         CalendarSection(reminders)
+        BackupSection(backup)
         DataLocationSection(dataLocation)
         LogLocationSection(logLocation)
         UpdatesSection(updates, installer)

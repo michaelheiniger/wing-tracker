@@ -3,6 +3,9 @@ package ch.qscqlmpa.wingtracker.desktop
 import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.airtime.AirtimeWebAccount
 import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
+import ch.qscqlmpa.wingtracker.backup.BackupArchive
+import ch.qscqlmpa.wingtracker.backup.CreateBackup
+import ch.qscqlmpa.wingtracker.backup.GetBackupStatus
 import ch.qscqlmpa.wingtracker.flights.DeleteFlight
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.FlightsOfWing
@@ -91,9 +94,11 @@ import ch.qscqlmpa.wingtracker.storage.json.JsonReserveRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonSettingsRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonUpdatePreferencesRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonWingRepository
+import ch.qscqlmpa.wingtracker.storage.json.ZipBackupArchive
 import ch.qscqlmpa.wingtracker.syride.SyrideWebFlightSource
 import ch.qscqlmpa.wingtracker.ui.airtime.AirtimeExportUseCases
 import ch.qscqlmpa.wingtracker.ui.airtime.AirtimeToken
+import ch.qscqlmpa.wingtracker.ui.backup.BackupUseCases
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.GearUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
@@ -141,6 +146,7 @@ fun appModules(
         flightsModule(),
         maintenanceModule(),
         remindersModule(),
+        backupModule(dataDirectory),
         updatesModule(installationDirectory, downloadDirectory, devMode),
         mapsModule(mapTileDirectory),
         uiModule(dataDirectory, devMode),
@@ -282,6 +288,14 @@ private fun remindersModule() =
         factory { SaveDeviceFolder(get()) }
         single { RemindersUseCases(get(), get(), get(), get()) }
         single { StartupReminder(get(), get(), TrayNotifier()) }
+    }
+
+private fun backupModule(dataDirectory: Path) =
+    module {
+        single<BackupArchive> { ZipBackupArchive(dataDirectory) }
+        factory { GetBackupStatus(get(), get()) }
+        factory { CreateBackup(get(), get(), get(), BuildInfo.VERSION) }
+        single { BackupUseCases(get(), get()) }
     }
 
 private fun mapsModule(tileDirectory: Path) =

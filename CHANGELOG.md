@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+- Back up everything in one file: "Back up now…" in the settings' new "Backup" section saves your flights, gear, settings and attached files as a zip where you choose, ideally on another drive. The section tells when the last backup was made, and after a backup where it went, how many files it holds and its size. A backup cannot be saved inside the data folder.
+
 ## [0.4.0] - 2026-10-18
 
 ### Added

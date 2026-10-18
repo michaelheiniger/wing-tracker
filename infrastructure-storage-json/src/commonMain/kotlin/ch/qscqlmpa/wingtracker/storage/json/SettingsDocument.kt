@@ -6,6 +6,7 @@ import ch.qscqlmpa.wingtracker.settings.ThemeMode
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 
 @Serializable
 internal data class SettingsDocument(
@@ -23,6 +24,8 @@ internal data class SettingsDocument(
     val deviceFolder: String? = null,
     // Added in schema 6: the air-time pilot whose flights an export compares with.
     val airtimeNick: String? = null,
+    // Added in schema 7: when the last backup was made, as ISO-8601 text like the flights' instants.
+    val lastBackupAt: String? = null,
 ) {
     fun toDomain(): AppSettings =
         AppSettings(
@@ -33,10 +36,11 @@ internal data class SettingsDocument(
             syrideUsername = syrideUsername,
             deviceFolder = deviceFolder,
             airtimeNick = airtimeNick,
+            lastBackupAt = lastBackupAt?.let(Instant::parse),
         )
 
     companion object {
-        const val CURRENT_SCHEMA_VERSION = 6
+        const val CURRENT_SCHEMA_VERSION = 7
 
         fun from(settings: AppSettings) =
             SettingsDocument(
@@ -48,6 +52,7 @@ internal data class SettingsDocument(
                 syrideUsername = settings.syrideUsername,
                 deviceFolder = settings.deviceFolder,
                 airtimeNick = settings.airtimeNick,
+                lastBackupAt = settings.lastBackupAt?.toString(),
             )
     }
 }

@@ -15,9 +15,11 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_airtime_pilot
 import ch.qscqlmpa.wingtracker.ui.resources.failure_airtime_token
 import ch.qscqlmpa.wingtracker.ui.resources.failure_airtime_unexpected
 import ch.qscqlmpa.wingtracker.ui.resources.failure_airtime_unreachable
+import ch.qscqlmpa.wingtracker.ui.resources.failure_backup_inside_data
 import ch.qscqlmpa.wingtracker.ui.resources.failure_cancel_plan
 import ch.qscqlmpa.wingtracker.ui.resources.failure_change_data_folder
 import ch.qscqlmpa.wingtracker.ui.resources.failure_complete_syride_flights
+import ch.qscqlmpa.wingtracker.ui.resources.failure_create_backup
 import ch.qscqlmpa.wingtracker.ui.resources.failure_data_overlaps
 import ch.qscqlmpa.wingtracker.ui.resources.failure_data_same
 import ch.qscqlmpa.wingtracker.ui.resources.failure_data_unusable
@@ -84,6 +86,8 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.DataFolderSame to Res.string.failure_data_same,
         FailureKind.DataFolderUnusable to Res.string.failure_data_unusable,
         FailureKind.DataFolderOverlaps to Res.string.failure_data_overlaps,
+        FailureKind.CreateBackup to Res.string.failure_create_backup,
+        FailureKind.BackupInsideDataFolder to Res.string.failure_backup_inside_data,
         FailureKind.SyrideUserNotFound to Res.string.failure_syride_user,
         FailureKind.SyrideUnreachable to Res.string.failure_syride_unreachable,
         FailureKind.SyridePagesChanged to Res.string.failure_syride_changed,

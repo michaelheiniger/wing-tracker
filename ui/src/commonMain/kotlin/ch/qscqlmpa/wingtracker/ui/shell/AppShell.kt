@@ -44,6 +44,8 @@ import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.FlightFilter
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
+import ch.qscqlmpa.wingtracker.ui.backup.BackupPresenter
+import ch.qscqlmpa.wingtracker.ui.backup.BackupUseCases
 import ch.qscqlmpa.wingtracker.ui.components.FileNamesBanner
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookRoute
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookSearch
@@ -60,6 +62,7 @@ import ch.qscqlmpa.wingtracker.ui.reminders.RemindersUseCases
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.about_version
 import ch.qscqlmpa.wingtracker.ui.resources.attention_badge
+import ch.qscqlmpa.wingtracker.ui.resources.backup_save_title
 import ch.qscqlmpa.wingtracker.ui.resources.nav_gear
 import ch.qscqlmpa.wingtracker.ui.resources.nav_logbook
 import ch.qscqlmpa.wingtracker.ui.resources.nav_settings
@@ -102,6 +105,7 @@ fun AppShell(
     gearUseCases: GearUseCases,
     maintenanceUseCases: MaintenanceUseCases,
     reminders: RemindersUseCases,
+    backups: BackupUseCases,
     updates: UpdateUseCases,
     platform: PlatformServices,
     themePreference: ThemePreference,
@@ -126,6 +130,9 @@ fun AppShell(
     val dataLocation =
         remember { DataLocationPresenter(scope, platform.dataLocation, chooseTitle, beforeChange = undo::flush) }
     val logLocation = remember { LogLocationPresenter(scope, platform.logLocation) }
+    val backupSaveTitle = stringResource(Res.string.backup_save_title)
+    val backup =
+        remember { BackupPresenter(scope, backups, platform.fileSaver, backupSaveTitle, beforeBackup = undo::flush) }
     val updatePresenter = remember { UpdatePresenter(scope, updates) }
     val installPresenter =
         remember {
@@ -143,6 +150,7 @@ fun AppShell(
     // Reminders are computed on demand (ADR 0012), so they are refreshed whenever the pilot moves between sections.
     LaunchedEffect(destination) { attentionPresenter.refresh() }
     LaunchedEffect(Unit) { reminderSettings.load() }
+    LaunchedEffect(Unit) { backup.load() }
     // Once per start (ADR 0012 rules out checking in the background).
     LaunchedEffect(Unit) { updatePresenter.start() }
 
@@ -239,6 +247,7 @@ fun AppShell(
                                             themePreference,
                                             scalePreference,
                                             reminderSettings,
+                                            backup,
                                             dataLocation,
                                             logLocation,
                                             updatePresenter,

@@ -34,6 +34,8 @@ enum class FailureKind {
     DataFolderSame,
     DataFolderUnusable,
     DataFolderOverlaps,
+    CreateBackup,
+    BackupInsideDataFolder,
     SyrideUserNotFound,
     SyrideUnreachable,
     SyridePagesChanged,

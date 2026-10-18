@@ -45,6 +45,15 @@ interface FileSaver {
         suggestedName: String,
         bytes: ByteArray,
     ): String?
+
+    /**
+     * Lets the user choose where a file will be saved, for a file too large to hold in memory, which the caller
+     * then writes itself. Returns the chosen path, or null when the dialog was cancelled.
+     */
+    suspend fun choose(
+        title: String,
+        suggestedName: String,
+    ): String?
 }
 
 /** Lets the user drop files onto a part of the window; only desktop has this, so it is a port. */

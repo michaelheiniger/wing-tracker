@@ -389,7 +389,7 @@
     <string name="undo_plan_cancelled">Contrôle planifié annulé</string>
     <string name="undo_flight_discarded">Vol abandonné</string>
     <string name="settings_data_title">Dossier de données</string>
-    <string name="settings_data_hint">Ton carnet de vols, ton matériel et les fichiers joints sont enregistrés dans ce dossier. Pour les sauvegarder, copie-le.</string>
+    <string name="settings_data_hint">Ton carnet de vols, ton matériel et les fichiers joints sont enregistrés dans ce dossier.</string>
     <string name="settings_data_open">Ouvrir le dossier</string>
     <string name="settings_data_change">Changer…</string>
     <string name="settings_data_default">Utiliser le dossier par défaut</string>
@@ -397,6 +397,20 @@
     <string name="settings_log_title">Journal</string>
     <string name="settings_log_hint">Wing Tracker note dans ce dossier ce qu'il fait et les erreurs inattendues. Si quelque chose ne va pas, joindre ces fichiers à ton rapport de bug aide à en trouver la cause. Ils peuvent contenir les noms de tes fichiers et dossiers.</string>
     <string name="settings_log_open">Ouvrir le dossier</string>
+    <string name="backup_title">Sauvegarde</string>
+    <string name="backup_hint">Une sauvegarde est un seul fichier avec tes vols, ton matériel, tes réglages et les fichiers joints. Garde-la ailleurs que sur cet ordinateur, par exemple sur une clé USB ou dans ton stockage en ligne.</string>
+    <string name="backup_last">Dernière sauvegarde : %1$s</string>
+    <string name="backup_never">Aucune sauvegarde faite pour l'instant.</string>
+    <string name="backup_create">Sauvegarder maintenant…</string>
+    <string name="backup_save_title">Enregistrer la sauvegarde</string>
+    <string name="backup_in_progress">Sauvegarde en cours…</string>
+    <string name="backup_saved">Sauvegarde enregistrée dans %1$s</string>
+    <plurals name="backup_saved_content">
+        <item quantity="one">%1$d fichier, %2$s Mo</item>
+        <item quantity="other">%1$d fichiers, %2$s Mo</item>
+    </plurals>
+    <string name="failure_create_backup">La sauvegarde n'a pas pu être faite : %1$s</string>
+    <string name="failure_backup_inside_data">Une sauvegarde ne peut pas être enregistrée dans le dossier de données, sinon la suivante la contiendrait. Choisis un autre dossier, idéalement sur un autre disque.</string>
     <string name="data_change_title">Changer le dossier de données</string>
     <string name="data_change_body">Nouveau dossier : %1$s</string>
     <string name="data_change_move_hint">Tes données actuelles peuvent y être déplacées : tout est copié, vérifié, puis seulement retiré de l'ancien dossier.</string>

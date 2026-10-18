@@ -389,7 +389,7 @@
     <string name="undo_plan_cancelled">Geplante Kontrolle abgebrochen</string>
     <string name="undo_flight_discarded">Flug verworfen</string>
     <string name="settings_data_title">Datenordner</string>
-    <string name="settings_data_hint">Dein Logbuch, deine Ausrüstung und angehängte Dateien liegen in diesem Ordner. Zum Sichern genügt es, ihn zu kopieren.</string>
+    <string name="settings_data_hint">Dein Logbuch, deine Ausrüstung und angehängte Dateien liegen in diesem Ordner.</string>
     <string name="settings_data_open">Ordner öffnen</string>
     <string name="settings_data_change">Ändern…</string>
     <string name="settings_data_default">Standardordner verwenden</string>
@@ -397,6 +397,20 @@
     <string name="settings_log_title">Protokoll</string>
     <string name="settings_log_hint">Wing Tracker hält in diesem Ordner fest, was es tut und welche unerwarteten Fehler auftreten. Wenn etwas schiefgeht, hilft es, diese Dateien deiner Fehlermeldung anzuhängen. Sie können die Namen deiner Dateien und Ordner enthalten.</string>
     <string name="settings_log_open">Ordner öffnen</string>
+    <string name="backup_title">Datensicherung</string>
+    <string name="backup_hint">Eine Sicherung ist eine einzige Datei mit deinen Flügen, deiner Ausrüstung, deinen Einstellungen und angehängten Dateien. Bewahre sie nicht nur auf diesem Computer auf, sondern zum Beispiel auf einem USB-Stick oder in deinem Cloud-Speicher.</string>
+    <string name="backup_last">Letzte Sicherung: %1$s</string>
+    <string name="backup_never">Noch keine Sicherung erstellt.</string>
+    <string name="backup_create">Jetzt sichern…</string>
+    <string name="backup_save_title">Sicherung speichern</string>
+    <string name="backup_in_progress">Sicherung läuft…</string>
+    <string name="backup_saved">Sicherung gespeichert unter %1$s</string>
+    <plurals name="backup_saved_content">
+        <item quantity="one">%1$d Datei, %2$s MB</item>
+        <item quantity="other">%1$d Dateien, %2$s MB</item>
+    </plurals>
+    <string name="failure_create_backup">Die Sicherung konnte nicht erstellt werden: %1$s</string>
+    <string name="failure_backup_inside_data">Eine Sicherung kann nicht im Datenordner gespeichert werden, sonst wäre sie in der nächsten enthalten. Wähle einen anderen Ordner, am besten auf einem anderen Laufwerk.</string>
     <string name="data_change_title">Datenordner ändern</string>
     <string name="data_change_body">Neuer Ordner: %1$s</string>
     <string name="data_change_move_hint">Deine bisherigen Daten können dorthin verschoben werden: alles wird kopiert, geprüft und erst dann aus dem alten Ordner entfernt.</string>
