@@ -18,6 +18,9 @@ import ch.qscqlmpa.wingtracker.ui.resources.statistics_table_year
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_before_tracking
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_flights
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_flights_column
+import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_hike_and_fly
+import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_hike_flights_column
+import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_hike_hours_column
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_hours_column
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_note
 import ch.qscqlmpa.wingtracker.ui.resources.statistics_totals_note_search
@@ -46,6 +49,20 @@ fun TotalsCard(
                 )
                 Figure(formatDuration(totals.hours), theme)
             }
+            if (totals.showsTypes) {
+                Text(
+                    stringResource(
+                        Res.string.statistics_totals_hike_and_fly,
+                        pluralStringResource(
+                            Res.plurals.statistics_totals_flights,
+                            totals.hikeAndFlyFlights,
+                            totals.hikeAndFlyFlights,
+                        ),
+                        formatDuration(totals.hikeAndFlyHours),
+                    ),
+                    color = theme.textPrimary,
+                )
+            }
             // The years cannot add up to the overall total when part of it has no date; this says where it comes from.
             if (totals.flightsBeforeTracking > 0 || totals.hoursBeforeTracking.isPositive()) {
                 Text(
@@ -66,12 +83,28 @@ fun TotalsCard(
                     TableCell(stringResource(Res.string.statistics_table_year), FIRST_COLUMN, bold = true)
                     TableCell(stringResource(Res.string.statistics_totals_flights_column), COLUMN, bold = true)
                     TableCell(stringResource(Res.string.statistics_totals_hours_column), COLUMN, bold = true)
+                    if (totals.showsTypes) {
+                        TableCell(
+                            stringResource(Res.string.statistics_totals_hike_flights_column),
+                            WIDE_COLUMN,
+                            bold = true,
+                        )
+                        TableCell(
+                            stringResource(Res.string.statistics_totals_hike_hours_column),
+                            WIDE_COLUMN,
+                            bold = true,
+                        )
+                    }
                 }
                 totals.years.forEach { year ->
                     Row {
                         TableCell(year.year.toString(), FIRST_COLUMN)
                         TableCell(year.flights.toString(), COLUMN)
                         TableCell(formatHoursAndMinutes(year.hours.inWholeMinutes), COLUMN)
+                        if (totals.showsTypes) {
+                            TableCell(year.hikeAndFlyFlights.toString(), WIDE_COLUMN)
+                            TableCell(formatHoursAndMinutes(year.hikeAndFlyHours.inWholeMinutes), WIDE_COLUMN)
+                        }
                     }
                 }
             }

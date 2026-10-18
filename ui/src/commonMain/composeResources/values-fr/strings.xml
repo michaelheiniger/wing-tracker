@@ -608,6 +608,9 @@
     <string name="statistics_totals_before_tracking">Dont %1$d vols et %2$s d'avant le suivi, qui n'appartiennent à aucune année</string>
     <string name="statistics_totals_flights_column">Vols</string>
     <string name="statistics_totals_hours_column">Heures (h:mm)</string>
+    <string name="statistics_totals_hike_and_fly">Dont vol rando : %1$s · %2$s</string>
+    <string name="statistics_totals_hike_flights_column">Vols rando</string>
+    <string name="statistics_totals_hike_hours_column">Heures rando</string>
     <string name="statistics_all_wings">Toutes les voiles</string>
     <string name="statistics_all_years">Toutes les années</string>
     <plurals name="statistics_totals_flights">

@@ -608,6 +608,9 @@
     <string name="statistics_totals_before_tracking">Davon %1$d Flüge und %2$s vor der Erfassung, die zu keinem Jahr gehören</string>
     <string name="statistics_totals_flights_column">Flüge</string>
     <string name="statistics_totals_hours_column">Stunden (h:mm)</string>
+    <string name="statistics_totals_hike_and_fly">Davon Hike &amp; Fly: %1$s · %2$s</string>
+    <string name="statistics_totals_hike_flights_column">Hike-&amp;-Fly-Flüge</string>
+    <string name="statistics_totals_hike_hours_column">Hike-&amp;-Fly-Stunden</string>
     <string name="statistics_all_wings">Alle Schirme</string>
     <string name="statistics_all_years">Alle Jahre</string>
     <plurals name="statistics_totals_flights">

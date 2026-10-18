@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
+- The statistics' "Totals" card tells how much of it was hike and fly, overall and per year in two more columns of its table, once your logbook has flights with a type.
 - Search the logbook by flight type: "From a site" and "Hike & fly" chips sit next to the wings, once your logbook has flights with a type. Flights of unknown type are left out while a type is chosen. The statistics banner names the chosen types.
 - Importing from Syride again offers to complete flights imported earlier: "Complete N flights" gives them Syride's flight type and the id of their take-off site. Only what is missing is filled in; a type you set and site names you typed stay as they are.
 - Flights imported from Syride remember Syride's own id of their take-off site. Their page has a "Site on Syride" button under the take-off site, which opens the site's page on Syride in your browser.

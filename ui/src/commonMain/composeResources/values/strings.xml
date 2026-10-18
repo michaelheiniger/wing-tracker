@@ -608,6 +608,9 @@
     <string name="statistics_totals_before_tracking">Including %1$d flights and %2$s from before tracking, which belong to no year</string>
     <string name="statistics_totals_flights_column">Flights</string>
     <string name="statistics_totals_hours_column">Hours (h:mm)</string>
+    <string name="statistics_totals_hike_and_fly">Of which hike &amp; fly: %1$s · %2$s</string>
+    <string name="statistics_totals_hike_flights_column">Hike &amp; fly flights</string>
+    <string name="statistics_totals_hike_hours_column">Hike &amp; fly hours</string>
     <string name="statistics_all_wings">All wings</string>
     <string name="statistics_all_years">All years</string>
     <plurals name="statistics_totals_flights">

@@ -4,6 +4,7 @@ import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightFilter
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.gear.GearStatus
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
@@ -74,7 +75,7 @@ class GetStatistics(
                     steps.map { (date, total) -> CumulativeFlightsPoint(date, total) }
                 },
             sinceLastCheck = if (filter.isActive) emptyList() else sinceLastCheckOf(ordered, flightsByWing),
-            totals = totalsOf(yearly, yearlyFlights, ordered, counting = !filter.isActive),
+            totals = totalsOf(yearly, yearlyFlights, counted, keyOfWing, ordered, counting = !filter.isActive),
             until = until,
             unreadable = loadedFlights.unreadable + loadedWings.unreadable,
         )
@@ -125,30 +126,42 @@ class GetStatistics(
     }
 
     // Built from the yearly figures, which cover the same years, so the totals always match the charts' sums.
+    // The flights are split by type the same way: only those on a wing with a series count.
     private fun totalsOf(
         yearly: List<YearlyHours>,
         yearlyFlights: List<YearlyFlights>,
+        counted: List<Flight>,
+        keyOfWing: Map<WingId, SeriesKey>,
         wings: List<Wing>,
         counting: Boolean,
-    ) = Totals(
-        years =
-            yearly.zip(yearlyFlights) { hours, flights ->
-                YearTotal(
-                    hours.year,
-                    flights.counts.values.sum(),
-                    hours.hours.values.fold(Duration.ZERO, Duration::plus),
-                )
-            },
-        flightsBeforeTracking = if (counting) wings.sumOf { it.details.flightsBeforeTracking } else 0,
-        hoursBeforeTracking =
-            if (counting) {
-                wings.fold(
-                    Duration.ZERO,
-                ) { sum, wing -> sum + wing.details.hoursBeforeTracking }
-            } else {
-                Duration.ZERO
-            },
-    )
+    ): Totals {
+        val charted = counted.filter { it.details.wingId in keyOfWing }
+        val hikesByYear =
+            charted.filter { it.details.type == FlightType.HikeAndFly }.groupBy { it.details.date.year }
+        return Totals(
+            years =
+                yearly.zip(yearlyFlights) { hours, flights ->
+                    val hikes = hikesByYear[hours.year].orEmpty()
+                    YearTotal(
+                        hours.year,
+                        flights.counts.values.sum(),
+                        hours.hours.values.fold(Duration.ZERO, Duration::plus),
+                        hikeAndFlyFlights = hikes.size,
+                        hikeAndFlyHours = hikes.fold(Duration.ZERO) { sum, f -> sum + f.details.duration },
+                    )
+                },
+            flightsBeforeTracking = if (counting) wings.sumOf { it.details.flightsBeforeTracking } else 0,
+            hoursBeforeTracking =
+                if (counting) {
+                    wings.fold(
+                        Duration.ZERO,
+                    ) { sum, wing -> sum + wing.details.hoursBeforeTracking }
+                } else {
+                    Duration.ZERO
+                },
+            showsTypes = charted.any { it.details.type != null },
+        )
+    }
 
     // Retired wings are left out: nothing is left to check on them.
     private fun sinceLastCheckOf(

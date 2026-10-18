@@ -60,6 +60,9 @@ data class YearTotal(
     val year: Int,
     val flights: Int,
     val hours: Duration,
+    // Part of [flights] and [hours].
+    val hikeAndFlyFlights: Int = 0,
+    val hikeAndFlyHours: Duration = Duration.ZERO,
 )
 
 /** All wings together, retired ones included: the pilot's own totals, whatever the charts show. */
@@ -69,9 +72,15 @@ data class Totals(
     // Entered on the wings without a date, so they count in the overall total but in no year.
     val flightsBeforeTracking: Int,
     val hoursBeforeTracking: Duration,
+    // Whether any counted flight has a type; the split is not offered to a pilot who never sets one.
+    val showsTypes: Boolean = false,
 ) {
     val flights: Int get() = years.sumOf { it.flights } + flightsBeforeTracking
     val hours: Duration get() = years.fold(hoursBeforeTracking) { sum, year -> sum + year.hours }
+
+    // Flights before tracking have no type, so they are never hike-and-fly.
+    val hikeAndFlyFlights: Int get() = years.sumOf { it.hikeAndFlyFlights }
+    val hikeAndFlyHours: Duration get() = years.fold(Duration.ZERO) { sum, year -> sum + year.hikeAndFlyHours }
 }
 
 data class Statistics(

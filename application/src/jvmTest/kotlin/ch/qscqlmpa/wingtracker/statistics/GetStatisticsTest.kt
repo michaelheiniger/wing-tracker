@@ -6,6 +6,7 @@ import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.FlightFilter
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.gear.Acquisition
 import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.GearStatus
@@ -69,9 +70,10 @@ private fun aFlight(
     wingId: String,
     date: LocalDate,
     duration: Duration = 60.minutes,
+    type: FlightType? = null,
 ) = Flight(
     id = FlightId("flight-${flightCounter++}"),
-    details = FlightDetails(date = date, duration = duration, wingId = WingId(wingId)),
+    details = FlightDetails(date = date, duration = duration, wingId = WingId(wingId), type = type),
     loggedAt = Instant.parse("2026-10-01T10:00:00Z"),
 )
 
@@ -380,6 +382,44 @@ class GetStatisticsTest {
                     YearTotal(2025, 0, Duration.ZERO),
                     YearTotal(2026, 1, 15.minutes),
                 )
+            }
+
+        @Test
+        fun `splits out the hike-and-fly flights of each year`() =
+            runTest {
+                // given
+                givenStored(
+                    listOf(aWing("w-1")),
+                    aFlight("w-1", LocalDate(2025, 6, 1), 40.minutes, FlightType.HikeAndFly),
+                    aFlight("w-1", LocalDate(2025, 6, 2), 90.minutes, FlightType.Site),
+                    aFlight("w-1", LocalDate(2026, 7, 1), 15.minutes),
+                    aFlight("w-1", LocalDate(2026, 7, 2), 25.minutes, FlightType.HikeAndFly),
+                )
+
+                // when
+                val totals = statistics().totals
+
+                // then
+                assertThat(totals.years).containsExactly(
+                    YearTotal(2025, 2, 130.minutes, hikeAndFlyFlights = 1, hikeAndFlyHours = 40.minutes),
+                    YearTotal(2026, 2, 40.minutes, hikeAndFlyFlights = 1, hikeAndFlyHours = 25.minutes),
+                )
+                assertThat(totals.hikeAndFlyFlights).isEqualTo(2)
+                assertThat(totals.hikeAndFlyHours).isEqualTo(65.minutes)
+                assertThat(totals.showsTypes).isTrue()
+            }
+
+        @Test
+        fun `does not split by type when no flight has one`() =
+            runTest {
+                // given
+                givenStored(listOf(aWing("w-1")), aFlight("w-1", LocalDate(2025, 6, 1)))
+
+                // when
+                val totals = statistics().totals
+
+                // then
+                assertThat(totals.showsTypes).isFalse()
             }
 
         @Test
