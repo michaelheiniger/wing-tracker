@@ -670,6 +670,12 @@
     <string name="flight_detail_wing">Wing</string>
     <string name="flight_detail_takeoff_site">Take-off</string>
     <string name="flight_detail_landing_site">Landing</string>
+    <string name="site_source_manual">Entered by you</string>
+    <string name="site_source_syride">Syride</string>
+    <string name="site_source_spreadsheet">Spreadsheet</string>
+    <string name="flight_detail_site_other">%1$s: %2$s</string>
+    <string name="field_site_fallback">From %1$s: %2$s</string>
+    <string name="field_site_replaces">Replaces “%2$s” from %1$s</string>
     <string name="flight_detail_distance">Distance</string>
     <string name="flight_detail_top_altitude">Top altitude</string>
     <string name="flight_detail_instrument">Instrument</string>

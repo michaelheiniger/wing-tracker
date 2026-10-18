@@ -70,10 +70,30 @@ class FlightFilterTest {
         @Test
         fun `ignores case and accents on both sides`() {
             // given
-            val atChateau = aFlight(details = aFlightDetails().copy(takeOffSite = "Château-d'Oex"))
+            val atChateau =
+                aFlight(details = aFlightDetails().copy(takeOffSite = SiteNames.of(SiteSource.Manual, "Château-d'Oex")))
 
             // when
             val matches = FlightFilter(text = "CHATEAU").matches(atChateau, wingName)
+
+            // then
+            assertThat(matches).isTrue()
+        }
+
+        @Test
+        fun `finds a site by the name of a source that is not shown`() {
+            // given
+            val renamed =
+                aFlight(
+                    details =
+                        aFlightDetails().copy(
+                            takeOffSite =
+                                SiteNames.of(SiteSource.Syride, "Niederhorn").with(SiteSource.Manual, "Vorsass"),
+                        ),
+                )
+
+            // when
+            val matches = FlightFilter(text = "niederhorn").matches(renamed, wingName)
 
             // then
             assertThat(matches).isTrue()

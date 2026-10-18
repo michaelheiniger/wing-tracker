@@ -136,17 +136,12 @@ class PrepareAirtimeExport(
 
     /** air-time's take-off site of the same name, for manual entries only: a track tells air-time where it was. */
     private suspend fun withTakeOffIds(candidates: List<AirtimeExportCandidate>): List<AirtimeExportCandidate> {
-        if (candidates.all {
-                it.withTrack ||
-                    it.flight.details.takeOffSite
-                        .isNullOrBlank()
-            }
-        ) {
+        if (candidates.all { it.withTrack || it.flight.details.takeOffSite.shown == null }) {
             return candidates
         }
         val byName = account.takeOffs().associateBy({ it.name.trim().lowercase() }, { it.id })
         return candidates.map { candidate ->
-            val site = candidate.flight.details.takeOffSite
+            val site = candidate.flight.details.takeOffSite.shown
             if (candidate.withTrack || site == null) {
                 candidate
             } else {

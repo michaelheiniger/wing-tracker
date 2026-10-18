@@ -3,8 +3,11 @@ package ch.qscqlmpa.wingtracker.storage.json
 import ch.qscqlmpa.wingtracker.attachments.Attachment
 import ch.qscqlmpa.wingtracker.attachments.AttachmentId
 import ch.qscqlmpa.wingtracker.flights.ExternalReference
+import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.IgcFile
+import ch.qscqlmpa.wingtracker.flights.SiteNames
+import ch.qscqlmpa.wingtracker.flights.SiteSource
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -26,6 +29,24 @@ class JsonFlightRepositoryTest {
     lateinit var dataDirectory: Path
 
     private val repository by lazy { JsonFlightRepository(dataDirectory) }
+
+    /** Rewrites the stored [flight] the way [schemaVersion] wrote it: without [newerKeys], one name per site. */
+    private fun rewriteAsSchema(
+        schemaVersion: Int,
+        flight: Flight,
+        newerKeys: Set<String> = emptySet(),
+    ) {
+        val file = dataDirectory.resolve("flights/${flight.id.value}.json")
+        val document = Json.parseToJsonElement(file.readText()).jsonObject
+        val legacy =
+            mapOf(
+                "schemaVersion" to JsonPrimitive(schemaVersion),
+                "takeOffSite" to JsonPrimitive(flight.details.takeOffSite.shown),
+                "landingSite" to JsonPrimitive(flight.details.landingSite.shown),
+            )
+        val dropped = newerKeys + setOf("takeOffSiteNames", "landingSiteNames")
+        file.writeText(JsonObject(document.filterKeys { it !in dropped } + legacy).toString())
+    }
 
     @Nested
     inner class SaveAndFindById {
@@ -50,7 +71,12 @@ class JsonFlightRepositoryTest {
                 val full = aStoredFlight()
                 val flight =
                     full.copy(
-                        details = full.details.copy(takeOffSite = null, landingSite = null, notes = null),
+                        details =
+                            full.details.copy(
+                                takeOffSite = SiteNames.NONE,
+                                landingSite = SiteNames.NONE,
+                                notes = null,
+                            ),
                     )
                 repository.save(flight)
 
@@ -59,6 +85,67 @@ class JsonFlightRepositoryTest {
 
                 // then
                 assertThat(found).usingRecursiveComparison().isEqualTo(flight)
+            }
+
+        @Test
+        fun `restores the site names of every source`() =
+            runTest {
+                // given
+                val base = aStoredFlight()
+                val flight =
+                    base.copy(
+                        details =
+                            base.details.copy(
+                                takeOffSite =
+                                    SiteNames(
+                                        mapOf(
+                                            SiteSource.Manual to "Niederhorn West",
+                                            SiteSource.Syride to "Niederhorn",
+                                            SiteSource.Spreadsheet to "Niederhorn (BE)",
+                                        ),
+                                    ),
+                                landingSite = SiteNames.of(SiteSource.Spreadsheet, "Beatenbucht"),
+                            ),
+                    )
+                repository.save(flight)
+
+                // when
+                val found = repository.findById(flight.id)
+
+                // then
+                assertThat(found).usingRecursiveComparison().isEqualTo(flight)
+            }
+
+        @Test
+        fun `reads a site name written before names had a source as typed by the pilot`() =
+            runTest {
+                // given
+                val flight = aStoredFlight()
+                repository.save(flight)
+                rewriteAsSchema(5, flight)
+
+                // when
+                val found = repository.findById(flight.id)
+
+                // then
+                assertThat(found?.details?.takeOffSite).isEqualTo(SiteNames.of(SiteSource.Manual, "Niederhorn"))
+                assertThat(found?.details?.landingSite).isEqualTo(SiteNames.of(SiteSource.Manual, "Beatenbucht"))
+            }
+
+        @Test
+        fun `reads the take-off site of a Syride flight written before names had a source as Syride's`() =
+            runTest {
+                // given
+                val flight = aStoredFlight().copy(importedFrom = ExternalReference("syride", "flight:3720061"))
+                repository.save(flight)
+                rewriteAsSchema(5, flight)
+
+                // when
+                val found = repository.findById(flight.id)
+
+                // then
+                assertThat(found?.details?.takeOffSite).isEqualTo(SiteNames.of(SiteSource.Syride, "Niederhorn"))
+                assertThat(found?.details?.landingSite).isEqualTo(SiteNames.of(SiteSource.Manual, "Beatenbucht"))
             }
 
         @Test
@@ -121,13 +208,7 @@ class JsonFlightRepositoryTest {
                 // given
                 val flight = aStoredFlight()
                 repository.save(flight)
-                val file = dataDirectory.resolve("flights/${flight.id.value}.json")
-                val document = Json.parseToJsonElement(file.readText()).jsonObject
-                file.writeText(
-                    JsonObject(
-                        document.filterKeys { it != "exports" } + ("schemaVersion" to JsonPrimitive(4)),
-                    ).toString(),
-                )
+                rewriteAsSchema(4, flight, newerKeys = setOf("exports"))
 
                 // when
                 val found = repository.findById(flight.id)
@@ -142,13 +223,7 @@ class JsonFlightRepositoryTest {
                 // given
                 val flight = aStoredFlight(takeOffTime = null)
                 repository.save(flight)
-                val file = dataDirectory.resolve("flights/${flight.id.value}.json")
-                val document = Json.parseToJsonElement(file.readText()).jsonObject
-                file.writeText(
-                    JsonObject(
-                        document.filterKeys { it != "takeOffTime" } + ("schemaVersion" to JsonPrimitive(3)),
-                    ).toString(),
-                )
+                rewriteAsSchema(3, flight, newerKeys = setOf("takeOffTime"))
 
                 // when
                 val found = repository.findById(flight.id)
@@ -163,7 +238,6 @@ class JsonFlightRepositoryTest {
                 // given
                 val flight = aStoredFlight(takeOffTime = null)
                 repository.save(flight)
-                val file = dataDirectory.resolve("flights/${flight.id.value}.json")
                 val newerKeys =
                     setOf(
                         "distanceKm",
@@ -173,12 +247,7 @@ class JsonFlightRepositoryTest {
                         "importedFromId",
                         "takeOffTime",
                     )
-                val document = Json.parseToJsonElement(file.readText()).jsonObject
-                file.writeText(
-                    JsonObject(
-                        document.filterKeys { it !in newerKeys } + ("schemaVersion" to JsonPrimitive(2)),
-                    ).toString(),
-                )
+                rewriteAsSchema(2, flight, newerKeys)
 
                 // when
                 val found = repository.findById(flight.id)
@@ -194,14 +263,8 @@ class JsonFlightRepositoryTest {
                 // given
                 val flight = aStoredFlight(takeOffTime = null)
                 repository.save(flight)
-                val file = dataDirectory.resolve("flights/${flight.id.value}.json")
                 val newerKeys = setOf("igcAttachmentId", "igcFileName", "igcChecksum", "takeOffTime")
-                val document = Json.parseToJsonElement(file.readText()).jsonObject
-                file.writeText(
-                    JsonObject(
-                        document.filterKeys { it !in newerKeys } + ("schemaVersion" to JsonPrimitive(1)),
-                    ).toString(),
-                )
+                rewriteAsSchema(1, flight, newerKeys)
 
                 // when
                 val found = repository.findById(flight.id)

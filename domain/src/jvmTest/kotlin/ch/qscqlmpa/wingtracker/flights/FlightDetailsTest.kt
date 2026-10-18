@@ -14,8 +14,8 @@ private fun aFlightDetails(duration: Duration = 95.minutes) =
         date = LocalDate(2026, 9, 20),
         duration = duration,
         wingId = WingId("3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47"),
-        takeOffSite = "Niederhorn",
-        landingSite = "Beatenbucht",
+        takeOffSite = SiteNames.of(SiteSource.Manual, "Niederhorn"),
+        landingSite = SiteNames.of(SiteSource.Manual, "Beatenbucht"),
         notes = "Thermic, smooth air",
     )
 

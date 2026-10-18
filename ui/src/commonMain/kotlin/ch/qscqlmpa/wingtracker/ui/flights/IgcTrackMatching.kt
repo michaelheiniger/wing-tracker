@@ -103,7 +103,7 @@ internal fun MatchLine(
         listOfNotNull(
             details.date.toDisplay(),
             details.takeOffTime?.toDisplay(),
-            details.takeOffSite,
+            details.takeOffSite.shown,
             formatDuration(details.duration),
         ).joinToString(" · ")
     val why =

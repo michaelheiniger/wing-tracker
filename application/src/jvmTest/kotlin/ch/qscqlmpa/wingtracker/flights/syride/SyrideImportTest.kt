@@ -8,6 +8,8 @@ import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.flights.InMemoryWings
+import ch.qscqlmpa.wingtracker.flights.SiteNames
+import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.flights.aFixedClock
 import ch.qscqlmpa.wingtracker.flights.aFlight
 import ch.qscqlmpa.wingtracker.flights.aFlightDetails
@@ -210,7 +212,7 @@ class SyrideImportTest {
                 assertThat(result.imported).isEqualTo(1)
                 val flight = saved.single()
                 assertThat(flight.details.wingId).isEqualTo(skyDancer.id)
-                assertThat(flight.details.takeOffSite).isEqualTo("Dent De Jaman")
+                assertThat(flight.details.takeOffSite).isEqualTo(SiteNames.of(SiteSource.Syride, "Dent De Jaman"))
                 assertThat(flight.details.notes).isEqualTo("Course Tour du Bocal vol 3")
                 assertThat(flight.details.distanceKm).isEqualTo(15.0)
                 assertThat(flight.details.topAltitudeMeters).isEqualTo(2464)

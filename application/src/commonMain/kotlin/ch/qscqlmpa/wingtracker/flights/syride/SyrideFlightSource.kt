@@ -2,6 +2,8 @@ package ch.qscqlmpa.wingtracker.flights.syride
 
 import ch.qscqlmpa.wingtracker.flights.ExternalReference
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
+import ch.qscqlmpa.wingtracker.flights.SiteNames
+import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.flights.importing.ImportableFlight
 import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
@@ -59,7 +61,7 @@ data class SyrideFlight(
             date = date,
             duration = duration,
             wingId = wingId,
-            takeOffSite = siteName,
+            takeOffSite = SiteNames.of(SiteSource.Syride, siteName),
             notes = name,
             takeOffTime = startTime,
             distanceKm = distanceKm,

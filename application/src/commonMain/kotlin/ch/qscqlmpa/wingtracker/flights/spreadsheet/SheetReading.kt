@@ -2,6 +2,8 @@ package ch.qscqlmpa.wingtracker.flights.spreadsheet
 
 import ch.qscqlmpa.wingtracker.flights.ExternalReference
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
+import ch.qscqlmpa.wingtracker.flights.SiteNames
+import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.flights.importing.ImportableFlight
 import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
@@ -36,8 +38,8 @@ data class SpreadsheetFlight(
             date = date,
             duration = duration,
             wingId = wingId,
-            takeOffSite = takeOffSite,
-            landingSite = landingSite,
+            takeOffSite = SiteNames.of(SiteSource.Spreadsheet, takeOffSite),
+            landingSite = SiteNames.of(SiteSource.Spreadsheet, landingSite),
             notes = notes,
             distanceKm = distanceKm,
         )

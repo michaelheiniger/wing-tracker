@@ -313,15 +313,13 @@ private fun FlightCard(
             )
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(wingName, style = MaterialTheme.typography.titleMedium)
+                val takeOff = details.takeOffSite.shown
+                val landing = details.landingSite.shown
                 val sites =
-                    when {
-                        details.takeOffSite != null && details.landingSite != null -> {
-                            stringResource(Res.string.flight_sites, details.takeOffSite!!, details.landingSite!!)
-                        }
-
-                        else -> {
-                            details.takeOffSite ?: details.landingSite
-                        }
+                    if (takeOff != null && landing != null) {
+                        stringResource(Res.string.flight_sites, takeOff, landing)
+                    } else {
+                        takeOff ?: landing
                     }
                 sites?.let { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 importedFacts(details)?.let {

@@ -5,6 +5,8 @@ import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.InMemoryWings
+import ch.qscqlmpa.wingtracker.flights.SiteNames
+import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.flights.aFixedClock
 import ch.qscqlmpa.wingtracker.flights.aFlight
 import ch.qscqlmpa.wingtracker.flights.aWingInService
@@ -161,7 +163,14 @@ class SpreadsheetImportTest {
             val edited =
                 aFlight(
                     details =
-                        FlightDetails(row.date, row.duration, birdy.id, " sonchaux", "RENNAZ", notes = "Edited later"),
+                        FlightDetails(
+                            row.date,
+                            row.duration,
+                            birdy.id,
+                            SiteNames.of(SiteSource.Manual, "sonchaux"),
+                            SiteNames.of(SiteSource.Manual, "RENNAZ"),
+                            notes = "Edited later",
+                        ),
                 )
 
             // when / then
@@ -204,6 +213,22 @@ class SpreadsheetImportTest {
                 assertThat(result.imported).isEqualTo(1)
                 assertThat(saved.single().details).usingRecursiveComparison().isEqualTo(row.toDetails(birdy.id))
                 assertThat(saved.single().importedFrom).isNull()
+            }
+
+        @Test
+        fun `records the spreadsheet as the source of the site names`() =
+            runTest {
+                // given
+                givenStored()
+                val row = aSpreadsheetFlight()
+
+                // when
+                import(listOf(row to WingTarget.Existing(birdy.id)), emptyMap())
+
+                // then
+                val details = saved.single().details
+                assertThat(details.takeOffSite).isEqualTo(SiteNames.of(SiteSource.Spreadsheet, "Sonchaux"))
+                assertThat(details.landingSite).isEqualTo(SiteNames.of(SiteSource.Spreadsheet, "Rennaz"))
             }
 
         @Test

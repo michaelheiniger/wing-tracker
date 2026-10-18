@@ -3,6 +3,8 @@ package ch.qscqlmpa.wingtracker.ui.flights
 import androidx.compose.runtime.Composable
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
+import ch.qscqlmpa.wingtracker.flights.SiteNames
+import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.ui.formatHoursAndMinutes
 import ch.qscqlmpa.wingtracker.ui.parseDate
@@ -18,7 +20,10 @@ import ch.qscqlmpa.wingtracker.ui.resources.error_time
 import ch.qscqlmpa.wingtracker.ui.toDisplay
 import org.jetbrains.compose.resources.stringResource
 
-/** What the pilot typed or picked; parsing lives in [validate] so it is testable without any UI. */
+/**
+ * What the pilot typed or picked; parsing lives in [validate] so it is testable without any UI. The site fields hold
+ * the pilot's own names; [takeOffSiteNames] and [landingSiteNames] keep what the other sources gave (ADR 0030).
+ */
 data class FlightFormInput(
     val date: String = "",
     val takeOffTime: String = "",
@@ -30,6 +35,8 @@ data class FlightFormInput(
     val distanceKm: String = "",
     val topAltitudeMeters: String = "",
     val instrument: String = "",
+    val takeOffSiteNames: SiteNames = SiteNames.NONE,
+    val landingSiteNames: SiteNames = SiteNames.NONE,
 ) {
     companion object {
         fun from(flight: Flight): FlightFormInput =
@@ -41,8 +48,8 @@ data class FlightFormInput(
                         .orEmpty(),
                 wingId = flight.details.wingId,
                 duration = formatHoursAndMinutes(flight.details.duration.inWholeMinutes),
-                takeOffSite = flight.details.takeOffSite.orEmpty(),
-                landingSite = flight.details.landingSite.orEmpty(),
+                takeOffSite = flight.details.takeOffSite[SiteSource.Manual].orEmpty(),
+                landingSite = flight.details.landingSite[SiteSource.Manual].orEmpty(),
                 notes = flight.details.notes.orEmpty(),
                 distanceKm =
                     flight.details.distanceKm
@@ -53,6 +60,8 @@ data class FlightFormInput(
                         ?.toString()
                         .orEmpty(),
                 instrument = flight.details.instrument.orEmpty(),
+                takeOffSiteNames = flight.details.takeOffSite,
+                landingSiteNames = flight.details.landingSite,
             )
     }
 }
@@ -116,8 +125,8 @@ fun FlightFormInput.validate(): FlightFormResult {
             date = checkNotNull(flightDate),
             duration = checkNotNull(flightDuration),
             wingId = checkNotNull(wingId),
-            takeOffSite = takeOffSite.trim().ifEmpty { null },
-            landingSite = landingSite.trim().ifEmpty { null },
+            takeOffSite = takeOffSiteNames.with(SiteSource.Manual, takeOffSite),
+            landingSite = landingSiteNames.with(SiteSource.Manual, landingSite),
             notes = notes.trim().ifEmpty { null },
             takeOffTime = time,
             distanceKm = distance,

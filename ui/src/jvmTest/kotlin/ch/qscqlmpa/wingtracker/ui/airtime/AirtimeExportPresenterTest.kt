@@ -3,6 +3,8 @@ package ch.qscqlmpa.wingtracker.ui.airtime
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.FlightId
+import ch.qscqlmpa.wingtracker.flights.SiteNames
+import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeException
 import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeExportCandidate
 import ch.qscqlmpa.wingtracker.flights.airtime.AirtimeExportDraft
@@ -55,7 +57,13 @@ private fun aCandidate(
     flight =
         Flight(
             FlightId(id),
-            FlightDetails(LocalDate(2026, 9, 20), 95.minutes, BIRDY.id, "Niederhorn", takeOffTime = LocalTime(13, 5)),
+            FlightDetails(
+                LocalDate(2026, 9, 20),
+                95.minutes,
+                BIRDY.id,
+                SiteNames.of(SiteSource.Manual, "Niederhorn"),
+                takeOffTime = LocalTime(13, 5),
+            ),
             Instant.parse("2026-09-20T17:00:00Z"),
         ),
     wing = BIRDY,

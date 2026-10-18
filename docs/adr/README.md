@@ -36,6 +36,7 @@ ADRs capture **why** wing-tracker is built the way it is. They use the
 | [0027](0027-flight-map-with-mapcompose-and-a-tile-port.md) | The flight map is drawn with MapCompose from tiles behind a port | Accepted |
 | [0028](0028-ground-altitude-from-terrain-tiles.md) | The ground under a track comes from terrain tiles behind a port | Accepted |
 | [0029](0029-airtime-export-through-a-port.md) | Flights are exported to air-time through its API, with a token kept by the OS | Accepted |
+| [0030](0030-site-names-are-kept-per-source.md) | Site names are kept per source | Accepted |
 
 ## Rules
 

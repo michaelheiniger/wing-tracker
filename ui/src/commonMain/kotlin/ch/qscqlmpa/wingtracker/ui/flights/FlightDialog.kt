@@ -30,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
+import ch.qscqlmpa.wingtracker.flights.SiteNames
+import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.ui.components.AppDialog
 import ch.qscqlmpa.wingtracker.ui.components.AppExposedDropdownMenu
@@ -50,6 +52,8 @@ import ch.qscqlmpa.wingtracker.ui.resources.field_flight_top_altitude
 import ch.qscqlmpa.wingtracker.ui.resources.field_flight_wing
 import ch.qscqlmpa.wingtracker.ui.resources.field_landing_site
 import ch.qscqlmpa.wingtracker.ui.resources.field_notes
+import ch.qscqlmpa.wingtracker.ui.resources.field_site_fallback
+import ch.qscqlmpa.wingtracker.ui.resources.field_site_replaces
 import ch.qscqlmpa.wingtracker.ui.resources.field_takeoff_site
 import ch.qscqlmpa.wingtracker.ui.resources.flight_form_title_add
 import ch.qscqlmpa.wingtracker.ui.resources.flight_form_title_edit
@@ -127,18 +131,18 @@ fun FlightDialog(
                     modifier = Modifier.fillMaxWidth().focusRequester(durationFocus),
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
+                    SiteField(
+                        label = stringResource(Res.string.field_takeoff_site),
                         value = input.takeOffSite,
+                        imported = input.takeOffSiteNames,
                         onValueChange = { v -> presenter.change { it.copy(takeOffSite = v) } },
-                        label = { Text(stringResource(Res.string.field_takeoff_site)) },
-                        singleLine = true,
                         modifier = Modifier.weight(1f),
                     )
-                    OutlinedTextField(
+                    SiteField(
+                        label = stringResource(Res.string.field_landing_site),
                         value = input.landingSite,
+                        imported = input.landingSiteNames,
                         onValueChange = { v -> presenter.change { it.copy(landingSite = v) } },
-                        label = { Text(stringResource(Res.string.field_landing_site)) },
-                        singleLine = true,
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -195,6 +199,39 @@ fun FlightDialog(
             }
         }
     }
+}
+
+/**
+ * The pilot's own name for a site. What an import gave stays visible below it, so the pilot sees which name the
+ * logbook shows while the field is empty, and what a typed name replaces (ADR 0030).
+ */
+@Composable
+private fun SiteField(
+    label: String,
+    value: String,
+    imported: SiteNames,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier,
+) {
+    val fallback = imported.with(SiteSource.Manual, null)
+    val source = fallback.shownSource
+    val name = fallback.shown
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        supportingText =
+            if (source == null || name == null || value.trim() == name) {
+                null
+            } else {
+                {
+                    val hint = if (value.isBlank()) Res.string.field_site_fallback else Res.string.field_site_replaces
+                    Text(stringResource(hint, source.label(), name))
+                }
+            },
+        singleLine = true,
+        modifier = modifier,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

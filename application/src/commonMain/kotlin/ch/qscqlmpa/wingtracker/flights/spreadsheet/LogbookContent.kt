@@ -45,8 +45,8 @@ class LogbookContent(
                 Signature(
                     details.date,
                     details.wingId,
-                    details.takeOffSite.normalized(),
-                    details.landingSite.normalized(),
+                    details.takeOffSite.shown.normalized(),
+                    details.landingSite.shown.normalized(),
                     details.duration,
                 )
 

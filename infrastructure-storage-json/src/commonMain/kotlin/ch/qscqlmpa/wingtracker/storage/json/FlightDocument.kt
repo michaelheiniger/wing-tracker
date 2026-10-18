@@ -8,6 +8,9 @@ import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.FlightExport
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.IgcFile
+import ch.qscqlmpa.wingtracker.flights.SiteNames
+import ch.qscqlmpa.wingtracker.flights.SiteSource
+import ch.qscqlmpa.wingtracker.flights.syride.SYRIDE_SYSTEM
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -23,6 +26,7 @@ internal data class FlightDocument(
     val date: LocalDate,
     val durationMinutes: Long,
     val wingId: String,
+    // Up to schema 5, a site had one name with no source; schema 6 replaced these with the names per source.
     val takeOffSite: String? = null,
     val landingSite: String? = null,
     val notes: String? = null,
@@ -42,6 +46,9 @@ internal data class FlightDocument(
     val takeOffTime: LocalTime? = null,
     // Added in schema 5: the services the flight was sent to.
     val exports: List<FlightExportDocument> = emptyList(),
+    // Added in schema 6: each site's name per source (ADR 0030).
+    val takeOffSiteNames: List<SiteNameDocument> = emptyList(),
+    val landingSiteNames: List<SiteNameDocument> = emptyList(),
 ) {
     fun toDomain(): Flight =
         Flight(
@@ -51,8 +58,8 @@ internal data class FlightDocument(
                     date = date,
                     duration = durationMinutes.minutes,
                     wingId = WingId(wingId),
-                    takeOffSite = takeOffSite,
-                    landingSite = landingSite,
+                    takeOffSite = siteNames(takeOffSiteNames, takeOffSite, legacyTakeOffSource()),
+                    landingSite = siteNames(landingSiteNames, landingSite, SiteSource.Manual),
                     notes = notes,
                     takeOffTime = takeOffTime,
                     distanceKm = distanceKm,
@@ -64,6 +71,22 @@ internal data class FlightDocument(
             importedFrom = importedFrom(),
             exports = exports.map { it.toDomain() },
         )
+
+    private fun siteNames(
+        names: List<SiteNameDocument>,
+        legacyName: String?,
+        legacySource: SiteSource,
+    ): SiteNames =
+        if (schemaVersion < SITE_NAMES_SCHEMA_VERSION) {
+            SiteNames.of(legacySource, legacyName)
+        } else {
+            SiteNames(names.associate { it.source.toSource() to it.name })
+        }
+
+    // The source of a name stored without one is a guess: Syride only ever gave the take-off site, and a pilot may
+    // have edited it since (ADR 0030).
+    private fun legacyTakeOffSource() =
+        if (importedFromSystem == SYRIDE_SYSTEM) SiteSource.Syride else SiteSource.Manual
 
     private fun importedFrom(): ExternalReference? {
         if (importedFromSystem == null || importedFromId == null) return null
@@ -77,9 +100,10 @@ internal data class FlightDocument(
 
     companion object {
         // Version 2 added the imported track, version 3 the details imported from other services, version 4 the
-        // take-off time, version 5 the exports. Older application versions treat newer data as unsupported and leave
-        // it untouched.
-        const val CURRENT_SCHEMA_VERSION = 5
+        // take-off time, version 5 the exports, version 6 the site names per source. Older application versions treat
+        // newer data as unsupported and leave it untouched.
+        const val CURRENT_SCHEMA_VERSION = 6
+        private const val SITE_NAMES_SCHEMA_VERSION = 6
 
         fun from(flight: Flight) =
             FlightDocument(
@@ -87,8 +111,6 @@ internal data class FlightDocument(
                 date = flight.details.date,
                 durationMinutes = flight.details.duration.inWholeMinutes,
                 wingId = flight.details.wingId.value,
-                takeOffSite = flight.details.takeOffSite,
-                landingSite = flight.details.landingSite,
                 notes = flight.details.notes,
                 loggedAt = flight.loggedAt.toString(),
                 igcAttachmentId =
@@ -105,6 +127,8 @@ internal data class FlightDocument(
                 importedFromId = flight.importedFrom?.id,
                 takeOffTime = flight.details.takeOffTime,
                 exports = flight.exports.map { FlightExportDocument(it.system, it.at.toString(), it.externalId) },
+                takeOffSiteNames = SiteNameDocument.from(flight.details.takeOffSite),
+                landingSiteNames = SiteNameDocument.from(flight.details.landingSite),
             )
     }
 }
@@ -118,3 +142,28 @@ internal data class FlightExportDocument(
 ) {
     fun toDomain() = FlightExport(system, Instant.parse(at), externalId)
 }
+
+@Serializable
+internal data class SiteNameDocument(
+    val source: String,
+    val name: String,
+) {
+    companion object {
+        // Ordered by precedence, so the file reads like the flight page.
+        fun from(names: SiteNames) =
+            SiteSource.entries.mapNotNull { source ->
+                names[source]?.let { SiteNameDocument(source.stored(), it) }
+            }
+    }
+}
+
+// The app's own words, so renaming an enum entry never changes stored data.
+private fun SiteSource.stored(): String =
+    when (this) {
+        SiteSource.Manual -> "manual"
+        SiteSource.Syride -> "syride"
+        SiteSource.Spreadsheet -> "spreadsheet"
+    }
+
+private fun String.toSource(): SiteSource =
+    SiteSource.entries.firstOrNull { it.stored() == this } ?: error("Unknown site name source: $this")

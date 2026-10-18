@@ -2,6 +2,8 @@ package ch.qscqlmpa.wingtracker.desktop.dev
 
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.LogFlight
+import ch.qscqlmpa.wingtracker.flights.SiteNames
+import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.flights.igc.ImportIgcFlight
 import ch.qscqlmpa.wingtracker.flights.igc.PrepareIgcImport
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
@@ -65,8 +67,8 @@ class FlightSeeder(
                     date = draft.date,
                     duration = checkNotNull(draft.duration) { "The sample track should contain a flight" },
                     wingId = wing.wing.id,
-                    takeOffSite = SAMPLE_SITES[index].first,
-                    landingSite = SAMPLE_SITES[index].second,
+                    takeOffSite = SiteNames.of(SiteSource.Manual, SAMPLE_SITES[index].first),
+                    landingSite = SiteNames.of(SiteSource.Manual, SAMPLE_SITES[index].second),
                     takeOffTime = draft.takeOffTime,
                 )
             import(details, file, draft.checksum)
@@ -88,7 +90,9 @@ class FlightSeeder(
             } else {
                 LocalTime(random.nextInt(FIRST_TAKE_OFF_HOUR, LAST_TAKE_OFF_HOUR + 1), random.nextInt(MINUTES_PER_HOUR))
             }
-        logFlight(FlightDetails(date, minutes.minutes, seeded.wing.id, site.first, site.second, note, takeOffTime))
+        val takeOffSite = SiteNames.of(SiteSource.Manual, site.first)
+        val landingSite = SiteNames.of(SiteSource.Manual, site.second)
+        logFlight(FlightDetails(date, minutes.minutes, seeded.wing.id, takeOffSite, landingSite, note, takeOffTime))
     }
 
     // Flying days are rare in winter and a bit more than weekly in summer; weekends are likelier.

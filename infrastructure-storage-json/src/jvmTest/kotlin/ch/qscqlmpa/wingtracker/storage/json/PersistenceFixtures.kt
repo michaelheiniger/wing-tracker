@@ -5,6 +5,8 @@ import ch.qscqlmpa.wingtracker.attachments.AttachmentId
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.FlightId
+import ch.qscqlmpa.wingtracker.flights.SiteNames
+import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.gear.Acquisition
 import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
 import ch.qscqlmpa.wingtracker.gear.CurrencyCode
@@ -76,8 +78,8 @@ fun aStoredFlight(
             date = LocalDate(2026, 9, 20),
             duration = 95.minutes,
             wingId = WingId(wingId),
-            takeOffSite = "Niederhorn",
-            landingSite = "Beatenbucht",
+            takeOffSite = SiteNames.of(SiteSource.Manual, "Niederhorn"),
+            landingSite = SiteNames.of(SiteSource.Manual, "Beatenbucht"),
             notes = notes,
             takeOffTime = takeOffTime,
         ),

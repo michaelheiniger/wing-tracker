@@ -61,8 +61,8 @@ fun aFlightDetails(
     date = date,
     duration = duration,
     wingId = wingId,
-    takeOffSite = "Niederhorn",
-    landingSite = "Beatenbucht",
+    takeOffSite = SiteNames.of(SiteSource.Manual, "Niederhorn"),
+    landingSite = SiteNames.of(SiteSource.Manual, "Beatenbucht"),
     notes = "Thermic, smooth air",
     takeOffTime = takeOffTime,
 )

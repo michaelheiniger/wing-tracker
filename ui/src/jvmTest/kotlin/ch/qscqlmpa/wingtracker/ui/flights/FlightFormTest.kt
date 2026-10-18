@@ -3,6 +3,8 @@ package ch.qscqlmpa.wingtracker.ui.flights
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.FlightId
+import ch.qscqlmpa.wingtracker.flights.SiteNames
+import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -44,8 +46,8 @@ class FlightFormTest {
                     date = LocalDate(2026, 9, 20),
                     duration = 95.minutes,
                     wingId = WingId("3f2b8a1e-7c4d-4e59-9a61-0d2c5b8e1f47"),
-                    takeOffSite = "Niederhorn",
-                    landingSite = "Beatenbucht",
+                    takeOffSite = SiteNames.of(SiteSource.Manual, "Niederhorn"),
+                    landingSite = SiteNames.of(SiteSource.Manual, "Beatenbucht"),
                     notes = "Thermic, smooth air",
                     takeOffTime = LocalTime(13, 5),
                 )
@@ -61,8 +63,8 @@ class FlightFormTest {
             val details = (input.validate() as FlightFormResult.Valid).details
 
             // then
-            assertThat(details.takeOffSite).isNull()
-            assertThat(details.landingSite).isNull()
+            assertThat(details.takeOffSite).isEqualTo(SiteNames.NONE)
+            assertThat(details.landingSite).isEqualTo(SiteNames.NONE)
             assertThat(details.notes).isNull()
         }
 
@@ -243,6 +245,45 @@ class FlightFormTest {
 
             // then
             assertThat(result).usingRecursiveComparison().isEqualTo(FlightFormResult.Valid(details))
+        }
+
+        @Test
+        fun `edits only the pilot's own site name and keeps the imported one`() {
+            // given
+            val details =
+                (aFlightFormInput().validate() as FlightFormResult.Valid).details.copy(
+                    takeOffSite = SiteNames.of(SiteSource.Syride, "Dent De Jaman"),
+                )
+            val flight = Flight(FlightId("flight-1"), details, Instant.parse("2026-09-20T17:00:00Z"))
+            val input = FlightFormInput.from(flight)
+
+            // when
+            val result = input.copy(takeOffSite = "Jaman").validate()
+
+            // then
+            assertThat(input.takeOffSite).isEmpty()
+            assertThat(
+                (result as FlightFormResult.Valid).details.takeOffSite.bySource,
+            ).containsExactlyInAnyOrderEntriesOf(
+                mapOf(SiteSource.Syride to "Dent De Jaman", SiteSource.Manual to "Jaman"),
+            )
+        }
+
+        @Test
+        fun `falls back to the imported site name when the pilot's own is cleared`() {
+            // given
+            val details =
+                (aFlightFormInput().validate() as FlightFormResult.Valid).details.copy(
+                    takeOffSite = SiteNames.of(SiteSource.Syride, "Dent De Jaman").with(SiteSource.Manual, "Jaman"),
+                )
+            val flight = Flight(FlightId("flight-1"), details, Instant.parse("2026-09-20T17:00:00Z"))
+
+            // when
+            val result = FlightFormInput.from(flight).copy(takeOffSite = " ").validate()
+
+            // then
+            assertThat((result as FlightFormResult.Valid).details.takeOffSite)
+                .isEqualTo(SiteNames.of(SiteSource.Syride, "Dent De Jaman"))
         }
     }
 }

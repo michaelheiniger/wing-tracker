@@ -247,7 +247,7 @@ private fun FlightRow(
                 "${details.date.toDisplay()}$time · ${formatDuration(details.duration)}",
                 style = MaterialTheme.typography.bodyLarge,
             )
-            Hint(listOfNotNull(candidate.wing.details.name, details.takeOffSite).joinToString(" · "))
+            Hint(listOfNotNull(candidate.wing.details.name, details.takeOffSite.shown).joinToString(" · "))
         }
         if (candidate.withTrack) {
             StatusBadge(stringResource(Res.string.airtime_kind_track), Severity.Neutral)

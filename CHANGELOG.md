@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Changed
+- Take-off and landing sites remember where their name came from: typed by you, Syride or a spreadsheet. A flight's page shows the name with its source, and below it what other sources call the site. When editing a flight, the site fields hold only your own name; an imported name stays as a hint below the field and is shown in the logbook while your field is empty. Searching the logbook finds a flight by any of its site names. Sites stored before are counted as Syride's for the take-off site of flights imported from Syride, and as typed by you otherwise.
+
 ## [0.3.0] - 2026-10-17
 
 ### Added

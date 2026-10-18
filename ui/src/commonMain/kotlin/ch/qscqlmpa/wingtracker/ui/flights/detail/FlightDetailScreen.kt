@@ -296,8 +296,8 @@ private fun Facts(
             Fact(Res.string.flight_detail_wing, wingName)
         }
         FactGroup(stringResource(Res.string.flight_detail_section_sites)) {
-            Fact(Res.string.flight_detail_takeoff_site, details.takeOffSite)
-            Fact(Res.string.flight_detail_landing_site, details.landingSite)
+            SiteFact(Res.string.flight_detail_takeoff_site, details.takeOffSite)
+            SiteFact(Res.string.flight_detail_landing_site, details.landingSite)
         }
         FactGroup(stringResource(Res.string.flight_detail_section_tracking)) {
             Fact(
@@ -392,7 +392,7 @@ internal fun Fact(
     label: StringResource,
     value: String?,
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(LABEL_GAP)) {
         Text(
             stringResource(label),
             modifier = Modifier.width(LABEL_WIDTH),
@@ -408,4 +408,8 @@ internal fun Fact(
 
 private val FACT_GROUP_WIDTH = 340.dp
 private val LABEL_WIDTH = 150.dp
+private val LABEL_GAP = 16.dp
+
+// Lines that belong to a fact's value start where its value does.
+internal val FACT_VALUE_INDENT = LABEL_WIDTH + LABEL_GAP
 private val PROFILE_HEIGHT = 200.dp

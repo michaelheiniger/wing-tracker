@@ -11,6 +11,8 @@ import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.flights.LogFlight
+import ch.qscqlmpa.wingtracker.flights.SiteNames
+import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.flights.UpdateFlight
 import ch.qscqlmpa.wingtracker.flights.igc.AttachIgcTrack
 import ch.qscqlmpa.wingtracker.flights.igc.FlightTrack
@@ -621,7 +623,13 @@ class IgcImportPresentersTest {
             withTrack: Boolean = false,
         ) = Flight(
             FlightId(id),
-            FlightDetails(LocalDate(2026, 9, 20), duration, WING_ID, "Niederhorn", takeOffTime = takeOffTime),
+            FlightDetails(
+                LocalDate(2026, 9, 20),
+                duration,
+                WING_ID,
+                SiteNames.of(SiteSource.Manual, "Niederhorn"),
+                takeOffTime = takeOffTime,
+            ),
             Instant.parse("2026-10-15T19:31:53Z"),
             igcFile = if (withTrack) IgcFile(Attachment(AttachmentId("igc-0"), "older.igc"), "9f0c41aa77e2") else null,
             importedFrom = ExternalReference("syride", "flight:3720061"),

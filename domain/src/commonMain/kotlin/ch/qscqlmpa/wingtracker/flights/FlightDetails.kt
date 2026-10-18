@@ -10,8 +10,8 @@ data class FlightDetails(
     val date: LocalDate,
     val duration: Duration,
     val wingId: WingId,
-    val takeOffSite: String? = null,
-    val landingSite: String? = null,
+    val takeOffSite: SiteNames = SiteNames.NONE,
+    val landingSite: SiteNames = SiteNames.NONE,
     val notes: String? = null,
     // Local time; it orders the flights of a day and ties a track to its flight (ADR 0026).
     val takeOffTime: LocalTime? = null,
