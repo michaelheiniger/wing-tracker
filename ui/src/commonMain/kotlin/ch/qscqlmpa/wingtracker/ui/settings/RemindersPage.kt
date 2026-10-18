@@ -3,7 +3,6 @@ package ch.qscqlmpa.wingtracker.ui.settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -29,7 +28,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.settings_calendar_hint
 import ch.qscqlmpa.wingtracker.ui.resources.settings_calendar_title
 import ch.qscqlmpa.wingtracker.ui.resources.settings_reminders_hint
 import ch.qscqlmpa.wingtracker.ui.resources.settings_reminders_title
-import ch.qscqlmpa.wingtracker.ui.resources.settings_save
 import ch.qscqlmpa.wingtracker.ui.resources.settings_saved
 import org.jetbrains.compose.resources.stringResource
 
@@ -94,9 +92,13 @@ private fun LeadTimes(presenter: ReminderSettingsPresenter) {
             modifier = Modifier.weight(1f),
         )
     }
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Button(onClick = presenter::save) { Text(stringResource(Res.string.settings_save)) }
-        if (presenter.saved) Text(stringResource(Res.string.settings_saved), color = MaterialTheme.colorScheme.primary)
+    // Saving happens without a button, so the pilot sees it did.
+    if (presenter.saved) {
+        Text(
+            stringResource(Res.string.settings_saved),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

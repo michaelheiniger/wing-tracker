@@ -18,6 +18,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Changed
 - The settings are split into pages: Appearance, Reminders, Backup, Data and logs, Updates and About, listed on the left of the settings. Each page groups its settings into cards and opens at its top; the settings return to the page you left. The version and the link to the changelog are shown on the About page instead of in a dialog.
 - Cloud storage in the settings shows a summary of your bucket (provider, region, bucket and how many backups are kept) instead of the whole form. "Set up…" or "Edit…" opens the form in a dialog, where "Test connection" checks what you typed before you save; "Cancel" drops your changes.
+- Reminder lead times and the backup reminder are saved as soon as what you type is valid, like the theme and the interface size; the "Save" button is gone. "Saved" confirms it, and a value that is not valid is marked on its field and not saved.
 
 ## [0.4.0] - 2026-10-18
 

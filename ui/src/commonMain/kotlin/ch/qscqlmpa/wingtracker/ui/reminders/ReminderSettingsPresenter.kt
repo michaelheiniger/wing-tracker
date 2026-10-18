@@ -14,7 +14,13 @@ import ch.qscqlmpa.wingtracker.ui.resources.settings_calendar_pick_title
 import ch.qscqlmpa.wingtracker.ui.toFailure
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.getString
 
 sealed interface ExportOutcome {
@@ -34,6 +40,9 @@ class CalendarWording(
 
 private const val CALENDAR_FILE_NAME = "wing-tracker.ics"
 
+// Long enough that typing "21" stores 21, not 2 and then 21.
+private const val SAVE_DELAY_MILLIS = 500L
+
 class ReminderSettingsPresenter(
     private val scope: CoroutineScope,
     private val useCases: RemindersUseCases,
@@ -52,18 +61,23 @@ class ReminderSettingsPresenter(
     var failure by mutableStateOf<Failure?>(null)
         private set
 
+    private var pendingSave: Job? = null
+
+    // Two saves are two read-modify-writes of the settings file; overlapping, one could undo the other.
+    private val writing = Mutex()
+
     fun load() =
         launchGuarded(FailureKind.LoadSettings) {
             val settings = useCases.getAppSettings()
             input = ReminderSettingsInput.from(settings.reminderLeadTimes, settings.backupReminder)
         }
 
+    /** Saves what is typed as soon as it is valid, like the other settings, which apply at once. */
     fun change(update: (ReminderSettingsInput) -> ReminderSettingsInput) {
         input = update(input)
         saved = false
-    }
-
-    fun save() {
+        // A value typed since makes a save still waiting obsolete.
+        pendingSave?.cancel()
         when (val result = input.validate()) {
             is ReminderSettingsResult.Invalid -> {
                 errors = result.errors
@@ -71,12 +85,19 @@ class ReminderSettingsPresenter(
 
             is ReminderSettingsResult.Valid -> {
                 errors = emptyMap()
-                launchGuarded(FailureKind.SaveSettings) {
-                    useCases.saveReminderLeadTimes(result.leadTimes)
-                    useCases.saveBackupReminder(result.backup)
-                    saved = true
-                    onLeadTimesSaved()
-                }
+                pendingSave =
+                    launchGuarded(FailureKind.SaveSettings) {
+                        delay(SAVE_DELAY_MILLIS)
+                        // Once begun, a save is finished, so the file never holds half of it.
+                        withContext(NonCancellable) {
+                            writing.withLock {
+                                useCases.saveReminderLeadTimes(result.leadTimes)
+                                useCases.saveBackupReminder(result.backup)
+                            }
+                        }
+                        saved = true
+                        onLeadTimesSaved()
+                    }
             }
         }
     }
@@ -110,7 +131,7 @@ class ReminderSettingsPresenter(
     private fun launchGuarded(
         kind: FailureKind,
         block: suspend () -> Unit,
-    ) {
+    ): Job =
         scope.launch {
             try {
                 failure = null
@@ -124,5 +145,4 @@ class ReminderSettingsPresenter(
                 failure = e.toFailure(kind)
             }
         }
-    }
 }

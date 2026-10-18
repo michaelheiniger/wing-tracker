@@ -29,6 +29,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -156,16 +157,16 @@ class ReminderPresentersTest {
             }
 
         @Test
-        fun `saves valid lead times and tells the app so reminders can refresh`() =
+        fun `saves valid lead times once typed and tells the app so reminders can refresh`() =
             runTest {
                 // given
                 coEvery { settings.load() } returns AppSettings()
                 var refreshed = false
                 val presenter = settingsPresenter { refreshed = true }
-                presenter.change { ReminderSettingsInput(days = "21", hours = "8") }
 
                 // when
-                presenter.save()
+                presenter.change { ReminderSettingsInput(days = "21", hours = "8") }
+                advanceUntilIdle()
 
                 // then
                 coVerify(
@@ -181,12 +182,12 @@ class ReminderPresentersTest {
                 // given
                 coEvery { settings.load() } returns AppSettings()
                 val presenter = settingsPresenter()
+
+                // when
                 presenter.change {
                     ReminderSettingsInput(days = "30", hours = "10", backupEnabled = false, backupDays = "60")
                 }
-
-                // when
-                presenter.save()
+                advanceUntilIdle()
 
                 // then
                 coVerify(exactly = 1) {
@@ -199,10 +200,10 @@ class ReminderPresentersTest {
             runTest {
                 // given
                 val presenter = settingsPresenter()
-                presenter.change { ReminderSettingsInput(days = "0", hours = "8") }
 
                 // when
-                presenter.save()
+                presenter.change { ReminderSettingsInput(days = "0", hours = "8") }
+                advanceUntilIdle()
 
                 // then
                 assertThat(presenter.errors).containsKey(ReminderSettingsField.Days)
@@ -217,13 +218,49 @@ class ReminderPresentersTest {
                 coEvery { settings.load() } returns AppSettings()
                 val presenter = settingsPresenter()
                 presenter.change { ReminderSettingsInput(days = "21", hours = "8") }
-                presenter.save()
+                advanceUntilIdle()
 
                 // when
                 presenter.change { it.copy(days = "22") }
 
                 // then
                 assertThat(presenter.saved).isFalse()
+            }
+
+        @Test
+        fun `saves only the last of values typed in quick succession`() =
+            runTest {
+                // given
+                coEvery { settings.load() } returns AppSettings()
+                val presenter = settingsPresenter()
+
+                // when
+                presenter.change { ReminderSettingsInput(days = "2", hours = "8") }
+                presenter.change { it.copy(days = "21") }
+                advanceUntilIdle()
+
+                // then
+                coVerify(exactly = 0) { settings.save(match { it.reminderLeadTimes.days == 2 }) }
+                coVerify(
+                    exactly = 1,
+                ) { settings.save(AppSettings(reminderLeadTimes = ReminderLeadTimes(days = 21, hours = 8.hours))) }
+            }
+
+        @Test
+        fun `a value made invalid before the save drops the save`() =
+            runTest {
+                // given
+                coEvery { settings.load() } returns AppSettings()
+                val presenter = settingsPresenter()
+
+                // when
+                presenter.change { ReminderSettingsInput(days = "21", hours = "8") }
+                presenter.change { it.copy(days = "") }
+                advanceUntilIdle()
+
+                // then
+                assertThat(presenter.errors).containsOnlyKeys(ReminderSettingsField.Days)
+                coVerify(exactly = 0) { settings.save(any()) }
             }
     }
 
