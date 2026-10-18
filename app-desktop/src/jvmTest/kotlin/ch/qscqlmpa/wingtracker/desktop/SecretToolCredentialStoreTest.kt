@@ -15,7 +15,7 @@ class SecretToolCredentialStoreTest {
     private val runs = mutableListOf<Pair<List<String>, String?>>()
 
     private fun store(result: ToolResult) =
-        SecretToolCredentialStore { arguments, input ->
+        SecretToolCredentialStore("wing-tracker") { arguments, input ->
             runs += arguments to input
             result
         }
@@ -74,6 +74,35 @@ class SecretToolCredentialStoreTest {
             assertThatThrownBy { runBlocking { store.write("airtime-token", TOKEN) } }
                 .isInstanceOf(CredentialStoreException::class.java)
         }
+    }
+
+    @Nested
+    inner class Application {
+        @Test
+        fun `keeps a development build's secrets apart from the installed application's`() =
+            runTest {
+                // given
+                val store =
+                    SecretToolCredentialStore("wing-tracker-dev") { arguments, input ->
+                        runs += arguments to input
+                        ToolResult(0, "", "")
+                    }
+
+                // when
+                store.write("airtime-token", TOKEN)
+
+                // then
+                assertThat(runs.single().first).isEqualTo(
+                    listOf(
+                        "store",
+                        "--label=wing-tracker-dev airtime-token",
+                        "application",
+                        "wing-tracker-dev",
+                        "key",
+                        "airtime-token",
+                    ),
+                )
+            }
     }
 
     @Nested

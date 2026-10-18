@@ -24,6 +24,8 @@ class ToolResult(
  * install it. A locked keyring is unlocked by the desktop's own prompt.
  */
 class SecretToolCredentialStore(
+    // Tells this application's secrets apart, and a development build's from an installed one's.
+    private val application: String,
     private val run: suspend (arguments: List<String>, input: String?) -> ToolResult = ::runSecretTool,
 ) : CredentialStore {
     override suspend fun read(key: String): String? {
@@ -43,7 +45,7 @@ class SecretToolCredentialStore(
         secret: String,
     ) {
         // The secret goes through the standard input, never the command line, which other users can list.
-        val result = run(listOf("store", "--label=wing-tracker $key") + attributes(key), secret)
+        val result = run(listOf("store", "--label=$application $key") + attributes(key), secret)
         if (result.exitCode != 0) fail("Keeping $key", result)
         logger.info { "Kept $key in the Secret Service" }
     }
@@ -53,7 +55,7 @@ class SecretToolCredentialStore(
         if (result.exitCode != 0 && !isNothingKept(result)) fail("Forgetting $key", result)
     }
 
-    private fun attributes(key: String) = listOf("application", "wing-tracker", "key", key)
+    private fun attributes(key: String) = listOf("application", application, "key", key)
 
     // secret-tool ends with 1 and says nothing when no secret matches; any other failure explains itself.
     private fun isNothingKept(result: ToolResult) = result.exitCode == 1 && result.errors.isBlank()

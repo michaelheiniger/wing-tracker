@@ -368,7 +368,7 @@ private fun uiModule(
             dataLocation(dataDirectory, devMode),
             DesktopLogLocation(DesktopLogging.directory(devMode)),
             DesktopUpdateInstaller(InstallationDirectory.installerKind(), DesktopLogging.directory(devMode)),
-            credentialStore(),
+            credentialStore(devMode),
             supportsAllFileNames(),
         )
     }
@@ -380,5 +380,15 @@ private fun uiModule(
 }
 
 // Linux has the Secret Service; macOS has neither, so it keeps secrets for the session only (ADR 0029).
-private fun credentialStore(osName: String = System.getProperty("os.name")): CredentialStore =
-    if ("win" in osName.lowercase()) WindowsCredentialStore() else SecretToolCredentialStore()
+// A development build keeps its own, so trying out a form never replaces the pilot's real keys.
+private fun credentialStore(
+    devMode: Boolean,
+    osName: String = System.getProperty("os.name"),
+): CredentialStore {
+    val application = if (devMode) "wing-tracker-dev" else "wing-tracker"
+    return if ("win" in osName.lowercase()) {
+        WindowsCredentialStore(application)
+    } else {
+        SecretToolCredentialStore(application)
+    }
+}

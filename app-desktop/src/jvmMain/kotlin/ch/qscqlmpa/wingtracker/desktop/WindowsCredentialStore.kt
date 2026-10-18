@@ -26,7 +26,10 @@ private const val ERROR_NOT_FOUND = 1168
  * The Windows Credential Manager, called through JNA (ADR 0029). Secrets are kept for this user on this computer only,
  * like the other per-installation preferences, and never roam to other computers.
  */
-class WindowsCredentialStore : CredentialStore {
+class WindowsCredentialStore(
+    // Tells this application's secrets apart, and a development build's from an installed one's.
+    private val application: String,
+) : CredentialStore {
     private val advapi by lazy { NativeLibrary.getInstance("Advapi32") }
 
     override suspend fun read(key: String): String? =
@@ -80,7 +83,7 @@ class WindowsCredentialStore : CredentialStore {
     }
 
     // The application's name in front, so the entry is recognisable among others in the Credential Manager.
-    private fun target(key: String) = "wing-tracker/$key"
+    private fun target(key: String) = "$application/$key"
 
     private fun call(
         name: String,
