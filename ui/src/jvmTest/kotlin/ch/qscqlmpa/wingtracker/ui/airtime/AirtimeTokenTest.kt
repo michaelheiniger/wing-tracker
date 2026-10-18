@@ -2,6 +2,7 @@ package ch.qscqlmpa.wingtracker.ui.airtime
 
 import ch.qscqlmpa.wingtracker.ui.platform.CredentialStore
 import ch.qscqlmpa.wingtracker.ui.platform.CredentialStoreException
+import ch.qscqlmpa.wingtracker.ui.platform.SecretKeeping
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -25,7 +26,7 @@ class AirtimeTokenTest {
                 val keeping = token.keep("  $TOKEN\n")
 
                 // then
-                assertThat(keeping).isEqualTo(TokenKeeping.System)
+                assertThat(keeping).isEqualTo(SecretKeeping.System)
                 coVerify(exactly = 1) { store.write("airtime-token", TOKEN) }
             }
 
@@ -40,7 +41,7 @@ class AirtimeTokenTest {
                 val keeping = token.keep(TOKEN)
 
                 // then
-                assertThat(keeping).isEqualTo(TokenKeeping.Session)
+                assertThat(keeping).isEqualTo(SecretKeeping.Session)
                 assertThat(token.current()).isEqualTo(TOKEN)
             }
     }

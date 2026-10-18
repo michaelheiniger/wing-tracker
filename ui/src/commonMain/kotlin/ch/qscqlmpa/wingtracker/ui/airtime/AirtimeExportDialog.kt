@@ -44,6 +44,7 @@ import ch.qscqlmpa.wingtracker.ui.flights.importing.IMPORT_LIST_MAX_HEIGHT_DP
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.isWorthRetrying
 import ch.qscqlmpa.wingtracker.ui.message
+import ch.qscqlmpa.wingtracker.ui.platform.SecretKeeping
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
 import ch.qscqlmpa.wingtracker.ui.resources.action_close
@@ -167,7 +168,7 @@ private fun ReviewStep(
     onClose: () -> Unit,
 ) {
     val draft = checkNotNull(presenter.draft)
-    if (presenter.keeping == TokenKeeping.Session) {
+    if (presenter.keeping == SecretKeeping.Session) {
         StatusBadge(stringResource(Res.string.airtime_token_session), Severity.Warning)
     }
     if (draft.alreadyExported > 0) Hint(plural(Res.plurals.airtime_already, draft.alreadyExported))

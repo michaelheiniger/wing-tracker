@@ -12,6 +12,7 @@ import ch.qscqlmpa.wingtracker.flights.airtime.PrepareAirtimeExport
 import ch.qscqlmpa.wingtracker.settings.SaveAirtimeNick
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
+import ch.qscqlmpa.wingtracker.ui.platform.SecretKeeping
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -50,7 +51,7 @@ class AirtimeExportPresenter(
         private set
 
     /** Where the token typed in this dialog ended up; null until one was kept. */
-    var keeping by mutableStateOf<TokenKeeping?>(null)
+    var keeping by mutableStateOf<SecretKeeping?>(null)
         private set
     var stage by mutableStateOf(AirtimeStage.Account)
         private set

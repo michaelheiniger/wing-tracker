@@ -21,6 +21,7 @@ import ch.qscqlmpa.wingtracker.settings.SaveAirtimeNick
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.CredentialStore
 import ch.qscqlmpa.wingtracker.ui.platform.CredentialStoreException
+import ch.qscqlmpa.wingtracker.ui.platform.SecretKeeping
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -148,7 +149,7 @@ class AirtimeExportPresenterTest {
                 assertThat(
                     presenter.selection.chosen,
                 ).containsExactlyInAnyOrder(FlightId("flight-1"), FlightId("flight-2"))
-                assertThat(presenter.keeping).isEqualTo(TokenKeeping.System)
+                assertThat(presenter.keeping).isEqualTo(SecretKeeping.System)
                 coVerify(exactly = 1) { store.write("airtime-token", TOKEN) }
                 coVerify(exactly = 1) { saveNick(NICK) }
             }
@@ -200,7 +201,7 @@ class AirtimeExportPresenterTest {
                 presenter.read()
 
                 // then
-                assertThat(presenter.keeping).isEqualTo(TokenKeeping.Session)
+                assertThat(presenter.keeping).isEqualTo(SecretKeeping.Session)
             }
 
         @Test
