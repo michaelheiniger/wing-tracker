@@ -7,6 +7,12 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.TimeZone
 import org.assertj.core.api.Assertions.assertThat
@@ -38,6 +44,7 @@ private fun uploaded(
     at: String,
 ) = CloudObject(key, 18_000_000, Instant.parse(at))
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class UploadBackupTest {
     private val archive = mockk<BackupArchive>(relaxUnitFun = true)
     private val storage = mockk<CloudStorage>(relaxUnitFun = true)
@@ -141,6 +148,51 @@ class UploadBackupTest {
                 // then
                 assertThat(result).isEqualTo(UploadedBackup(BUCKET.bucket, KEY, SUMMARY, 0, CloudProblem.AccessDenied))
                 coVerify(exactly = 1) { settings.save(match { it.lastBackupAt == NOW }) }
+            }
+    }
+
+    @Nested
+    inner class Cancelling {
+        @Test
+        fun `removes the local copy and records nothing when cancelled during the upload`() =
+            runTest {
+                // given
+                givenBucket()
+                coEvery { storage.upload(any(), any(), any()) } coAnswers { awaitCancellation() }
+                val running = launch { uploadBackup(SECRET) }
+                runCurrent()
+
+                // when
+                running.cancelAndJoin()
+
+                // then
+                coVerify(exactly = 1) { archive.discard(TEMPORARY) }
+                coVerify(exactly = 0) { settings.save(any()) }
+            }
+
+        @Test
+        fun `still records and tidies up when cancelled once the backup is in the bucket`() =
+            runTest {
+                // given
+                givenBucket()
+                val older = "wing-tracker/wing-tracker-backup-2026-08-30-0815.zip"
+                coEvery { storage.list(any(), any()) } coAnswers {
+                    delay(1_000)
+                    listOf(
+                        uploaded(KEY, "2026-10-18T12:30:20Z"),
+                        uploaded("wing-tracker/wing-tracker-backup-2026-10-11-2010.zip", "2026-10-11T18:10:30Z"),
+                        uploaded(older, "2026-08-30T06:15:30Z"),
+                    )
+                }
+                val running = launch { uploadBackup(SECRET) }
+                runCurrent()
+
+                // when
+                running.cancelAndJoin()
+
+                // then
+                coVerify(exactly = 1) { settings.save(match { it.lastBackupAt == NOW }) }
+                coVerify(exactly = 1) { storage.delete(TARGET, older) }
             }
     }
 }

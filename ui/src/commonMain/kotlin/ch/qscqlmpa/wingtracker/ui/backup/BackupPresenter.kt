@@ -19,6 +19,7 @@ import ch.qscqlmpa.wingtracker.ui.platform.FileSaver
 import ch.qscqlmpa.wingtracker.ui.toFailure
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 
@@ -59,6 +60,10 @@ class BackupPresenter(
         private set
     var busy by mutableStateOf(false)
         private set
+
+    /** Set while a backup is being uploaded, which the pilot may cancel. */
+    var uploading by mutableStateOf(false)
+        private set
     var outcome by mutableStateOf<BackupOutcome?>(null)
         private set
 
@@ -83,13 +88,38 @@ class BackupPresenter(
             backingUp { BackupOutcome.Saved(destination, useCases.createBackup(destination)) }
         }
 
-    fun upload() =
-        attempt(FailureKind.UploadBackup) {
-            outcome = null
-            // A key kept for the session only is gone after a restart; it is typed again under Cloud storage.
-            val secretKey = cloudSecret.current() ?: throw MissingSecretException()
-            backingUp { BackupOutcome.Uploaded(useCases.uploadBackup(secretKey)) }
+    private var upload: Job? = null
+
+    fun upload() {
+        if (busy) return
+        upload =
+            attempt(FailureKind.UploadBackup) {
+                outcome = null
+                // A key kept for the session only is gone after a restart; it is typed again under Cloud storage.
+                val secretKey = cloudSecret.current() ?: throw MissingSecretException()
+                uploading = true
+                try {
+                    backingUp { BackupOutcome.Uploaded(useCases.uploadBackup(secretKey)) }
+                } finally {
+                    uploading = false
+                }
+            }
+    }
+
+    /**
+     * Stops an upload; nothing is left on this computer and nothing is reported. A cancel that comes too late finds the
+     * backup already in the bucket and recorded, so the status is read again afterwards.
+     */
+    fun cancelUpload() {
+        val running = upload ?: return
+        if (!uploading) return
+        running.cancel()
+        scope.launch {
+            running.join()
+            load()
+            onCreated()
         }
+    }
 
     private suspend fun backingUp(backup: suspend () -> BackupOutcome) {
         busy = true
@@ -106,7 +136,7 @@ class BackupPresenter(
     private fun attempt(
         kind: FailureKind,
         action: suspend () -> Unit,
-    ) {
+    ): Job =
         scope.launch {
             try {
                 failure = null
@@ -126,7 +156,6 @@ class BackupPresenter(
                 failure = e.toFailure(kind)
             }
         }
-    }
 }
 
 internal class MissingSecretException : Exception("No secret key is kept for the cloud storage")

@@ -6,6 +6,11 @@ import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -30,6 +35,7 @@ private val BUCKET =
     )
 private val TARGET = BUCKET.target(SECRET)
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CloudRestoreTest {
     private val storage = mockk<CloudStorage>(relaxUnitFun = true)
     private val archive = mockk<BackupArchive>(relaxUnitFun = true)
@@ -100,6 +106,22 @@ class CloudRestoreTest {
 
                 // then
                 assertThat(failure).isInstanceOf(CloudStorageException::class.java)
+                coVerify(exactly = 1) { archive.discard(TEMPORARY) }
+            }
+
+        @Test
+        fun `leaves nothing behind when the download is cancelled`() =
+            runTest {
+                // given
+                coEvery { archive.temporaryFile(any()) } returns TEMPORARY
+                coEvery { storage.download(any(), any(), any()) } coAnswers { awaitCancellation() }
+                val running = launch { DownloadCloudBackup(storage, archive, settings)(SECRET, NEWEST) }
+                runCurrent()
+
+                // when
+                running.cancelAndJoin()
+
+                // then
                 coVerify(exactly = 1) { archive.discard(TEMPORARY) }
             }
 

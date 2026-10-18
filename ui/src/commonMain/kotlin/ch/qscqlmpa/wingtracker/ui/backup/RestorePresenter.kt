@@ -19,7 +19,10 @@ import ch.qscqlmpa.wingtracker.ui.platform.FolderCheck
 import ch.qscqlmpa.wingtracker.ui.toFailure
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Where a restore stands; null on the presenter while none is under way. */
 sealed interface RestoreStep {
@@ -99,22 +102,31 @@ class RestorePresenter(
             step = RestoreStep.ChooseCloud(cloudUseCases.listCloudBackups(secretKey()))
         }
 
+    private var download: Job? = null
+
     fun chooseCloudBackup(backup: CloudBackup) {
         val choosing = step as? RestoreStep.ChooseCloud ?: return
-        attempt {
-            step = RestoreStep.Downloading(backup)
-            var archive: String? = null
-            try {
-                archive = cloudUseCases.downloadCloudBackup(secretKey(), backup.key)
-                step = RestoreStep.Confirm(archive, useCases.inspectBackup(archive), downloaded = true)
-            } finally {
-                // A download that fails or turns out damaged goes back to the list, and leaves nothing behind.
-                if (step is RestoreStep.Downloading) {
-                    step = choosing
-                    archive?.let { cloudUseCases.discardTemporaryBackup(it) }
+        download =
+            attempt {
+                step = RestoreStep.Downloading(backup)
+                var archive: String? = null
+                try {
+                    archive = cloudUseCases.downloadCloudBackup(secretKey(), backup.key)
+                    step = RestoreStep.Confirm(archive, useCases.inspectBackup(archive), downloaded = true)
+                } finally {
+                    // A download that fails, turns out damaged or is cancelled goes back to the list, leaving nothing.
+                    if (step is RestoreStep.Downloading) {
+                        step = choosing
+                        archive?.let { withContext(NonCancellable) { cloudUseCases.discardTemporaryBackup(it) } }
+                    }
                 }
             }
-        }
+    }
+
+    /** Stops a download and goes back to the list of backups, without a message: the pilot chose to stop. */
+    fun cancelDownload() {
+        if (step !is RestoreStep.Downloading) return
+        download?.cancel()
     }
 
     fun chooseFolder() {
@@ -164,7 +176,7 @@ class RestorePresenter(
             FolderCheck.Overlaps -> FailureKind.DataFolderOverlaps
         }
 
-    private fun attempt(action: suspend () -> Unit) {
+    private fun attempt(action: suspend () -> Unit): Job =
         scope.launch {
             try {
                 failure = null
@@ -184,7 +196,6 @@ class RestorePresenter(
                 failure = e.toFailure(FailureKind.RestoreBackup)
             }
         }
-    }
 }
 
 internal fun BackupProblem.failureKind(): FailureKind =

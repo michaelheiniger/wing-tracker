@@ -20,6 +20,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -206,6 +207,29 @@ class BackupPresenterTest {
                 assertThat(presenter.lastMadeAt).isEqualTo(NOW)
                 assertThat(flushed).isTrue()
                 assertThat(created).isEqualTo(1)
+            }
+
+        @Test
+        fun `stops an upload the pilot cancels, without a message, and reads the status again`() =
+            runTest {
+                // given
+                givenLastBackup(EARLIER_BACKUP, BUCKET)
+                coEvery { credentials.read("cloud-storage-secret-key") } returns "s3cr3t/K3y"
+                coEvery { uploadBackup(any()) } coAnswers { awaitCancellation() }
+                val presenter = presenter().also { it.load() }
+                presenter.upload()
+                assertThat(presenter.uploading).isTrue()
+
+                // when
+                presenter.cancelUpload()
+
+                // then
+                assertThat(presenter.uploading).isFalse()
+                assertThat(presenter.busy).isFalse()
+                assertThat(presenter.outcome).isNull()
+                assertThat(presenter.failure).isNull()
+                assertThat(created).isEqualTo(1)
+                coVerify(atLeast = 2) { getBackupStatus() }
             }
 
         @Test

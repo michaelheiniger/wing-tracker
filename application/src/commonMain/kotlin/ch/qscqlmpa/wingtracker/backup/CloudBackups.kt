@@ -2,6 +2,8 @@ package ch.qscqlmpa.wingtracker.backup
 
 import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDateTime
 
 /** Remembers where backups are uploaded to, or forgets it with null; the secret key is the caller's to keep. */
@@ -64,14 +66,18 @@ class UploadBackup(
             try {
                 archive.create(file, appVersion, now).also { storage.upload(target, key, file) }
             } finally {
-                archive.discard(file)
+                // Also when the pilot cancelled, which would otherwise cancel the removal too.
+                withContext(NonCancellable) { archive.discard(file) }
             }
-        settings.save(settings.load().copy(lastBackupAt = now))
-        return try {
-            UploadedBackup(cloud.bucket, key, summary, deleteOldest(target, cloud.keepLast), cleanupProblem = null)
-        } catch (e: CloudStorageException) {
-            // The backup is safe in the bucket; failing to tidy up must not make it look lost.
-            UploadedBackup(cloud.bucket, key, summary, deleted = 0, cleanupProblem = e.problem)
+        // The backup is in the bucket: a cancel arriving now must not leave it unrecorded or half tidied up.
+        return withContext(NonCancellable) {
+            settings.save(settings.load().copy(lastBackupAt = now))
+            try {
+                UploadedBackup(cloud.bucket, key, summary, deleteOldest(target, cloud.keepLast), cleanupProblem = null)
+            } catch (e: CloudStorageException) {
+                // The backup is safe in the bucket; failing to tidy up must not make it look lost.
+                UploadedBackup(cloud.bucket, key, summary, deleted = 0, cleanupProblem = e.problem)
+            }
         }
     }
 
@@ -132,7 +138,8 @@ class DownloadCloudBackup(
             complete = true
             return file
         } finally {
-            if (!complete) archive.discard(file)
+            // Also when the pilot cancelled, which would otherwise cancel the removal too.
+            if (!complete) withContext(NonCancellable) { archive.discard(file) }
         }
     }
 }

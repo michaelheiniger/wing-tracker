@@ -466,6 +466,7 @@
     <string name="backup_save_file">Enregistrer en fichier…</string>
     <string name="backup_upload">Envoyer vers le stockage en ligne</string>
     <string name="backup_uploading">Envoi en cours…</string>
+    <string name="backup_cancel_upload">Annuler l'envoi</string>
     <string name="backup_uploaded">Sauvegarde envoyée dans le bucket %1$s sous %2$s</string>
     <plurals name="backup_deleted_old">
         <item quantity="one">%1$d sauvegarde plus ancienne a été supprimée.</item>

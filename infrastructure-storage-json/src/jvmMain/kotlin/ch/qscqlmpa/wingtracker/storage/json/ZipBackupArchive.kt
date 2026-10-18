@@ -7,6 +7,7 @@ import ch.qscqlmpa.wingtracker.backup.BackupProblem
 import ch.qscqlmpa.wingtracker.backup.BackupSummary
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import java.nio.file.Files
 import java.nio.file.Path
@@ -49,7 +50,9 @@ class ZipBackupArchive(
             // Written under a temporary name, so an interrupted backup never looks like a finished one.
             val temporary = Files.createTempFile(folder, "${target.fileName}-", ".tmp")
             try {
-                val entries = writeArchive(temporary, appVersion, createdAt)
+                val context = coroutineContext
+                // Checked between files, so a pilot who cancels does not wait for the whole archive.
+                val entries = writeArchive(temporary, appVersion, createdAt) { context.ensureActive() }
                 moveReplacing(temporary, target)
                 logger.info { "Backed up ${entries.size} files to $target" }
                 BackupSummary(files = entries.size, bytes = entries.sumOf { it.size })
@@ -120,9 +123,14 @@ class ZipBackupArchive(
         archive: Path,
         appVersion: String,
         createdAt: Instant,
+        checkCancelled: () -> Unit,
     ): List<BackupEntryDocument> =
         ZipOutputStream(archive.outputStream().buffered()).use { zip ->
-            val entries = storedFiles().map { zip.add(it) }
+            val entries =
+                storedFiles().map {
+                    checkCancelled()
+                    zip.add(it)
+                }
             val manifest =
                 BackupManifestDocument(appVersion = appVersion, createdAt = createdAt.toString(), files = entries)
             zip.putNextEntry(ZipEntry(BackupManifestDocument.ENTRY_NAME))

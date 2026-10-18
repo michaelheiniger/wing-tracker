@@ -23,6 +23,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -289,6 +290,24 @@ class RestorePresenterTest {
                 assertThat(presenter.step).isEqualTo(RestoreStep.ChooseCloud(listOf(newest)))
                 assertThat(presenter.failure?.kind).isEqualTo(FailureKind.BackupDamaged)
                 coVerify(exactly = 1) { discardTemporaryBackup(DOWNLOADED) }
+            }
+
+        @Test
+        fun `goes back to the list without a message when the pilot cancels the download`() =
+            runTest {
+                // given
+                givenCloudBackup()
+                coEvery { downloadCloudBackup(any(), any()) } coAnswers { awaitCancellation() }
+                val presenter = presenter().also { it.startFromCloud() }
+                presenter.chooseCloudBackup(newest)
+                assertThat(presenter.step).isEqualTo(RestoreStep.Downloading(newest))
+
+                // when
+                presenter.cancelDownload()
+
+                // then
+                assertThat(presenter.step).isEqualTo(RestoreStep.ChooseCloud(listOf(newest)))
+                assertThat(presenter.failure).isNull()
             }
 
         @Test

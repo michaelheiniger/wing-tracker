@@ -466,6 +466,7 @@
     <string name="backup_save_file">Save as file…</string>
     <string name="backup_upload">Upload to cloud storage</string>
     <string name="backup_uploading">Uploading…</string>
+    <string name="backup_cancel_upload">Cancel upload</string>
     <string name="backup_uploaded">Backup uploaded to the bucket %1$s as %2$s</string>
     <plurals name="backup_deleted_old">
         <item quantity="one">%1$d older backup was deleted.</item>

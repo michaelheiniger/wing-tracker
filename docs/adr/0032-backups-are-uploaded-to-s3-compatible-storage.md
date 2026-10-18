@@ -21,3 +21,7 @@ A backup on the same computer or a drive next to it does not survive a fire or a
 ## Consequences
 
 Backups can leave the building without new dependencies, and any S3-compatible provider works. The signing and the XML answers are ours to maintain, and a provider's quirk shows only against the real service, so a connection test is offered before the first upload. Anyone with the bucket's keys can read the logbook. Deleting old backups needs the keys to allow it; a provider that refuses leaves them in place and says so.
+
+## Amendments
+
+- 2026-10-18: Uploads and downloads can be cancelled. Cancelling aborts the HTTP exchange, so nothing partial reaches the bucket, and the temporary file is removed even then. Once a backup is in the bucket, recording it and deleting the oldest backups finish regardless, so a late cancel never leaves a stored backup unrecorded; the screen reads the status again after a cancel.

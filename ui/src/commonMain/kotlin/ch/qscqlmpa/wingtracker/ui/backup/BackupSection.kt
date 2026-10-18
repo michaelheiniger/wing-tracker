@@ -26,6 +26,7 @@ import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
+import ch.qscqlmpa.wingtracker.ui.resources.backup_cancel_upload
 import ch.qscqlmpa.wingtracker.ui.resources.backup_cleanup_failed
 import ch.qscqlmpa.wingtracker.ui.resources.backup_create
 import ch.qscqlmpa.wingtracker.ui.resources.backup_deleted_old
@@ -42,6 +43,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.backup_saved_content
 import ch.qscqlmpa.wingtracker.ui.resources.backup_title
 import ch.qscqlmpa.wingtracker.ui.resources.backup_upload
 import ch.qscqlmpa.wingtracker.ui.resources.backup_uploaded
+import ch.qscqlmpa.wingtracker.ui.resources.backup_uploading
 import ch.qscqlmpa.wingtracker.ui.resources.flight_date_time
 import ch.qscqlmpa.wingtracker.ui.resources.restore_choose_folder
 import ch.qscqlmpa.wingtracker.ui.resources.restore_cloud_choose
@@ -107,7 +109,9 @@ fun BackupSection(
         }
         if (presenter.busy) {
             CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-            Text(stringResource(Res.string.backup_in_progress))
+            Text(
+                stringResource(if (presenter.uploading) Res.string.backup_uploading else Res.string.backup_in_progress),
+            )
         }
     }
     presenter.outcome?.let { BackupOutcomeText(it) }
@@ -128,7 +132,12 @@ internal fun BackupButtons(
         ActionButton(textButtons, presenter::create, enabled, Res.string.backup_create)
     } else {
         ActionButton(textButtons, presenter::create, enabled, Res.string.backup_save_file)
-        ActionButton(textButtons, presenter::upload, enabled, Res.string.backup_upload)
+        // In place of the upload button, where the pilot's eyes already are.
+        if (presenter.uploading) {
+            ActionButton(textButtons, presenter::cancelUpload, enabled = true, Res.string.backup_cancel_upload)
+        } else {
+            ActionButton(textButtons, presenter::upload, enabled, Res.string.backup_upload)
+        }
     }
 }
 
@@ -262,7 +271,8 @@ private fun CloudBackupsDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = presenter::cancel, enabled = downloading == null) {
+            // While downloading, it stops the download and goes back to the list.
+            TextButton(onClick = if (downloading == null) presenter::cancel else presenter::cancelDownload) {
                 Text(stringResource(Res.string.action_cancel))
             }
         },
