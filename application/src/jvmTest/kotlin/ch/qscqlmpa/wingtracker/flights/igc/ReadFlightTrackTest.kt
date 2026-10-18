@@ -6,6 +6,7 @@ import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
 import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.flights.aFixedClock
 import ch.qscqlmpa.wingtracker.flights.aFlight
+import ch.qscqlmpa.wingtracker.maps.GeoPoint
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -93,6 +94,24 @@ class ReadFlightTrackTest {
                 assertThat(statistics.takeOffAltitudeMeters).isEqualTo(START_ALTITUDE)
                 assertThat(statistics.maxAltitudeMeters).isEqualTo(START_ALTITUDE + 1200)
                 assertThat(statistics.landingAltitudeMeters).isEqualTo(START_ALTITUDE - 1200)
+            }
+
+        @Test
+        fun `gives the positions of take-off and landing`() =
+            runTest {
+                // given
+                givenTrack(Leg.Still(10.minutes), Leg.Moving(60.minutes, 32.0), Leg.Still(10.minutes))
+
+                // when
+                val track = checkNotNull(readFlightTrack(aTrackedFlight()))
+
+                // then
+                val statistics = checkNotNull(track.statistics)
+                val takeOff = track.flown.first()
+                val landing = track.flown.last()
+                assertThat(statistics.takeOffPosition).isEqualTo(GeoPoint(takeOff.latitude, takeOff.longitude))
+                assertThat(statistics.landingPosition).isEqualTo(GeoPoint(landing.latitude, landing.longitude))
+                assertThat(statistics.landingPosition).isNotEqualTo(statistics.takeOffPosition)
             }
 
         @Test

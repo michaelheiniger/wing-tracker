@@ -676,6 +676,9 @@
     <string name="flight_detail_site_other">%1$s: %2$s</string>
     <string name="field_site_fallback">Laut %1$s: %2$s</string>
     <string name="field_site_replaces">Ersetzt „%2$s“ von %1$s</string>
+    <string name="flight_detail_takeoff_position">Startposition</string>
+    <string name="flight_detail_landing_position">Landeposition</string>
+    <string name="site_source_track">IGC-Track</string>
     <string name="flight_detail_distance">Distanz</string>
     <string name="flight_detail_top_altitude">Maximale Höhe</string>
     <string name="flight_detail_instrument">Instrument</string>

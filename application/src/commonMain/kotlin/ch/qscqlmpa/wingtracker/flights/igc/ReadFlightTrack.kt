@@ -3,6 +3,7 @@ package ch.qscqlmpa.wingtracker.flights.igc
 import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
 import ch.qscqlmpa.wingtracker.flights.Flight
+import ch.qscqlmpa.wingtracker.maps.GeoPoint
 import kotlinx.datetime.LocalTime
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
@@ -36,6 +37,9 @@ data class ClimbRate(
 data class TrackStatistics(
     val takeOffTime: LocalTime,
     val landingTime: LocalTime,
+    // Where the flight started and ended, read from the track each time and never stored (ADR 0030).
+    val takeOffPosition: GeoPoint,
+    val landingPosition: GeoPoint,
     val takeOffAltitudeMeters: Int?,
     val landingAltitudeMeters: Int?,
     val maxAltitudeMeters: Int?,
@@ -74,6 +78,8 @@ class ReadFlightTrack(
         return TrackStatistics(
             takeOffTime = clock.local(detected.takeOff).time.inWholeSeconds(),
             landingTime = clock.local(detected.landing).time.inWholeSeconds(),
+            takeOffPosition = flown.first().position(),
+            landingPosition = flown.last().position(),
             takeOffAltitudeMeters = flown.firstNotNullOfOrNull { it.altitudeMeters },
             landingAltitudeMeters = flown.lastOrNull { it.altitudeMeters != null }?.altitudeMeters,
             maxAltitudeMeters = flown.mapNotNull { it.altitudeMeters }.maxOrNull(),
@@ -98,5 +104,7 @@ private fun climbRates(fixes: List<TrackFix>): List<ClimbRate> {
     }
     return speeds
 }
+
+private fun TrackFix.position() = GeoPoint(latitude, longitude)
 
 private fun LocalTime.inWholeSeconds() = LocalTime(hour, minute, second)

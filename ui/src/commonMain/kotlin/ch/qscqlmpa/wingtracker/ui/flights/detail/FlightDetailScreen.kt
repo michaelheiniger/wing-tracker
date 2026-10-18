@@ -71,6 +71,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_duration
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_earlier
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_imported_from
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_instrument
+import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_landing_position
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_landing_site
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_later
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_logged_at
@@ -86,6 +87,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_section_origin
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_section_sites
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_section_tracking
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_syride
+import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_takeoff_position
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_takeoff_site
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_takeoff_time
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_top_altitude
@@ -297,7 +299,9 @@ private fun Facts(
         }
         FactGroup(stringResource(Res.string.flight_detail_section_sites)) {
             SiteFact(Res.string.flight_detail_takeoff_site, details.takeOffSite)
+            TrackPositionFact(Res.string.flight_detail_takeoff_position, track) { it.takeOffPosition }
             SiteFact(Res.string.flight_detail_landing_site, details.landingSite)
+            TrackPositionFact(Res.string.flight_detail_landing_position, track) { it.landingPosition }
         }
         FactGroup(stringResource(Res.string.flight_detail_section_tracking)) {
             Fact(
