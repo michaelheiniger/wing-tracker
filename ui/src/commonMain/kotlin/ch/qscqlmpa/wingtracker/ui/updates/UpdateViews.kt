@@ -48,7 +48,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.update_not_installable
 import ch.qscqlmpa.wingtracker.ui.resources.update_release_title
 import ch.qscqlmpa.wingtracker.ui.resources.update_skip
 import ch.qscqlmpa.wingtracker.ui.resources.update_skipped
-import ch.qscqlmpa.wingtracker.ui.resources.update_title
 import ch.qscqlmpa.wingtracker.ui.resources.update_up_to_date
 import ch.qscqlmpa.wingtracker.ui.resources.update_whats_new
 import ch.qscqlmpa.wingtracker.ui.resources.update_whats_new_title
@@ -105,11 +104,6 @@ fun UpdatesSection(
     presenter: UpdatePresenter,
     installer: UpdateInstallPresenter,
 ) {
-    Text(
-        stringResource(Res.string.update_title),
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(top = 16.dp),
-    )
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Switch(checked = presenter.checkAtStartup, onCheckedChange = presenter::changeCheckAtStartup)
         Column {

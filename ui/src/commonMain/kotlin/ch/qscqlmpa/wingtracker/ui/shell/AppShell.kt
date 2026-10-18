@@ -80,6 +80,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.settings_data_choose_title
 import ch.qscqlmpa.wingtracker.ui.resources.update_rail_badge
 import ch.qscqlmpa.wingtracker.ui.settings.DataLocationPresenter
 import ch.qscqlmpa.wingtracker.ui.settings.LogLocationPresenter
+import ch.qscqlmpa.wingtracker.ui.settings.SettingsCategory
 import ch.qscqlmpa.wingtracker.ui.settings.SettingsScreen
 import ch.qscqlmpa.wingtracker.ui.statistics.StatisticsRoute
 import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
@@ -185,6 +186,8 @@ fun AppShell(
     var logbookSearch by remember { mutableStateOf(LogbookSearch()) }
     // Set only by the logbook's search; opening Statistics from the rail always shows every flight.
     var statisticsFilter by remember { mutableStateOf<FlightFilter?>(null) }
+    // Kept here, so a look at another section returns to the same settings page.
+    var settingsCategory by remember { mutableStateOf(SettingsCategory.Appearance) }
 
     // Reminders are computed on demand (ADR 0012), so they are refreshed whenever the pilot moves between sections.
     LaunchedEffect(destination) { attentionPresenter.refresh() }
@@ -289,6 +292,8 @@ fun AppShell(
 
                                     Destination.Settings -> {
                                         SettingsScreen(
+                                            settingsCategory,
+                                            { settingsCategory = it },
                                             themePreference,
                                             scalePreference,
                                             reminderSettings,

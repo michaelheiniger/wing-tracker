@@ -76,6 +76,12 @@
 
     <string name="settings_title">Réglages</string>
     <string name="settings_theme">Thème</string>
+    <string name="settings_category_appearance">Apparence</string>
+    <string name="settings_category_reminders">Rappels</string>
+    <string name="settings_category_backup">Sauvegarde</string>
+    <string name="settings_category_files">Données et journal</string>
+    <string name="settings_category_updates">Mises à jour</string>
+    <string name="settings_category_about">À propos</string>
     <string name="theme_system">Système</string>
     <string name="theme_light">Clair</string>
     <string name="theme_dark">Sombre</string>
@@ -573,11 +579,9 @@
     </plurals>
     <string name="flight_distance">%1$s km</string>
     <string name="flight_altitude">%1$d m</string>
-    <string name="about_open">À propos</string>
     <string name="about_title">À propos de Wing Tracker</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_changelog">Nouveautés (journal des modifications)</string>
-    <string name="about_close">Fermer</string>
     <string name="import_menu">Importer</string>
     <string name="import_wizard_title">Importer des vols</string>
     <string name="import_step_source">Source</string>

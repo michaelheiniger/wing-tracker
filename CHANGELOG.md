@@ -15,6 +15,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - Restore a backup from your cloud storage: "Restore from cloud storage…" lists the backups Wing Tracker uploaded, newest first, with their date and size. The one you choose is downloaded, checked and restored like a backup file, into an empty folder you choose; the download is removed afterwards.
 - Uploads and downloads of backups can be cancelled: "Cancel upload" takes the place of "Upload to cloud storage" while it runs, and "Cancel" in the list of cloud backups stops a download and goes back to the list. Nothing is left on your computer or half-uploaded in the bucket. An upload that had already reached the bucket still counts as your last backup.
 
+### Changed
+- The settings are split into pages: Appearance, Reminders, Backup, Data and logs, Updates and About, listed on the left of the settings. Each page groups its settings into cards and opens at its top; the settings return to the page you left. The version and the link to the changelog are shown on the About page instead of in a dialog.
+
 ## [0.4.0] - 2026-10-18
 
 ### Added

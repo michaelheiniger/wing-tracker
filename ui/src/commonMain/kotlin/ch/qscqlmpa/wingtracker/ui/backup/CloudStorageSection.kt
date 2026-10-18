@@ -3,7 +3,6 @@ package ch.qscqlmpa.wingtracker.ui.backup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -24,7 +23,6 @@ import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.platform.SecretKeeping
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.cloud_connected
-import ch.qscqlmpa.wingtracker.ui.resources.cloud_hint
 import ch.qscqlmpa.wingtracker.ui.resources.cloud_provider_mega
 import ch.qscqlmpa.wingtracker.ui.resources.cloud_provider_other
 import ch.qscqlmpa.wingtracker.ui.resources.cloud_region_hint_mega
@@ -36,7 +34,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.cloud_saved_system
 import ch.qscqlmpa.wingtracker.ui.resources.cloud_secret_kept_hint
 import ch.qscqlmpa.wingtracker.ui.resources.cloud_test
 import ch.qscqlmpa.wingtracker.ui.resources.cloud_testing
-import ch.qscqlmpa.wingtracker.ui.resources.cloud_title
 import ch.qscqlmpa.wingtracker.ui.resources.field_cloud_access_key
 import ch.qscqlmpa.wingtracker.ui.resources.field_cloud_bucket
 import ch.qscqlmpa.wingtracker.ui.resources.field_cloud_endpoint
@@ -50,16 +47,6 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun CloudStorageSection(presenter: CloudStoragePresenter) {
     val input = presenter.input
-    Text(
-        stringResource(Res.string.cloud_title),
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(top = 16.dp),
-    )
-    Text(
-        stringResource(Res.string.cloud_hint),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         CloudProvider.entries.forEach { provider ->
             FilterChip(

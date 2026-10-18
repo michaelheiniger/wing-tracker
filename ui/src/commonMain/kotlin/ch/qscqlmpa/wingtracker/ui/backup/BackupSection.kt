@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -30,7 +29,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.backup_cancel_upload
 import ch.qscqlmpa.wingtracker.ui.resources.backup_cleanup_failed
 import ch.qscqlmpa.wingtracker.ui.resources.backup_create
 import ch.qscqlmpa.wingtracker.ui.resources.backup_deleted_old
-import ch.qscqlmpa.wingtracker.ui.resources.backup_hint
 import ch.qscqlmpa.wingtracker.ui.resources.backup_in_progress
 import ch.qscqlmpa.wingtracker.ui.resources.backup_last
 import ch.qscqlmpa.wingtracker.ui.resources.backup_never
@@ -40,7 +38,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.backup_restore_file
 import ch.qscqlmpa.wingtracker.ui.resources.backup_save_file
 import ch.qscqlmpa.wingtracker.ui.resources.backup_saved
 import ch.qscqlmpa.wingtracker.ui.resources.backup_saved_content
-import ch.qscqlmpa.wingtracker.ui.resources.backup_title
 import ch.qscqlmpa.wingtracker.ui.resources.backup_upload
 import ch.qscqlmpa.wingtracker.ui.resources.backup_uploaded
 import ch.qscqlmpa.wingtracker.ui.resources.backup_uploading
@@ -73,16 +70,6 @@ fun BackupSection(
     presenter: BackupPresenter,
     restore: RestorePresenter,
 ) {
-    Text(
-        stringResource(Res.string.backup_title),
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(top = 16.dp),
-    )
-    Text(
-        stringResource(Res.string.backup_hint),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
     Text(
         presenter.lastMadeAt?.let {
             stringResource(
