@@ -92,6 +92,21 @@ class SyrideWebFlightSourceTest {
     }
 
     @Nested
+    inner class SitePage {
+        @Test
+        fun `builds the address of a flying site from its id, encoding accents`() {
+            // given
+            val source = source(profile = "", pages = emptyList())
+
+            // when
+            val page = source.sitePage("Crêt_Du_Midi")
+
+            // then
+            assertThat(page).isEqualTo("https://syride.com/en/flying-sites/Cr%C3%AAt_Du_Midi")
+        }
+    }
+
+    @Nested
     inner class Problems {
         @Test
         fun `reports an unknown pilot, which Syride answers with pilot id 0`() =

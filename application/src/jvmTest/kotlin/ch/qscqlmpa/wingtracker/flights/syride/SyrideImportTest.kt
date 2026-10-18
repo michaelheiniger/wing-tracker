@@ -52,6 +52,7 @@ private fun aSyrideFlight(
     startTime = startTime,
     duration = 98.minutes,
     siteName = "Dent De Jaman",
+    siteId = "Dent_De_Jaman",
     wing = wing,
     distanceKm = 15.0,
     topAltitudeMeters = 2464,
@@ -214,7 +215,9 @@ class SyrideImportTest {
                 assertThat(result.imported).isEqualTo(1)
                 val flight = saved.single()
                 assertThat(flight.details.wingId).isEqualTo(skyDancer.id)
-                assertThat(flight.details.takeOffSite).isEqualTo(SiteNames.of(SiteSource.Syride, "Dent De Jaman"))
+                assertThat(
+                    flight.details.takeOffSite,
+                ).isEqualTo(SiteNames.of(SiteSource.Syride, "Dent De Jaman", "Dent_De_Jaman"))
                 assertThat(flight.details.notes).isEqualTo("Course Tour du Bocal vol 3")
                 assertThat(flight.details.distanceKm).isEqualTo(15.0)
                 assertThat(flight.details.topAltitudeMeters).isEqualTo(2464)

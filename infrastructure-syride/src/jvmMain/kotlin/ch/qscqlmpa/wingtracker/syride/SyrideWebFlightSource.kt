@@ -43,6 +43,8 @@ class SyrideWebFlightSource(
         flightNumber: String,
     ): String = "$BASE/en/pilots/${URLEncoder.encode(username.replace(' ', '_'), Charsets.UTF_8)}/$flightNumber"
 
+    override fun sitePage(siteId: String): String = "$BASE/en/flying-sites/${URLEncoder.encode(siteId, Charsets.UTF_8)}"
+
     override suspend fun fetch(username: String): List<SyrideFlight> {
         val profile = "$BASE/en/pilots/${URLEncoder.encode(username, Charsets.UTF_8)}"
         val rider = riderId(fetchPage(profile, profile))

@@ -345,6 +345,7 @@ private fun FlightPage(
                 onOpenTrack = { presenter.openTrack(flight) },
                 onDelete = { deleting = true },
                 onOpenSyride = syridePage?.let { page -> { uriHandler.openUri(page) } },
+                onOpenSyrideSite = useCases.getSyrideSitePage(flight)?.let { page -> { uriHandler.openUri(page) } },
                 onOpenAirtime = airtimePage?.let { page -> { uriHandler.openUri(page) } },
                 onForgetAirtimeExport = { forgettingExport = true },
             ),

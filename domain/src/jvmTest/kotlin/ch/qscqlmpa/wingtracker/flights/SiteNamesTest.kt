@@ -22,6 +22,13 @@ class SiteNamesTest {
             assertThatThrownBy { SiteNames(mapOf(SiteSource.Syride to " ")) }
                 .isInstanceOf(IllegalArgumentException::class.java)
         }
+
+        @Test
+        fun `rejects an id for the site from a source that gave no name`() {
+            assertThatThrownBy {
+                SiteNames(mapOf(SiteSource.Manual to "Jaman"), mapOf(SiteSource.Syride to "Dent_De_Jaman"))
+            }.isInstanceOf(IllegalArgumentException::class.java)
+        }
     }
 
     @Nested
@@ -105,6 +112,31 @@ class SiteNamesTest {
             // then
             assertThat(changed[SiteSource.Manual]).isNull()
             assertThat(changed[SiteSource.Syride]).isEqualTo("Niederhorn")
+        }
+
+        @Test
+        fun `keeps the source's own id for the site with its name`() {
+            // given
+            val names = SiteNames.of(SiteSource.Manual, "Jaman")
+
+            // when
+            val changed = names.with(SiteSource.Syride, "Dent De Jaman", "Dent_De_Jaman")
+
+            // then
+            assertThat(changed.reference(SiteSource.Syride)).isEqualTo("Dent_De_Jaman")
+            assertThat(changed.reference(SiteSource.Manual)).isNull()
+        }
+
+        @Test
+        fun `removes the id together with the name`() {
+            // given
+            val names = SiteNames.of(SiteSource.Syride, "Dent De Jaman", "Dent_De_Jaman")
+
+            // when
+            val changed = names.with(SiteSource.Syride, null)
+
+            // then
+            assertThat(changed).isEqualTo(SiteNames.NONE)
         }
 
         @Test

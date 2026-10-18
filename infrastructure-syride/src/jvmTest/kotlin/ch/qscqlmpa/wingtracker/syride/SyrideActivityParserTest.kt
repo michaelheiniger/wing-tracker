@@ -58,6 +58,11 @@ class SyrideActivityParserTest {
         }
 
         @Test
+        fun `reads the id of the site from the address of its page`() {
+            assertThat(flight.siteId).isEqualTo("Dent_De_Jaman")
+        }
+
+        @Test
         fun `reads a hike-and-fly flight`() {
             assertThat(flight.type).isEqualTo(FlightType.HikeAndFly)
         }
@@ -91,8 +96,9 @@ class SyrideActivityParserTest {
         }
 
         @Test
-        fun `reads the site from the plain label`() {
+        fun `reads the site from the plain label, which has no page`() {
             assertThat(flight.siteName).isEqualTo("Sonchaux")
+            assertThat(flight.siteId).isNull()
             assertThat(flight.wing).isEqualTo(SourceWing("Ultralite 4", "Ozone"))
             assertThat(flight.duration).isEqualTo(10.minutes)
         }
@@ -114,6 +120,24 @@ class SyrideActivityParserTest {
         @Test
         fun `decodes accents written as named entities`() {
             assertThat(flight.siteName).isEqualTo("Sonchaux (déco nord)")
+        }
+
+        @Test
+        fun `decodes accents and apostrophes in the id of a site`() {
+            // given
+            val linked =
+                card.replace(
+                    "<ul>Flying site : <font id='site3523881'>Sonchaux (d&eacute;co nord)</font></ul>",
+                    "<div id='site3770736'> at " +
+                        "<a href='/en/flying-sites/Roc_D&#039;Orzival'>Roc D&#039;Orzival</a></div>",
+                )
+
+            // when
+            val parsed = SyrideActivityParser.parsePage(linked).flights.single()
+
+            // then
+            assertThat(parsed.siteName).isEqualTo("Roc D'Orzival")
+            assertThat(parsed.siteId).isEqualTo("Roc_D'Orzival")
         }
 
         @Test

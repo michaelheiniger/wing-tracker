@@ -684,6 +684,7 @@
     <string name="flight_type_site">From a site</string>
     <string name="flight_type_hike_and_fly">Hike &amp; fly</string>
     <string name="flight_detail_type">Type</string>
+    <string name="flight_detail_open_syride_site">Site on Syride</string>
     <string name="flight_detail_distance">Distance</string>
     <string name="flight_detail_top_altitude">Top altitude</string>
     <string name="flight_detail_instrument">Instrument</string>

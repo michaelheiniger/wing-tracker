@@ -21,3 +21,7 @@ The stored flight format gains the names per source in a new schema version (ver
 ## Consequences
 
 No source overwrites another, and a later name lookup becomes one more source that never replaces what the pilot typed. The inferred source of older names can be wrong for a Syride name the pilot edited before, or a name that came from a spreadsheet, which left no trace. Showing the positions from the track only works where the track is read, so the logbook and exports know only names. Older application versions treat flights written in the new format as newer data and leave them untouched (ADR 0015).
+
+## Amendments
+
+- 2026-10-18: A source's name for a site can come with that source's own id for the site, kept and removed together with the name. Syride gives one for the sites it knows (the name of the site's page); the flight's page links to it. It is the natural key for the planned name lookup.

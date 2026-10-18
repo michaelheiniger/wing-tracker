@@ -15,6 +15,7 @@ import ch.qscqlmpa.wingtracker.flights.spreadsheet.OpenSpreadsheet
 import ch.qscqlmpa.wingtracker.flights.spreadsheet.PrepareSpreadsheetImport
 import ch.qscqlmpa.wingtracker.flights.syride.CountSyrideFlightsWithoutTrack
 import ch.qscqlmpa.wingtracker.flights.syride.GetSyrideFlightPage
+import ch.qscqlmpa.wingtracker.flights.syride.GetSyrideSitePage
 import ch.qscqlmpa.wingtracker.flights.syride.ImportSyrideFlights
 import ch.qscqlmpa.wingtracker.flights.syride.PrepareSyrideImport
 import ch.qscqlmpa.wingtracker.flights.syride.UpdateSyrideTakeOffTimes
@@ -51,4 +52,5 @@ class LogbookUseCases(
     val getSyrideFlightPage: GetSyrideFlightPage,
     val readGroundProfile: ReadGroundProfile,
     val airtimeExport: AirtimeExportUseCases,
+    val getSyrideSitePage: GetSyrideSitePage,
 )

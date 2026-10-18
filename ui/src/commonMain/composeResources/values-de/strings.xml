@@ -684,6 +684,7 @@
     <string name="flight_type_site">Vom Startplatz</string>
     <string name="flight_type_hike_and_fly">Hike &amp; Fly</string>
     <string name="flight_detail_type">Art</string>
+    <string name="flight_detail_open_syride_site">Auf Syride</string>
     <string name="flight_detail_distance">Distanz</string>
     <string name="flight_detail_top_altitude">Maximale Höhe</string>
     <string name="flight_detail_instrument">Instrument</string>

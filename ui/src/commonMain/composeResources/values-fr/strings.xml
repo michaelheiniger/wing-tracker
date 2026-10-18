@@ -684,6 +684,7 @@
     <string name="flight_type_site">Vol de site</string>
     <string name="flight_type_hike_and_fly">Vol rando</string>
     <string name="flight_detail_type">Type</string>
+    <string name="flight_detail_open_syride_site">Site sur Syride</string>
     <string name="flight_detail_distance">Distance</string>
     <string name="flight_detail_top_altitude">Altitude maximale</string>
     <string name="flight_detail_instrument">Instrument</string>

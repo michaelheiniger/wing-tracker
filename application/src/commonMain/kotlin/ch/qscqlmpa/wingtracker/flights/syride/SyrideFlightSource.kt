@@ -56,6 +56,8 @@ data class SyrideFlight(
     val instrument: String?,
     // Null when Syride shows a type this version does not know.
     val type: FlightType? = null,
+    // Syride's id of the site, the name of its page there; null for a site typed in without one.
+    val siteId: String? = null,
 ) : ImportableFlight {
     override val externalReference: ExternalReference get() = ExternalReference(SYRIDE_SYSTEM, id)
 
@@ -64,7 +66,7 @@ data class SyrideFlight(
             date = date,
             duration = duration,
             wingId = wingId,
-            takeOffSite = SiteNames.of(SiteSource.Syride, siteName),
+            takeOffSite = SiteNames.of(SiteSource.Syride, siteName, siteId),
             notes = name,
             takeOffTime = startTime,
             distanceKm = distanceKm,
@@ -101,4 +103,7 @@ interface SyrideFlightSource {
         username: String,
         flightNumber: String,
     ): String
+
+    /** The address of a flying site's page on Syride, to open in the browser. */
+    fun sitePage(siteId: String): String
 }

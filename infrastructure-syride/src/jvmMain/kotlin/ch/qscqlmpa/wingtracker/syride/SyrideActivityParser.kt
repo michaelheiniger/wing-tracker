@@ -20,6 +20,7 @@ private const val FIELD_VALUE = "font"
 private const val TRACK_LINK = "[onclick*=showFlightInPopup]"
 private const val SITE_LINK = "[id^=site] a"
 private const val TYPE = "[id^=type]"
+private const val SITE_PAGE = "/flying-sites/"
 
 // The flight id only appears inside the script call that opens the track.
 private val FLIGHT_ID = Regex("showFlightInPopup\\((\\d+)")
@@ -78,6 +79,8 @@ internal object SyrideActivityParser {
             startTime = moment.second,
             duration = duration.minutes,
             siteName = card.selectFirst(SITE_LINK)?.cleanText()?.takeIf { it.isNotEmpty() } ?: value("Flying site"),
+            // Only a site Syride knows has a page; one typed in by the pilot is plain text.
+            siteId = card.selectFirst(SITE_LINK)?.siteId(),
             // The brand follows the wing's name in parentheses, next to its logo.
             wing = SourceWing(wingName, fields["Used wing"]?.remark?.let(::insideParentheses)),
             distanceKm = number(value("Distance"), "km"),
@@ -94,6 +97,10 @@ internal object SyrideActivityParser {
             text.startsWith("Site flight") -> FlightType.Site
             else -> null
         }
+
+    // The last part of the page's address, with HTML entities already decoded by the parser, e.g. "Crêt_Du_Midi".
+    private fun Element.siteId(): String? =
+        attr("href").substringAfter(SITE_PAGE, "").takeIf { it.isNotBlank() && '/' !in it }
 
     private fun Element.activityId() = id().removePrefix(CARD_ID_PREFIX).toInt()
 

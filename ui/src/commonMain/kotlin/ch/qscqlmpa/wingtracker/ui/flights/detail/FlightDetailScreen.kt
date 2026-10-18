@@ -301,7 +301,7 @@ private fun Facts(
             Fact(Res.string.flight_detail_type, details.type?.label())
         }
         FactGroup(stringResource(Res.string.flight_detail_section_sites)) {
-            SiteFact(Res.string.flight_detail_takeoff_site, details.takeOffSite)
+            SiteFact(Res.string.flight_detail_takeoff_site, details.takeOffSite, actions.onOpenSyrideSite)
             TrackPositionFact(Res.string.flight_detail_takeoff_position, track) { it.takeOffPosition }
             SiteFact(Res.string.flight_detail_landing_site, details.landingSite)
             TrackPositionFact(Res.string.flight_detail_landing_position, track) { it.landingPosition }

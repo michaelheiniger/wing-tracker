@@ -50,7 +50,7 @@ internal data class FlightDocument(
     // Added in schema 6: each site's name per source (ADR 0030).
     val takeOffSiteNames: List<SiteNameDocument> = emptyList(),
     val landingSiteNames: List<SiteNameDocument> = emptyList(),
-    // Added in schema 7: how the pilot got to take-off.
+    // Added in schema 7: how the pilot got to take-off, and the source's own id of a site (in SiteNameDocument).
     val type: String? = null,
 ) {
     fun toDomain(): Flight =
@@ -84,7 +84,10 @@ internal data class FlightDocument(
         if (schemaVersion < SITE_NAMES_SCHEMA_VERSION) {
             SiteNames.of(legacySource, legacyName)
         } else {
-            SiteNames(names.associate { it.source.toSource() to it.name })
+            SiteNames(
+                names.associate { it.source.toSource() to it.name },
+                names.mapNotNull { name -> name.reference?.let { name.source.toSource() to it } }.toMap(),
+            )
         }
 
     // The source of a name stored without one is a guess: Syride only ever gave the take-off site, and a pilot may
@@ -152,12 +155,13 @@ internal data class FlightExportDocument(
 internal data class SiteNameDocument(
     val source: String,
     val name: String,
+    val reference: String? = null,
 ) {
     companion object {
         // Ordered by precedence, so the file reads like the flight page.
         fun from(names: SiteNames) =
             SiteSource.entries.mapNotNull { source ->
-                names[source]?.let { SiteNameDocument(source.stored(), it) }
+                names[source]?.let { SiteNameDocument(source.stored(), it, names.reference(source)) }
             }
     }
 }

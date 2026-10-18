@@ -3,8 +3,10 @@ package ch.qscqlmpa.wingtracker.ui.flights.detail
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -16,6 +18,7 @@ import ch.qscqlmpa.wingtracker.ui.components.Severity
 import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.flights.label
 import ch.qscqlmpa.wingtracker.ui.resources.Res
+import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_open_syride_site
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_site_other
 import ch.qscqlmpa.wingtracker.ui.resources.site_source_track
 import org.jetbrains.compose.resources.StringResource
@@ -28,6 +31,7 @@ import kotlin.math.roundToLong
 internal fun SiteFact(
     label: StringResource,
     names: SiteNames,
+    onOpenSyride: (() -> Unit)? = null,
 ) {
     Fact(label, names.shown)
     val shownSource = names.shownSource ?: return
@@ -43,6 +47,11 @@ internal fun SiteFact(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+        }
+        onOpenSyride?.let { open ->
+            TextButton(onClick = open, contentPadding = ButtonDefaults.TextButtonWithIconContentPadding) {
+                Text(stringResource(Res.string.flight_detail_open_syride_site))
             }
         }
     }

@@ -89,7 +89,7 @@ class JsonFlightRepositoryTest {
             }
 
         @Test
-        fun `restores the site names of every source`() =
+        fun `restores the site names of every source with their ids`() =
             runTest {
                 // given
                 val base = aStoredFlight()
@@ -104,6 +104,7 @@ class JsonFlightRepositoryTest {
                                             SiteSource.Syride to "Niederhorn",
                                             SiteSource.Spreadsheet to "Niederhorn (BE)",
                                         ),
+                                        mapOf(SiteSource.Syride to "Niederhorn"),
                                     ),
                                 landingSite = SiteNames.of(SiteSource.Spreadsheet, "Beatenbucht"),
                             ),
