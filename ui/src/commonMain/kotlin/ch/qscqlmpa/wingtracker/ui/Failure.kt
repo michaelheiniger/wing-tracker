@@ -39,6 +39,7 @@ enum class FailureKind {
     SyridePagesChanged,
     ImportSyride,
     UpdateTakeOffTimes,
+    CompleteSyrideFlights,
     SpreadsheetUnreadable,
     SpreadsheetOldFormat,
     ImportSpreadsheet,

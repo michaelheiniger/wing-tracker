@@ -60,6 +60,15 @@ private fun aSyrideFlight(
     type = FlightType.HikeAndFly,
 )
 
+// A flight imported from Syride before its type and site id were read.
+private fun anEarlierSyrideFlight(
+    id: String = "f-1",
+    syrideId: String = "flight:1",
+) = aFlight(
+    id,
+    aFlightDetails().copy(takeOffSite = SiteNames.of(SiteSource.Syride, "Dent De Jaman")),
+).copy(importedFrom = ExternalReference(SYRIDE_SYSTEM, syrideId))
+
 class SyrideImportTest {
     private val source = mockk<SyrideFlightSource>()
     private val flights = mockk<FlightRepository>(relaxUnitFun = true)
@@ -166,6 +175,44 @@ class SyrideImportTest {
 
                 // then
                 assertThat(draft.takeOffTimeUpdates).isEmpty()
+            }
+
+        @Test
+        fun `offers the type and the site id Syride gives since for earlier flights`() =
+            runTest {
+                // given
+                givenStored(flightList = listOf(anEarlierSyrideFlight()))
+                coEvery { source.fetch("QSCQLMPA") } returns listOf(aSyrideFlight("flight:1"))
+
+                // when
+                val draft = prepare("QSCQLMPA")
+
+                // then
+                assertThat(draft.completions).containsExactly(
+                    SyrideCompletion(FlightId("f-1"), FlightType.HikeAndFly, "Dent De Jaman", "Dent_De_Jaman"),
+                )
+            }
+
+        @Test
+        fun `offers neither a type the pilot set nor the id of a site name that differs from Syride's`() =
+            runTest {
+                // given
+                val earlier = anEarlierSyrideFlight()
+                val edited =
+                    earlier.withDetails(
+                        earlier.details.copy(
+                            type = FlightType.Site,
+                            takeOffSite = SiteNames.of(SiteSource.Syride, "Jaman"),
+                        ),
+                    )
+                givenStored(flightList = listOf(edited))
+                coEvery { source.fetch("QSCQLMPA") } returns listOf(aSyrideFlight("flight:1"))
+
+                // when
+                val draft = prepare("QSCQLMPA")
+
+                // then
+                assertThat(draft.completions).isEmpty()
             }
 
         @Test
@@ -432,6 +479,90 @@ class SyrideImportTest {
 
                 // then
                 assertThat(count).isEqualTo(0)
+            }
+    }
+
+    @Nested
+    inner class CompletingFlights {
+        private val complete = CompleteSyrideFlights(flights)
+        private val completion =
+            SyrideCompletion(FlightId("f-1"), FlightType.HikeAndFly, "Dent De Jaman", "Dent_De_Jaman")
+
+        @Test
+        fun `fills in the type and the id of Syride's take-off site`() =
+            runTest {
+                // given
+                val stored = anEarlierSyrideFlight()
+                givenStored(flightList = listOf(stored))
+                coEvery { flights.findById(FlightId("f-1")) } returns stored
+
+                // when
+                val count = complete(listOf(completion))
+
+                // then
+                assertThat(count).isEqualTo(1)
+                assertThat(saved.single().details.type).isEqualTo(FlightType.HikeAndFly)
+                assertThat(saved.single().details.takeOffSite)
+                    .isEqualTo(SiteNames.of(SiteSource.Syride, "Dent De Jaman", "Dent_De_Jaman"))
+            }
+
+        @Test
+        fun `keeps a type the pilot set since the account was read and still adds the site id`() =
+            runTest {
+                // given
+                val earlier = anEarlierSyrideFlight()
+                val stored = earlier.withDetails(earlier.details.copy(type = FlightType.Site))
+                givenStored(flightList = listOf(stored))
+                coEvery { flights.findById(FlightId("f-1")) } returns stored
+
+                // when
+                complete(listOf(completion))
+
+                // then
+                assertThat(saved.single().details.type).isEqualTo(FlightType.Site)
+                assertThat(
+                    saved
+                        .single()
+                        .details.takeOffSite
+                        .reference(SiteSource.Syride),
+                ).isEqualTo("Dent_De_Jaman")
+            }
+
+        @Test
+        fun `leaves a flight that has nothing left to fill`() =
+            runTest {
+                // given
+                val earlier = anEarlierSyrideFlight()
+                val stored =
+                    earlier.withDetails(
+                        earlier.details.copy(
+                            type = FlightType.Site,
+                            takeOffSite = SiteNames.of(SiteSource.Syride, "Jaman"),
+                        ),
+                    )
+                givenStored(flightList = listOf(stored))
+                coEvery { flights.findById(FlightId("f-1")) } returns stored
+
+                // when
+                val count = complete(listOf(completion))
+
+                // then
+                assertThat(count).isZero()
+                assertThat(saved).isEmpty()
+            }
+
+        @Test
+        fun `skips a flight deleted since the account was read`() =
+            runTest {
+                // given
+                givenStored()
+                coEvery { flights.findById(FlightId("f-1")) } returns null
+
+                // when
+                val count = complete(listOf(completion))
+
+                // then
+                assertThat(count).isZero()
             }
     }
 

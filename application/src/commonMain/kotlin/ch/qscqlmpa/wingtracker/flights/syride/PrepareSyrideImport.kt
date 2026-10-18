@@ -15,6 +15,8 @@ data class SyrideImportDraft(
     val existingWings: List<Wing>,
     // Flights imported earlier whose take-off time Syride gives differently; the pilot decides whether to update them.
     val takeOffTimeUpdates: List<TakeOffTimeUpdate> = emptyList(),
+    // Flights imported earlier that can get what Syride gives since; the pilot decides whether to fill it in.
+    val completions: List<SyrideCompletion> = emptyList(),
 )
 
 /** Reads the account and works out what is new, so the pilot only has to decide about the wings. */
@@ -33,13 +35,14 @@ class PrepareSyrideImport(
                 .associateBy { checkNotNull(it.importedFrom).id }
         val (old, new) = fetched.partition { it.id in known }
         val timeUpdates = old.mapNotNull { takeOffTimeUpdate(known.getValue(it.id), it) }
+        val completions = old.mapNotNull { completionOf(known.getValue(it.id), it) }
         val existing = wings.findAll().items.sortedBy { it.details.name.lowercase() }
         val groups =
             new
                 .groupBy { it.wing }
                 .map { (wing, list) -> WingGroup(wing, list.sortedBy { it.date }, suggestWing(wing, existing)) }
                 .sortedByDescending { it.lastDate }
-        return SyrideImportDraft(username.trim(), groups, old.size, existing, timeUpdates)
+        return SyrideImportDraft(username.trim(), groups, old.size, existing, timeUpdates, completions)
     }
 }
 

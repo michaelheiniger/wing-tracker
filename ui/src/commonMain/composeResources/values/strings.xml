@@ -464,6 +464,20 @@
     <string name="failure_syride_changed">Syride's pages look different than expected, so the flights cannot be read (%1$s). The application needs an update.</string>
     <string name="failure_import_syride">The flights could not be imported: %1$s</string>
     <string name="failure_update_takeoff_times">The take-off times could not be updated: %1$s</string>
+    <plurals name="syride_completions_found">
+        <item quantity="one">%1$d of them can get its type or take-off site from Syride.</item>
+        <item quantity="other">%1$d of them can get their type or take-off site from Syride.</item>
+    </plurals>
+    <string name="syride_completions_why">Only what is missing is filled in: a type you set and site names you typed stay as they are.</string>
+    <plurals name="syride_complete">
+        <item quantity="one">Complete %1$d flight</item>
+        <item quantity="other">Complete %1$d flights</item>
+    </plurals>
+    <plurals name="syride_completed">
+        <item quantity="one">%1$d flight completed.</item>
+        <item quantity="other">%1$d flights completed.</item>
+    </plurals>
+    <string name="failure_complete_syride_flights">The flights could not be completed: %1$s</string>
     <plurals name="import_count">
         <item quantity="one">Import %1$d flight</item>
         <item quantity="other">Import %1$d flights</item>

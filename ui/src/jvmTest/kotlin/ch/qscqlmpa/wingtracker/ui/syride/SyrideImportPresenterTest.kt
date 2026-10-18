@@ -1,14 +1,17 @@
 package ch.qscqlmpa.wingtracker.ui.syride
 
 import ch.qscqlmpa.wingtracker.flights.FlightId
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.flights.importing.ImportResult
 import ch.qscqlmpa.wingtracker.flights.importing.NewWingSpec
 import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
 import ch.qscqlmpa.wingtracker.flights.importing.WingGroup
 import ch.qscqlmpa.wingtracker.flights.importing.WingTarget
+import ch.qscqlmpa.wingtracker.flights.syride.CompleteSyrideFlights
 import ch.qscqlmpa.wingtracker.flights.syride.CountSyrideFlightsWithoutTrack
 import ch.qscqlmpa.wingtracker.flights.syride.ImportSyrideFlights
 import ch.qscqlmpa.wingtracker.flights.syride.PrepareSyrideImport
+import ch.qscqlmpa.wingtracker.flights.syride.SyrideCompletion
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideException
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlight
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideImportDraft
@@ -59,6 +62,7 @@ class SyrideImportPresenterTest {
     private val prepare = mockk<PrepareSyrideImport>()
     private val import = mockk<ImportSyrideFlights>()
     private val updateTimes = mockk<UpdateSyrideTakeOffTimes>()
+    private val complete = mockk<CompleteSyrideFlights>()
     private val countWithoutTrack = mockk<CountSyrideFlightsWithoutTrack>().also { coEvery { it() } returns 0 }
     private val saveUsername = mockk<SaveSyrideUsername>(relaxUnitFun = true)
 
@@ -68,6 +72,7 @@ class SyrideImportPresenterTest {
             prepare,
             import,
             updateTimes,
+            complete,
             countWithoutTrack,
             saveUsername,
             username,
@@ -434,6 +439,48 @@ class SyrideImportPresenterTest {
                 assertThat(presenter.failure?.kind).isEqualTo(FailureKind.UpdateTakeOffTimes)
                 assertThat(presenter.updatedTimes).isNull()
                 assertThat(presenter.updatingTimes).isFalse()
+            }
+    }
+
+    @Nested
+    inner class CompletingFlights {
+        private val completion =
+            SyrideCompletion(FlightId("flight-1"), FlightType.HikeAndFly, "Dent De Jaman", "Dent_De_Jaman")
+
+        private fun TestScope.readWithCompletions(): SyrideImportPresenter {
+            coEvery { prepare("QSCQLMPA") } returns aDraft().copy(completions = listOf(completion))
+            return presenter().also { it.read() }
+        }
+
+        @Test
+        fun `completes the flights the account offered and reports how many`() =
+            runTest {
+                // given
+                coEvery { complete(listOf(completion)) } returns 1
+                val presenter = readWithCompletions()
+
+                // when
+                presenter.completeFlights()
+
+                // then
+                assertThat(presenter.completed).isEqualTo(1)
+                assertThat(presenter.completing).isFalse()
+            }
+
+        @Test
+        fun `reports a failure and stays ready to try again`() =
+            runTest {
+                // given
+                coEvery { complete(any()) } throws IOException("Disk full")
+                val presenter = readWithCompletions()
+
+                // when
+                presenter.completeFlights()
+
+                // then
+                assertThat(presenter.failure?.kind).isEqualTo(FailureKind.CompleteSyrideFlights)
+                assertThat(presenter.completed).isNull()
+                assertThat(presenter.completing).isFalse()
             }
     }
 }

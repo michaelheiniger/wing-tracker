@@ -34,6 +34,10 @@ import ch.qscqlmpa.wingtracker.ui.resources.import_count
 import ch.qscqlmpa.wingtracker.ui.resources.import_nothing_new
 import ch.qscqlmpa.wingtracker.ui.resources.syride_account_hint
 import ch.qscqlmpa.wingtracker.ui.resources.syride_already
+import ch.qscqlmpa.wingtracker.ui.resources.syride_complete
+import ch.qscqlmpa.wingtracker.ui.resources.syride_completed
+import ch.qscqlmpa.wingtracker.ui.resources.syride_completions_found
+import ch.qscqlmpa.wingtracker.ui.resources.syride_completions_why
 import ch.qscqlmpa.wingtracker.ui.resources.syride_read
 import ch.qscqlmpa.wingtracker.ui.resources.syride_reading
 import ch.qscqlmpa.wingtracker.ui.resources.syride_time_example
@@ -166,6 +170,7 @@ private fun WingsStep(
     val draft = checkNotNull(presenter.draft)
     if (draft.alreadyImported > 0) Hint(stringResource(Res.string.syride_already, draft.alreadyImported))
     TakeOffTimes(presenter)
+    Completions(presenter)
     if (draft.groups.isEmpty()) {
         Text(stringResource(Res.string.import_nothing_new))
     } else {
@@ -195,6 +200,28 @@ private fun WingsStep(
 }
 
 private const val TIME_EXAMPLES = 3
+
+/** Flights imported earlier that can get what Syride gives since; only missing values are filled in. */
+@Composable
+private fun Completions(presenter: SyrideImportPresenter) {
+    presenter.completed?.let {
+        StatusBadge(pluralStringResource(Res.plurals.syride_completed, it, it), Severity.Success)
+        return
+    }
+    val completions = checkNotNull(presenter.draft).completions
+    if (completions.isEmpty()) return
+    Surface(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = MaterialTheme.shapes.medium) {
+        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(pluralStringResource(Res.plurals.syride_completions_found, completions.size, completions.size))
+            Hint(stringResource(Res.string.syride_completions_why))
+            Buttons {
+                Button(onClick = presenter::completeFlights, enabled = !presenter.completing) {
+                    Text(pluralStringResource(Res.plurals.syride_complete, completions.size, completions.size))
+                }
+            }
+        }
+    }
+}
 
 /** Flights imported earlier that can get Syride's take-off time, with a few examples so the pilot sees the change. */
 @Composable

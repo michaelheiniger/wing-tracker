@@ -280,6 +280,7 @@ private fun importWizard(
             useCases.prepareSyrideImport,
             useCases.importSyrideFlights,
             useCases.updateSyrideTakeOffTimes,
+            useCases.completeSyrideFlights,
             useCases.countSyrideFlightsWithoutTrack,
             useCases.saveSyrideUsername,
             initialUsername = "",

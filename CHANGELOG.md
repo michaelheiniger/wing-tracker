@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
+- Importing from Syride again offers to complete flights imported earlier: "Complete N flights" gives them Syride's flight type and the id of their take-off site. Only what is missing is filled in; a type you set and site names you typed stay as they are.
 - Flights imported from Syride remember Syride's own id of their take-off site. Their page has a "Site on Syride" button under the take-off site, which opens the site's page on Syride in your browser.
 - Flights have a type: "From a site" or "Hike & fly", or unknown. Set it in the flight form, see it in the flight's "Flight" card, and spot hike-and-fly flights in the logbook by their "Hike & fly" badge. Flights imported from Syride get the type Syride gives them.
 - A flight with a track shows its take-off and landing position in the "Sites" card, read from the track each time the page opens and marked "IGC track". The positions are in decimal degrees, latitude first, so they can be copied into a map site.

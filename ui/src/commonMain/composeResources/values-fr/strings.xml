@@ -464,6 +464,20 @@
     <string name="failure_syride_changed">Les pages de Syride ne ressemblent pas à ce qui est attendu, les vols ne peuvent donc pas être lus (%1$s). L'application a besoin d'une mise à jour.</string>
     <string name="failure_import_syride">Les vols n'ont pas pu être importés : %1$s</string>
     <string name="failure_update_takeoff_times">Les heures de décollage n'ont pas pu être mises à jour : %1$s</string>
+    <plurals name="syride_completions_found">
+        <item quantity="one">%1$d d'entre eux peut reprendre son type ou son site de décollage de Syride.</item>
+        <item quantity="other">%1$d d'entre eux peuvent reprendre leur type ou leur site de décollage de Syride.</item>
+    </plurals>
+    <string name="syride_completions_why">Seul ce qui manque est complété : un type que tu as choisi et les noms de sites que tu as saisis restent tels quels.</string>
+    <plurals name="syride_complete">
+        <item quantity="one">Compléter %1$d vol</item>
+        <item quantity="other">Compléter %1$d vols</item>
+    </plurals>
+    <plurals name="syride_completed">
+        <item quantity="one">%1$d vol complété.</item>
+        <item quantity="other">%1$d vols complétés.</item>
+    </plurals>
+    <string name="failure_complete_syride_flights">Les vols n'ont pas pu être complétés : %1$s</string>
     <plurals name="import_count">
         <item quantity="one">Importer %1$d vol</item>
         <item quantity="other">Importer %1$d vols</item>
