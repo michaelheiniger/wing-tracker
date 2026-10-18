@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-18
+
 ### Added
 - The statistics' "Totals" card tells how much of it was hike and fly, overall and per year in two more columns of its table, once your logbook has flights with a type.
 - Search the logbook by flight type: "From a site" and "Hike & fly" chips sit next to the wings, once your logbook has flights with a type. Flights of unknown type are left out while a type is chosen. The statistics banner names the chosen types.
