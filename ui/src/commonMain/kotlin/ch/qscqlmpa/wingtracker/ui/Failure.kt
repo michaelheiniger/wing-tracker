@@ -48,6 +48,8 @@ enum class FailureKind {
     CloudAccessDenied,
     CloudClockOff,
     CloudUnexpected,
+    UploadBackup,
+    CloudSecretMissing,
     SyrideUserNotFound,
     SyrideUnreachable,
     SyridePagesChanged,

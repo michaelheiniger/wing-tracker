@@ -350,6 +350,26 @@ class ZipBackupArchiveTest {
             }
     }
 
+    @Nested
+    inner class TemporaryFile {
+        @Test
+        fun `offers a fresh path outside the data folder and removes it with its folder`() =
+            runTest {
+                // given
+                val file = Path.of(archive.temporaryFile("wing-tracker-backup-2026-10-18-1430.zip"))
+                archive.create(file.toString(), APP_VERSION, CREATED_AT)
+
+                // when
+                archive.discard(file.toString())
+
+                // then
+                assertThat(file.fileName.toString()).isEqualTo("wing-tracker-backup-2026-10-18-1430.zip")
+                assertThat(file.startsWith(dataDirectory)).isFalse()
+                assertThat(Files.exists(file)).isFalse()
+                assertThat(Files.exists(file.parent)).isFalse()
+            }
+    }
+
     private suspend fun problemInspecting(): BackupProblem? =
         (runCatching { archive.inspect(backup.toString()) }.exceptionOrNull() as? BackupException)?.problem
 

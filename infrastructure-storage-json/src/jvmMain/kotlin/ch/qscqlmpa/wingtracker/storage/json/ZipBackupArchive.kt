@@ -31,6 +31,7 @@ import kotlin.time.Instant
 private val logger = KotlinLogging.logger {}
 
 private const val BUFFER_BYTES = 64 * 1024
+private const val TEMPORARY_PREFIX = "wing-tracker-backup-"
 
 /** Backs up the data folder as one zip of its files as they are stored, with a manifest of them (ADR 0031). */
 class ZipBackupArchive(
@@ -91,6 +92,20 @@ class ZipBackupArchive(
             }
         }
     }
+
+    override suspend fun temporaryFile(name: String): String =
+        withContext(Dispatchers.IO) {
+            Files.createTempDirectory(TEMPORARY_PREFIX).resolve(Path(name).fileName).toString()
+        }
+
+    override suspend fun discard(path: String) =
+        withContext(Dispatchers.IO) {
+            val file = Path(path)
+            Files.deleteIfExists(file)
+            // Only a folder made by temporaryFile, so nothing else is ever removed by mistake.
+            file.parent?.takeIf { it.fileName.toString().startsWith(TEMPORARY_PREFIX) }?.let(Files::deleteIfExists)
+            Unit
+        }
 
     @OptIn(kotlin.io.path.ExperimentalPathApi::class)
     private fun removeUnpacked(

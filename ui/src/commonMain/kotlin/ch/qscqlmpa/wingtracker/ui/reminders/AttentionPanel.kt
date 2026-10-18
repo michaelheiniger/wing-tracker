@@ -26,6 +26,7 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.DueState
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.reminders.Attention
 import ch.qscqlmpa.wingtracker.reminders.AttentionItem
+import ch.qscqlmpa.wingtracker.ui.backup.BackupButtons
 import ch.qscqlmpa.wingtracker.ui.backup.BackupPresenter
 import ch.qscqlmpa.wingtracker.ui.components.Severity
 import ch.qscqlmpa.wingtracker.ui.components.icon
@@ -39,7 +40,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.attention_backup_title
 import ch.qscqlmpa.wingtracker.ui.resources.attention_due_soon
 import ch.qscqlmpa.wingtracker.ui.resources.attention_open
 import ch.qscqlmpa.wingtracker.ui.resources.attention_title
-import ch.qscqlmpa.wingtracker.ui.resources.backup_create
 import ch.qscqlmpa.wingtracker.ui.resources.maintenance_planned_on
 import ch.qscqlmpa.wingtracker.ui.theme.extraColors
 import ch.qscqlmpa.wingtracker.ui.toDisplay
@@ -164,8 +164,6 @@ private fun BackupRow(
             }
         }
         if (presenter.busy) CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-        TextButton(onClick = presenter::create, enabled = !presenter.busy) {
-            Text(stringResource(Res.string.backup_create))
-        }
+        BackupButtons(presenter, textButtons = true)
     }
 }

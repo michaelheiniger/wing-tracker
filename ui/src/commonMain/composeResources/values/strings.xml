@@ -463,6 +463,17 @@
     <string name="failure_cloud_denied">These keys may not do this. Give the key the right to read, write and delete in the bucket.</string>
     <string name="failure_cloud_clock">The storage refused because this computer's clock is off. Set the right time and try again.</string>
     <string name="failure_cloud_unexpected">The storage gave an answer Wing Tracker cannot read: %1$s</string>
+    <string name="backup_save_file">Save as file…</string>
+    <string name="backup_upload">Upload to cloud storage</string>
+    <string name="backup_uploading">Uploading…</string>
+    <string name="backup_uploaded">Backup uploaded to the bucket %1$s as %2$s</string>
+    <plurals name="backup_deleted_old">
+        <item quantity="one">%1$d older backup was deleted.</item>
+        <item quantity="other">%1$d older backups were deleted.</item>
+    </plurals>
+    <string name="backup_cleanup_failed">The backup is uploaded, but older backups could not be deleted: %1$s</string>
+    <string name="failure_upload_backup">The backup could not be uploaded: %1$s</string>
+    <string name="failure_cloud_secret_missing">The secret key of your cloud storage is no longer kept. Enter it again under Cloud storage and save.</string>
     <string name="data_change_title">Change the data folder</string>
     <string name="data_change_body">New folder: %1$s</string>
     <string name="data_change_move_hint">Your current data can be moved there: everything is copied, checked and only then removed from the old folder.</string>

@@ -9,18 +9,23 @@ import kotlinx.datetime.LocalDateTime
 data class BackupStatus(
     val lastMadeAt: LocalDateTime?,
     val suggestedFileName: String,
+    // Uploading is offered once a bucket is set up (ADR 0032).
+    val cloudStorage: CloudStorageSettings? = null,
 )
 
 class GetBackupStatus(
     private val settings: SettingsRepository,
     private val clock: AppClock,
 ) {
-    suspend operator fun invoke(): BackupStatus =
-        BackupStatus(
-            lastMadeAt = settings.load().lastBackupAt?.let(clock::local),
+    suspend operator fun invoke(): BackupStatus {
+        val stored = settings.load()
+        return BackupStatus(
+            lastMadeAt = stored.lastBackupAt?.let(clock::local),
             // Dated, so backups saved in one folder sort by age and never replace each other by accident.
             suggestedFileName = "wing-tracker-backup-${clock.today()}.zip",
+            cloudStorage = stored.cloudStorage,
         )
+    }
 }
 
 /** Backs up all stored data and remembers when, so the pilot can see how old their last backup is (ADR 0031). */

@@ -54,7 +54,7 @@ class RestorePresenterTest {
     private fun TestScope.presenter() =
         RestorePresenter(
             TestScope(UnconfinedTestDispatcher(testScheduler)),
-            BackupUseCases(mockk(), mockk(), inspectBackup, restoreBackup),
+            BackupUseCases(mockk(), mockk(), inspectBackup, restoreBackup, mockk()),
             filePicker,
             location,
             RestoreTitles(pickBackup = "Choose the backup", chooseFolder = "Choose a folder"),

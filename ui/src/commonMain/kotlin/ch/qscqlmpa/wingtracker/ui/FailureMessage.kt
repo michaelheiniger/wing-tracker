@@ -28,6 +28,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_check
 import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_clock
 import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_denied
 import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_keys
+import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_secret_missing
 import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_unexpected
 import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_unreachable
 import ch.qscqlmpa.wingtracker.ui.resources.failure_complete_syride_flights
@@ -81,6 +82,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_update_refused
 import ch.qscqlmpa.wingtracker.ui.resources.failure_update_takeoff_times
 import ch.qscqlmpa.wingtracker.ui.resources.failure_update_unexpected
 import ch.qscqlmpa.wingtracker.ui.resources.failure_update_unreachable
+import ch.qscqlmpa.wingtracker.ui.resources.failure_upload_backup
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -115,6 +117,8 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.CloudAccessDenied to Res.string.failure_cloud_denied,
         FailureKind.CloudClockOff to Res.string.failure_cloud_clock,
         FailureKind.CloudUnexpected to Res.string.failure_cloud_unexpected,
+        FailureKind.UploadBackup to Res.string.failure_upload_backup,
+        FailureKind.CloudSecretMissing to Res.string.failure_cloud_secret_missing,
         FailureKind.SyrideUserNotFound to Res.string.failure_syride_user,
         FailureKind.SyrideUnreachable to Res.string.failure_syride_unreachable,
         FailureKind.SyridePagesChanged to Res.string.failure_syride_changed,

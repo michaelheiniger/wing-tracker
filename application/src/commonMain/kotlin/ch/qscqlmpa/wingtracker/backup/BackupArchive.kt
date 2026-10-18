@@ -65,4 +65,10 @@ interface BackupArchive {
         archive: String,
         folder: String,
     )
+
+    /** A path named [name] in a new folder outside the data folder, for a backup that only passes through. */
+    suspend fun temporaryFile(name: String): String
+
+    /** Removes a file from [temporaryFile] and its folder; one already gone is no error. */
+    suspend fun discard(path: String)
 }

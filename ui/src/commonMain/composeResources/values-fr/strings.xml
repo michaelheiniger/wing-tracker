@@ -463,6 +463,17 @@
     <string name="failure_cloud_denied">Ces clés n'en ont pas le droit. Donne à la clé le droit de lire, écrire et supprimer dans le bucket.</string>
     <string name="failure_cloud_clock">Le stockage a refusé car l'horloge de cet ordinateur n'est pas à l'heure. Règle l'heure et réessaie.</string>
     <string name="failure_cloud_unexpected">Le stockage a donné une réponse que Wing Tracker ne sait pas lire : %1$s</string>
+    <string name="backup_save_file">Enregistrer en fichier…</string>
+    <string name="backup_upload">Envoyer vers le stockage en ligne</string>
+    <string name="backup_uploading">Envoi en cours…</string>
+    <string name="backup_uploaded">Sauvegarde envoyée dans le bucket %1$s sous %2$s</string>
+    <plurals name="backup_deleted_old">
+        <item quantity="one">%1$d sauvegarde plus ancienne a été supprimée.</item>
+        <item quantity="other">%1$d sauvegardes plus anciennes ont été supprimées.</item>
+    </plurals>
+    <string name="backup_cleanup_failed">La sauvegarde est envoyée, mais les plus anciennes n'ont pas pu être supprimées : %1$s</string>
+    <string name="failure_upload_backup">La sauvegarde n'a pas pu être envoyée : %1$s</string>
+    <string name="failure_cloud_secret_missing">La clé secrète de ton stockage en ligne n'est plus conservée. Saisis-la à nouveau sous Stockage en ligne et enregistre.</string>
     <string name="data_change_title">Changer le dossier de données</string>
     <string name="data_change_body">Nouveau dossier : %1$s</string>
     <string name="data_change_move_hint">Tes données actuelles peuvent y être déplacées : tout est copié, vérifié, puis seulement retiré de l'ancien dossier.</string>

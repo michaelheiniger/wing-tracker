@@ -463,6 +463,17 @@
     <string name="failure_cloud_denied">Diese Schlüssel dürfen das nicht. Gib dem Schlüssel das Recht, im Bucket zu lesen, zu schreiben und zu löschen.</string>
     <string name="failure_cloud_clock">Der Speicher hat abgelehnt, weil die Uhr dieses Computers falsch geht. Stelle die richtige Zeit ein und versuche es erneut.</string>
     <string name="failure_cloud_unexpected">Der Speicher hat eine Antwort gegeben, die Wing Tracker nicht lesen kann: %1$s</string>
+    <string name="backup_save_file">Als Datei speichern…</string>
+    <string name="backup_upload">In den Cloud-Speicher hochladen</string>
+    <string name="backup_uploading">Wird hochgeladen…</string>
+    <string name="backup_uploaded">Sicherung in den Bucket %1$s hochgeladen als %2$s</string>
+    <plurals name="backup_deleted_old">
+        <item quantity="one">%1$d ältere Sicherung wurde gelöscht.</item>
+        <item quantity="other">%1$d ältere Sicherungen wurden gelöscht.</item>
+    </plurals>
+    <string name="backup_cleanup_failed">Die Sicherung ist hochgeladen, aber ältere Sicherungen konnten nicht gelöscht werden: %1$s</string>
+    <string name="failure_upload_backup">Die Sicherung konnte nicht hochgeladen werden: %1$s</string>
+    <string name="failure_cloud_secret_missing">Der geheime Schlüssel deines Cloud-Speichers wird nicht mehr aufbewahrt. Gib ihn unter Cloud-Speicher erneut ein und speichere.</string>
     <string name="data_change_title">Datenordner ändern</string>
     <string name="data_change_body">Neuer Ordner: %1$s</string>
     <string name="data_change_move_hint">Deine bisherigen Daten können dorthin verschoben werden: alles wird kopiert, geprüft und erst dann aus dem alten Ordner entfernt.</string>

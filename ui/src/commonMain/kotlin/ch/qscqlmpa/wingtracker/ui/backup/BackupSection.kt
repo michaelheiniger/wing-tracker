@@ -15,21 +15,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.components.AppAlertDialog
 import ch.qscqlmpa.wingtracker.ui.components.Severity
 import ch.qscqlmpa.wingtracker.ui.components.StatusBadge
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_cancel
+import ch.qscqlmpa.wingtracker.ui.resources.backup_cleanup_failed
 import ch.qscqlmpa.wingtracker.ui.resources.backup_create
+import ch.qscqlmpa.wingtracker.ui.resources.backup_deleted_old
 import ch.qscqlmpa.wingtracker.ui.resources.backup_hint
 import ch.qscqlmpa.wingtracker.ui.resources.backup_in_progress
 import ch.qscqlmpa.wingtracker.ui.resources.backup_last
 import ch.qscqlmpa.wingtracker.ui.resources.backup_never
 import ch.qscqlmpa.wingtracker.ui.resources.backup_restore
+import ch.qscqlmpa.wingtracker.ui.resources.backup_save_file
 import ch.qscqlmpa.wingtracker.ui.resources.backup_saved
 import ch.qscqlmpa.wingtracker.ui.resources.backup_saved_content
 import ch.qscqlmpa.wingtracker.ui.resources.backup_title
+import ch.qscqlmpa.wingtracker.ui.resources.backup_upload
+import ch.qscqlmpa.wingtracker.ui.resources.backup_uploaded
 import ch.qscqlmpa.wingtracker.ui.resources.flight_date_time
 import ch.qscqlmpa.wingtracker.ui.resources.restore_choose_folder
 import ch.qscqlmpa.wingtracker.ui.resources.restore_how
@@ -40,7 +46,9 @@ import ch.qscqlmpa.wingtracker.ui.resources.restore_newer_badge
 import ch.qscqlmpa.wingtracker.ui.resources.restore_restart_body
 import ch.qscqlmpa.wingtracker.ui.resources.restore_title
 import ch.qscqlmpa.wingtracker.ui.settings.RestartDialog
+import ch.qscqlmpa.wingtracker.ui.theme.extraColors
 import ch.qscqlmpa.wingtracker.ui.toDisplay
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
@@ -72,9 +80,7 @@ fun BackupSection(
         style = MaterialTheme.typography.bodyLarge,
     )
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        OutlinedButton(onClick = presenter::create, enabled = !presenter.busy) {
-            Text(stringResource(Res.string.backup_create))
-        }
+        BackupButtons(presenter)
         OutlinedButton(onClick = restore::start, enabled = !presenter.busy && restore.step == null) {
             Text(stringResource(Res.string.backup_restore))
         }
@@ -83,24 +89,76 @@ fun BackupSection(
             Text(stringResource(Res.string.backup_in_progress))
         }
     }
-    presenter.saved?.let { saved ->
-        // The path is selectable, so the pilot can find the file again or copy it elsewhere.
-        Text(stringResource(Res.string.backup_saved, saved.path))
-        Text(
-            pluralStringResource(
-                Res.plurals.backup_saved_content,
-                saved.summary.files,
-                saved.summary.files,
-                megabytes(saved.summary.bytes),
-            ),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    presenter.outcome?.let { BackupOutcomeText(it) }
     presenter.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
     // A failure while choosing the backup has no dialog to show in yet.
     if (restore.step == null) restore.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
     RestoreDialogs(restore)
+}
+
+/** The ways to back up: a file only, or a file or the bucket once one is set up (ADR 0032). */
+@Composable
+internal fun BackupButtons(
+    presenter: BackupPresenter,
+    textButtons: Boolean = false,
+) {
+    val enabled = !presenter.busy
+    if (presenter.cloud == null) {
+        ActionButton(textButtons, presenter::create, enabled, Res.string.backup_create)
+    } else {
+        ActionButton(textButtons, presenter::create, enabled, Res.string.backup_save_file)
+        ActionButton(textButtons, presenter::upload, enabled, Res.string.backup_upload)
+    }
+}
+
+@Composable
+private fun ActionButton(
+    text: Boolean,
+    onClick: () -> Unit,
+    enabled: Boolean,
+    label: StringResource,
+) {
+    if (text) {
+        TextButton(onClick = onClick, enabled = enabled) { Text(stringResource(label)) }
+    } else {
+        OutlinedButton(onClick = onClick, enabled = enabled) { Text(stringResource(label)) }
+    }
+}
+
+@Composable
+private fun BackupOutcomeText(outcome: BackupOutcome) {
+    val summary =
+        when (outcome) {
+            is BackupOutcome.Saved -> {
+                // The path is selectable, so the pilot can find the file again or copy it elsewhere.
+                Text(stringResource(Res.string.backup_saved, outcome.path))
+                outcome.summary
+            }
+
+            is BackupOutcome.Uploaded -> {
+                Text(stringResource(Res.string.backup_uploaded, outcome.upload.bucket, outcome.upload.key))
+                outcome.upload.summary
+            }
+        }
+    Text(
+        pluralStringResource(Res.plurals.backup_saved_content, summary.files, summary.files, megabytes(summary.bytes)),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    val upload = (outcome as? BackupOutcome.Uploaded)?.upload ?: return
+    if (upload.deleted > 0) {
+        Text(
+            pluralStringResource(Res.plurals.backup_deleted_old, upload.deleted, upload.deleted),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    upload.cleanupProblem?.let {
+        Text(
+            stringResource(Res.string.backup_cleanup_failed, Failure(it.failureKind()).message()),
+            color = MaterialTheme.extraColors.warning,
+        )
+    }
 }
 
 @Composable

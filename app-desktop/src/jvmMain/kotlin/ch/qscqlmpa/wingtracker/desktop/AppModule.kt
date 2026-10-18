@@ -11,6 +11,7 @@ import ch.qscqlmpa.wingtracker.backup.GetBackupStatus
 import ch.qscqlmpa.wingtracker.backup.InspectBackup
 import ch.qscqlmpa.wingtracker.backup.RestoreBackup
 import ch.qscqlmpa.wingtracker.backup.SaveCloudStorage
+import ch.qscqlmpa.wingtracker.backup.UploadBackup
 import ch.qscqlmpa.wingtracker.flights.DeleteFlight
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.FlightsOfWing
@@ -309,7 +310,8 @@ private fun backupModule(dataDirectory: Path) =
         single<CloudStorage> { S3CloudStorage("wing-tracker/${BuildInfo.VERSION}") }
         factory { SaveCloudStorage(get()) }
         factory { CheckCloudStorage(get()) }
-        single { BackupUseCases(get(), get(), get(), get()) }
+        factory { UploadBackup(get(), get(), get(), get(), BuildInfo.VERSION) }
+        single { BackupUseCases(get(), get(), get(), get(), get()) }
         single { CloudStorageUseCases(get(), get(), get()) }
     }
 

@@ -139,6 +139,8 @@ fun AppShell(
     val dataLocation =
         remember { DataLocationPresenter(scope, platform.dataLocation, chooseTitle, beforeChange = undo::flush) }
     val logLocation = remember { LogLocationPresenter(scope, platform.logLocation) }
+    // One for the whole run, so a secret key kept for the session serves every upload.
+    val cloudSecret = remember { CloudSecret(platform.credentialStore) }
     val backupSaveTitle = stringResource(Res.string.backup_save_title)
     val backup =
         remember {
@@ -147,13 +149,12 @@ fun AppShell(
                 backups,
                 platform.fileSaver,
                 backupSaveTitle,
+                cloudSecret,
                 beforeBackup = undo::flush,
                 onCreated = attentionPresenter::refresh,
             )
         }
-    // One for the whole run, so a secret key kept for the session serves every upload.
-    val cloudSecret = remember { CloudSecret(platform.credentialStore) }
-    val cloudStorage = remember { CloudStoragePresenter(scope, cloudStorageUseCases, cloudSecret) }
+    val cloudStorage = remember { CloudStoragePresenter(scope, cloudStorageUseCases, cloudSecret, backup::load) }
     val restoreTitles =
         RestoreTitles(stringResource(Res.string.restore_pick_title), stringResource(Res.string.restore_folder_title))
     val restore =
