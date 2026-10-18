@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.syride
 
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
 import ch.qscqlmpa.wingtracker.flights.syride.SyrideFlight
 import ch.qscqlmpa.wingtracker.flights.syride.syrideFlightId
@@ -18,6 +19,7 @@ private const val FIELD = "ul"
 private const val FIELD_VALUE = "font"
 private const val TRACK_LINK = "[onclick*=showFlightInPopup]"
 private const val SITE_LINK = "[id^=site] a"
+private const val TYPE = "[id^=type]"
 
 // The flight id only appears inside the script call that opens the track.
 private val FLIGHT_ID = Regex("showFlightInPopup\\((\\d+)")
@@ -81,8 +83,17 @@ internal object SyrideActivityParser {
             distanceKm = number(value("Distance"), "km"),
             topAltitudeMeters = number(value("Top altitude"), "m")?.toInt(),
             instrument = value("Used instrument"),
+            type = card.selectFirst(TYPE)?.cleanText()?.let(::flightType),
         )
     }
+
+    // Followed by "without instrument." for a flight logged by hand, which the missing track already tells.
+    private fun flightType(text: String): FlightType? =
+        when {
+            text.startsWith("Hike flight") -> FlightType.HikeAndFly
+            text.startsWith("Site flight") -> FlightType.Site
+            else -> null
+        }
 
     private fun Element.activityId() = id().removePrefix(CARD_ID_PREFIX).toInt()
 

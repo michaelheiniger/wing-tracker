@@ -53,6 +53,7 @@ import ch.qscqlmpa.wingtracker.ui.components.AppCard
 import ch.qscqlmpa.wingtracker.ui.flights.FlightNeighbours
 import ch.qscqlmpa.wingtracker.ui.flights.detail.map.FlightMap
 import ch.qscqlmpa.wingtracker.ui.flights.detail.profile.AltitudeProfile
+import ch.qscqlmpa.wingtracker.ui.flights.label
 import ch.qscqlmpa.wingtracker.ui.flights.toDisplayNumber
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.message
@@ -92,6 +93,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_takeoff_site
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_takeoff_time
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_top_altitude
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_track_file
+import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_type
 import ch.qscqlmpa.wingtracker.ui.resources.flight_detail_wing
 import ch.qscqlmpa.wingtracker.ui.resources.flight_distance
 import ch.qscqlmpa.wingtracker.ui.resources.flight_edit
@@ -296,6 +298,7 @@ private fun Facts(
             Fact(Res.string.flight_detail_takeoff_time, details.takeOffTime?.toDisplay())
             Fact(Res.string.flight_detail_duration, formatDuration(details.duration))
             Fact(Res.string.flight_detail_wing, wingName)
+            Fact(Res.string.flight_detail_type, details.type?.label())
         }
         FactGroup(stringResource(Res.string.flight_detail_section_sites)) {
             SiteFact(Res.string.flight_detail_takeoff_site, details.takeOffSite)

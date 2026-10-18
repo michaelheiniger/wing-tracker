@@ -35,6 +35,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.flights.Logbook
 import ch.qscqlmpa.wingtracker.flights.LogbookMonth
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
@@ -337,6 +338,10 @@ private fun FlightCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+            }
+            // Only hike-and-fly is marked: it is the exception, and marking every site flight would be noise.
+            if (details.type == FlightType.HikeAndFly) {
+                StatusBadge(FlightType.HikeAndFly.label(), Severity.Neutral)
             }
             if (flight.igcFile != null) {
                 AssistChip(

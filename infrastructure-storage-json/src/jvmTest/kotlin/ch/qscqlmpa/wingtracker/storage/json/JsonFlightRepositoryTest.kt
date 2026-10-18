@@ -5,6 +5,7 @@ import ch.qscqlmpa.wingtracker.attachments.AttachmentId
 import ch.qscqlmpa.wingtracker.flights.ExternalReference
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightId
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.flights.SiteNames
 import ch.qscqlmpa.wingtracker.flights.SiteSource
@@ -117,6 +118,21 @@ class JsonFlightRepositoryTest {
             }
 
         @Test
+        fun `reads a flight written before the type was kept as of unknown type`() =
+            runTest {
+                // given
+                val flight = aStoredFlight()
+                repository.save(flight.copy(details = flight.details.copy(type = FlightType.Site)))
+                rewriteAsSchema(6, flight, newerKeys = setOf("type"))
+
+                // when
+                val found = repository.findById(flight.id)
+
+                // then
+                assertThat(found?.details?.type).isNull()
+            }
+
+        @Test
         fun `reads a site name written before names had a source as typed by the pilot`() =
             runTest {
                 // given
@@ -176,7 +192,13 @@ class JsonFlightRepositoryTest {
                 val base = aStoredFlight()
                 val imported =
                     base.copy(
-                        details = base.details.copy(distanceKm = 15.0, topAltitudeMeters = 2464, instrument = "Nav XL"),
+                        details =
+                            base.details.copy(
+                                distanceKm = 15.0,
+                                topAltitudeMeters = 2464,
+                                instrument = "Nav XL",
+                                type = FlightType.HikeAndFly,
+                            ),
                         importedFrom = ExternalReference("syride", "flight:3720061"),
                     )
                 repository.save(imported)

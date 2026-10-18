@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.syride
 
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.flights.importing.SourceWing
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -57,6 +58,11 @@ class SyrideActivityParserTest {
         }
 
         @Test
+        fun `reads a hike-and-fly flight`() {
+            assertThat(flight.type).isEqualTo(FlightType.HikeAndFly)
+        }
+
+        @Test
         fun `identifies the flight by its Syride flight id`() {
             assertThat(flight.id).isEqualTo("flight:3720061")
         }
@@ -77,6 +83,11 @@ class SyrideActivityParserTest {
         fun `is identified by its activity and has no flight name when none was set`() {
             assertThat(flight.id).startsWith("untracked-flight:")
             assertThat(flight.name).isNull()
+        }
+
+        @Test
+        fun `reads a site flight logged without instrument`() {
+            assertThat(flight.type).isEqualTo(FlightType.Site)
         }
 
         @Test
@@ -125,6 +136,22 @@ class SyrideActivityParserTest {
             // then
             assertThat(page.flights).isEmpty()
             assertThat(page.unreadableFlights).isEqualTo(1)
+        }
+
+        @Test
+        fun `still reads a flight whose type it does not know, without a type`() {
+            // given
+            val card =
+                "<div id='activite3770736' class=\"boxno\"><div id='type3770736'>Tandem flight</div>" +
+                    "<ul>Flying site : <font>Sonchaux</font></ul><ul>Flight name : <font>not set</font></ul>" +
+                    "<ul>Date : <font>31/05/2026 - 11h35</font></ul><ul>Flight time : <font>10min</font></ul>" +
+                    "<ul>Used wing : <font>Ultralite 4</font> (Ozone)</ul></div>"
+
+            // when
+            val page = SyrideActivityParser.parsePage(card)
+
+            // then
+            assertThat(page.flights.single().type).isNull()
         }
 
         @Test

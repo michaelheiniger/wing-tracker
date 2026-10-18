@@ -7,6 +7,7 @@ import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.FlightExport
 import ch.qscqlmpa.wingtracker.flights.FlightId
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.flights.SiteNames
 import ch.qscqlmpa.wingtracker.flights.SiteSource
@@ -49,6 +50,8 @@ internal data class FlightDocument(
     // Added in schema 6: each site's name per source (ADR 0030).
     val takeOffSiteNames: List<SiteNameDocument> = emptyList(),
     val landingSiteNames: List<SiteNameDocument> = emptyList(),
+    // Added in schema 7: how the pilot got to take-off.
+    val type: String? = null,
 ) {
     fun toDomain(): Flight =
         Flight(
@@ -65,6 +68,7 @@ internal data class FlightDocument(
                     distanceKm = distanceKm,
                     topAltitudeMeters = topAltitudeMeters,
                     instrument = instrument,
+                    type = type?.toFlightType(),
                 ),
             loggedAt = Instant.parse(loggedAt),
             igcFile = igcFile(),
@@ -101,8 +105,8 @@ internal data class FlightDocument(
     companion object {
         // Version 2 added the imported track, version 3 the details imported from other services, version 4 the
         // take-off time, version 5 the exports, version 6 the site names per source. Older application versions treat
-        // newer data as unsupported and leave it untouched.
-        const val CURRENT_SCHEMA_VERSION = 6
+        // newer data as unsupported and leave it untouched. Version 7 added the flight type.
+        const val CURRENT_SCHEMA_VERSION = 7
         private const val SITE_NAMES_SCHEMA_VERSION = 6
 
         fun from(flight: Flight) =
@@ -129,6 +133,7 @@ internal data class FlightDocument(
                 exports = flight.exports.map { FlightExportDocument(it.system, it.at.toString(), it.externalId) },
                 takeOffSiteNames = SiteNameDocument.from(flight.details.takeOffSite),
                 landingSiteNames = SiteNameDocument.from(flight.details.landingSite),
+                type = flight.details.type?.stored(),
             )
     }
 }
@@ -167,3 +172,13 @@ private fun SiteSource.stored(): String =
 
 private fun String.toSource(): SiteSource =
     SiteSource.entries.firstOrNull { it.stored() == this } ?: error("Unknown site name source: $this")
+
+// The app's own words, like the site sources.
+private fun FlightType.stored(): String =
+    when (this) {
+        FlightType.Site -> "site"
+        FlightType.HikeAndFly -> "hike-and-fly"
+    }
+
+private fun String.toFlightType(): FlightType =
+    FlightType.entries.firstOrNull { it.stored() == this } ?: error("Unknown flight type: $this")

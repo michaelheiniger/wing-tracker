@@ -7,6 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ## [Unreleased]
 
 ### Added
+- Flights have a type: "From a site" or "Hike & fly", or unknown. Set it in the flight form, see it in the flight's "Flight" card, and spot hike-and-fly flights in the logbook by their "Hike & fly" badge. Flights imported from Syride get the type Syride gives them.
 - A flight with a track shows its take-off and landing position in the "Sites" card, read from the track each time the page opens and marked "IGC track". The positions are in decimal degrees, latitude first, so they can be copied into a map site.
 
 ### Changed

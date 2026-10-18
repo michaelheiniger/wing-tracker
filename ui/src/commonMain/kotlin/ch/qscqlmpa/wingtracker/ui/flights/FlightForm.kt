@@ -3,6 +3,7 @@ package ch.qscqlmpa.wingtracker.ui.flights
 import androidx.compose.runtime.Composable
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.flights.SiteNames
 import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
@@ -35,6 +36,7 @@ data class FlightFormInput(
     val distanceKm: String = "",
     val topAltitudeMeters: String = "",
     val instrument: String = "",
+    val type: FlightType? = null,
     val takeOffSiteNames: SiteNames = SiteNames.NONE,
     val landingSiteNames: SiteNames = SiteNames.NONE,
 ) {
@@ -60,6 +62,7 @@ data class FlightFormInput(
                         ?.toString()
                         .orEmpty(),
                 instrument = flight.details.instrument.orEmpty(),
+                type = flight.details.type,
                 takeOffSiteNames = flight.details.takeOffSite,
                 landingSiteNames = flight.details.landingSite,
             )
@@ -132,6 +135,7 @@ fun FlightFormInput.validate(): FlightFormResult {
             distanceKm = distance,
             topAltitudeMeters = altitude,
             instrument = instrument.trim().ifEmpty { null },
+            type = type,
         ),
     )
 }

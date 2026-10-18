@@ -15,6 +15,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.flights.SiteNames
 import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
@@ -49,6 +51,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.field_flight_duration
 import ch.qscqlmpa.wingtracker.ui.resources.field_flight_instrument
 import ch.qscqlmpa.wingtracker.ui.resources.field_flight_takeoff_time
 import ch.qscqlmpa.wingtracker.ui.resources.field_flight_top_altitude
+import ch.qscqlmpa.wingtracker.ui.resources.field_flight_type
 import ch.qscqlmpa.wingtracker.ui.resources.field_flight_wing
 import ch.qscqlmpa.wingtracker.ui.resources.field_landing_site
 import ch.qscqlmpa.wingtracker.ui.resources.field_notes
@@ -57,6 +60,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.field_site_replaces
 import ch.qscqlmpa.wingtracker.ui.resources.field_takeoff_site
 import ch.qscqlmpa.wingtracker.ui.resources.flight_form_title_add
 import ch.qscqlmpa.wingtracker.ui.resources.flight_form_title_edit
+import ch.qscqlmpa.wingtracker.ui.resources.flight_type_unknown
 import ch.qscqlmpa.wingtracker.ui.resources.flight_warning_before_service
 import ch.qscqlmpa.wingtracker.ui.resources.flight_wing_retired
 import org.jetbrains.compose.resources.stringResource
@@ -130,6 +134,7 @@ fun FlightDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().focusRequester(durationFocus),
                 )
+                FlightTypeChoice(input.type) { type -> presenter.change { it.copy(type = type) } }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
                     SiteField(
                         label = stringResource(Res.string.field_takeoff_site),
@@ -196,6 +201,30 @@ fun FlightDialog(
                         Text(stringResource(Res.string.action_save))
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FlightTypeChoice(
+    selected: FlightType?,
+    onSelected: (FlightType?) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(stringResource(Res.string.field_flight_type), style = MaterialTheme.typography.labelLarge)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(
+                selected = selected == null,
+                onClick = { onSelected(null) },
+                label = { Text(stringResource(Res.string.flight_type_unknown)) },
+            )
+            FlightType.entries.forEach { type ->
+                FilterChip(
+                    selected = selected == type,
+                    onClick = { onSelected(type) },
+                    label = { Text(type.label()) },
+                )
             }
         }
     }

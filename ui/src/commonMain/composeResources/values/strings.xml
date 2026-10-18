@@ -679,6 +679,11 @@
     <string name="flight_detail_takeoff_position">Take-off position</string>
     <string name="flight_detail_landing_position">Landing position</string>
     <string name="site_source_track">IGC track</string>
+    <string name="field_flight_type">Type</string>
+    <string name="flight_type_unknown">Unknown</string>
+    <string name="flight_type_site">From a site</string>
+    <string name="flight_type_hike_and_fly">Hike &amp; fly</string>
+    <string name="flight_detail_type">Type</string>
     <string name="flight_detail_distance">Distance</string>
     <string name="flight_detail_top_altitude">Top altitude</string>
     <string name="flight_detail_instrument">Instrument</string>

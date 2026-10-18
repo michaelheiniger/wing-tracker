@@ -6,6 +6,7 @@ import ch.qscqlmpa.wingtracker.flights.ExternalReference
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.flights.InMemoryWings
 import ch.qscqlmpa.wingtracker.flights.SiteNames
@@ -55,6 +56,7 @@ private fun aSyrideFlight(
     distanceKm = 15.0,
     topAltitudeMeters = 2464,
     instrument = "Nav XL",
+    type = FlightType.HikeAndFly,
 )
 
 class SyrideImportTest {
@@ -217,6 +219,7 @@ class SyrideImportTest {
                 assertThat(flight.details.distanceKm).isEqualTo(15.0)
                 assertThat(flight.details.topAltitudeMeters).isEqualTo(2464)
                 assertThat(flight.details.instrument).isEqualTo("Nav XL")
+                assertThat(flight.details.type).isEqualTo(FlightType.HikeAndFly)
                 assertThat(flight.details.takeOffTime).isEqualTo(LocalTime(13, 43))
                 assertThat(flight.importedFrom).isEqualTo(ExternalReference(SYRIDE_SYSTEM, "flight:1"))
             }

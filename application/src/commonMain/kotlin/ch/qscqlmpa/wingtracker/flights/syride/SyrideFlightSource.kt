@@ -2,6 +2,7 @@ package ch.qscqlmpa.wingtracker.flights.syride
 
 import ch.qscqlmpa.wingtracker.flights.ExternalReference
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.flights.SiteNames
 import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.flights.importing.ImportableFlight
@@ -53,6 +54,8 @@ data class SyrideFlight(
     val distanceKm: Double?,
     val topAltitudeMeters: Int?,
     val instrument: String?,
+    // Null when Syride shows a type this version does not know.
+    val type: FlightType? = null,
 ) : ImportableFlight {
     override val externalReference: ExternalReference get() = ExternalReference(SYRIDE_SYSTEM, id)
 
@@ -67,6 +70,7 @@ data class SyrideFlight(
             distanceKm = distanceKm,
             topAltitudeMeters = topAltitudeMeters,
             instrument = instrument,
+            type = type,
         )
 }
 

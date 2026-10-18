@@ -19,6 +19,8 @@ data class FlightDetails(
     val distanceKm: Double? = null,
     val topAltitudeMeters: Int? = null,
     val instrument: String? = null,
+    // Null when not known, e.g. for flights logged before it was recorded.
+    val type: FlightType? = null,
 ) {
     init {
         require(duration.isPositive()) { "A flight must last longer than zero" }

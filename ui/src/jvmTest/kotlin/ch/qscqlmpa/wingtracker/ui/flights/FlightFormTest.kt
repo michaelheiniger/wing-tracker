@@ -3,6 +3,7 @@ package ch.qscqlmpa.wingtracker.ui.flights
 import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightDetails
 import ch.qscqlmpa.wingtracker.flights.FlightId
+import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.flights.SiteNames
 import ch.qscqlmpa.wingtracker.flights.SiteSource
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
@@ -245,6 +246,21 @@ class FlightFormTest {
 
             // then
             assertThat(result).usingRecursiveComparison().isEqualTo(FlightFormResult.Valid(details))
+        }
+
+        @Test
+        fun `keeps the flight type through the form`() {
+            // given
+            val input = aFlightFormInput().copy(type = FlightType.HikeAndFly)
+
+            // when
+            val details = (input.validate() as FlightFormResult.Valid).details
+
+            // then
+            assertThat(details.type).isEqualTo(FlightType.HikeAndFly)
+            assertThat(
+                FlightFormInput.from(Flight(FlightId("flight-1"), details, Instant.parse("2026-09-20T17:00:00Z"))).type,
+            ).isEqualTo(FlightType.HikeAndFly)
         }
 
         @Test
