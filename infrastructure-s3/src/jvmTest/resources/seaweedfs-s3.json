@@ -1,0 +1,9 @@
+{
+  "identities": [
+    {
+      "name": "pilot",
+      "credentials": [{ "accessKey": "AKIAWINGTRACKERTEST", "secretKey": "wJalrXUtnFEMI/K7MDENG/wingTrackerTestKey" }],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    }
+  ]
+}
