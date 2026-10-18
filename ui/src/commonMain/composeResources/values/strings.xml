@@ -474,6 +474,13 @@
     <string name="backup_cleanup_failed">The backup is uploaded, but older backups could not be deleted: %1$s</string>
     <string name="failure_upload_backup">The backup could not be uploaded: %1$s</string>
     <string name="failure_cloud_secret_missing">The secret key of your cloud storage is no longer kept. Enter it again under Cloud storage and save.</string>
+    <string name="backup_restore_file">Restore from a file…</string>
+    <string name="backup_restore_cloud">Restore from cloud storage…</string>
+    <string name="restore_cloud_title">Backups in your cloud storage</string>
+    <string name="restore_cloud_empty">There is no backup in the bucket yet.</string>
+    <string name="restore_cloud_choose">Restore</string>
+    <string name="restore_downloading">Downloading…</string>
+    <string name="restore_cloud_size">%1$s MB</string>
     <string name="data_change_title">Change the data folder</string>
     <string name="data_change_body">New folder: %1$s</string>
     <string name="data_change_move_hint">Your current data can be moved there: everything is copied, checked and only then removed from the old folder.</string>

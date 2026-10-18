@@ -4,10 +4,15 @@ import ch.qscqlmpa.wingtracker.backup.BackupException
 import ch.qscqlmpa.wingtracker.backup.BackupPreview
 import ch.qscqlmpa.wingtracker.backup.BackupProblem
 import ch.qscqlmpa.wingtracker.backup.BackupSummary
+import ch.qscqlmpa.wingtracker.backup.CloudBackup
+import ch.qscqlmpa.wingtracker.backup.DiscardTemporaryBackup
+import ch.qscqlmpa.wingtracker.backup.DownloadCloudBackup
 import ch.qscqlmpa.wingtracker.backup.InspectBackup
+import ch.qscqlmpa.wingtracker.backup.ListCloudBackups
 import ch.qscqlmpa.wingtracker.backup.RestoreBackup
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
+import ch.qscqlmpa.wingtracker.ui.platform.CredentialStore
 import ch.qscqlmpa.wingtracker.ui.platform.DataLocation
 import ch.qscqlmpa.wingtracker.ui.platform.FilePicker
 import ch.qscqlmpa.wingtracker.ui.platform.FolderCheck
@@ -39,6 +44,8 @@ private val PREVIEW =
         madeByNewerVersion = false,
     )
 private val CONFIRM = RestoreStep.Confirm(ARCHIVE, PREVIEW)
+private const val CLOUD_KEY = "wing-tracker/wing-tracker-backup-2026-10-18-1430.zip"
+private const val DOWNLOADED = "/tmp/wing-tracker-backup-81273/wing-tracker-backup-2026-10-18-1430.zip"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RestorePresenterTest {
@@ -49,6 +56,10 @@ class RestorePresenterTest {
         mockk<DataLocation>(relaxUnitFun = true).also {
             every { it.path } returns CURRENT
         }
+    private val listCloudBackups = mockk<ListCloudBackups>()
+    private val downloadCloudBackup = mockk<DownloadCloudBackup>()
+    private val discardTemporaryBackup = mockk<DiscardTemporaryBackup>(relaxed = true)
+    private val credentials = mockk<CredentialStore>().also { coEvery { it.read(any()) } returns "s3cr3t/K3y" }
     private var flushed = false
 
     private fun TestScope.presenter() =
@@ -58,6 +69,8 @@ class RestorePresenterTest {
             filePicker,
             location,
             RestoreTitles(pickBackup = "Choose the backup", chooseFolder = "Choose a folder"),
+            CloudRestoreUseCases(listCloudBackups, downloadCloudBackup, discardTemporaryBackup),
+            CloudSecret(credentials),
         ) { flushed = true }
 
     private fun givenPickedBackup() {
@@ -220,6 +233,111 @@ class RestorePresenterTest {
 
                 // then
                 verify(exactly = 1) { location.restart() }
+            }
+    }
+
+    @Nested
+    inner class FromCloud {
+        private val newest = CloudBackup(CLOUD_KEY, LocalDateTime(2026, 10, 18, 14, 30, 20), 18_350_080)
+
+        private fun givenCloudBackup() {
+            coEvery { listCloudBackups("s3cr3t/K3y") } returns listOf(newest)
+            coEvery { downloadCloudBackup("s3cr3t/K3y", CLOUD_KEY) } returns DOWNLOADED
+            coEvery { inspectBackup(DOWNLOADED) } returns PREVIEW
+        }
+
+        @Test
+        fun `lists the backups in the bucket`() =
+            runTest {
+                // given
+                givenCloudBackup()
+                val presenter = presenter()
+
+                // when
+                presenter.startFromCloud()
+
+                // then
+                assertThat(presenter.step).isEqualTo(RestoreStep.ChooseCloud(listOf(newest)))
+            }
+
+        @Test
+        fun `downloads and checks the chosen backup, then confirms it like a file`() =
+            runTest {
+                // given
+                givenCloudBackup()
+                val presenter = presenter().also { it.startFromCloud() }
+
+                // when
+                presenter.chooseCloudBackup(newest)
+
+                // then
+                assertThat(presenter.step).isEqualTo(RestoreStep.Confirm(DOWNLOADED, PREVIEW, downloaded = true))
+            }
+
+        @Test
+        fun `goes back to the list and removes the download when it turns out damaged`() =
+            runTest {
+                // given
+                givenCloudBackup()
+                coEvery { inspectBackup(DOWNLOADED) } throws BackupException(BackupProblem.Damaged, "flights differ")
+                val presenter = presenter().also { it.startFromCloud() }
+
+                // when
+                presenter.chooseCloudBackup(newest)
+
+                // then
+                assertThat(presenter.step).isEqualTo(RestoreStep.ChooseCloud(listOf(newest)))
+                assertThat(presenter.failure?.kind).isEqualTo(FailureKind.BackupDamaged)
+                coVerify(exactly = 1) { discardTemporaryBackup(DOWNLOADED) }
+            }
+
+        @Test
+        fun `removes the download once restored`() =
+            runTest {
+                // given
+                givenCloudBackup()
+                givenChosenFolder(FolderCheck.Empty)
+                val presenter = presenter().also { it.startFromCloud() }
+                presenter.chooseCloudBackup(newest)
+
+                // when
+                presenter.chooseFolder()
+
+                // then
+                assertThat(presenter.step).isEqualTo(RestoreStep.Restored(TARGET))
+                coVerify(exactly = 1) { restoreBackup(DOWNLOADED, TARGET) }
+                coVerify(exactly = 1) { discardTemporaryBackup(DOWNLOADED) }
+            }
+
+        @Test
+        fun `removes the download when the pilot cancels`() =
+            runTest {
+                // given
+                givenCloudBackup()
+                val presenter = presenter().also { it.startFromCloud() }
+                presenter.chooseCloudBackup(newest)
+
+                // when
+                presenter.cancel()
+
+                // then
+                assertThat(presenter.step).isNull()
+                coVerify(exactly = 1) { discardTemporaryBackup(DOWNLOADED) }
+            }
+
+        @Test
+        fun `asks for the secret key again when none is kept any more`() =
+            runTest {
+                // given
+                coEvery { credentials.read(any()) } returns null
+                val presenter = presenter()
+
+                // when
+                presenter.startFromCloud()
+
+                // then
+                assertThat(presenter.failure).isEqualTo(Failure(FailureKind.CloudSecretMissing))
+                assertThat(presenter.step).isNull()
             }
     }
 }

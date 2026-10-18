@@ -46,6 +46,7 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
 import ch.qscqlmpa.wingtracker.ui.backup.BackupPresenter
 import ch.qscqlmpa.wingtracker.ui.backup.BackupUseCases
+import ch.qscqlmpa.wingtracker.ui.backup.CloudRestoreUseCases
 import ch.qscqlmpa.wingtracker.ui.backup.CloudSecret
 import ch.qscqlmpa.wingtracker.ui.backup.CloudStoragePresenter
 import ch.qscqlmpa.wingtracker.ui.backup.CloudStorageUseCases
@@ -115,6 +116,7 @@ fun AppShell(
     reminders: RemindersUseCases,
     backups: BackupUseCases,
     cloudStorageUseCases: CloudStorageUseCases,
+    cloudRestoreUseCases: CloudRestoreUseCases,
     updates: UpdateUseCases,
     platform: PlatformServices,
     themePreference: ThemePreference,
@@ -159,7 +161,16 @@ fun AppShell(
         RestoreTitles(stringResource(Res.string.restore_pick_title), stringResource(Res.string.restore_folder_title))
     val restore =
         remember {
-            RestorePresenter(scope, backups, platform.filePicker, platform.dataLocation, restoreTitles, undo::flush)
+            RestorePresenter(
+                scope,
+                backups,
+                platform.filePicker,
+                platform.dataLocation,
+                restoreTitles,
+                cloudRestoreUseCases,
+                cloudSecret,
+                undo::flush,
+            )
         }
     val updatePresenter = remember { UpdatePresenter(scope, updates) }
     val installPresenter =

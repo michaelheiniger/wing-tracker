@@ -86,3 +86,59 @@ class UploadBackup(
         return beyond.size
     }
 }
+
+/** A backup in the bucket, as the pilot chooses one to restore. */
+data class CloudBackup(
+    val key: String,
+    val madeAt: LocalDateTime,
+    val bytes: Long,
+)
+
+/** The backups this application uploaded, newest first, in the pilot's time. */
+class ListCloudBackups(
+    private val storage: CloudStorage,
+    private val settings: SettingsRepository,
+    private val clock: AppClock,
+) {
+    suspend operator fun invoke(secretKey: String): List<CloudBackup> {
+        val cloud = checkNotNull(settings.load().cloudStorage) { "No cloud storage is set up" }
+        return storage
+            .list(cloud.target(secretKey), CLOUD_BACKUP_PREFIX)
+            .filter { isUploadedBackup(it.key) }
+            .sortedByDescending { it.lastModified }
+            .map { CloudBackup(it.key, clock.local(it.lastModified), it.size) }
+    }
+}
+
+/**
+ * Downloads a backup into a temporary file for the restore of ADR 0031, which checks it like any other. The caller
+ * discards the file once done with it; a failed download leaves nothing behind.
+ */
+class DownloadCloudBackup(
+    private val storage: CloudStorage,
+    private val archive: BackupArchive,
+    private val settings: SettingsRepository,
+) {
+    suspend operator fun invoke(
+        secretKey: String,
+        key: String,
+    ): String {
+        val cloud = checkNotNull(settings.load().cloudStorage) { "No cloud storage is set up" }
+        require(isUploadedBackup(key)) { "Not a backup of this application: $key" }
+        val file = archive.temporaryFile(key.substringAfterLast('/'))
+        var complete = false
+        try {
+            storage.download(cloud.target(secretKey), key, file)
+            complete = true
+            return file
+        } finally {
+            if (!complete) archive.discard(file)
+        }
+    }
+}
+
+class DiscardTemporaryBackup(
+    private val archive: BackupArchive,
+) {
+    suspend operator fun invoke(path: String) = archive.discard(path)
+}

@@ -474,6 +474,13 @@
     <string name="backup_cleanup_failed">Die Sicherung ist hochgeladen, aber ältere Sicherungen konnten nicht gelöscht werden: %1$s</string>
     <string name="failure_upload_backup">Die Sicherung konnte nicht hochgeladen werden: %1$s</string>
     <string name="failure_cloud_secret_missing">Der geheime Schlüssel deines Cloud-Speichers wird nicht mehr aufbewahrt. Gib ihn unter Cloud-Speicher erneut ein und speichere.</string>
+    <string name="backup_restore_file">Aus einer Datei wiederherstellen…</string>
+    <string name="backup_restore_cloud">Aus dem Cloud-Speicher wiederherstellen…</string>
+    <string name="restore_cloud_title">Sicherungen in deinem Cloud-Speicher</string>
+    <string name="restore_cloud_empty">Im Bucket gibt es noch keine Sicherung.</string>
+    <string name="restore_cloud_choose">Wiederherstellen</string>
+    <string name="restore_downloading">Wird heruntergeladen…</string>
+    <string name="restore_cloud_size">%1$s MB</string>
     <string name="data_change_title">Datenordner ändern</string>
     <string name="data_change_body">Neuer Ordner: %1$s</string>
     <string name="data_change_move_hint">Deine bisherigen Daten können dorthin verschoben werden: alles wird kopiert, geprüft und erst dann aus dem alten Ordner entfernt.</string>

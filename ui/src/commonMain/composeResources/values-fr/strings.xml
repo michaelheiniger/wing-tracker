@@ -474,6 +474,13 @@
     <string name="backup_cleanup_failed">La sauvegarde est envoyée, mais les plus anciennes n'ont pas pu être supprimées : %1$s</string>
     <string name="failure_upload_backup">La sauvegarde n'a pas pu être envoyée : %1$s</string>
     <string name="failure_cloud_secret_missing">La clé secrète de ton stockage en ligne n'est plus conservée. Saisis-la à nouveau sous Stockage en ligne et enregistre.</string>
+    <string name="backup_restore_file">Restaurer depuis un fichier…</string>
+    <string name="backup_restore_cloud">Restaurer depuis le stockage en ligne…</string>
+    <string name="restore_cloud_title">Sauvegardes dans ton stockage en ligne</string>
+    <string name="restore_cloud_empty">Il n'y a encore aucune sauvegarde dans le bucket.</string>
+    <string name="restore_cloud_choose">Restaurer</string>
+    <string name="restore_downloading">Téléchargement…</string>
+    <string name="restore_cloud_size">%1$s Mo</string>
     <string name="data_change_title">Changer le dossier de données</string>
     <string name="data_change_body">Nouveau dossier : %1$s</string>
     <string name="data_change_move_hint">Tes données actuelles peuvent y être déplacées : tout est copié, vérifié, puis seulement retiré de l'ancien dossier.</string>

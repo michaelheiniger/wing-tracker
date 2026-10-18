@@ -3,8 +3,11 @@ package ch.qscqlmpa.wingtracker.ui.backup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -15,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ch.qscqlmpa.wingtracker.backup.CloudBackup
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.components.AppAlertDialog
 import ch.qscqlmpa.wingtracker.ui.components.Severity
@@ -30,6 +34,8 @@ import ch.qscqlmpa.wingtracker.ui.resources.backup_in_progress
 import ch.qscqlmpa.wingtracker.ui.resources.backup_last
 import ch.qscqlmpa.wingtracker.ui.resources.backup_never
 import ch.qscqlmpa.wingtracker.ui.resources.backup_restore
+import ch.qscqlmpa.wingtracker.ui.resources.backup_restore_cloud
+import ch.qscqlmpa.wingtracker.ui.resources.backup_restore_file
 import ch.qscqlmpa.wingtracker.ui.resources.backup_save_file
 import ch.qscqlmpa.wingtracker.ui.resources.backup_saved
 import ch.qscqlmpa.wingtracker.ui.resources.backup_saved_content
@@ -38,6 +44,11 @@ import ch.qscqlmpa.wingtracker.ui.resources.backup_upload
 import ch.qscqlmpa.wingtracker.ui.resources.backup_uploaded
 import ch.qscqlmpa.wingtracker.ui.resources.flight_date_time
 import ch.qscqlmpa.wingtracker.ui.resources.restore_choose_folder
+import ch.qscqlmpa.wingtracker.ui.resources.restore_cloud_choose
+import ch.qscqlmpa.wingtracker.ui.resources.restore_cloud_empty
+import ch.qscqlmpa.wingtracker.ui.resources.restore_cloud_size
+import ch.qscqlmpa.wingtracker.ui.resources.restore_cloud_title
+import ch.qscqlmpa.wingtracker.ui.resources.restore_downloading
 import ch.qscqlmpa.wingtracker.ui.resources.restore_how
 import ch.qscqlmpa.wingtracker.ui.resources.restore_in_progress
 import ch.qscqlmpa.wingtracker.ui.resources.restore_made
@@ -81,8 +92,18 @@ fun BackupSection(
     )
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         BackupButtons(presenter)
-        OutlinedButton(onClick = restore::start, enabled = !presenter.busy && restore.step == null) {
-            Text(stringResource(Res.string.backup_restore))
+        val canRestore = !presenter.busy && restore.step == null
+        if (presenter.cloud == null) {
+            OutlinedButton(onClick = restore::start, enabled = canRestore) {
+                Text(stringResource(Res.string.backup_restore))
+            }
+        } else {
+            OutlinedButton(onClick = restore::start, enabled = canRestore) {
+                Text(stringResource(Res.string.backup_restore_file))
+            }
+            OutlinedButton(onClick = restore::startFromCloud, enabled = canRestore) {
+                Text(stringResource(Res.string.backup_restore_cloud))
+            }
         }
         if (presenter.busy) {
             CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
@@ -164,6 +185,14 @@ private fun BackupOutcomeText(outcome: BackupOutcome) {
 @Composable
 private fun RestoreDialogs(presenter: RestorePresenter) {
     when (val step = presenter.step) {
+        is RestoreStep.ChooseCloud -> {
+            CloudBackupsDialog(step.backups, downloading = null, presenter)
+        }
+
+        is RestoreStep.Downloading -> {
+            CloudBackupsDialog(listOf(step.backup), downloading = step.backup, presenter)
+        }
+
         is RestoreStep.Confirm -> {
             RestoreDialog(step, presenter, restoring = false)
         }
@@ -182,6 +211,62 @@ private fun RestoreDialogs(presenter: RestorePresenter) {
 
         null -> {}
     }
+}
+
+/** The backups in the bucket, newest first, each restored with its own button (ADR 0032). */
+@Composable
+private fun CloudBackupsDialog(
+    backups: List<CloudBackup>,
+    downloading: CloudBackup?,
+    presenter: RestorePresenter,
+) {
+    AppAlertDialog(
+        onDismissRequest = { if (downloading == null) presenter.cancel() },
+        title = { Text(stringResource(Res.string.restore_cloud_title)) },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.heightIn(max = 360.dp).verticalScroll(rememberScrollState()),
+            ) {
+                if (backups.isEmpty()) Text(stringResource(Res.string.restore_cloud_empty))
+                backups.forEach { backup ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                stringResource(
+                                    Res.string.flight_date_time,
+                                    backup.madeAt.date.toDisplay(),
+                                    backup.madeAt.time.toDisplay(),
+                                ),
+                            )
+                            Text(
+                                stringResource(Res.string.restore_cloud_size, megabytes(backup.bytes)),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        if (downloading == backup) {
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                            Text(stringResource(Res.string.restore_downloading))
+                        } else {
+                            TextButton(onClick = { presenter.chooseCloudBackup(backup) }) {
+                                Text(stringResource(Res.string.restore_cloud_choose))
+                            }
+                        }
+                    }
+                }
+                presenter.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = presenter::cancel, enabled = downloading == null) {
+                Text(stringResource(Res.string.action_cancel))
+            }
+        },
+    )
 }
 
 @Composable

@@ -129,4 +129,4 @@ class BackupPresenter(
     }
 }
 
-private class MissingSecretException : Exception("No secret key is kept for the cloud storage")
+internal class MissingSecretException : Exception("No secret key is kept for the cloud storage")
