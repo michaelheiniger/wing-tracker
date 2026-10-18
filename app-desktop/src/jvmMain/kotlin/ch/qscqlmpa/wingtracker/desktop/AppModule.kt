@@ -385,7 +385,7 @@ private fun credentialStore(
     devMode: Boolean,
     osName: String = System.getProperty("os.name"),
 ): CredentialStore {
-    val application = if (devMode) "wing-tracker-dev" else "wing-tracker"
+    val application = DevMode.appName(devMode)
     return if ("win" in osName.lowercase()) {
         WindowsCredentialStore(application)
     } else {

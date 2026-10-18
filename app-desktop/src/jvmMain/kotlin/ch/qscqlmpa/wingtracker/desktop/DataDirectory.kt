@@ -55,7 +55,7 @@ object DataDirectory {
         env: Map<String, String> = System.getenv(),
         userHome: String = System.getProperty("user.home"),
     ): Path {
-        val appFolder = if (devMode) "wing-tracker-dev" else "wing-tracker"
+        val appFolder = DevMode.appName(devMode)
         val os = osName.lowercase()
         val base =
             when {
