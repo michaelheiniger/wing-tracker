@@ -6,6 +6,8 @@ import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
 import ch.qscqlmpa.wingtracker.backup.BackupArchive
 import ch.qscqlmpa.wingtracker.backup.CreateBackup
 import ch.qscqlmpa.wingtracker.backup.GetBackupStatus
+import ch.qscqlmpa.wingtracker.backup.InspectBackup
+import ch.qscqlmpa.wingtracker.backup.RestoreBackup
 import ch.qscqlmpa.wingtracker.flights.DeleteFlight
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.FlightsOfWing
@@ -295,7 +297,9 @@ private fun backupModule(dataDirectory: Path) =
         single<BackupArchive> { ZipBackupArchive(dataDirectory) }
         factory { GetBackupStatus(get(), get()) }
         factory { CreateBackup(get(), get(), get(), BuildInfo.VERSION) }
-        single { BackupUseCases(get(), get()) }
+        factory { InspectBackup(get(), get(), BuildInfo.VERSION) }
+        factory { RestoreBackup(get()) }
+        single { BackupUseCases(get(), get(), get(), get()) }
     }
 
 private fun mapsModule(tileDirectory: Path) =

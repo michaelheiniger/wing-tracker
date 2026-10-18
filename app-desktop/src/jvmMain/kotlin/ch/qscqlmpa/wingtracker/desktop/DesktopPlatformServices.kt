@@ -67,6 +67,18 @@ class DesktopFilePicker : FilePicker {
         }
     }
 
+    override suspend fun pickPath(
+        title: String,
+        extensions: Set<String>,
+    ): String? =
+        FileKit
+            .openFilePicker(
+                type = FileKitType.File(extensions = extensions),
+                mode = FileKitMode.Single,
+                dialogSettings = FileKitDialogSettings(title = title),
+            )?.also { it.file.checkedPath() }
+            ?.path
+
     override suspend fun pickFolder(
         title: String,
         extension: String,

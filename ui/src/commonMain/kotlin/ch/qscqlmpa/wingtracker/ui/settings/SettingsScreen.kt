@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import ch.qscqlmpa.wingtracker.settings.ThemeMode
 import ch.qscqlmpa.wingtracker.ui.backup.BackupPresenter
 import ch.qscqlmpa.wingtracker.ui.backup.BackupSection
+import ch.qscqlmpa.wingtracker.ui.backup.RestorePresenter
 import ch.qscqlmpa.wingtracker.ui.components.AppAlertDialog
 import ch.qscqlmpa.wingtracker.ui.message
 import ch.qscqlmpa.wingtracker.ui.reminders.ExportOutcome
@@ -47,8 +48,6 @@ import ch.qscqlmpa.wingtracker.ui.resources.data_change_title
 import ch.qscqlmpa.wingtracker.ui.resources.data_change_use
 import ch.qscqlmpa.wingtracker.ui.resources.data_change_use_existing
 import ch.qscqlmpa.wingtracker.ui.resources.data_restart_body
-import ch.qscqlmpa.wingtracker.ui.resources.data_restart_now
-import ch.qscqlmpa.wingtracker.ui.resources.data_restart_title
 import ch.qscqlmpa.wingtracker.ui.resources.field_lead_days
 import ch.qscqlmpa.wingtracker.ui.resources.field_lead_hours
 import ch.qscqlmpa.wingtracker.ui.resources.scale_automatic
@@ -90,6 +89,7 @@ fun SettingsScreen(
     scalePreference: InterfaceScalePreference,
     reminders: ReminderSettingsPresenter,
     backup: BackupPresenter,
+    restore: RestorePresenter,
     dataLocation: DataLocationPresenter,
     logLocation: LogLocationPresenter,
     updates: UpdatePresenter,
@@ -114,7 +114,7 @@ fun SettingsScreen(
         ScaleSection(scalePreference)
         RemindersSection(reminders)
         CalendarSection(reminders)
-        BackupSection(backup)
+        BackupSection(backup, restore)
         DataLocationSection(dataLocation)
         LogLocationSection(logLocation)
         UpdatesSection(updates, installer)
@@ -150,7 +150,7 @@ private fun DataLocationSection(presenter: DataLocationPresenter) {
     }
     presenter.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
     presenter.proposal?.let { ChangeDialog(it, presenter) }
-    if (presenter.restartRequired) RestartDialog(presenter)
+    if (presenter.restartRequired) RestartDialog(stringResource(Res.string.data_restart_body), presenter::restart)
 }
 
 @Composable
@@ -212,17 +212,6 @@ private fun ChangeDialog(
                 TextButton(onClick = presenter::cancel) { Text(stringResource(Res.string.action_cancel)) }
             }
         },
-    )
-}
-
-// Not dismissible: carrying on would write to the old folder while the new one is already chosen.
-@Composable
-private fun RestartDialog(presenter: DataLocationPresenter) {
-    AppAlertDialog(
-        onDismissRequest = {},
-        title = { Text(stringResource(Res.string.data_restart_title)) },
-        text = { Text(stringResource(Res.string.data_restart_body)) },
-        confirmButton = { Button(onClick = presenter::restart) { Text(stringResource(Res.string.data_restart_now)) } },
     )
 }
 

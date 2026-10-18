@@ -411,6 +411,22 @@
     </plurals>
     <string name="failure_create_backup">Die Sicherung konnte nicht erstellt werden: %1$s</string>
     <string name="failure_backup_inside_data">Eine Sicherung kann nicht im Datenordner gespeichert werden, sonst wäre sie in der nächsten enthalten. Wähle einen anderen Ordner, am besten auf einem anderen Laufwerk.</string>
+    <string name="backup_restore">Sicherung wiederherstellen…</string>
+    <string name="restore_pick_title">Wähle die Sicherung, die wiederhergestellt werden soll</string>
+    <string name="restore_folder_title">Wähle einen leeren Ordner für die wiederhergestellten Daten</string>
+    <string name="restore_title">Sicherung wiederherstellen</string>
+    <string name="restore_made">Erstellt am %1$s mit Wing Tracker %2$s</string>
+    <string name="restore_newer_badge">Mit einer neueren Version erstellt</string>
+    <string name="restore_newer">Diese Sicherung wurde mit einer neueren Version von Wing Tracker erstellt. Daten, die nur diese Version lesen kann, werden auch wiederhergestellt, erscheinen aber erst nach einer Aktualisierung.</string>
+    <string name="restore_how">Die Sicherung wird in einen leeren Ordner deiner Wahl entpackt, der dann zum Datenordner wird. Deine aktuellen Daten bleiben unverändert in %1$s.</string>
+    <string name="restore_choose_folder">Ordner wählen und wiederherstellen…</string>
+    <string name="restore_in_progress">Wird wiederhergestellt…</string>
+    <string name="restore_restart_body">Die Sicherung wurde in %1$s wiederhergestellt. Wing Tracker startet jetzt neu, um sie zu verwenden; deine bisherigen Daten bleiben in %2$s.</string>
+    <string name="failure_restore_backup">Die Sicherung konnte nicht wiederhergestellt werden: %1$s</string>
+    <string name="failure_not_a_backup">%1$s ist keine Sicherung von Wing Tracker.</string>
+    <string name="failure_backup_damaged">Diese Sicherung ist unvollständig oder wurde verändert und kann daher nicht sicher wiederhergestellt werden: %1$s</string>
+    <string name="failure_backup_newer_format">Diese Sicherung wurde von einer neueren Version von Wing Tracker erstellt. Aktualisiere Wing Tracker, um sie wiederherzustellen.</string>
+    <string name="failure_restore_folder_not_empty">Dieser Ordner ist nicht leer. Wähle einen leeren Ordner, damit nichts darin überschrieben wird.</string>
     <string name="data_change_title">Datenordner ändern</string>
     <string name="data_change_body">Neuer Ordner: %1$s</string>
     <string name="data_change_move_hint">Deine bisherigen Daten können dorthin verschoben werden: alles wird kopiert, geprüft und erst dann aus dem alten Ordner entfernt.</string>

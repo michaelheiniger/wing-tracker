@@ -411,6 +411,22 @@
     </plurals>
     <string name="failure_create_backup">La sauvegarde n'a pas pu être faite : %1$s</string>
     <string name="failure_backup_inside_data">Une sauvegarde ne peut pas être enregistrée dans le dossier de données, sinon la suivante la contiendrait. Choisis un autre dossier, idéalement sur un autre disque.</string>
+    <string name="backup_restore">Restaurer une sauvegarde…</string>
+    <string name="restore_pick_title">Choisis la sauvegarde à restaurer</string>
+    <string name="restore_folder_title">Choisis un dossier vide pour les données restaurées</string>
+    <string name="restore_title">Restaurer une sauvegarde</string>
+    <string name="restore_made">Faite le %1$s avec Wing Tracker %2$s</string>
+    <string name="restore_newer_badge">Faite avec une version plus récente</string>
+    <string name="restore_newer">Cette sauvegarde a été faite avec une version plus récente de Wing Tracker. Les données que seule cette version sait lire sont aussi restaurées, mais n'apparaissent qu'après la mise à jour.</string>
+    <string name="restore_how">La sauvegarde est décompressée dans un dossier vide que tu choisis, qui devient ensuite le dossier de données. Tes données actuelles restent intactes dans %1$s.</string>
+    <string name="restore_choose_folder">Choisir le dossier et restaurer…</string>
+    <string name="restore_in_progress">Restauration en cours…</string>
+    <string name="restore_restart_body">La sauvegarde a été restaurée dans %1$s. Wing Tracker redémarre maintenant pour l'utiliser ; tes données précédentes restent dans %2$s.</string>
+    <string name="failure_restore_backup">La sauvegarde n'a pas pu être restaurée : %1$s</string>
+    <string name="failure_not_a_backup">%1$s n'est pas une sauvegarde de Wing Tracker.</string>
+    <string name="failure_backup_damaged">Cette sauvegarde est incomplète ou a été modifiée, elle ne peut donc pas être restaurée sans risque : %1$s</string>
+    <string name="failure_backup_newer_format">Cette sauvegarde a été faite par une version plus récente de Wing Tracker. Mets Wing Tracker à jour pour la restaurer.</string>
+    <string name="failure_restore_folder_not_empty">Ce dossier n'est pas vide. Choisis un dossier vide, pour que rien n'y soit écrasé.</string>
     <string name="data_change_title">Changer le dossier de données</string>
     <string name="data_change_body">Nouveau dossier : %1$s</string>
     <string name="data_change_move_hint">Tes données actuelles peuvent y être déplacées : tout est copié, vérifié, puis seulement retiré de l'ancien dossier.</string>

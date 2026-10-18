@@ -15,7 +15,9 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_airtime_pilot
 import ch.qscqlmpa.wingtracker.ui.resources.failure_airtime_token
 import ch.qscqlmpa.wingtracker.ui.resources.failure_airtime_unexpected
 import ch.qscqlmpa.wingtracker.ui.resources.failure_airtime_unreachable
+import ch.qscqlmpa.wingtracker.ui.resources.failure_backup_damaged
 import ch.qscqlmpa.wingtracker.ui.resources.failure_backup_inside_data
+import ch.qscqlmpa.wingtracker.ui.resources.failure_backup_newer_format
 import ch.qscqlmpa.wingtracker.ui.resources.failure_cancel_plan
 import ch.qscqlmpa.wingtracker.ui.resources.failure_change_data_folder
 import ch.qscqlmpa.wingtracker.ui.resources.failure_complete_syride_flights
@@ -42,12 +44,15 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_load_settings
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_statistics
 import ch.qscqlmpa.wingtracker.ui.resources.failure_no_connection
 import ch.qscqlmpa.wingtracker.ui.resources.failure_no_igc_in_folder
+import ch.qscqlmpa.wingtracker.ui.resources.failure_not_a_backup
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_data_folder
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_log_folder
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_report
 import ch.qscqlmpa.wingtracker.ui.resources.failure_open_track
 import ch.qscqlmpa.wingtracker.ui.resources.failure_read_ground
 import ch.qscqlmpa.wingtracker.ui.resources.failure_read_track
+import ch.qscqlmpa.wingtracker.ui.resources.failure_restore_backup
+import ch.qscqlmpa.wingtracker.ui.resources.failure_restore_folder_not_empty
 import ch.qscqlmpa.wingtracker.ui.resources.failure_retire
 import ch.qscqlmpa.wingtracker.ui.resources.failure_save
 import ch.qscqlmpa.wingtracker.ui.resources.failure_save_check
@@ -88,6 +93,11 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.DataFolderOverlaps to Res.string.failure_data_overlaps,
         FailureKind.CreateBackup to Res.string.failure_create_backup,
         FailureKind.BackupInsideDataFolder to Res.string.failure_backup_inside_data,
+        FailureKind.RestoreBackup to Res.string.failure_restore_backup,
+        FailureKind.NotABackup to Res.string.failure_not_a_backup,
+        FailureKind.BackupDamaged to Res.string.failure_backup_damaged,
+        FailureKind.BackupNewerFormat to Res.string.failure_backup_newer_format,
+        FailureKind.RestoreFolderNotEmpty to Res.string.failure_restore_folder_not_empty,
         FailureKind.SyrideUserNotFound to Res.string.failure_syride_user,
         FailureKind.SyrideUnreachable to Res.string.failure_syride_unreachable,
         FailureKind.SyridePagesChanged to Res.string.failure_syride_changed,

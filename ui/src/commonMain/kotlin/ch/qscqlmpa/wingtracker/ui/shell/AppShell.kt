@@ -46,6 +46,8 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
 import ch.qscqlmpa.wingtracker.ui.backup.BackupPresenter
 import ch.qscqlmpa.wingtracker.ui.backup.BackupUseCases
+import ch.qscqlmpa.wingtracker.ui.backup.RestorePresenter
+import ch.qscqlmpa.wingtracker.ui.backup.RestoreTitles
 import ch.qscqlmpa.wingtracker.ui.components.FileNamesBanner
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookRoute
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookSearch
@@ -67,6 +69,8 @@ import ch.qscqlmpa.wingtracker.ui.resources.nav_gear
 import ch.qscqlmpa.wingtracker.ui.resources.nav_logbook
 import ch.qscqlmpa.wingtracker.ui.resources.nav_settings
 import ch.qscqlmpa.wingtracker.ui.resources.nav_statistics
+import ch.qscqlmpa.wingtracker.ui.resources.restore_folder_title
+import ch.qscqlmpa.wingtracker.ui.resources.restore_pick_title
 import ch.qscqlmpa.wingtracker.ui.resources.settings_data_choose_title
 import ch.qscqlmpa.wingtracker.ui.resources.update_rail_badge
 import ch.qscqlmpa.wingtracker.ui.settings.DataLocationPresenter
@@ -133,6 +137,12 @@ fun AppShell(
     val backupSaveTitle = stringResource(Res.string.backup_save_title)
     val backup =
         remember { BackupPresenter(scope, backups, platform.fileSaver, backupSaveTitle, beforeBackup = undo::flush) }
+    val restoreTitles =
+        RestoreTitles(stringResource(Res.string.restore_pick_title), stringResource(Res.string.restore_folder_title))
+    val restore =
+        remember {
+            RestorePresenter(scope, backups, platform.filePicker, platform.dataLocation, restoreTitles, undo::flush)
+        }
     val updatePresenter = remember { UpdatePresenter(scope, updates) }
     val installPresenter =
         remember {
@@ -248,6 +258,7 @@ fun AppShell(
                                             scalePreference,
                                             reminderSettings,
                                             backup,
+                                            restore,
                                             dataLocation,
                                             logLocation,
                                             updatePresenter,

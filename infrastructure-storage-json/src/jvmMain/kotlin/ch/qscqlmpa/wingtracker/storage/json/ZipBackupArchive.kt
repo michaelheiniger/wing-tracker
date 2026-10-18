@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.storage.json
 
 import ch.qscqlmpa.wingtracker.backup.BackupArchive
+import ch.qscqlmpa.wingtracker.backup.BackupContents
 import ch.qscqlmpa.wingtracker.backup.BackupException
 import ch.qscqlmpa.wingtracker.backup.BackupProblem
 import ch.qscqlmpa.wingtracker.backup.BackupSummary
@@ -14,11 +15,14 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
+import kotlin.io.path.deleteRecursively
 import kotlin.io.path.exists
 import kotlin.io.path.extension
 import kotlin.io.path.inputStream
 import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.isDirectory
 import kotlin.io.path.isRegularFile
+import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.outputStream
 import kotlin.io.path.relativeTo
 import kotlin.io.path.walk
@@ -52,6 +56,50 @@ class ZipBackupArchive(
                 Files.deleteIfExists(temporary)
             }
         }
+
+    override suspend fun inspect(archive: String): BackupContents =
+        withContext(Dispatchers.IO) {
+            BackupZipReader.open(Path(archive)).use { reader ->
+                reader.verify()
+                reader.contents
+            }
+        }
+
+    override suspend fun restore(
+        archive: String,
+        folder: String,
+    ) = withContext(Dispatchers.IO) {
+        val target = Path(folder).toAbsolutePath().normalize()
+        if (target.exists() && (!target.isDirectory() || target.listDirectoryEntries().isNotEmpty())) {
+            throw BackupException(BackupProblem.FolderNotEmpty, folder)
+        }
+        BackupZipReader.open(Path(archive)).use { reader ->
+            val created = !target.exists()
+            var complete = false
+            try {
+                target.createDirectories()
+                reader.manifest.files.forEach { entry ->
+                    val file = target.resolve(entry.path)
+                    file.parent.createDirectories()
+                    file.outputStream().use { reader.copy(entry, it) }
+                }
+                complete = true
+                logger.info { "Restored ${reader.manifest.files.size} files from $archive to $target" }
+            } finally {
+                // The folder was empty, so whatever is in it now came from this broken backup.
+                if (!complete) removeUnpacked(target, created)
+            }
+        }
+    }
+
+    @OptIn(kotlin.io.path.ExperimentalPathApi::class)
+    private fun removeUnpacked(
+        target: Path,
+        created: Boolean,
+    ) {
+        if (!target.exists()) return
+        if (created) target.deleteRecursively() else target.listDirectoryEntries().forEach { it.deleteRecursively() }
+    }
 
     private fun writeArchive(
         archive: Path,
@@ -107,6 +155,4 @@ class ZipBackupArchive(
     }
 
     private fun Path.realOrNormalized(): Path = if (exists()) toRealPath() else toAbsolutePath().normalize()
-
-    private fun ByteArray.toHex(): String = joinToString("") { "%02x".format(it) }
 }

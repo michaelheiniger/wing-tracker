@@ -38,7 +38,7 @@ class BackupPresenterTest {
     private fun TestScope.presenter() =
         BackupPresenter(
             TestScope(UnconfinedTestDispatcher(testScheduler)),
-            BackupUseCases(getBackupStatus, createBackup),
+            BackupUseCases(getBackupStatus, createBackup, mockk(), mockk()),
             fileSaver,
             "Save the backup",
         ) { flushed = true }

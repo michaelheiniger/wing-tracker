@@ -106,4 +106,61 @@ class BackupsTest {
                 assertThat(status.lastMadeAt).isNull()
             }
     }
+
+    @Nested
+    inner class InspectBackupInvoke {
+        private val contents =
+            BackupContents(
+                createdAt = EARLIER_BACKUP,
+                appVersion = APP_VERSION,
+                summary = BackupSummary(files = 412, bytes = 18_350_080),
+            )
+
+        @Test
+        fun `shows a checked backup in the pilot's time`() =
+            runTest {
+                // given
+                coEvery { archive.inspect(DESTINATION) } returns contents
+
+                // when
+                val preview = InspectBackup(archive, clock, APP_VERSION)(DESTINATION)
+
+                // then
+                assertThat(preview)
+                    .isEqualTo(
+                        BackupPreview(
+                            madeAt = LocalDateTime(2026, 9, 27, 19, 5),
+                            appVersion = APP_VERSION,
+                            summary = contents.summary,
+                            madeByNewerVersion = false,
+                        ),
+                    )
+            }
+
+        @Test
+        fun `tells when the backup was made by a newer version`() =
+            runTest {
+                // given
+                coEvery { archive.inspect(DESTINATION) } returns contents.copy(appVersion = "0.5.0")
+
+                // when
+                val preview = InspectBackup(archive, clock, APP_VERSION)(DESTINATION)
+
+                // then
+                assertThat(preview.madeByNewerVersion).isTrue()
+            }
+
+        @Test
+        fun `cannot tell a newer backup on a development build`() =
+            runTest {
+                // given
+                coEvery { archive.inspect(DESTINATION) } returns contents.copy(appVersion = "0.5.0")
+
+                // when
+                val preview = InspectBackup(archive, clock, "dev")(DESTINATION)
+
+                // then
+                assertThat(preview.madeByNewerVersion).isFalse()
+            }
+    }
 }

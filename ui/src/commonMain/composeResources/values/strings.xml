@@ -411,6 +411,22 @@
     </plurals>
     <string name="failure_create_backup">The backup could not be made: %1$s</string>
     <string name="failure_backup_inside_data">A backup cannot be saved inside the data folder, or the next backup would contain it. Choose another folder, ideally on another drive.</string>
+    <string name="backup_restore">Restore a backup…</string>
+    <string name="restore_pick_title">Choose the backup to restore</string>
+    <string name="restore_folder_title">Choose an empty folder for the restored data</string>
+    <string name="restore_title">Restore a backup</string>
+    <string name="restore_made">Made on %1$s with Wing Tracker %2$s</string>
+    <string name="restore_newer_badge">Made with a newer version</string>
+    <string name="restore_newer">This backup was made with a newer version of Wing Tracker. Records only that version can read are restored too, but show only after updating.</string>
+    <string name="restore_how">The backup is unpacked into an empty folder you choose, which then becomes the data folder. Your current data stays untouched in %1$s.</string>
+    <string name="restore_choose_folder">Choose folder and restore…</string>
+    <string name="restore_in_progress">Restoring…</string>
+    <string name="restore_restart_body">The backup was restored into %1$s. Wing Tracker restarts now to use it; your previous data stays in %2$s.</string>
+    <string name="failure_restore_backup">The backup could not be restored: %1$s</string>
+    <string name="failure_not_a_backup">%1$s is not a Wing Tracker backup.</string>
+    <string name="failure_backup_damaged">This backup is incomplete or was changed, so it cannot be restored safely: %1$s</string>
+    <string name="failure_backup_newer_format">This backup was made by a newer version of Wing Tracker. Update Wing Tracker to restore it.</string>
+    <string name="failure_restore_folder_not_empty">That folder is not empty. Choose an empty folder, so nothing in it is overwritten.</string>
     <string name="data_change_title">Change the data folder</string>
     <string name="data_change_body">New folder: %1$s</string>
     <string name="data_change_move_hint">Your current data can be moved there: everything is copied, checked and only then removed from the old folder.</string>
