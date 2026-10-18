@@ -298,6 +298,12 @@
     <string name="attention_open">Ouvrir</string>
     <string name="attention_due_soon">Contrôle bientôt dû</string>
     <string name="attention_badge">%1$d demandent de l'attention</string>
+    <string name="settings_backup_reminder">Me rappeler de sauvegarder</string>
+    <string name="field_backup_days">Après tant de jours sans sauvegarde</string>
+    <string name="attention_backup_title">Sauvegarde des données</string>
+    <string name="attention_backup_last">Dernière sauvegarde le %1$s</string>
+    <string name="attention_backup_never">Aucune sauvegarde pour l'instant</string>
+    <string name="notification_backup">sauvegarde à faire</string>
 
     <string name="settings_reminders_title">Rappels</string>
     <string name="settings_reminders_hint">Un contrôle est considéré comme bientôt dû aussi longtemps avant son échéance. La limite qui arrive en premier s'applique.</string>

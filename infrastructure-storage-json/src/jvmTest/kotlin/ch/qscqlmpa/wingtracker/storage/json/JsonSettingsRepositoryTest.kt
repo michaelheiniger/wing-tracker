@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.storage.json
 
+import ch.qscqlmpa.wingtracker.backup.BackupReminder
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
 import ch.qscqlmpa.wingtracker.settings.AppSettings
 import ch.qscqlmpa.wingtracker.settings.ThemeMode
@@ -79,6 +80,7 @@ class JsonSettingsRepositoryTest {
                         deviceFolder = "/run/media/michael/SYRIDE1",
                         airtimeNick = "qscqlmpa",
                         lastBackupAt = Instant.parse("2026-10-18T12:30:00Z"),
+                        backupReminder = BackupReminder(enabled = false, days = 60),
                     )
                 repository.save(saved)
 

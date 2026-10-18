@@ -75,11 +75,11 @@ private sealed interface LogbookDialog {
 fun LogbookRoute(
     useCases: LogbookUseCases,
     platform: PlatformServices,
-    attention: Attention,
+    // Filled by the shell, which owns what needs attention; the logbook only gives it a place.
+    attentionPanel: @Composable () -> Unit,
     search: LogbookSearch,
     onSearchChange: (LogbookSearch) -> Unit,
     onOpenStatistics: (FlightFilter) -> Unit,
-    onOpenGear: (GearRef) -> Unit,
     onGoToGear: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -144,8 +144,7 @@ fun LogbookRoute(
                 onImport = { dialog = LogbookDialog.Import() },
                 onExportToAirtime = { dialog = LogbookDialog.ExportToAirtime },
                 onOpenStatistics = { onOpenStatistics(presenter.state.search.toFilter()) },
-                attention = attention,
-                onOpenAttention = onOpenGear,
+                attentionPanel = attentionPanel,
                 onGoToGear = onGoToGear,
                 listState = listState,
             )

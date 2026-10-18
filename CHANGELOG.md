@@ -9,6 +9,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Added
 - Back up everything in one file: "Back up now…" in the settings' new "Backup" section saves your flights, gear, settings and attached files as a zip where you choose, ideally on another drive. The section tells when the last backup was made, and after a backup where it went, how many files it holds and its size. A backup cannot be saved inside the data folder.
 - Restore a backup from the settings' "Backup" section: "Restore a backup…" checks the file first and shows when and with which version it was made, how many files it holds and its size. A backup that is incomplete or was changed is refused. It is then unpacked into an empty folder you choose, which becomes the data folder after a restart; your current data stays untouched in its folder.
+- "Needs attention" above the logbook reminds you to back up once your last backup is older than you allow, or right away if you never made one and your logbook holds anything. "Back up now…" makes the backup from there. The start-up notification mentions it too. In the settings, next to the reminder lead times, choose after how many days to be reminded, or turn the reminder off if your data folder is already backed up another way.
 
 ## [0.4.0] - 2026-10-18
 

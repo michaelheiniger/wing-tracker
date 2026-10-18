@@ -54,7 +54,8 @@ class ReminderSettingsPresenter(
 
     fun load() =
         launchGuarded(FailureKind.LoadSettings) {
-            input = ReminderSettingsInput.from(useCases.getAppSettings().reminderLeadTimes)
+            val settings = useCases.getAppSettings()
+            input = ReminderSettingsInput.from(settings.reminderLeadTimes, settings.backupReminder)
         }
 
     fun change(update: (ReminderSettingsInput) -> ReminderSettingsInput) {
@@ -72,6 +73,7 @@ class ReminderSettingsPresenter(
                 errors = emptyMap()
                 launchGuarded(FailureKind.SaveSettings) {
                     useCases.saveReminderLeadTimes(result.leadTimes)
+                    useCases.saveBackupReminder(result.backup)
                     saved = true
                     onLeadTimesSaved()
                 }

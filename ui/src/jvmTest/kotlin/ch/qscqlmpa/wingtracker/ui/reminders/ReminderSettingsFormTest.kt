@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.ui.reminders
 
+import ch.qscqlmpa.wingtracker.backup.BackupReminder
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
 import ch.qscqlmpa.wingtracker.ui.gear.wing.FormError
 import org.assertj.core.api.Assertions.assertThat
@@ -67,6 +68,42 @@ class ReminderSettingsFormTest {
         }
 
         @Test
+        fun `reads the backup reminder`() {
+            // given
+            val input = ReminderSettingsInput(days = "30", hours = "10", backupEnabled = true, backupDays = " 14 ")
+
+            // when
+            val result = input.validate()
+
+            // then
+            assertThat((result as ReminderSettingsResult.Valid).backup).isEqualTo(BackupReminder(true, 14))
+        }
+
+        @Test
+        fun `rejects backup days that are not a positive whole number while the reminder is on`() {
+            // given
+            val input = ReminderSettingsInput(days = "30", hours = "10", backupEnabled = true, backupDays = "0")
+
+            // when
+            val errors = (input.validate() as ReminderSettingsResult.Invalid).errors
+
+            // then
+            assertThat(errors).containsOnlyKeys(ReminderSettingsField.BackupDays)
+        }
+
+        @Test
+        fun `ignores the backup days of a reminder turned off`() {
+            // given
+            val input = ReminderSettingsInput(days = "30", hours = "10", backupEnabled = false, backupDays = "")
+
+            // when
+            val result = input.validate()
+
+            // then
+            assertThat((result as ReminderSettingsResult.Valid).backup).isEqualTo(BackupReminder(enabled = false))
+        }
+
+        @Test
         fun `reports both fields at once`() {
             // given
             val input = ReminderSettingsInput()
@@ -86,11 +123,13 @@ class ReminderSettingsFormTest {
             // given
             val leadTimes = ReminderLeadTimes(days = 45, hours = 7.hours + 15.minutes)
 
+            val backup = BackupReminder(enabled = false, days = 90)
+
             // when
-            val result = ReminderSettingsInput.from(leadTimes).validate()
+            val result = ReminderSettingsInput.from(leadTimes, backup).validate()
 
             // then
-            assertThat((result as ReminderSettingsResult.Valid).leadTimes).isEqualTo(leadTimes)
+            assertThat(result).isEqualTo(ReminderSettingsResult.Valid(leadTimes, backup))
         }
     }
 }

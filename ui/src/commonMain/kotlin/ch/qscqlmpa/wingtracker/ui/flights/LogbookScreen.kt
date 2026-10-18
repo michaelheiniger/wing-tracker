@@ -49,7 +49,6 @@ import ch.qscqlmpa.wingtracker.ui.components.UnreadableBanner
 import ch.qscqlmpa.wingtracker.ui.formatDuration
 import ch.qscqlmpa.wingtracker.ui.icons.BarChartIcon
 import ch.qscqlmpa.wingtracker.ui.message
-import ch.qscqlmpa.wingtracker.ui.reminders.AttentionPanel
 import ch.qscqlmpa.wingtracker.ui.resources.Res
 import ch.qscqlmpa.wingtracker.ui.resources.action_dismiss
 import ch.qscqlmpa.wingtracker.ui.resources.airtime_export_action
@@ -96,8 +95,7 @@ fun LogbookScreen(
     onImport: () -> Unit,
     onExportToAirtime: () -> Unit,
     onOpenStatistics: () -> Unit,
-    attention: Attention,
-    onOpenAttention: (GearRef) -> Unit,
+    attentionPanel: @Composable () -> Unit,
     onGoToGear: () -> Unit,
     // Owned by the route, so the list is where the pilot left it after looking at a flight.
     listState: LazyListState,
@@ -138,7 +136,7 @@ fun LogbookScreen(
                 }
             }
             importFailure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
-            AttentionPanel(attention, onOpenAttention)
+            attentionPanel()
             state.unreadable.forEach { UnreadableBanner(it, onDismiss = presenter::dismissUnreadable) }
             state.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
             if (state.loading) {

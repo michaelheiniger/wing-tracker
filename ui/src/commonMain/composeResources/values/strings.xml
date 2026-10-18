@@ -298,6 +298,12 @@
     <string name="attention_open">Open</string>
     <string name="attention_due_soon">Check due soon</string>
     <string name="attention_badge">%1$d need attention</string>
+    <string name="settings_backup_reminder">Remind me to back up</string>
+    <string name="field_backup_days">After days without a backup</string>
+    <string name="attention_backup_title">Data backup</string>
+    <string name="attention_backup_last">Last backup on %1$s</string>
+    <string name="attention_backup_never">No backup yet</string>
+    <string name="notification_backup">backup due</string>
 
     <string name="settings_reminders_title">Reminders</string>
     <string name="settings_reminders_hint">A check counts as due soon this long before it is due. Whichever limit comes first applies.</string>

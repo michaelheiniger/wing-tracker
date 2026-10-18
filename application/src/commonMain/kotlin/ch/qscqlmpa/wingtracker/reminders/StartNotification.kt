@@ -10,6 +10,7 @@ data class StartNotification(
     val dueSoonCount: Int,
     val plannedCount: Int,
     val names: List<String>,
+    val backupDue: Boolean = false,
 )
 
 /**
@@ -30,6 +31,7 @@ class GetStartNotification(
             dueSoonCount = overview.dueSoonCount,
             plannedCount = overview.items.count { it.state == DueState.Ok },
             names = overview.items.map { it.name },
+            backupDue = overview.backup != null,
         )
     }
 }

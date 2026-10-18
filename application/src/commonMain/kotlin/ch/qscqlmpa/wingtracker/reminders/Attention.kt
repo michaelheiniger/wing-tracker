@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.reminders
 
 import ch.qscqlmpa.wingtracker.AppClock
+import ch.qscqlmpa.wingtracker.backup.BackupDue
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.gear.maintenance.DueState
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearKind
@@ -28,16 +29,19 @@ data class AttentionItem(
 
 data class Attention(
     val items: List<AttentionItem>,
+    val backup: BackupDue? = null,
 ) {
+    // Gear only: the count is the Gear section's badge, and a backup is not gear.
     val count: Int get() = items.size
     val dueCount: Int get() = items.count { it.state == DueState.Due }
     val dueSoonCount: Int get() = items.count { it.state == DueState.DueSoon }
-    val isEmpty: Boolean get() = items.isEmpty()
+    val isEmpty: Boolean get() = items.isEmpty() && backup == null
 }
 
 /**
  * Computed on demand from the stored data (ADR 0012): nothing runs in the background, so what the pilot sees
- * is always the current state. Retired gear never asks for attention.
+ * is always the current state. Retired gear never asks for attention. A backup does when the last one grew older
+ * than the pilot allows (ADR 0031).
  */
 class GetAttention(
     private val gear: MaintainedGearRepository,
@@ -46,18 +50,33 @@ class GetAttention(
     private val clock: AppClock,
 ) {
     suspend operator fun invoke(): Attention {
-        val leadTimes = settings.load().reminderLeadTimes
+        val stored = settings.load()
+        val leadTimes = stored.reminderLeadTimes
         val today = clock.today()
         val plannedHorizon = today.plus(leadTimes.days, DateTimeUnit.DAY)
         val allFlights = flights.findAll().items
+        val allGear = gear.findAll()
         val items =
-            gear.findAll().filter { it.isActive }.mapNotNull { item ->
+            allGear.filter { it.isActive }.mapNotNull { item ->
                 val status = item.maintenanceStatus(allFlights.flownOn(item), today, leadTimes)
                 val planned = item.history.nextPlannedCheck?.takeIf { it.date <= plannedHorizon }
                 val state = status?.state ?: DueState.Ok
                 if (state == DueState.Ok && planned == null) null else item.toAttention(state, status, planned)
             }
-        return Attention(items.sortedWith(compareBy<AttentionItem> { severity(it) }.thenBy { it.name.lowercase() }))
+        val lastBackupOn = stored.lastBackupAt?.let { clock.local(it).date }
+        val backup =
+            BackupDue(lastBackupOn).takeIf {
+                stored.backupReminder.isDue(
+                    lastBackupOn,
+                    today,
+                    hasData =
+                        allGear.isNotEmpty() || allFlights.isNotEmpty(),
+                )
+            }
+        return Attention(
+            items.sortedWith(compareBy<AttentionItem> { severity(it) }.thenBy { it.name.lowercase() }),
+            backup,
+        )
     }
 
     private fun MaintainedGear.toAttention(

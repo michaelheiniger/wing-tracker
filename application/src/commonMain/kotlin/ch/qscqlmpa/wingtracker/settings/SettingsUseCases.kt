@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.settings
 
+import ch.qscqlmpa.wingtracker.backup.BackupReminder
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
 
 /**
@@ -19,6 +20,14 @@ class SaveReminderLeadTimes(
 ) {
     suspend operator fun invoke(leadTimes: ReminderLeadTimes) {
         settings.save(settings.load().copy(reminderLeadTimes = leadTimes))
+    }
+}
+
+class SaveBackupReminder(
+    private val settings: SettingsRepository,
+) {
+    suspend operator fun invoke(reminder: BackupReminder) {
+        settings.save(settings.load().copy(backupReminder = reminder))
     }
 }
 

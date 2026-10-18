@@ -298,6 +298,12 @@
     <string name="attention_open">Öffnen</string>
     <string name="attention_due_soon">Kontrolle bald fällig</string>
     <string name="attention_badge">%1$d brauchen Aufmerksamkeit</string>
+    <string name="settings_backup_reminder">An die Datensicherung erinnern</string>
+    <string name="field_backup_days">Nach so vielen Tagen ohne Sicherung</string>
+    <string name="attention_backup_title">Datensicherung</string>
+    <string name="attention_backup_last">Letzte Sicherung am %1$s</string>
+    <string name="attention_backup_never">Noch keine Sicherung</string>
+    <string name="notification_backup">Sicherung fällig</string>
 
     <string name="settings_reminders_title">Erinnerungen</string>
     <string name="settings_reminders_hint">Eine Kontrolle gilt so lange vor ihrer Fälligkeit als bald fällig. Es gilt, was zuerst eintritt.</string>

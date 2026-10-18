@@ -13,6 +13,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -48,9 +49,11 @@ import ch.qscqlmpa.wingtracker.ui.resources.data_change_title
 import ch.qscqlmpa.wingtracker.ui.resources.data_change_use
 import ch.qscqlmpa.wingtracker.ui.resources.data_change_use_existing
 import ch.qscqlmpa.wingtracker.ui.resources.data_restart_body
+import ch.qscqlmpa.wingtracker.ui.resources.field_backup_days
 import ch.qscqlmpa.wingtracker.ui.resources.field_lead_days
 import ch.qscqlmpa.wingtracker.ui.resources.field_lead_hours
 import ch.qscqlmpa.wingtracker.ui.resources.scale_automatic
+import ch.qscqlmpa.wingtracker.ui.resources.settings_backup_reminder
 import ch.qscqlmpa.wingtracker.ui.resources.settings_calendar_empty
 import ch.qscqlmpa.wingtracker.ui.resources.settings_calendar_export
 import ch.qscqlmpa.wingtracker.ui.resources.settings_calendar_exported
@@ -251,6 +254,33 @@ private fun RemindersSection(presenter: ReminderSettingsPresenter) {
             label = { Text(stringResource(Res.string.field_lead_hours)) },
             isError = ReminderSettingsField.Hours in presenter.errors,
             supportingText = { presenter.errors[ReminderSettingsField.Hours]?.let { Text(it.message()) } },
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+        )
+    }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.weight(1f),
+        ) {
+            Switch(
+                checked = input.backupEnabled,
+                onCheckedChange = { on -> presenter.change { it.copy(backupEnabled = on) } },
+            )
+            Text(stringResource(Res.string.settings_backup_reminder))
+        }
+        OutlinedTextField(
+            value = input.backupDays,
+            onValueChange = { v -> presenter.change { it.copy(backupDays = v) } },
+            label = { Text(stringResource(Res.string.field_backup_days)) },
+            enabled = input.backupEnabled,
+            isError = ReminderSettingsField.BackupDays in presenter.errors,
+            supportingText = { presenter.errors[ReminderSettingsField.BackupDays]?.let { Text(it.message()) } },
             singleLine = true,
             modifier = Modifier.weight(1f),
         )

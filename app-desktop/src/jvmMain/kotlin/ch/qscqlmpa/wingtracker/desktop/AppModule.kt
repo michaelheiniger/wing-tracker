@@ -81,6 +81,7 @@ import ch.qscqlmpa.wingtracker.reminders.GetStartNotification
 import ch.qscqlmpa.wingtracker.reminders.MarkStartNotificationShown
 import ch.qscqlmpa.wingtracker.settings.GetAppSettings
 import ch.qscqlmpa.wingtracker.settings.SaveAirtimeNick
+import ch.qscqlmpa.wingtracker.settings.SaveBackupReminder
 import ch.qscqlmpa.wingtracker.settings.SaveDeviceFolder
 import ch.qscqlmpa.wingtracker.settings.SaveInterfaceScale
 import ch.qscqlmpa.wingtracker.settings.SaveReminderLeadTimes
@@ -288,7 +289,8 @@ private fun remindersModule() =
         factory { SaveInterfaceScale(get()) }
         factory { SaveSyrideUsername(get()) }
         factory { SaveDeviceFolder(get()) }
-        single { RemindersUseCases(get(), get(), get(), get()) }
+        factory { SaveBackupReminder(get()) }
+        single { RemindersUseCases(get(), get(), get(), get(), get()) }
         single { StartupReminder(get(), get(), TrayNotifier()) }
     }
 

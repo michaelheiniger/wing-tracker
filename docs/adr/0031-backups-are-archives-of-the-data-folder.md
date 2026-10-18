@@ -21,3 +21,7 @@ The data folder is self-contained (ADR 0011), so copying it was the only backup 
 ## Consequences
 
 A backup is exact and restores bit for bit, and a broken or altered archive is refused before anything is unpacked. The archive format is the JSON storage layout, so it only restores into the JSON backend; a later backend needs a migration path. Secrets are kept by the OS (ADR 0029) and the data folder pointer lives outside the folder (ADR 0020), so neither is in a backup. A restored backup carries the settings from when it was made, including when the backup before it was made.
+
+## Amendments
+
+- 2026-10-18: The nudge is an entry of the "Needs attention" panel that backs up in place. It appears once the last backup is as old as the days set next to the reminder lead times, or, with no backup yet, once anything is stored. A switch turns it off, for a data folder already backed up otherwise. The start-up notification mentions it; the Gear section's badge does not, since a backup is not gear. The setting is part of settings schema 7, which no release has used yet.

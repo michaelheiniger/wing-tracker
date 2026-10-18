@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.ui.reminders
 
 import ch.qscqlmpa.wingtracker.AppClock
+import ch.qscqlmpa.wingtracker.backup.BackupReminder
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.gear.Acquisition
 import ch.qscqlmpa.wingtracker.gear.AcquisitionCondition
@@ -15,6 +16,7 @@ import ch.qscqlmpa.wingtracker.reminders.GetAttention
 import ch.qscqlmpa.wingtracker.reminders.GetCalendarEntries
 import ch.qscqlmpa.wingtracker.settings.AppSettings
 import ch.qscqlmpa.wingtracker.settings.GetAppSettings
+import ch.qscqlmpa.wingtracker.settings.SaveBackupReminder
 import ch.qscqlmpa.wingtracker.settings.SaveReminderLeadTimes
 import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import ch.qscqlmpa.wingtracker.shared.LoadResult
@@ -81,6 +83,7 @@ class ReminderPresentersTest {
             getAppSettings = GetAppSettings(settings),
             saveReminderLeadTimes = SaveReminderLeadTimes(settings),
             getCalendarEntries = GetCalendarEntries(gear, settings, clock),
+            saveBackupReminder = SaveBackupReminder(settings),
         )
 
     // Words the calendar without resource files, which unit tests do not have.
@@ -170,6 +173,25 @@ class ReminderPresentersTest {
                 ) { settings.save(AppSettings(reminderLeadTimes = ReminderLeadTimes(days = 21, hours = 8.hours))) }
                 assertThat(presenter.saved).isTrue()
                 assertThat(refreshed).isTrue()
+            }
+
+        @Test
+        fun `saves the backup reminder with the lead times`() =
+            runTest {
+                // given
+                coEvery { settings.load() } returns AppSettings()
+                val presenter = settingsPresenter()
+                presenter.change {
+                    ReminderSettingsInput(days = "30", hours = "10", backupEnabled = false, backupDays = "60")
+                }
+
+                // when
+                presenter.save()
+
+                // then
+                coVerify(exactly = 1) {
+                    settings.save(AppSettings(backupReminder = BackupReminder(enabled = false, days = 60)))
+                }
             }
 
         @Test

@@ -58,6 +58,7 @@ import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
 import ch.qscqlmpa.wingtracker.ui.icons.BarChartIcon
 import ch.qscqlmpa.wingtracker.ui.icons.UpdateIcon
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
+import ch.qscqlmpa.wingtracker.ui.reminders.AttentionPanel
 import ch.qscqlmpa.wingtracker.ui.reminders.AttentionPresenter
 import ch.qscqlmpa.wingtracker.ui.reminders.ReminderSettingsPresenter
 import ch.qscqlmpa.wingtracker.ui.reminders.RemindersUseCases
@@ -136,7 +137,16 @@ fun AppShell(
     val logLocation = remember { LogLocationPresenter(scope, platform.logLocation) }
     val backupSaveTitle = stringResource(Res.string.backup_save_title)
     val backup =
-        remember { BackupPresenter(scope, backups, platform.fileSaver, backupSaveTitle, beforeBackup = undo::flush) }
+        remember {
+            BackupPresenter(
+                scope,
+                backups,
+                platform.fileSaver,
+                backupSaveTitle,
+                beforeBackup = undo::flush,
+                onCreated = attentionPresenter::refresh,
+            )
+        }
     val restoreTitles =
         RestoreTitles(stringResource(Res.string.restore_pick_title), stringResource(Res.string.restore_folder_title))
     val restore =
@@ -218,16 +228,21 @@ fun AppShell(
                                         LogbookRoute(
                                             useCases = logbookUseCases,
                                             platform = platform,
-                                            attention = attentionPresenter.state.attention,
+                                            attentionPanel = {
+                                                AttentionPanel(
+                                                    attentionPresenter.state.attention,
+                                                    onOpen = { ref ->
+                                                        pendingGear = ref
+                                                        destination = Destination.Gear.name
+                                                    },
+                                                    backup = backup,
+                                                )
+                                            },
                                             search = logbookSearch,
                                             onSearchChange = { logbookSearch = it },
                                             onOpenStatistics = { filter ->
                                                 statisticsFilter = filter
                                                 destination = Destination.Statistics.name
-                                            },
-                                            onOpenGear = { ref ->
-                                                pendingGear = ref
-                                                destination = Destination.Gear.name
                                             },
                                             onGoToGear = { destination = Destination.Gear.name },
                                         )

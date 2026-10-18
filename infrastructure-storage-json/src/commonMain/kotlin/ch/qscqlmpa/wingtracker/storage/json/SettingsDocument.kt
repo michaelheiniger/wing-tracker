@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.storage.json
 
+import ch.qscqlmpa.wingtracker.backup.BackupReminder
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
 import ch.qscqlmpa.wingtracker.settings.AppSettings
 import ch.qscqlmpa.wingtracker.settings.ThemeMode
@@ -26,6 +27,9 @@ internal data class SettingsDocument(
     val airtimeNick: String? = null,
     // Added in schema 7: when the last backup was made, as ISO-8601 text like the flights' instants.
     val lastBackupAt: String? = null,
+    // Also schema 7, which no release has used yet: when to remind the pilot to back up.
+    val backupReminderEnabled: Boolean = true,
+    val backupReminderDays: Int = BackupReminder.DEFAULT_DAYS,
 ) {
     fun toDomain(): AppSettings =
         AppSettings(
@@ -37,6 +41,7 @@ internal data class SettingsDocument(
             deviceFolder = deviceFolder,
             airtimeNick = airtimeNick,
             lastBackupAt = lastBackupAt?.let(Instant::parse),
+            backupReminder = BackupReminder(backupReminderEnabled, backupReminderDays),
         )
 
     companion object {
@@ -53,6 +58,8 @@ internal data class SettingsDocument(
                 deviceFolder = settings.deviceFolder,
                 airtimeNick = settings.airtimeNick,
                 lastBackupAt = settings.lastBackupAt?.toString(),
+                backupReminderEnabled = settings.backupReminder.enabled,
+                backupReminderDays = settings.backupReminder.days,
             )
     }
 }

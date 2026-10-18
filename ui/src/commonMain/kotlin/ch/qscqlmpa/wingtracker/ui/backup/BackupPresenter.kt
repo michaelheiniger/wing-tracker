@@ -40,6 +40,8 @@ class BackupPresenter(
     private val saveTitle: String,
     // Lets anything still waiting (e.g. an undoable delete) reach the stored data, so the backup matches the screen.
     private val beforeBackup: suspend () -> Unit = {},
+    // Lets the reminder to back up go away as soon as the backup is made (ADR 0012 computes it on demand).
+    private val onCreated: () -> Unit = {},
 ) {
     var lastMadeAt by mutableStateOf<LocalDateTime?>(null)
         private set
@@ -62,6 +64,7 @@ class BackupPresenter(
                 beforeBackup()
                 saved = SavedBackup(destination, useCases.createBackup(destination))
                 lastMadeAt = useCases.getBackupStatus().lastMadeAt
+                onCreated()
             } finally {
                 busy = false
             }

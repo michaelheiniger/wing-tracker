@@ -1,5 +1,7 @@
 package ch.qscqlmpa.wingtracker.reminders
 
+import ch.qscqlmpa.wingtracker.backup.BackupDue
+import ch.qscqlmpa.wingtracker.backup.BackupReminder
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.aFixedClock
 import ch.qscqlmpa.wingtracker.gear.GearStatus
@@ -27,6 +29,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 // "Today" is 2026-10-11 (see aFixedClock in the flights tests).
 private fun planned(
@@ -56,6 +59,9 @@ private fun aWingWithInterval(
     status = status,
 )
 
+// Recent enough that the backup reminder stays quiet in tests about the gear.
+private val RECENT_BACKUP = Instant.parse("2026-10-05T18:00:00Z")
+
 class RemindersTest {
     private val gear = mockk<MaintainedGearRepository>()
     private val flights = mockk<FlightRepository>().also { coEvery { it.findAll() } returns LoadResult(emptyList()) }
@@ -64,7 +70,7 @@ class RemindersTest {
 
     private fun givenGear(
         vararg items: MaintainedGear,
-        appSettings: AppSettings = AppSettings(),
+        appSettings: AppSettings = AppSettings(lastBackupAt = RECENT_BACKUP),
     ) {
         coEvery { gear.findAll() } returns items.toList()
         coEvery { settings.load() } returns appSettings
@@ -368,6 +374,111 @@ class RemindersTest {
                 assertThat(entry.checkType).isEqualTo(CheckType.Full)
                 assertThat(entry.company).isEqualTo("Alpine Wing Service")
                 assertThat(entry.notes).isEqualTo("Annual")
+            }
+    }
+
+    @Nested
+    inner class BackupReminderInAttention {
+        @Test
+        fun `asks for a backup once the last one is as old as the pilot allows`() =
+            runTest {
+                // given
+                givenGear(fine, appSettings = AppSettings(lastBackupAt = Instant.parse("2026-09-11T19:30:00Z")))
+
+                // when
+                val attention = GetAttention(gear, flights, settings, clock)()
+
+                // then
+                assertThat(attention.backup).isEqualTo(BackupDue(LocalDate(2026, 9, 11)))
+                assertThat(attention.count).isZero()
+                assertThat(attention.isEmpty).isFalse()
+            }
+
+        @Test
+        fun `stays quiet the day before`() =
+            runTest {
+                // given
+                givenGear(fine, appSettings = AppSettings(lastBackupAt = Instant.parse("2026-09-12T08:00:00Z")))
+
+                // when
+                val attention = GetAttention(gear, flights, settings, clock)()
+
+                // then
+                assertThat(attention.backup).isNull()
+            }
+
+        @Test
+        fun `asks for a first backup once something is stored`() =
+            runTest {
+                // given
+                givenGear(fine, appSettings = AppSettings())
+
+                // when
+                val attention = GetAttention(gear, flights, settings, clock)()
+
+                // then
+                assertThat(attention.backup).isEqualTo(BackupDue(lastMadeOn = null))
+            }
+
+        @Test
+        fun `does not ask a fresh installation with nothing to lose`() =
+            runTest {
+                // given
+                givenGear(appSettings = AppSettings())
+
+                // when
+                val attention = GetAttention(gear, flights, settings, clock)()
+
+                // then
+                assertThat(attention.isEmpty).isTrue()
+            }
+
+        @Test
+        fun `does not ask when the pilot turned the reminder off`() =
+            runTest {
+                // given
+                givenGear(fine, appSettings = AppSettings(backupReminder = BackupReminder(enabled = false)))
+
+                // when
+                val attention = GetAttention(gear, flights, settings, clock)()
+
+                // then
+                assertThat(attention.backup).isNull()
+            }
+
+        @Test
+        fun `follows the days the pilot chose`() =
+            runTest {
+                // given
+                givenGear(
+                    fine,
+                    appSettings =
+                        AppSettings(
+                            lastBackupAt = RECENT_BACKUP,
+                            backupReminder = BackupReminder(enabled = true, days = 6),
+                        ),
+                )
+
+                // when
+                val attention = GetAttention(gear, flights, settings, clock)()
+
+                // then
+                assertThat(attention.backup).isEqualTo(BackupDue(LocalDate(2026, 10, 5)))
+            }
+
+        @Test
+        fun `is part of the start-up notification even when all gear is fine`() =
+            runTest {
+                // given
+                givenGear(fine, appSettings = AppSettings())
+                val getAttention = GetAttention(gear, flights, settings, clock)
+
+                // when
+                val notification = GetStartNotification(getAttention, settings, clock)()
+
+                // then
+                assertThat(notification)
+                    .isEqualTo(StartNotification(0, 0, 0, names = emptyList(), backupDue = true))
             }
     }
 }
