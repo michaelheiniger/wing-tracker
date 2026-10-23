@@ -5,7 +5,7 @@ import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import kotlin.time.Duration
 
 data class GearMaintenance(
@@ -28,7 +28,7 @@ fun List<Flight>.flownOn(gear: MaintainedGear): List<FlownHours> =
 class GetGearMaintenance(
     private val gear: MaintainedGearRepository,
     private val flights: FlightRepository,
-    private val settings: SettingsRepository,
+    private val settings: LogbookSettingsRepository,
     private val clock: AppClock,
 ) {
     suspend operator fun invoke(ref: GearRef): GearMaintenance {
@@ -61,7 +61,7 @@ class GetGearMaintenance(
 class GetMaintenanceStatuses(
     private val gear: MaintainedGearRepository,
     private val flights: FlightRepository,
-    private val settings: SettingsRepository,
+    private val settings: LogbookSettingsRepository,
     private val clock: AppClock,
 ) {
     suspend operator fun invoke(): Map<GearRef, MaintenanceStatus?> {

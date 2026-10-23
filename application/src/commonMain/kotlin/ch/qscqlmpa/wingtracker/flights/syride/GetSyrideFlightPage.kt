@@ -1,7 +1,7 @@
 package ch.qscqlmpa.wingtracker.flights.syride
 
 import ch.qscqlmpa.wingtracker.flights.Flight
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 
 /**
  * Where a flight imported from Syride can be seen there. Flights do not remember the account they came from, so the
@@ -9,7 +9,7 @@ import ch.qscqlmpa.wingtracker.settings.SettingsRepository
  */
 class GetSyrideFlightPage(
     private val source: SyrideFlightSource,
-    private val settings: SettingsRepository,
+    private val settings: LogbookSettingsRepository,
 ) {
     /** Null when the flight has no page on Syride, or no account is known yet. */
     suspend operator fun invoke(flight: Flight): String? {

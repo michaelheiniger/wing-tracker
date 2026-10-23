@@ -1,8 +1,8 @@
 package ch.qscqlmpa.wingtracker.settings
 
-interface SettingsRepository {
+interface LogbookSettingsRepository {
     /** Returns defaults when nothing was saved yet, so first launch needs no setup. */
-    suspend fun load(): AppSettings
+    suspend fun load(): LogbookSettings
 
-    suspend fun save(settings: AppSettings)
+    suspend fun save(settings: LogbookSettings)
 }

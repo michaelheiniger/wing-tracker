@@ -14,11 +14,14 @@ import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.reminders.GetAttention
 import ch.qscqlmpa.wingtracker.reminders.GetCalendarEntries
-import ch.qscqlmpa.wingtracker.settings.AppSettings
-import ch.qscqlmpa.wingtracker.settings.GetAppSettings
+import ch.qscqlmpa.wingtracker.settings.DeviceSettings
+import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
+import ch.qscqlmpa.wingtracker.settings.GetDeviceSettings
+import ch.qscqlmpa.wingtracker.settings.GetLogbookSettings
+import ch.qscqlmpa.wingtracker.settings.LogbookSettings
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import ch.qscqlmpa.wingtracker.settings.SaveBackupReminder
 import ch.qscqlmpa.wingtracker.settings.SaveReminderLeadTimes
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
@@ -62,7 +65,10 @@ private fun aWing(
 class ReminderPresentersTest {
     private val gear = mockk<MaintainedGearRepository>()
     private val flights = mockk<FlightRepository>().also { coEvery { it.findAll() } returns LoadResult(emptyList()) }
-    private val settings = mockk<SettingsRepository>(relaxUnitFun = true)
+    private val logbookSettings =
+        mockk<LogbookSettingsRepository>(relaxUnitFun = true).also { coEvery { it.load() } returns LogbookSettings() }
+    private val deviceSettings =
+        mockk<DeviceSettingsRepository>(relaxUnitFun = true).also { coEvery { it.load() } returns DeviceSettings() }
     private val saver = mockk<FileSaver>()
     private val clock =
         AppClock(
@@ -75,16 +81,16 @@ class ReminderPresentersTest {
 
     private fun givenStored(vararg items: MaintainedGear) {
         coEvery { gear.findAll() } returns items.toList()
-        coEvery { settings.load() } returns AppSettings()
     }
 
     private fun TestScope.useCases() =
         RemindersUseCases(
-            getAttention = GetAttention(gear, flights, settings, clock),
-            getAppSettings = GetAppSettings(settings),
-            saveReminderLeadTimes = SaveReminderLeadTimes(settings),
-            getCalendarEntries = GetCalendarEntries(gear, settings, clock),
-            saveBackupReminder = SaveBackupReminder(settings),
+            getAttention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock),
+            getLogbookSettings = GetLogbookSettings(logbookSettings),
+            getDeviceSettings = GetDeviceSettings(deviceSettings),
+            saveReminderLeadTimes = SaveReminderLeadTimes(logbookSettings),
+            getCalendarEntries = GetCalendarEntries(gear, logbookSettings, clock),
+            saveBackupReminder = SaveBackupReminder(deviceSettings),
         )
 
     // Words the calendar without resource files, which unit tests do not have.
@@ -127,7 +133,6 @@ class ReminderPresentersTest {
             runTest {
                 // given
                 coEvery { gear.findAll() } throws IOException("disk unreadable")
-                coEvery { settings.load() } returns AppSettings()
                 val presenter =
                     AttentionPresenter(TestScope(UnconfinedTestDispatcher(testScheduler)), useCases().getAttention)
 
@@ -145,8 +150,8 @@ class ReminderPresentersTest {
         fun `loads the stored lead times into the form`() =
             runTest {
                 // given
-                coEvery { settings.load() } returns
-                    AppSettings(reminderLeadTimes = ReminderLeadTimes(days = 14, hours = 5.hours))
+                coEvery { logbookSettings.load() } returns
+                    LogbookSettings(reminderLeadTimes = ReminderLeadTimes(days = 14, hours = 5.hours))
                 val presenter = settingsPresenter()
 
                 // when
@@ -160,7 +165,6 @@ class ReminderPresentersTest {
         fun `saves valid lead times once typed and tells the app so reminders can refresh`() =
             runTest {
                 // given
-                coEvery { settings.load() } returns AppSettings()
                 var refreshed = false
                 val presenter = settingsPresenter { refreshed = true }
 
@@ -171,7 +175,11 @@ class ReminderPresentersTest {
                 // then
                 coVerify(
                     exactly = 1,
-                ) { settings.save(AppSettings(reminderLeadTimes = ReminderLeadTimes(days = 21, hours = 8.hours))) }
+                ) {
+                    logbookSettings.save(
+                        LogbookSettings(reminderLeadTimes = ReminderLeadTimes(days = 21, hours = 8.hours)),
+                    )
+                }
                 assertThat(presenter.saved).isTrue()
                 assertThat(refreshed).isTrue()
             }
@@ -180,7 +188,6 @@ class ReminderPresentersTest {
         fun `saves the backup reminder with the lead times`() =
             runTest {
                 // given
-                coEvery { settings.load() } returns AppSettings()
                 val presenter = settingsPresenter()
 
                 // when
@@ -191,7 +198,7 @@ class ReminderPresentersTest {
 
                 // then
                 coVerify(exactly = 1) {
-                    settings.save(AppSettings(backupReminder = BackupReminder(enabled = false, days = 60)))
+                    deviceSettings.save(DeviceSettings(backupReminder = BackupReminder(enabled = false, days = 60)))
                 }
             }
 
@@ -208,14 +215,14 @@ class ReminderPresentersTest {
                 // then
                 assertThat(presenter.errors).containsKey(ReminderSettingsField.Days)
                 assertThat(presenter.saved).isFalse()
-                coVerify(exactly = 0) { settings.save(any()) }
+                coVerify(exactly = 0) { logbookSettings.save(any()) }
+                coVerify(exactly = 0) { deviceSettings.save(any()) }
             }
 
         @Test
         fun `editing the form clears the saved confirmation`() =
             runTest {
                 // given
-                coEvery { settings.load() } returns AppSettings()
                 val presenter = settingsPresenter()
                 presenter.change { ReminderSettingsInput(days = "21", hours = "8") }
                 advanceUntilIdle()
@@ -231,7 +238,6 @@ class ReminderPresentersTest {
         fun `saves only the last of values typed in quick succession`() =
             runTest {
                 // given
-                coEvery { settings.load() } returns AppSettings()
                 val presenter = settingsPresenter()
 
                 // when
@@ -240,17 +246,20 @@ class ReminderPresentersTest {
                 advanceUntilIdle()
 
                 // then
-                coVerify(exactly = 0) { settings.save(match { it.reminderLeadTimes.days == 2 }) }
+                coVerify(exactly = 0) { logbookSettings.save(match { it.reminderLeadTimes.days == 2 }) }
                 coVerify(
                     exactly = 1,
-                ) { settings.save(AppSettings(reminderLeadTimes = ReminderLeadTimes(days = 21, hours = 8.hours))) }
+                ) {
+                    logbookSettings.save(
+                        LogbookSettings(reminderLeadTimes = ReminderLeadTimes(days = 21, hours = 8.hours)),
+                    )
+                }
             }
 
         @Test
         fun `a value made invalid before the save drops the save`() =
             runTest {
                 // given
-                coEvery { settings.load() } returns AppSettings()
                 val presenter = settingsPresenter()
 
                 // when
@@ -260,7 +269,8 @@ class ReminderPresentersTest {
 
                 // then
                 assertThat(presenter.errors).containsOnlyKeys(ReminderSettingsField.Days)
-                coVerify(exactly = 0) { settings.save(any()) }
+                coVerify(exactly = 0) { logbookSettings.save(any()) }
+                coVerify(exactly = 0) { deviceSettings.save(any()) }
             }
     }
 

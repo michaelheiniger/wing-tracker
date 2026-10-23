@@ -2,7 +2,7 @@ package ch.qscqlmpa.wingtracker.reminders
 
 import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.gear.maintenance.DueState
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
 
 /** What the start-up notification should say; the wording itself belongs to the UI layer (ADR 0014). */
 data class StartNotification(
@@ -19,7 +19,7 @@ data class StartNotification(
  */
 class GetStartNotification(
     private val attention: GetAttention,
-    private val settings: SettingsRepository,
+    private val settings: DeviceSettingsRepository,
     private val clock: AppClock,
 ) {
     suspend operator fun invoke(): StartNotification? {
@@ -37,7 +37,7 @@ class GetStartNotification(
 }
 
 class MarkStartNotificationShown(
-    private val settings: SettingsRepository,
+    private val settings: DeviceSettingsRepository,
     private val clock: AppClock,
 ) {
     suspend operator fun invoke() {

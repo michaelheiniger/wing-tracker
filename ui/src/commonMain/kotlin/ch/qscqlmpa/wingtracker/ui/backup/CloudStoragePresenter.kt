@@ -8,7 +8,7 @@ import ch.qscqlmpa.wingtracker.backup.CloudProblem
 import ch.qscqlmpa.wingtracker.backup.CloudStorageException
 import ch.qscqlmpa.wingtracker.backup.CloudStorageSettings
 import ch.qscqlmpa.wingtracker.backup.SaveCloudStorage
-import ch.qscqlmpa.wingtracker.settings.GetAppSettings
+import ch.qscqlmpa.wingtracker.settings.GetLogbookSettings
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.gear.wing.FormError
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 
 /** Use cases the cloud storage settings need; passed in so this module never sees the DI framework. */
 class CloudStorageUseCases(
-    val getAppSettings: GetAppSettings,
+    val getLogbookSettings: GetLogbookSettings,
     val saveCloudStorage: SaveCloudStorage,
     val checkCloudStorage: CheckCloudStorage,
 )
@@ -80,7 +80,7 @@ class CloudStoragePresenter(
 
     fun load() =
         attempt(FailureKind.LoadSettings) {
-            stored = useCases.getAppSettings().cloudStorage
+            stored = useCases.getLogbookSettings().cloudStorage
             input = formOfStored()
             secretStored = secret.current() != null
         }

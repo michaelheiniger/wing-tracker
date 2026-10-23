@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.storage.json
 
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -15,7 +16,7 @@ internal inline fun <reified T> decodeDocument(
     currentSchemaVersion: Int,
 ): T {
     val element = json.parseToJsonElement(text)
-    val schemaVersion = ((element as? JsonObject)?.get("schemaVersion") as? JsonPrimitive)?.intOrNull
+    val schemaVersion = element.schemaVersion()
     if (schemaVersion != null && schemaVersion > currentSchemaVersion) {
         throw UnsupportedSchemaException(
             "Schema version $schemaVersion was written by a newer version of the application, " +
@@ -24,3 +25,6 @@ internal inline fun <reified T> decodeDocument(
     }
     return json.decodeFromJsonElement<T>(element)
 }
+
+internal fun JsonElement.schemaVersion(): Int? =
+    ((this as? JsonObject)?.get("schemaVersion") as? JsonPrimitive)?.intOrNull

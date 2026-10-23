@@ -1,8 +1,10 @@
 package ch.qscqlmpa.wingtracker.backup
 
 import ch.qscqlmpa.wingtracker.AppClock
-import ch.qscqlmpa.wingtracker.settings.AppSettings
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import ch.qscqlmpa.wingtracker.settings.DeviceSettings
+import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
+import ch.qscqlmpa.wingtracker.settings.LogbookSettings
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
@@ -48,7 +50,8 @@ private fun uploaded(
 class UploadBackupTest {
     private val archive = mockk<BackupArchive>(relaxUnitFun = true)
     private val storage = mockk<CloudStorage>(relaxUnitFun = true)
-    private val settings = mockk<SettingsRepository>(relaxUnitFun = true)
+    private val logbookSettings = mockk<LogbookSettingsRepository>()
+    private val settings = mockk<DeviceSettingsRepository>(relaxUnitFun = true)
     private val clock =
         AppClock(
             clock =
@@ -57,10 +60,11 @@ class UploadBackupTest {
                 },
             zone = TimeZone.of("Europe/Zurich"),
         )
-    private val uploadBackup = UploadBackup(archive, storage, settings, clock, APP_VERSION)
+    private val uploadBackup = UploadBackup(archive, storage, logbookSettings, settings, clock, APP_VERSION)
 
     private fun givenBucket(cloud: CloudStorageSettings = BUCKET) {
-        coEvery { settings.load() } returns AppSettings(cloudStorage = cloud)
+        coEvery { logbookSettings.load() } returns LogbookSettings(cloudStorage = cloud)
+        coEvery { settings.load() } returns DeviceSettings(interfaceScalePercent = 125)
         coEvery { archive.temporaryFile("wing-tracker-backup-2026-10-18-1430.zip") } returns TEMPORARY
         coEvery { archive.create(TEMPORARY, APP_VERSION, NOW) } returns SUMMARY
     }
@@ -83,9 +87,7 @@ class UploadBackupTest {
                     storage.upload(TARGET, KEY, TEMPORARY)
                     archive.discard(TEMPORARY)
                 }
-                coVerify(
-                    exactly = 1,
-                ) { settings.save(AppSettings(cloudStorage = BUCKET.copy(keepLast = null), lastBackupAt = NOW)) }
+                coVerify(exactly = 1) { settings.save(DeviceSettings(interfaceScalePercent = 125, lastBackupAt = NOW)) }
                 coVerify(exactly = 0) { storage.list(any(), any()) }
             }
 

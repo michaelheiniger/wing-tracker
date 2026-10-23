@@ -68,8 +68,11 @@ class ReminderSettingsPresenter(
 
     fun load() =
         launchGuarded(FailureKind.LoadSettings) {
-            val settings = useCases.getAppSettings()
-            input = ReminderSettingsInput.from(settings.reminderLeadTimes, settings.backupReminder)
+            input =
+                ReminderSettingsInput.from(
+                    useCases.getLogbookSettings().reminderLeadTimes,
+                    useCases.getDeviceSettings().backupReminder,
+                )
         }
 
     /** Saves what is typed as soon as it is valid, like the other settings, which apply at once. */

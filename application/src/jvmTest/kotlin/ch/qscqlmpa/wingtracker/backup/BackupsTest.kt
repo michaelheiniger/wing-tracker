@@ -1,9 +1,10 @@
 package ch.qscqlmpa.wingtracker.backup
 
 import ch.qscqlmpa.wingtracker.AppClock
-import ch.qscqlmpa.wingtracker.settings.AppSettings
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
-import ch.qscqlmpa.wingtracker.settings.ThemeMode
+import ch.qscqlmpa.wingtracker.settings.DeviceSettings
+import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
+import ch.qscqlmpa.wingtracker.settings.LogbookSettings
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -23,7 +24,8 @@ private val EARLIER_BACKUP = Instant.parse("2026-09-27T17:05:00Z")
 
 class BackupsTest {
     private val archive = mockk<BackupArchive>()
-    private val settings = mockk<SettingsRepository>(relaxUnitFun = true)
+    private val logbookSettings = mockk<LogbookSettingsRepository>()
+    private val settings = mockk<DeviceSettingsRepository>(relaxUnitFun = true)
     private val clock =
         AppClock(
             clock =
@@ -32,7 +34,7 @@ class BackupsTest {
                 },
             zone = TimeZone.of("Europe/Zurich"),
         )
-    private val stored = AppSettings(themeMode = ThemeMode.Dark, syrideUsername = "michael.heiniger")
+    private val stored = DeviceSettings(interfaceScalePercent = 125, deviceFolder = "/run/media/michael/SYRIDE1")
 
     @Nested
     inner class CreateBackupInvoke {
@@ -72,12 +74,13 @@ class BackupsTest {
 
     @Nested
     inner class GetBackupStatusInvoke {
-        private val getBackupStatus = GetBackupStatus(settings, clock)
+        private val getBackupStatus = GetBackupStatus(logbookSettings, settings, clock)
 
         @Test
         fun `tells when the last backup was made in the pilot's time and offers a dated name`() =
             runTest {
                 // given
+                coEvery { logbookSettings.load() } returns LogbookSettings()
                 coEvery { settings.load() } returns stored.copy(lastBackupAt = EARLIER_BACKUP)
 
                 // when
@@ -97,6 +100,7 @@ class BackupsTest {
         fun `has no last backup when none was made yet`() =
             runTest {
                 // given
+                coEvery { logbookSettings.load() } returns LogbookSettings()
                 coEvery { settings.load() } returns stored
 
                 // when

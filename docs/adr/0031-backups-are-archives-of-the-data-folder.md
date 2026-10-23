@@ -25,3 +25,4 @@ A backup is exact and restores bit for bit, and a broken or altered archive is r
 ## Amendments
 
 - 2026-10-18: The nudge is an entry of the "Needs attention" panel that backs up in place. It appears once the last backup is as old as the days set next to the reminder lead times, or, with no backup yet, once anything is stored. A switch turns it off, for a data folder already backed up otherwise. The start-up notification mentions it; the Gear section's badge does not, since a backup is not gear. The setting is part of settings schema 7, which no release has used yet.
+- 2026-10-24: The settings are split into logbook settings and device settings (ADR 0033), each in its own file in the data folder. A backup holds both, so restoring it on another device also brings the device settings of the device it was made on, such as when that device's last backup was made. The archive format is unchanged.

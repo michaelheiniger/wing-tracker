@@ -10,8 +10,8 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.GearRef
 import ch.qscqlmpa.wingtracker.gear.maintenance.GetMaintenanceStatuses
 import ch.qscqlmpa.wingtracker.gear.maintenance.MaintainedGearRepository
 import ch.qscqlmpa.wingtracker.gear.wing.GearInUseException
-import ch.qscqlmpa.wingtracker.settings.AppSettings
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import ch.qscqlmpa.wingtracker.settings.LogbookSettings
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
@@ -55,7 +55,7 @@ class SimpleGearPresentersTest {
     private val gear = mockk<MaintainedGearRepository>().also { coEvery { it.findAll() } returns emptyList() }
     private val flights = mockk<FlightRepository>().also { coEvery { it.findAll() } returns LoadResult(emptyList()) }
     private val today = LocalDate(2026, 10, 11)
-    private val settings = mockk<SettingsRepository>().also { coEvery { it.load() } returns AppSettings() }
+    private val settings = mockk<LogbookSettingsRepository>().also { coEvery { it.load() } returns LogbookSettings() }
 
     private fun TestScope.listPresenter() =
         SimpleGearListPresenter(

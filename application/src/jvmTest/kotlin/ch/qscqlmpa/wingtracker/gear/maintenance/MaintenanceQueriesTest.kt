@@ -8,8 +8,8 @@ import ch.qscqlmpa.wingtracker.flights.aFixedClock
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.aWing
 import ch.qscqlmpa.wingtracker.gear.wing.aWingDetails
-import ch.qscqlmpa.wingtracker.settings.AppSettings
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import ch.qscqlmpa.wingtracker.settings.LogbookSettings
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -34,7 +34,7 @@ private fun aFlightOn(
 class MaintenanceQueriesTest {
     private val gear = mockk<MaintainedGearRepository>()
     private val flights = mockk<FlightRepository>()
-    private val settings = mockk<SettingsRepository>().also { coEvery { it.load() } returns AppSettings() }
+    private val settings = mockk<LogbookSettingsRepository>().also { coEvery { it.load() } returns LogbookSettings() }
     private val interval = MaintenanceInterval(months = 12, hours = 100.hours)
     private val skyDancer =
         aWing(

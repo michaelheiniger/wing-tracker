@@ -2,8 +2,8 @@ package ch.qscqlmpa.wingtracker.flights.syride
 
 import ch.qscqlmpa.wingtracker.flights.ExternalReference
 import ch.qscqlmpa.wingtracker.flights.aFlight
-import ch.qscqlmpa.wingtracker.settings.AppSettings
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import ch.qscqlmpa.wingtracker.settings.LogbookSettings
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -16,11 +16,11 @@ private const val PAGE = "https://syride.com/en/pilots/michael/3720061"
 
 class GetSyrideFlightPageTest {
     private val source = mockk<SyrideFlightSource>()
-    private val settings = mockk<SettingsRepository>()
+    private val settings = mockk<LogbookSettingsRepository>()
     private val getSyrideFlightPage = GetSyrideFlightPage(source, settings)
 
     init {
-        coEvery { settings.load() } returns AppSettings(syrideUsername = "michael")
+        coEvery { settings.load() } returns LogbookSettings(syrideUsername = "michael")
         every { source.flightPage("michael", "3720061") } returns PAGE
     }
 
@@ -71,7 +71,7 @@ class GetSyrideFlightPageTest {
         fun `has no page while no Syride account is saved`() =
             runTest {
                 // given
-                coEvery { settings.load() } returns AppSettings()
+                coEvery { settings.load() } returns LogbookSettings()
                 val flight = importedAs(syrideFlightId("3720061"))
 
                 // when

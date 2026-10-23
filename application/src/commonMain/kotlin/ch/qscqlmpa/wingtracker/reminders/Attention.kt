@@ -12,7 +12,8 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceStatus
 import ch.qscqlmpa.wingtracker.gear.maintenance.PlannedCheck
 import ch.qscqlmpa.wingtracker.gear.maintenance.flownOn
 import ch.qscqlmpa.wingtracker.gear.maintenance.maintenanceStatus
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.plus
 
@@ -46,12 +47,13 @@ data class Attention(
 class GetAttention(
     private val gear: MaintainedGearRepository,
     private val flights: FlightRepository,
-    private val settings: SettingsRepository,
+    private val logbookSettings: LogbookSettingsRepository,
+    private val deviceSettings: DeviceSettingsRepository,
     private val clock: AppClock,
 ) {
     suspend operator fun invoke(): Attention {
-        val stored = settings.load()
-        val leadTimes = stored.reminderLeadTimes
+        val leadTimes = logbookSettings.load().reminderLeadTimes
+        val device = deviceSettings.load()
         val today = clock.today()
         val plannedHorizon = today.plus(leadTimes.days, DateTimeUnit.DAY)
         val allFlights = flights.findAll().items
@@ -63,10 +65,10 @@ class GetAttention(
                 val state = status?.state ?: DueState.Ok
                 if (state == DueState.Ok && planned == null) null else item.toAttention(state, status, planned)
             }
-        val lastBackupOn = stored.lastBackupAt?.let { clock.local(it).date }
+        val lastBackupOn = device.lastBackupAt?.let { clock.local(it).date }
         val backup =
             BackupDue(lastBackupOn).takeIf {
-                stored.backupReminder.isDue(
+                device.backupReminder.isDue(
                     lastBackupOn,
                     today,
                     hasData =

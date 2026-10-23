@@ -31,8 +31,8 @@ import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingDetails
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
-import ch.qscqlmpa.wingtracker.settings.AppSettings
-import ch.qscqlmpa.wingtracker.settings.GetAppSettings
+import ch.qscqlmpa.wingtracker.settings.DeviceSettings
+import ch.qscqlmpa.wingtracker.settings.GetDeviceSettings
 import ch.qscqlmpa.wingtracker.settings.SaveDeviceFolder
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.ui.Failure
@@ -100,7 +100,7 @@ class IgcImportPresentersTest {
     private val wings = mockk<WingRepository>().also { coEvery { it.findById(WING_ID) } returns aWing() }
     private val attachments = mockk<AttachmentStore>(relaxUnitFun = true)
     private val picker = mockk<FilePicker>()
-    private val getAppSettings = mockk<GetAppSettings>().also { coEvery { it() } returns AppSettings() }
+    private val getDeviceSettings = mockk<GetDeviceSettings>().also { coEvery { it() } returns DeviceSettings() }
     private val saveDeviceFolder = mockk<SaveDeviceFolder>(relaxUnitFun = true)
     private val reader = mockk<TrackReader>()
     private val opener = mockk<FileOpener>(relaxUnitFun = true)
@@ -138,7 +138,7 @@ class IgcImportPresentersTest {
     @Nested
     inner class ChoosingTheFiles {
         private fun TestScope.importer() =
-            IgcImportPresenter(scope(), picker, "Choose", "Choose folder", getAppSettings, saveDeviceFolder)
+            IgcImportPresenter(scope(), picker, "Choose", "Choose folder", getDeviceSettings, saveDeviceFolder)
 
         @Test
         fun `hands over every chosen file`() =
@@ -261,7 +261,7 @@ class IgcImportPresentersTest {
         fun `opens the folder dialog where the last import came from`() =
             runTest {
                 // given
-                coEvery { getAppSettings() } returns AppSettings(deviceFolder = DEVICE)
+                coEvery { getDeviceSettings() } returns DeviceSettings(deviceFolder = DEVICE)
                 coEvery { picker.pickFolder("Choose folder", "igc", DEVICE) } returns null
 
                 // when

@@ -106,7 +106,7 @@ fun LogbookRoute(
                 platform.filePicker,
                 pickTitle,
                 pickFolderTitle,
-                useCases.getAppSettings,
+                useCases.getDeviceSettings,
                 useCases.saveDeviceFolder,
             )
         }
@@ -216,7 +216,7 @@ private fun AirtimeExport(
         remember {
             AirtimeExportPresenter(scope, airtime.prepare, airtime.export, airtime.saveNick, airtime.token, "").also {
                 it.start()
-                scope.launch { it.suggestNick(useCases.getAppSettings().airtimeNick) }
+                scope.launch { it.suggestNick(useCases.getLogbookSettings().airtimeNick) }
             }
         }
     AirtimeExportDialog(presenter, airtime.pages, onClose)
@@ -285,7 +285,7 @@ private fun importWizard(
             initialUsername = "",
         ).also { syride ->
             // The account used last time is filled in once the settings are read.
-            scope.launch { syride.suggestUsername(useCases.getAppSettings().syrideUsername) }
+            scope.launch { syride.suggestUsername(useCases.getLogbookSettings().syrideUsername) }
         }
     },
     newSpreadsheet = {

@@ -87,7 +87,10 @@ import ch.qscqlmpa.wingtracker.reminders.GetCalendarEntries
 import ch.qscqlmpa.wingtracker.reminders.GetStartNotification
 import ch.qscqlmpa.wingtracker.reminders.MarkStartNotificationShown
 import ch.qscqlmpa.wingtracker.s3.S3CloudStorage
-import ch.qscqlmpa.wingtracker.settings.GetAppSettings
+import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
+import ch.qscqlmpa.wingtracker.settings.GetDeviceSettings
+import ch.qscqlmpa.wingtracker.settings.GetLogbookSettings
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import ch.qscqlmpa.wingtracker.settings.SaveAirtimeNick
 import ch.qscqlmpa.wingtracker.settings.SaveBackupReminder
 import ch.qscqlmpa.wingtracker.settings.SaveDeviceFolder
@@ -95,14 +98,14 @@ import ch.qscqlmpa.wingtracker.settings.SaveInterfaceScale
 import ch.qscqlmpa.wingtracker.settings.SaveReminderLeadTimes
 import ch.qscqlmpa.wingtracker.settings.SaveSyrideUsername
 import ch.qscqlmpa.wingtracker.settings.SaveThemeMode
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import ch.qscqlmpa.wingtracker.spreadsheet.FileSpreadsheetReader
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
 import ch.qscqlmpa.wingtracker.storage.json.FileAttachmentStore
+import ch.qscqlmpa.wingtracker.storage.json.JsonDeviceSettingsRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonFlightRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonHarnessRepository
+import ch.qscqlmpa.wingtracker.storage.json.JsonLogbookSettingsRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonReserveRepository
-import ch.qscqlmpa.wingtracker.storage.json.JsonSettingsRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonUpdatePreferencesRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonWingRepository
 import ch.qscqlmpa.wingtracker.storage.json.ZipBackupArchive
@@ -181,7 +184,8 @@ private fun storageModule(dataDirectory: Path) =
         single<HarnessRepository> { JsonHarnessRepository(dataDirectory) }
         single<ReserveRepository> { JsonReserveRepository(dataDirectory) }
         single<FlightRepository> { JsonFlightRepository(dataDirectory) }
-        single<SettingsRepository> { JsonSettingsRepository(dataDirectory) }
+        single<LogbookSettingsRepository> { JsonLogbookSettingsRepository(dataDirectory) }
+        single<DeviceSettingsRepository> { JsonDeviceSettingsRepository(dataDirectory) }
         single<AttachmentStore> { FileAttachmentStore(dataDirectory) }
         single<MaintainedGearRepository> { CompositeMaintainedGearRepository(get(), get(), get()) }
     }
@@ -268,6 +272,7 @@ private fun flightsModule() =
                 get(),
                 get(),
                 get(),
+                get(),
             )
         }
         factory { GetStatistics(get(), get(), get()) }
@@ -289,32 +294,33 @@ private fun maintenanceModule() =
 
 private fun remindersModule() =
     module {
-        factory { GetAttention(get(), get(), get(), get()) }
+        factory { GetAttention(get(), get(), get(), get(), get()) }
         factory { GetStartNotification(get(), get(), get()) }
         factory { MarkStartNotificationShown(get(), get()) }
         factory { GetCalendarEntries(get(), get(), get()) }
-        factory { GetAppSettings(get()) }
+        factory { GetLogbookSettings(get()) }
+        factory { GetDeviceSettings(get()) }
         factory { SaveReminderLeadTimes(get()) }
         factory { SaveThemeMode(get()) }
         factory { SaveInterfaceScale(get()) }
         factory { SaveSyrideUsername(get()) }
         factory { SaveDeviceFolder(get()) }
         factory { SaveBackupReminder(get()) }
-        single { RemindersUseCases(get(), get(), get(), get(), get()) }
+        single { RemindersUseCases(get(), get(), get(), get(), get(), get()) }
         single { StartupReminder(get(), get(), TrayNotifier()) }
     }
 
 private fun backupModule(dataDirectory: Path) =
     module {
         single<BackupArchive> { ZipBackupArchive(dataDirectory) }
-        factory { GetBackupStatus(get(), get()) }
+        factory { GetBackupStatus(get(), get(), get()) }
         factory { CreateBackup(get(), get(), get(), BuildInfo.VERSION) }
         factory { InspectBackup(get(), get(), BuildInfo.VERSION) }
         factory { RestoreBackup(get()) }
         single<CloudStorage> { S3CloudStorage("wing-tracker/${BuildInfo.VERSION}") }
         factory { SaveCloudStorage(get()) }
         factory { CheckCloudStorage(get()) }
-        factory { UploadBackup(get(), get(), get(), get(), BuildInfo.VERSION) }
+        factory { UploadBackup(get(), get(), get(), get(), get(), BuildInfo.VERSION) }
         single { BackupUseCases(get(), get(), get(), get(), get()) }
         single { CloudStorageUseCases(get(), get(), get()) }
         factory { ListCloudBackups(get(), get(), get()) }

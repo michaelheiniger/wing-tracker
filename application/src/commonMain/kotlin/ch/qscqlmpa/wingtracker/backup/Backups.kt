@@ -1,7 +1,8 @@
 package ch.qscqlmpa.wingtracker.backup
 
 import ch.qscqlmpa.wingtracker.AppClock
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import ch.qscqlmpa.wingtracker.updates.AppVersion
 import kotlinx.datetime.LocalDateTime
 
@@ -14,24 +15,23 @@ data class BackupStatus(
 )
 
 class GetBackupStatus(
-    private val settings: SettingsRepository,
+    private val logbookSettings: LogbookSettingsRepository,
+    private val deviceSettings: DeviceSettingsRepository,
     private val clock: AppClock,
 ) {
-    suspend operator fun invoke(): BackupStatus {
-        val stored = settings.load()
-        return BackupStatus(
-            lastMadeAt = stored.lastBackupAt?.let(clock::local),
+    suspend operator fun invoke(): BackupStatus =
+        BackupStatus(
+            lastMadeAt = deviceSettings.load().lastBackupAt?.let(clock::local),
             // Dated, so backups saved in one folder sort by age and never replace each other by accident.
             suggestedFileName = "wing-tracker-backup-${clock.today()}.zip",
-            cloudStorage = stored.cloudStorage,
+            cloudStorage = logbookSettings.load().cloudStorage,
         )
-    }
 }
 
 /** Backs up all stored data and remembers when, so the pilot can see how old their last backup is (ADR 0031). */
 class CreateBackup(
     private val archive: BackupArchive,
-    private val settings: SettingsRepository,
+    private val settings: DeviceSettingsRepository,
     private val clock: AppClock,
     private val appVersion: String,
 ) {

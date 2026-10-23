@@ -1,14 +1,15 @@
 package ch.qscqlmpa.wingtracker.backup
 
 import ch.qscqlmpa.wingtracker.AppClock
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDateTime
 
 /** Remembers where backups are uploaded to, or forgets it with null; the secret key is the caller's to keep. */
 class SaveCloudStorage(
-    private val settings: SettingsRepository,
+    private val settings: LogbookSettingsRepository,
 ) {
     suspend operator fun invoke(cloud: CloudStorageSettings?) {
         settings.save(settings.load().copy(cloudStorage = cloud))
@@ -52,12 +53,13 @@ data class UploadedBackup(
 class UploadBackup(
     private val archive: BackupArchive,
     private val storage: CloudStorage,
-    private val settings: SettingsRepository,
+    private val logbookSettings: LogbookSettingsRepository,
+    private val deviceSettings: DeviceSettingsRepository,
     private val clock: AppClock,
     private val appVersion: String,
 ) {
     suspend operator fun invoke(secretKey: String): UploadedBackup {
-        val cloud = checkNotNull(settings.load().cloudStorage) { "No cloud storage is set up" }
+        val cloud = checkNotNull(logbookSettings.load().cloudStorage) { "No cloud storage is set up" }
         val target = cloud.target(secretKey)
         val now = clock.now()
         val key = backupKey(clock.local(now))
@@ -71,7 +73,7 @@ class UploadBackup(
             }
         // The backup is in the bucket: a cancel arriving now must not leave it unrecorded or half tidied up.
         return withContext(NonCancellable) {
-            settings.save(settings.load().copy(lastBackupAt = now))
+            deviceSettings.save(deviceSettings.load().copy(lastBackupAt = now))
             try {
                 UploadedBackup(cloud.bucket, key, summary, deleteOldest(target, cloud.keepLast), cleanupProblem = null)
             } catch (e: CloudStorageException) {
@@ -103,7 +105,7 @@ data class CloudBackup(
 /** The backups this application uploaded, newest first, in the pilot's time. */
 class ListCloudBackups(
     private val storage: CloudStorage,
-    private val settings: SettingsRepository,
+    private val settings: LogbookSettingsRepository,
     private val clock: AppClock,
 ) {
     suspend operator fun invoke(secretKey: String): List<CloudBackup> {
@@ -123,7 +125,7 @@ class ListCloudBackups(
 class DownloadCloudBackup(
     private val storage: CloudStorage,
     private val archive: BackupArchive,
-    private val settings: SettingsRepository,
+    private val settings: LogbookSettingsRepository,
 ) {
     suspend operator fun invoke(
         secretKey: String,

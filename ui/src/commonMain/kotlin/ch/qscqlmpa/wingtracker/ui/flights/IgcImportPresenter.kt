@@ -4,7 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
-import ch.qscqlmpa.wingtracker.settings.GetAppSettings
+import ch.qscqlmpa.wingtracker.settings.GetDeviceSettings
 import ch.qscqlmpa.wingtracker.settings.SaveDeviceFolder
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
@@ -20,7 +20,7 @@ class IgcImportPresenter(
     private val filePicker: FilePicker,
     private val pickTitle: String,
     private val pickFolderTitle: String,
-    private val getAppSettings: GetAppSettings,
+    private val getDeviceSettings: GetDeviceSettings,
     private val saveDeviceFolder: SaveDeviceFolder,
 ) {
     var failure by mutableStateOf<Failure?>(null)
@@ -33,7 +33,7 @@ class IgcImportPresenter(
     fun chooseFolder(onChosen: (List<NewAttachment>) -> Unit) =
         collect(onChosen, emptyFolder = FailureKind.NoIgcInFolder) {
             val picked =
-                filePicker.pickFolder(pickFolderTitle, IGC_EXTENSION, getAppSettings().deviceFolder)
+                filePicker.pickFolder(pickFolderTitle, IGC_EXTENSION, getDeviceSettings().deviceFolder)
                     ?: return@collect null
             // Remembered even when it holds no track, so the next try starts in the same place.
             saveDeviceFolder(picked.path)

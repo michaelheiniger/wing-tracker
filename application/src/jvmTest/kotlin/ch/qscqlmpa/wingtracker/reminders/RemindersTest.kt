@@ -17,8 +17,10 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
 import ch.qscqlmpa.wingtracker.gear.maintenance.aHarnessWithInterval
 import ch.qscqlmpa.wingtracker.gear.wing.aWing
 import ch.qscqlmpa.wingtracker.gear.wing.aWingDetails
-import ch.qscqlmpa.wingtracker.settings.AppSettings
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import ch.qscqlmpa.wingtracker.settings.DeviceSettings
+import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
+import ch.qscqlmpa.wingtracker.settings.LogbookSettings
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -65,15 +67,18 @@ private val RECENT_BACKUP = Instant.parse("2026-10-05T18:00:00Z")
 class RemindersTest {
     private val gear = mockk<MaintainedGearRepository>()
     private val flights = mockk<FlightRepository>().also { coEvery { it.findAll() } returns LoadResult(emptyList()) }
-    private val settings = mockk<SettingsRepository>(relaxUnitFun = true)
+    private val logbookSettings = mockk<LogbookSettingsRepository>()
+    private val deviceSettings = mockk<DeviceSettingsRepository>(relaxUnitFun = true)
     private val clock = aFixedClock()
 
     private fun givenGear(
         vararg items: MaintainedGear,
-        appSettings: AppSettings = AppSettings(lastBackupAt = RECENT_BACKUP),
+        logbook: LogbookSettings = LogbookSettings(),
+        device: DeviceSettings = DeviceSettings(lastBackupAt = RECENT_BACKUP),
     ) {
         coEvery { gear.findAll() } returns items.toList()
-        coEvery { settings.load() } returns appSettings
+        coEvery { logbookSettings.load() } returns logbook
+        coEvery { deviceSettings.load() } returns device
     }
 
     private val overdue = aWingWithInterval("w-1", "Overdue", LocalDate(2025, 3, 1))
@@ -89,7 +94,7 @@ class RemindersTest {
                 givenGear(fine, soon, overdue)
 
                 // when
-                val attention = GetAttention(gear, flights, settings, clock)()
+                val attention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock)()
 
                 // then
                 assertThat(attention.items.map { it.name to it.state })
@@ -112,7 +117,7 @@ class RemindersTest {
                 givenGear(withPlan)
 
                 // when
-                val attention = GetAttention(gear, flights, settings, clock)()
+                val attention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock)()
 
                 // then
                 val item = attention.items.single()
@@ -134,7 +139,7 @@ class RemindersTest {
                 givenGear(withPlan)
 
                 // when
-                val attention = GetAttention(gear, flights, settings, clock)()
+                val attention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock)()
 
                 // then
                 assertThat(attention.isEmpty).isTrue()
@@ -154,7 +159,7 @@ class RemindersTest {
                 )
 
                 // when
-                val attention = GetAttention(gear, flights, settings, clock)()
+                val attention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock)()
 
                 // then
                 assertThat(attention.isEmpty).isTrue()
@@ -166,11 +171,11 @@ class RemindersTest {
                 // given
                 givenGear(
                     fine,
-                    appSettings = AppSettings(reminderLeadTimes = ReminderLeadTimes(days = 365, hours = 10.hours)),
+                    logbook = LogbookSettings(reminderLeadTimes = ReminderLeadTimes(days = 365, hours = 10.hours)),
                 )
 
                 // when
-                val attention = GetAttention(gear, flights, settings, clock)()
+                val attention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock)()
 
                 // then
                 assertThat(attention.items.single().state).isEqualTo(DueState.DueSoon)
@@ -183,7 +188,7 @@ class RemindersTest {
                 givenGear(aHarnessWithInterval())
 
                 // when
-                val attention = GetAttention(gear, flights, settings, clock)()
+                val attention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock)()
 
                 // then
                 assertThat(attention.items.single().kind).isEqualTo(GearKind.Harness)
@@ -193,7 +198,12 @@ class RemindersTest {
 
     @Nested
     inner class StartNotificationRules {
-        private fun notification() = GetStartNotification(GetAttention(gear, flights, settings, clock), settings, clock)
+        private fun notification() =
+            GetStartNotification(
+                GetAttention(gear, flights, logbookSettings, deviceSettings, clock),
+                deviceSettings,
+                clock,
+            )
 
         @Test
         fun `summarises what needs attention`() =
@@ -227,7 +237,7 @@ class RemindersTest {
         fun `stays silent when it was already shown today`() =
             runTest {
                 // given
-                givenGear(overdue, appSettings = AppSettings(lastReminderNotificationOn = LocalDate(2026, 10, 11)))
+                givenGear(overdue, device = DeviceSettings(lastReminderNotificationOn = LocalDate(2026, 10, 11)))
 
                 // when
                 val result = notification()()
@@ -240,7 +250,7 @@ class RemindersTest {
         fun `shows again on a later day`() =
             runTest {
                 // given
-                givenGear(overdue, appSettings = AppSettings(lastReminderNotificationOn = LocalDate(2026, 10, 10)))
+                givenGear(overdue, device = DeviceSettings(lastReminderNotificationOn = LocalDate(2026, 10, 10)))
 
                 // when
                 val result = notification()()
@@ -253,17 +263,16 @@ class RemindersTest {
         fun `remembers today as the day it was shown without touching other settings`() =
             runTest {
                 // given
-                coEvery { settings.load() } returns
-                    AppSettings(reminderLeadTimes = ReminderLeadTimes(days = 14, hours = 5.hours))
+                coEvery { deviceSettings.load() } returns DeviceSettings(interfaceScalePercent = 125)
 
                 // when
-                MarkStartNotificationShown(settings, clock)()
+                MarkStartNotificationShown(deviceSettings, clock)()
 
                 // then
                 coVerify(exactly = 1) {
-                    settings.save(
-                        AppSettings(
-                            reminderLeadTimes = ReminderLeadTimes(days = 14, hours = 5.hours),
+                    deviceSettings.save(
+                        DeviceSettings(
+                            interfaceScalePercent = 125,
                             lastReminderNotificationOn = LocalDate(2026, 10, 11),
                         ),
                     )
@@ -287,7 +296,7 @@ class RemindersTest {
                 givenGear(overdue, fine, withPlan)
 
                 // when
-                val export = GetCalendarEntries(gear, settings, clock)()
+                val export = GetCalendarEntries(gear, logbookSettings, clock)()
 
                 // then
                 assertThat(export.entries.map { it.uid to it.date }).containsExactly(
@@ -304,7 +313,7 @@ class RemindersTest {
                 givenGear(overdue)
 
                 // when
-                val export = GetCalendarEntries(gear, settings, clock)()
+                val export = GetCalendarEntries(gear, logbookSettings, clock)()
 
                 // then
                 assertThat(export.entries).isEmpty()
@@ -329,7 +338,7 @@ class RemindersTest {
                 givenGear(retired, hoursOnly)
 
                 // when
-                val export = GetCalendarEntries(gear, settings, clock)()
+                val export = GetCalendarEntries(gear, logbookSettings, clock)()
 
                 // then
                 assertThat(export.entries).isEmpty()
@@ -341,11 +350,11 @@ class RemindersTest {
                 // given
                 givenGear(
                     fine,
-                    appSettings = AppSettings(reminderLeadTimes = ReminderLeadTimes(days = 21, hours = 10.hours)),
+                    logbook = LogbookSettings(reminderLeadTimes = ReminderLeadTimes(days = 21, hours = 10.hours)),
                 )
 
                 // when
-                val export = GetCalendarEntries(gear, settings, clock)()
+                val export = GetCalendarEntries(gear, logbookSettings, clock)()
 
                 // then
                 assertThat(export.leadDays).isEqualTo(21)
@@ -367,7 +376,7 @@ class RemindersTest {
                 givenGear(withPlan)
 
                 // when
-                val entry = GetCalendarEntries(gear, settings, clock)().entries.single()
+                val entry = GetCalendarEntries(gear, logbookSettings, clock)().entries.single()
 
                 // then
                 assertThat(entry.kind).isEqualTo(CalendarEntryKind.PlannedCheck)
@@ -383,10 +392,10 @@ class RemindersTest {
         fun `asks for a backup once the last one is as old as the pilot allows`() =
             runTest {
                 // given
-                givenGear(fine, appSettings = AppSettings(lastBackupAt = Instant.parse("2026-09-11T19:30:00Z")))
+                givenGear(fine, device = DeviceSettings(lastBackupAt = Instant.parse("2026-09-11T19:30:00Z")))
 
                 // when
-                val attention = GetAttention(gear, flights, settings, clock)()
+                val attention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock)()
 
                 // then
                 assertThat(attention.backup).isEqualTo(BackupDue(LocalDate(2026, 9, 11)))
@@ -398,10 +407,10 @@ class RemindersTest {
         fun `stays quiet the day before`() =
             runTest {
                 // given
-                givenGear(fine, appSettings = AppSettings(lastBackupAt = Instant.parse("2026-09-12T08:00:00Z")))
+                givenGear(fine, device = DeviceSettings(lastBackupAt = Instant.parse("2026-09-12T08:00:00Z")))
 
                 // when
-                val attention = GetAttention(gear, flights, settings, clock)()
+                val attention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock)()
 
                 // then
                 assertThat(attention.backup).isNull()
@@ -411,10 +420,10 @@ class RemindersTest {
         fun `asks for a first backup once something is stored`() =
             runTest {
                 // given
-                givenGear(fine, appSettings = AppSettings())
+                givenGear(fine, device = DeviceSettings())
 
                 // when
-                val attention = GetAttention(gear, flights, settings, clock)()
+                val attention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock)()
 
                 // then
                 assertThat(attention.backup).isEqualTo(BackupDue(lastMadeOn = null))
@@ -424,10 +433,10 @@ class RemindersTest {
         fun `does not ask a fresh installation with nothing to lose`() =
             runTest {
                 // given
-                givenGear(appSettings = AppSettings())
+                givenGear(device = DeviceSettings())
 
                 // when
-                val attention = GetAttention(gear, flights, settings, clock)()
+                val attention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock)()
 
                 // then
                 assertThat(attention.isEmpty).isTrue()
@@ -437,10 +446,10 @@ class RemindersTest {
         fun `does not ask when the pilot turned the reminder off`() =
             runTest {
                 // given
-                givenGear(fine, appSettings = AppSettings(backupReminder = BackupReminder(enabled = false)))
+                givenGear(fine, device = DeviceSettings(backupReminder = BackupReminder(enabled = false)))
 
                 // when
-                val attention = GetAttention(gear, flights, settings, clock)()
+                val attention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock)()
 
                 // then
                 assertThat(attention.backup).isNull()
@@ -452,15 +461,15 @@ class RemindersTest {
                 // given
                 givenGear(
                     fine,
-                    appSettings =
-                        AppSettings(
+                    device =
+                        DeviceSettings(
                             lastBackupAt = RECENT_BACKUP,
                             backupReminder = BackupReminder(enabled = true, days = 6),
                         ),
                 )
 
                 // when
-                val attention = GetAttention(gear, flights, settings, clock)()
+                val attention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock)()
 
                 // then
                 assertThat(attention.backup).isEqualTo(BackupDue(LocalDate(2026, 10, 5)))
@@ -470,11 +479,11 @@ class RemindersTest {
         fun `is part of the start-up notification even when all gear is fine`() =
             runTest {
                 // given
-                givenGear(fine, appSettings = AppSettings())
-                val getAttention = GetAttention(gear, flights, settings, clock)
+                givenGear(fine, device = DeviceSettings())
+                val getAttention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock)
 
                 // when
-                val notification = GetStartNotification(getAttention, settings, clock)()
+                val notification = GetStartNotification(getAttention, deviceSettings, clock)()
 
                 // then
                 assertThat(notification)

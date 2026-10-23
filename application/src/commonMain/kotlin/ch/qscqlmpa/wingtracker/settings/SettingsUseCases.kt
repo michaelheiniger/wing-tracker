@@ -8,7 +8,7 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
  * reminders and the other way round.
  */
 class SaveThemeMode(
-    private val settings: SettingsRepository,
+    private val settings: LogbookSettingsRepository,
 ) {
     suspend operator fun invoke(mode: ThemeMode) {
         settings.save(settings.load().copy(themeMode = mode))
@@ -16,7 +16,7 @@ class SaveThemeMode(
 }
 
 class SaveReminderLeadTimes(
-    private val settings: SettingsRepository,
+    private val settings: LogbookSettingsRepository,
 ) {
     suspend operator fun invoke(leadTimes: ReminderLeadTimes) {
         settings.save(settings.load().copy(reminderLeadTimes = leadTimes))
@@ -24,7 +24,7 @@ class SaveReminderLeadTimes(
 }
 
 class SaveBackupReminder(
-    private val settings: SettingsRepository,
+    private val settings: DeviceSettingsRepository,
 ) {
     suspend operator fun invoke(reminder: BackupReminder) {
         settings.save(settings.load().copy(backupReminder = reminder))
@@ -32,7 +32,7 @@ class SaveBackupReminder(
 }
 
 class SaveInterfaceScale(
-    private val settings: SettingsRepository,
+    private val settings: DeviceSettingsRepository,
 ) {
     /** [percent] is null to follow the desktop's scaling. */
     suspend operator fun invoke(percent: Int?) {
@@ -41,7 +41,7 @@ class SaveInterfaceScale(
 }
 
 class SaveDeviceFolder(
-    private val settings: SettingsRepository,
+    private val settings: DeviceSettingsRepository,
 ) {
     suspend operator fun invoke(folder: String) {
         settings.save(settings.load().copy(deviceFolder = folder.trim().ifEmpty { null }))
@@ -49,7 +49,7 @@ class SaveDeviceFolder(
 }
 
 class SaveAirtimeNick(
-    private val settings: SettingsRepository,
+    private val settings: LogbookSettingsRepository,
 ) {
     suspend operator fun invoke(nick: String) {
         settings.save(settings.load().copy(airtimeNick = nick.trim().ifEmpty { null }))
@@ -57,7 +57,7 @@ class SaveAirtimeNick(
 }
 
 class SaveSyrideUsername(
-    private val settings: SettingsRepository,
+    private val settings: LogbookSettingsRepository,
 ) {
     suspend operator fun invoke(username: String) {
         settings.save(settings.load().copy(syrideUsername = username.trim().ifEmpty { null }))

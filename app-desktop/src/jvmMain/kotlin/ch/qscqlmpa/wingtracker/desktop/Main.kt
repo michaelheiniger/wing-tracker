@@ -25,9 +25,10 @@ import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.ui.window.rememberWindowState
+import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import ch.qscqlmpa.wingtracker.settings.SaveInterfaceScale
 import ch.qscqlmpa.wingtracker.settings.SaveThemeMode
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
 import ch.qscqlmpa.wingtracker.statistics.GetStatistics
 import ch.qscqlmpa.wingtracker.ui.backup.BackupUseCases
 import ch.qscqlmpa.wingtracker.ui.backup.CloudRestoreUseCases
@@ -84,9 +85,10 @@ fun main() {
     val koin = startKoin { modules(appModules(dataDirectory, devMode)) }.koin
 
     // Loaded before the first frame so the window never flashes the wrong theme or size.
-    val settings = runBlocking { koin.get<SettingsRepository>().load() }
-    val themePreference = koin.get<ThemePreference>().also { it.mode = settings.themeMode }
-    val scalePreference = InterfaceScalePreference(settings.interfaceScalePercent)
+    val themeMode = runBlocking { koin.get<LogbookSettingsRepository>().load().themeMode }
+    val interfaceScale = runBlocking { koin.get<DeviceSettingsRepository>().load().interfaceScalePercent }
+    val themePreference = koin.get<ThemePreference>().also { it.mode = themeMode }
+    val scalePreference = InterfaceScalePreference(interfaceScale)
     val detectedScale = DesktopScale.detect()
     val jvmScale = jvmScale()
     val initialFactor = DesktopScale.factor(scalePreference.percent, detectedScale, jvmScale)

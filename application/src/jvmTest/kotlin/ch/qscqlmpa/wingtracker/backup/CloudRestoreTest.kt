@@ -1,8 +1,8 @@
 package ch.qscqlmpa.wingtracker.backup
 
 import ch.qscqlmpa.wingtracker.AppClock
-import ch.qscqlmpa.wingtracker.settings.AppSettings
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import ch.qscqlmpa.wingtracker.settings.LogbookSettings
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -40,9 +40,9 @@ class CloudRestoreTest {
     private val storage = mockk<CloudStorage>(relaxUnitFun = true)
     private val archive = mockk<BackupArchive>(relaxUnitFun = true)
     private val settings =
-        mockk<SettingsRepository>().also {
+        mockk<LogbookSettingsRepository>().also {
             coEvery { it.load() } returns
-                AppSettings(cloudStorage = BUCKET)
+                LogbookSettings(cloudStorage = BUCKET)
         }
     private val clock = AppClock(zone = TimeZone.of("Europe/Zurich"))
 

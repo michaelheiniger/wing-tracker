@@ -5,7 +5,7 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.CheckType
 import ch.qscqlmpa.wingtracker.gear.maintenance.GearKind
 import ch.qscqlmpa.wingtracker.gear.maintenance.MaintainedGearRepository
 import ch.qscqlmpa.wingtracker.gear.maintenance.maintenanceStatus
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
 
@@ -37,7 +37,7 @@ data class CalendarEntries(
  */
 class GetCalendarEntries(
     private val gear: MaintainedGearRepository,
-    private val settings: SettingsRepository,
+    private val settings: LogbookSettingsRepository,
     private val clock: AppClock,
 ) {
     suspend operator fun invoke(): CalendarEntries {

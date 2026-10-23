@@ -8,9 +8,9 @@ import ch.qscqlmpa.wingtracker.backup.CloudStorageException
 import ch.qscqlmpa.wingtracker.backup.CloudStorageSettings
 import ch.qscqlmpa.wingtracker.backup.CloudTarget
 import ch.qscqlmpa.wingtracker.backup.SaveCloudStorage
-import ch.qscqlmpa.wingtracker.settings.AppSettings
-import ch.qscqlmpa.wingtracker.settings.GetAppSettings
-import ch.qscqlmpa.wingtracker.settings.SettingsRepository
+import ch.qscqlmpa.wingtracker.settings.GetLogbookSettings
+import ch.qscqlmpa.wingtracker.settings.LogbookSettings
+import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.CredentialStore
@@ -42,7 +42,7 @@ private val BUCKET =
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CloudStoragePresenterTest {
-    private val settings = mockk<SettingsRepository>(relaxUnitFun = true)
+    private val settings = mockk<LogbookSettingsRepository>(relaxUnitFun = true)
     private val storage = mockk<CloudStorage>(relaxUnitFun = true)
     private val credentials = mockk<CredentialStore>(relaxUnitFun = true)
     private var changed = 0
@@ -50,7 +50,7 @@ class CloudStoragePresenterTest {
     private fun TestScope.presenter() =
         CloudStoragePresenter(
             TestScope(UnconfinedTestDispatcher(testScheduler)),
-            CloudStorageUseCases(GetAppSettings(settings), SaveCloudStorage(settings), CheckCloudStorage(storage)),
+            CloudStorageUseCases(GetLogbookSettings(settings), SaveCloudStorage(settings), CheckCloudStorage(storage)),
             CloudSecret(credentials),
         ) { changed++ }
 
@@ -58,7 +58,7 @@ class CloudStoragePresenterTest {
         cloud: CloudStorageSettings?,
         secret: String?,
     ) {
-        coEvery { settings.load() } returns AppSettings(cloudStorage = cloud)
+        coEvery { settings.load() } returns LogbookSettings(cloudStorage = cloud)
         coEvery { credentials.read(STORE_KEY) } returns secret
     }
 
@@ -140,7 +140,7 @@ class CloudStoragePresenterTest {
 
                 // then
                 coVerify(exactly = 1) { credentials.write(STORE_KEY, SECRET) }
-                coVerify(exactly = 1) { settings.save(AppSettings(cloudStorage = BUCKET)) }
+                coVerify(exactly = 1) { settings.save(LogbookSettings(cloudStorage = BUCKET)) }
                 assertThat(presenter.outcome).isEqualTo(CloudStorageOutcome.Saved(SecretKeeping.System))
                 assertThat(presenter.input.secretKey).isEmpty()
                 assertThat(presenter.stored).isEqualTo(BUCKET)
@@ -228,7 +228,7 @@ class CloudStoragePresenterTest {
                 presenter.remove()
 
                 // then
-                coVerify(exactly = 1) { settings.save(AppSettings(cloudStorage = null)) }
+                coVerify(exactly = 1) { settings.save(LogbookSettings(cloudStorage = null)) }
                 coVerify(exactly = 1) { credentials.delete(STORE_KEY) }
                 assertThat(presenter.stored).isNull()
                 assertThat(presenter.input).isEqualTo(CloudStorageInput())

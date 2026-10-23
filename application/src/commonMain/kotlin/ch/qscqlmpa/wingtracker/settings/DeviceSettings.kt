@@ -1,29 +1,20 @@
 package ch.qscqlmpa.wingtracker.settings
 
 import ch.qscqlmpa.wingtracker.backup.BackupReminder
-import ch.qscqlmpa.wingtracker.backup.CloudStorageSettings
-import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
 import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
 
-data class AppSettings(
-    val themeMode: ThemeMode = ThemeMode.System,
-    val reminderLeadTimes: ReminderLeadTimes = ReminderLeadTimes.DEFAULT,
+/** Settings that belong to this device, never synchronised with the logbook (ADR 0033). */
+data class DeviceSettings(
     // Remembered so the start-up notification appears at most once per day, however often the app is started.
     val lastReminderNotificationOn: LocalDate? = null,
     // Null means "follow the desktop's scaling"; a number is a fixed size in percent.
     val interfaceScalePercent: Int? = null,
-    // Remembered so the next import from Syride starts with the same account.
-    val syrideUsername: String? = null,
-    // Remembered so the next export to air-time compares with the same pilot's flights there (ADR 0029).
-    val airtimeNick: String? = null,
     // Remembered so the next import from a device opens the folder chooser where the logger was last found.
     val deviceFolder: String? = null,
-    // Remembered so the pilot can see how old their last backup is (ADR 0031).
+    // Remembered so the pilot can see how old this device's last backup is (ADR 0031).
     val lastBackupAt: Instant? = null,
     val backupReminder: BackupReminder = BackupReminder(),
-    // Null until the pilot sets up a bucket to upload backups to (ADR 0032).
-    val cloudStorage: CloudStorageSettings? = null,
 ) {
     init {
         require(interfaceScalePercent == null || interfaceScalePercent in MIN_SCALE_PERCENT..MAX_SCALE_PERCENT) {
