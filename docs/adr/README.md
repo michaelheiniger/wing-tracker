@@ -39,6 +39,7 @@ ADRs capture **why** wing-tracker is built the way it is. They use the
 | [0030](0030-site-names-are-kept-per-source.md) | Site names are kept per source | Accepted |
 | [0031](0031-backups-are-archives-of-the-data-folder.md) | Backups are archives of the data folder, restored into a new folder | Accepted |
 | [0032](0032-backups-are-uploaded-to-s3-compatible-storage.md) | Backups are uploaded to S3-compatible storage through a port, signed by the application | Accepted |
+| [0033](0033-logbook-sync-through-git.md) | The logbook is synchronised between devices through a Git repository | Accepted |
 
 ## Rules
 
