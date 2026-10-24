@@ -9,6 +9,7 @@ import ch.qscqlmpa.wingtracker.sync.SyncedRecord
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Constants
 import org.eclipse.jgit.revwalk.RevCommit
+import org.eclipse.jgit.transport.RefSpec
 import org.eclipse.jgit.treewalk.TreeWalk
 import java.io.File
 import java.nio.file.Path
@@ -79,37 +80,31 @@ class OtherDevice(
     remote: SyncRemote,
     private val directory: Path,
 ) {
-    private val git =
-        Git
-            .cloneRepository()
-            .setURI(remote.url)
-            .setDirectory(directory.toFile())
-            .setBranch("main")
-            .call()
-
-    fun deleteAndPush(path: String) {
-        directory.resolve(path).toFile().delete()
-        git.rm().addFilepattern(path).call()
-        git
-            .commit()
-            .setMessage("Delete from the other device")
-            .setAuthor(OTHER_DEVICE.name, OTHER_DEVICE.email)
-            .call()
-        git
-            .push()
-            .setRefSpecs(
-                org.eclipse.jgit.transport
-                    .RefSpec("HEAD:refs/heads/main"),
-            ).call()
+    init {
+        clone(remote, directory)
     }
+
+    fun deleteAndPush(path: String) =
+        withGit(directory) { git ->
+            directory.resolve(path).toFile().delete()
+            git.rm().addFilepattern(path).call()
+            commitAndPush(git, "Delete from the other device")
+        }
 
     fun commitAndPush(
         path: String,
         content: String,
         message: String = "Log flight from the other device",
-    ) {
+    ) = withGit(directory) { git ->
         directory.store(path, content)
         git.add().addFilepattern(".").call()
+        commitAndPush(git, message)
+    }
+
+    private fun commitAndPush(
+        git: Git,
+        message: String,
+    ) {
         git
             .commit()
             .setMessage(message)
@@ -118,32 +113,43 @@ class OtherDevice(
         // A clone of an empty repository starts on JGit's default branch, so the branch is named.
         git
             .push()
-            .setRefSpecs(
-                org.eclipse.jgit.transport
-                    .RefSpec("HEAD:refs/heads/main"),
-            ).call()
+            .setRefSpecs(RefSpec("HEAD:refs/heads/main"))
+            .call()
     }
 }
 
 /** What the remote holds, read as a fresh clone would see it. */
 class RemoteContent(
     remote: SyncRemote,
-    directory: Path,
+    private val directory: Path,
 ) {
-    private val git =
-        Git
-            .cloneRepository()
-            .setURI(remote.url)
-            .setDirectory(directory.toFile())
-            .setBranch("main")
-            .call()
+    init {
+        clone(remote, directory)
+    }
 
-    fun files(): List<String> = git.repository.filesAt(Constants.HEAD)
+    fun files(): List<String> = withGit(directory) { it.repository.filesAt(Constants.HEAD) }
 
-    fun read(path: String): String = File(git.repository.workTree, path).readText()
+    fun read(path: String): String = directory.resolve(path).toFile().readText()
 
-    fun commits(): List<RevCommit> = git.log().call().toList()
+    fun commits(): List<RevCommit> = withGit(directory) { it.log().call().toList() }
 }
+
+private fun clone(
+    remote: SyncRemote,
+    directory: Path,
+) = Git
+    .cloneRepository()
+    .setURI(remote.url)
+    .setDirectory(directory.toFile())
+    .setBranch("main")
+    .call()
+    .close()
+
+// Opened per use and closed at once: Windows cannot delete a test's folder while a repository in it is still open.
+private fun <T> withGit(
+    directory: Path,
+    action: (Git) -> T,
+): T = Git.open(directory.toFile()).use(action)
 
 fun org.eclipse.jgit.lib.Repository.filesAt(revision: String): List<String> {
     val tree = parseCommit(resolve(revision)).tree

@@ -14,6 +14,8 @@ import ch.qscqlmpa.wingtracker.sync.SyncedRecord
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.storage.file.WindowCacheConfig
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -40,6 +42,12 @@ class GitLogbookTest {
         dataFolder = Files.createDirectories(root.resolve("data"))
         remote = aRemote(root.resolve("remote.git"))
         logbook = GitLogbook(dataFolder, TestLayout(dataFolder), 10.seconds)
+    }
+
+    // JGit keeps pack files open in a cache of its own after a repository is closed; Windows cannot delete them then.
+    @AfterEach
+    fun releasePackFiles() {
+        WindowCacheConfig().install()
     }
 
     private fun remoteContent(name: String = "check") = RemoteContent(remote, root.resolve(name))
