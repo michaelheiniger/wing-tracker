@@ -21,6 +21,7 @@ internal data class DeviceSettingsDocument(
     // Also schema 1, which no release has used yet: where the logbook is synchronised to (ADR 0033).
     val sync: SyncSettingsDocument? = null,
     val lastSyncedAt: String? = null,
+    val syncAtStartAndClose: Boolean = true,
 ) {
     fun toDomain(): DeviceSettings =
         DeviceSettings(
@@ -31,6 +32,7 @@ internal data class DeviceSettingsDocument(
             backupReminder = BackupReminder(backupReminderEnabled, backupReminderDays),
             sync = sync?.toDomain(),
             lastSyncedAt = lastSyncedAt?.let(Instant::parse),
+            syncAtStartAndClose = syncAtStartAndClose,
         )
 
     companion object {
@@ -46,6 +48,7 @@ internal data class DeviceSettingsDocument(
                 backupReminderDays = settings.backupReminder.days,
                 sync = settings.sync?.let(SyncSettingsDocument::from),
                 lastSyncedAt = settings.lastSyncedAt?.toString(),
+                syncAtStartAndClose = settings.syncAtStartAndClose,
             )
     }
 }

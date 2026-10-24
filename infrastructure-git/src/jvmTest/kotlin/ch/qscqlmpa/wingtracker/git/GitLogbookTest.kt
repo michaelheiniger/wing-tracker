@@ -20,6 +20,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.readText
+import kotlin.time.Duration.Companion.seconds
 
 private val FLIGHT = FlightId("f-2026-09-20")
 
@@ -35,7 +36,7 @@ class GitLogbookTest {
     fun setUp() {
         dataFolder = Files.createDirectories(root.resolve("data"))
         remote = aRemote(root.resolve("remote.git"))
-        logbook = GitLogbook(dataFolder, TestLayout(dataFolder))
+        logbook = GitLogbook(dataFolder, TestLayout(dataFolder), 10.seconds)
     }
 
     private fun remoteContent(name: String = "check") = RemoteContent(remote, root.resolve(name))

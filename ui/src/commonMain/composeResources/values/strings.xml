@@ -988,4 +988,12 @@
     <string name="sync_join_restart_body">The logbook from the repository is in %1$s. Wing Tracker restarts now to use it; the logbook of this computer stays in %2$s.</string>
     <string name="failure_join_logbook">The logbook could not be copied: %1$s</string>
     <string name="failure_sync_not_a_logbook">This repository holds no Wing Tracker logbook, so nothing was copied. Check its address, or connect an empty repository to start synchronising the logbook of this computer.</string>
+    <string name="sync_automatic">Sync when the app starts and closes</string>
+    <string name="sync_automatic_hint">Turn off to sync only with Sync now, for example on a slow connection.</string>
+    <string name="sync_start_running">Synchronising with your other computers…</string>
+    <string name="sync_skip">Skip</string>
+    <string name="sync_start_stopped">Not synchronised</string>
+    <string name="sync_continue">Continue</string>
+    <string name="sync_close_title">Synchronising before closing</string>
+    <string name="sync_close_without">Close without syncing</string>
 </resources>

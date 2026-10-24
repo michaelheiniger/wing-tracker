@@ -4,10 +4,14 @@ import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
 import kotlinx.datetime.LocalDateTime
 
-/** [settings] is null until this device is connected; [lastSyncedAt] is in the pilot's time. */
+/**
+ * [settings] is null until this device is connected; [lastSyncedAt] is in the pilot's time. [automatic] tells
+ * whether the app syncs when it starts and closes, which only a connected device does.
+ */
 data class SyncStatus(
     val settings: SyncSettings?,
     val lastSyncedAt: LocalDateTime?,
+    val automatic: Boolean = false,
 )
 
 class GetSyncStatus(
@@ -19,7 +23,19 @@ class GetSyncStatus(
         val device = deviceSettings.load()
         // Both are needed: settings without a repository on disk mean the data folder was replaced since.
         val connected = device.sync?.takeIf { sync.isConnected() }
-        return SyncStatus(connected, device.lastSyncedAt?.takeIf { connected != null }?.let(clock::local))
+        return SyncStatus(
+            connected,
+            device.lastSyncedAt?.takeIf { connected != null }?.let(clock::local),
+            automatic = connected != null && device.syncAtStartAndClose,
+        )
+    }
+}
+
+class SaveAutomaticSync(
+    private val deviceSettings: DeviceSettingsRepository,
+) {
+    suspend operator fun invoke(enabled: Boolean) {
+        deviceSettings.save(deviceSettings.load().copy(syncAtStartAndClose = enabled))
     }
 }
 

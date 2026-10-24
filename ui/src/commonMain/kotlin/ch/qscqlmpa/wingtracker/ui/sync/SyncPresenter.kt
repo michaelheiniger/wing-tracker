@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import ch.qscqlmpa.wingtracker.sync.ConnectLogbook
 import ch.qscqlmpa.wingtracker.sync.GetSyncStatus
 import ch.qscqlmpa.wingtracker.sync.JoinLogbook
+import ch.qscqlmpa.wingtracker.sync.SaveAutomaticSync
 import ch.qscqlmpa.wingtracker.sync.SaveSyncSettings
 import ch.qscqlmpa.wingtracker.sync.SyncException
 import ch.qscqlmpa.wingtracker.sync.SyncLogbook
@@ -32,6 +33,7 @@ class SyncUseCases(
     val saveSyncSettings: SaveSyncSettings,
     val syncLogbook: SyncLogbook,
     val joinLogbook: JoinLogbook,
+    val saveAutomaticSync: SaveAutomaticSync,
 )
 
 private const val TOKEN_KEY = "sync-token"
@@ -129,8 +131,28 @@ class SyncPresenter(
     fun save() {
         // A token is needed to connect, even when one is still kept from before.
         val valid = validated(tokenStored = tokenStored && connected) ?: return
-        if (connected) saveSettings(valid) else connect(valid)
+        if (!connected) {
+            connect(valid)
+            return
+        }
+        attempt(FailureKind.SaveSettings) {
+            val settings = valid.settings
+            useCases.saveSyncSettings(settings.username, settings.authorName, settings.authorEmail)
+            val keeping = valid.token?.let { secret.keep(it) }
+            status = useCases.getSyncStatus()
+            tokenStored = true
+            editing = false
+            input = storedForm
+            outcome = SyncOutcome.Saved(keeping)
+        }
     }
+
+    /** Turns syncing when the app starts and closes on or off; it applies from the next start or close. */
+    fun changeAutomatic(enabled: Boolean) =
+        attempt(FailureKind.SaveSettings) {
+            useCases.saveAutomaticSync(enabled)
+            status = useCases.getSyncStatus()
+        }
 
     fun syncNow() {
         running =
@@ -189,18 +211,6 @@ class SyncPresenter(
                 }
             }
     }
-
-    private fun saveSettings(valid: SyncFormResult.Valid) =
-        attempt(FailureKind.SaveSettings) {
-            val settings = valid.settings
-            useCases.saveSyncSettings(settings.username, settings.authorName, settings.authorEmail)
-            val keeping = valid.token?.let { secret.keep(it) }
-            status = useCases.getSyncStatus()
-            tokenStored = true
-            editing = false
-            input = storedForm
-            outcome = SyncOutcome.Saved(keeping)
-        }
 
     private val storedForm: SyncInput get() = status?.settings?.let(SyncInput::from) ?: SyncInput()
 

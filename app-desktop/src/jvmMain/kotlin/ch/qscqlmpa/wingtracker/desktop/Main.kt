@@ -42,6 +42,10 @@ import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.reminders.RemindersUseCases
 import ch.qscqlmpa.wingtracker.ui.shell.AppShell
+import ch.qscqlmpa.wingtracker.ui.sync.AutoSyncPresenter
+import ch.qscqlmpa.wingtracker.ui.sync.CloseSyncDialog
+import ch.qscqlmpa.wingtracker.ui.sync.StartSync
+import ch.qscqlmpa.wingtracker.ui.sync.StartSyncScreen
 import ch.qscqlmpa.wingtracker.ui.sync.SyncUseCases
 import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
@@ -53,6 +57,7 @@ import io.github.vinceglb.filekit.FileKit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.supervisorScope
@@ -101,10 +106,15 @@ fun main() {
 
     application {
         var systemDark by remember { mutableStateOf(initialSystemDark) }
+        val autoSync = rememberAutoSync(koin, themePreference)
         LaunchedEffect(Unit) {
             // Supervised, so a failure is shown to the pilot instead of ending the app.
             supervisorScope {
-                launch(errorHandling.coroutineExceptionHandler) { koin.get<StartupReminder>()() }
+                launch(errorHandling.coroutineExceptionHandler) {
+                    // After the sync at start, so it tells about what other devices sent too.
+                    snapshotFlow { autoSync.start }.first { it == StartSync.Done }
+                    koin.get<StartupReminder>()()
+                }
                 // Followed live, so switching the desktop between light and dark needs no restart.
                 launch(errorHandling.coroutineExceptionHandler) {
                     while (true) {
@@ -128,7 +138,7 @@ fun main() {
             CompositionLocalProvider(
                 LocalWindowExceptionHandlerFactory provides errorHandling.windowExceptionHandlerFactory,
             ) {
-                MainWindow(koin, devMode, windowState, themePreference, scalePreference, themed)
+                MainWindow(koin, devMode, windowState, themePreference, scalePreference, autoSync, themed)
             }
         }
         UnexpectedErrorWindow(
@@ -146,13 +156,14 @@ private fun ApplicationScope.MainWindow(
     state: WindowState,
     themePreference: ThemePreference,
     scalePreference: InterfaceScalePreference,
+    autoSync: AutoSyncPresenter,
     themed: @Composable (@Composable () -> Unit) -> Unit,
 ) {
     Window(
         onCloseRequest = {
-            // A delete the pilot could still have undone must not be lost when the window closes.
+            // A delete the pilot could still have undone must not be lost when the window closes, nor left unsynced.
             runBlocking { koin.get<UndoCoordinator>().flush() }
-            exitApplication()
+            autoSync.close(::exitApplication)
         },
         title = if (devMode) "Wing Tracker (dev)" else "Wing Tracker",
         state = state,
@@ -168,6 +179,11 @@ private fun ApplicationScope.MainWindow(
             snapshotFlow { scalePreference.percent }.drop(1).collect { saveInterfaceScale(it) }
         }
         themed {
+            if (autoSync.closing) CloseSyncDialog(autoSync)
+            if (autoSync.start != StartSync.Done) {
+                StartSyncScreen(autoSync)
+                return@themed
+            }
             AppShell(
                 logbookUseCases = koin.get<LogbookUseCases>(),
                 getStatistics = koin.get<GetStatistics>(),

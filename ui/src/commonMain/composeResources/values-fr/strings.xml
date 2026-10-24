@@ -943,7 +943,7 @@
     <string name="failure_sync_no_repository">Ce dépôt n'existe pas. Vérifie son adresse.</string>
     <string name="failure_sync_not_empty">Ce dépôt n'est pas vide. Connecte-toi à un dépôt vide, ou à un dépôt contenant un carnet pour l'utiliser sur cet ordinateur.</string>
     <string name="failure_sync_unexpected">La synchronisation s'est arrêtée : %1$s. Réessaie.</string>
-    <string name="failure_sync_token_missing">Le jeton d'accès n'est plus gardé. Saisis-le à nouveau avec Modifier… et enregistre.</string>
+    <string name="failure_sync_token_missing">Le jeton d'accès n'est plus gardé. Saisis-le à nouveau avec « Modifier… » et enregistre.</string>
     <plurals name="sync_received">
         <item quantity="one">%1$d modification reçue</item>
         <item quantity="other">%1$d modifications reçues</item>
@@ -988,4 +988,12 @@
     <string name="sync_join_restart_body">Le carnet du dépôt est dans %1$s. Wing Tracker redémarre maintenant pour l'utiliser ; le carnet de cet ordinateur reste dans %2$s.</string>
     <string name="failure_join_logbook">Le carnet n'a pas pu être copié : %1$s</string>
     <string name="failure_sync_not_a_logbook">Ce dépôt ne contient pas de carnet Wing Tracker, rien n'a donc été copié. Vérifie son adresse, ou connecte un dépôt vide pour synchroniser le carnet de cet ordinateur.</string>
+    <string name="sync_automatic">Synchroniser au démarrage et à la fermeture</string>
+    <string name="sync_automatic_hint">Désactive pour ne synchroniser qu'avec « Synchroniser maintenant », par exemple sur une connexion lente.</string>
+    <string name="sync_start_running">Synchronisation avec tes autres ordinateurs…</string>
+    <string name="sync_skip">Passer</string>
+    <string name="sync_start_stopped">Non synchronisé</string>
+    <string name="sync_continue">Continuer</string>
+    <string name="sync_close_title">Synchronisation avant la fermeture</string>
+    <string name="sync_close_without">Fermer sans synchroniser</string>
 </resources>

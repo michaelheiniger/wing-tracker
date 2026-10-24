@@ -19,6 +19,8 @@ data class DeviceSettings(
     // Null until this device synchronises the logbook (ADR 0033).
     val sync: SyncSettings? = null,
     val lastSyncedAt: Instant? = null,
+    // Lets a pilot who is often offline sync by hand only.
+    val syncAtStartAndClose: Boolean = true,
 ) {
     init {
         require(interfaceScalePercent == null || interfaceScalePercent in MIN_SCALE_PERCENT..MAX_SCALE_PERCENT) {

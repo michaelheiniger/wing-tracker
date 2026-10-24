@@ -8,6 +8,7 @@ import ch.qscqlmpa.wingtracker.sync.GetSyncStatus
 import ch.qscqlmpa.wingtracker.sync.JoinLogbook
 import ch.qscqlmpa.wingtracker.sync.LogbookSync
 import ch.qscqlmpa.wingtracker.sync.RecordKind
+import ch.qscqlmpa.wingtracker.sync.SaveAutomaticSync
 import ch.qscqlmpa.wingtracker.sync.SaveSyncSettings
 import ch.qscqlmpa.wingtracker.sync.SyncException
 import ch.qscqlmpa.wingtracker.sync.SyncLogbook
@@ -86,6 +87,7 @@ class SyncPresenterTest {
                 SaveSyncSettings(sync, deviceSettings),
                 SyncLogbook(sync, deviceSettings, clock),
                 JoinLogbook(sync, deviceSettings, clock),
+                SaveAutomaticSync(deviceSettings),
             ),
             SyncSecret(credentials),
             beforeSync = { flushed++ },

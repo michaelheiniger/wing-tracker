@@ -24,6 +24,7 @@ import java.io.File
 import java.nio.file.Path
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
 
 private val logger = KotlinLogging.logger {}
 
@@ -35,9 +36,11 @@ private val logger = KotlinLogging.logger {}
 class GitLogbook(
     dataDirectory: Path,
     private val layout: SyncedFolderLayout,
+    // Bounds every network call, so a silent host never holds up starting or closing the app.
+    private val timeout: Duration,
 ) : LogbookSync,
     LogbookTransactions {
-    private val folder = GitFolder(dataDirectory.toFile(), layout)
+    private val folder = GitFolder(dataDirectory.toFile(), layout, timeout.inWholeSeconds.toInt())
     private val lock = Mutex()
 
     override suspend fun isConnected(): Boolean = withContext(Dispatchers.IO) { folder.isRepository() }
@@ -81,7 +84,7 @@ class GitLogbook(
         remote: SyncRemote,
         author: SyncAuthor,
         folder: String,
-    ) = online { GitFolder(File(folder), layout).cloneFrom(remote, author, this) }
+    ) = online { GitFolder(File(folder), layout, timeout.inWholeSeconds.toInt()).cloneFrom(remote, author, this) }
 
     override suspend fun sync(
         remote: SyncRemote,

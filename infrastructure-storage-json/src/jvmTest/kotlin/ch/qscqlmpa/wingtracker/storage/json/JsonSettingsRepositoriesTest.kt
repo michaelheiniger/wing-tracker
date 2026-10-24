@@ -62,6 +62,7 @@ private val SYNCED_DEVICE =
                 authorEmail = "michael@example.org",
             ),
         lastSyncedAt = Instant.parse("2026-10-20T17:45:00Z"),
+        syncAtStartAndClose = false,
     )
 
 // The same values as LOGBOOK and DEVICE, as the last version before the split wrote them.

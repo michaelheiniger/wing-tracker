@@ -943,7 +943,7 @@
     <string name="failure_sync_no_repository">Dieses Repository gibt es nicht. Prüfe die Adresse.</string>
     <string name="failure_sync_not_empty">Dieses Repository ist nicht leer. Verbinde dich mit einem leeren Repository oder mit einem, das ein Flugbuch enthält, um es auf diesem Computer zu verwenden.</string>
     <string name="failure_sync_unexpected">Die Synchronisation wurde abgebrochen: %1$s. Versuche es erneut.</string>
-    <string name="failure_sync_token_missing">Das Zugriffstoken ist nicht mehr gespeichert. Gib es mit Bearbeiten… erneut ein und speichere.</string>
+    <string name="failure_sync_token_missing">Das Zugriffstoken ist nicht mehr gespeichert. Gib es mit «Bearbeiten…» erneut ein und speichere.</string>
     <plurals name="sync_received">
         <item quantity="one">%1$d Änderung erhalten</item>
         <item quantity="other">%1$d Änderungen erhalten</item>
@@ -988,4 +988,12 @@
     <string name="sync_join_restart_body">Das Flugbuch aus dem Repository ist in %1$s. Wing Tracker startet jetzt neu, um es zu verwenden; das Flugbuch dieses Computers bleibt in %2$s.</string>
     <string name="failure_join_logbook">Das Flugbuch konnte nicht kopiert werden: %1$s</string>
     <string name="failure_sync_not_a_logbook">Dieses Repository enthält kein Flugbuch von Wing Tracker, deshalb wurde nichts kopiert. Prüfe die Adresse, oder verbinde ein leeres Repository, um das Flugbuch dieses Computers zu synchronisieren.</string>
+    <string name="sync_automatic">Beim Starten und Schliessen synchronisieren</string>
+    <string name="sync_automatic_hint">Ausschalten, um nur mit «Jetzt synchronisieren» abzugleichen, zum Beispiel bei einer langsamen Verbindung.</string>
+    <string name="sync_start_running">Wird mit deinen anderen Computern synchronisiert…</string>
+    <string name="sync_skip">Überspringen</string>
+    <string name="sync_start_stopped">Nicht synchronisiert</string>
+    <string name="sync_continue">Weiter</string>
+    <string name="sync_close_title">Synchronisieren vor dem Schliessen</string>
+    <string name="sync_close_without">Ohne Synchronisieren schliessen</string>
 </resources>

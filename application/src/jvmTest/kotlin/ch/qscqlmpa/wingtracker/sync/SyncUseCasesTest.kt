@@ -47,7 +47,23 @@ class SyncUseCasesTest {
                 val status = getSyncStatus()
 
                 // then
-                assertThat(status).isEqualTo(SyncStatus(SETTINGS, LocalDateTime(2026, 10, 20, 17, 45)))
+                assertThat(
+                    status,
+                ).isEqualTo(SyncStatus(SETTINGS, LocalDateTime(2026, 10, 20, 17, 45), automatic = true))
+            }
+
+        @Test
+        fun `does not sync at start and close when the pilot switched it off`() =
+            runTest {
+                // given
+                coEvery { deviceSettings.load() } returns connectedDevice.copy(syncAtStartAndClose = false)
+                coEvery { sync.isConnected() } returns true
+
+                // when
+                val status = getSyncStatus()
+
+                // then
+                assertThat(status.automatic).isFalse()
             }
 
         @Test
@@ -188,6 +204,22 @@ class SyncUseCasesTest {
                     )
                 coVerify(exactly = 1) { sync.changeAuthor(SyncAuthor("Michael H.", "michael@example.ch")) }
                 coVerify(exactly = 1) { deviceSettings.save(connectedDevice.copy(sync = changed)) }
+            }
+    }
+
+    @Nested
+    inner class SavingTheAutomaticSync {
+        @Test
+        fun `switches syncing at start and close off and keeps the other device settings`() =
+            runTest {
+                // given
+                coEvery { deviceSettings.load() } returns connectedDevice
+
+                // when
+                SaveAutomaticSync(deviceSettings)(false)
+
+                // then
+                coVerify(exactly = 1) { deviceSettings.save(connectedDevice.copy(syncAtStartAndClose = false)) }
             }
     }
 

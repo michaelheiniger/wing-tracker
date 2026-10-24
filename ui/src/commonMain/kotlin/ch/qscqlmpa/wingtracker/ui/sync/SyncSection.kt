@@ -102,6 +102,7 @@ fun SyncSection(
             }
             Busy(presenter, Res.string.sync_in_progress)
         }
+        AutomaticSyncSwitch(presenter)
     }
     // While the dialog is open, it shows them itself.
     if (!presenter.editing) Outcome(presenter)
@@ -278,7 +279,7 @@ private fun Outcome(presenter: SyncPresenter) {
 }
 
 @Composable
-private fun SyncOutcome.text(): String =
+internal fun SyncOutcome.text(): String =
     when (this) {
         is SyncOutcome.Connected -> {
             stringResource(

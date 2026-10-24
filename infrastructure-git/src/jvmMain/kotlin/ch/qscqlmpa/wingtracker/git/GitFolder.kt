@@ -40,6 +40,8 @@ private const val ANY_USERNAME = "wing-tracker"
 internal class GitFolder(
     private val folder: File,
     private val layout: SyncedFolderLayout,
+    // How long a host may stay silent before a network call gives up.
+    private val timeoutSeconds: Int,
 ) {
     fun isRepository() = File(folder, Constants.DOT_GIT).isDirectory
 
@@ -72,6 +74,7 @@ internal class GitFolder(
             .setDirectory(folder)
             .setBranch(BRANCH)
             .setCredentialsProvider(remote.credentials())
+            .setTimeout(timeoutSeconds)
             .setProgressMonitor(monitor)
             .call()
             .use { it.configure(author) }
@@ -88,6 +91,7 @@ internal class GitFolder(
             .lsRemoteRepository()
             .setRemote(remote.url)
             .setCredentialsProvider(remote.credentials())
+            .setTimeout(timeoutSeconds)
             .setHeads(true)
             .call()
             .isEmpty()
@@ -141,6 +145,7 @@ internal class GitFolder(
             .setRemote(remote.url)
             .setRefSpecs(RefSpec("+${Constants.R_HEADS}*:$FETCHED_PREFIX*"))
             .setCredentialsProvider(remote.credentials())
+            .setTimeout(timeoutSeconds)
             .setProgressMonitor(monitor)
             .call()
         val local = checkNotNull(git.repository.resolve(BRANCH_REF)) { "The logbook has no commit" }
@@ -165,6 +170,7 @@ internal class GitFolder(
                 .setRemote(remote.url)
                 .setRefSpecs(RefSpec("$BRANCH_REF:$BRANCH_REF"))
                 .setCredentialsProvider(remote.credentials())
+                .setTimeout(timeoutSeconds)
                 .setProgressMonitor(monitor)
                 .call()
         val refused =
