@@ -8,6 +8,9 @@ import java.awt.event.KeyEvent;
  * Coordinates are screen pixels, as in a full screenshot. key takes a KeyEvent name without VK_, e.g. ESCAPE, ENTER.
  */
 public class Drive {
+    private static final String SHIFTED = "~!@#$%^&*()_+{}|:\"<>?";
+    private static final String UNSHIFTED = "`1234567890-=[]\\;',./";
+
     public static void main(String[] args) throws Exception {
         Robot robot = new Robot();
         robot.setAutoDelay(60);
@@ -19,9 +22,12 @@ public class Drive {
                     robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
                 }
                 case "type" -> {
-                    for (char c : args[++i].toCharArray()) {
+                    for (char typed : args[++i].toCharArray()) {
+                        // Xvfb has a US layout: a shifted symbol is typed as Shift and the key below it.
+                        int symbol = SHIFTED.indexOf(typed);
+                        char c = symbol >= 0 ? UNSHIFTED.charAt(symbol) : typed;
                         int code = KeyEvent.getExtendedKeyCodeForChar(c);
-                        boolean shift = Character.isUpperCase(c);
+                        boolean shift = symbol >= 0 || Character.isUpperCase(c);
                         if (shift) robot.keyPress(KeyEvent.VK_SHIFT);
                         robot.keyPress(code);
                         robot.keyRelease(code);
