@@ -45,6 +45,11 @@ private fun syncedFolderLayout(dataDirectory: Path) =
 
         override fun recordAt(path: String) = JsonDataFolder.recordAt(path)
 
+        override fun summary(
+            path: String,
+            version: ByteArray,
+        ) = JsonDataFolder.summary(path, version)
+
         override fun differences(
             path: String,
             here: ByteArray?,

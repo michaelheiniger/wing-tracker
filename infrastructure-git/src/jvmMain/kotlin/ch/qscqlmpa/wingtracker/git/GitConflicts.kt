@@ -43,6 +43,7 @@ internal class GitConflicts(
             val there = git.blobAt(fetched, path)
             SyncConflict(
                 record = layout.recordAt(path),
+                summary = (here ?: there)?.let { layout.summary(path, it) },
                 here = ConflictSide(git.lastChange(base, local, path), deleted = here == null),
                 there = ConflictSide(git.lastChange(base, fetched, path), deleted = there == null),
                 differences = layout.differences(path, here, there),

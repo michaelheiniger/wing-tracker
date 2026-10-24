@@ -2,14 +2,17 @@ package ch.qscqlmpa.wingtracker.storage.json
 
 import ch.qscqlmpa.wingtracker.sync.FieldDifference
 import ch.qscqlmpa.wingtracker.sync.RecordKind
+import ch.qscqlmpa.wingtracker.sync.RecordSummary
 import ch.qscqlmpa.wingtracker.sync.SyncedRecord
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDate
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import kotlin.io.path.exists
+import kotlin.io.path.readBytes
 import kotlin.io.path.writeText
 
 class JsonDataFolderTest {
@@ -80,6 +83,48 @@ class JsonDataFolderTest {
                 SyncedRecord(RecordKind.LogbookSettings, "settings"),
                 SyncedRecord(RecordKind.Other, ".gitignore"),
             )
+        }
+    }
+
+    @Nested
+    inner class Summary {
+        @Test
+        fun `names a piece of gear by its name`() =
+            runTest {
+                // given
+                val wing = aStoredWing()
+                JsonWingRepository(dataDirectory).save(wing)
+                val stored = dataDirectory.resolve("wings/${wing.id.value}.json").readBytes()
+
+                // when
+                val summary = JsonDataFolder.summary("wings/${wing.id.value}.json", stored)
+
+                // then
+                assertThat(summary).isEqualTo(RecordSummary.Gear("Sky Dancer"))
+            }
+
+        @Test
+        fun `names a flight by its date and take-off site`() =
+            runTest {
+                // given
+                val flight = aStoredFlight()
+                JsonFlightRepository(dataDirectory).save(flight)
+                val stored = dataDirectory.resolve("flights/${flight.id.value}.json").readBytes()
+
+                // when
+                val summary = JsonDataFolder.summary("flights/${flight.id.value}.json", stored)
+
+                // then
+                assertThat(summary).isEqualTo(RecordSummary.Flight(LocalDate(2026, 9, 20), "Niederhorn"))
+            }
+
+        @Test
+        fun `has no name for a version it cannot read`() {
+            // given / when
+            val summary = JsonDataFolder.summary("flights/f-1.json", "not json at all".encodeToByteArray())
+
+            // then
+            assertThat(summary).isNull()
         }
     }
 

@@ -1,7 +1,9 @@
 package ch.qscqlmpa.wingtracker.storage.json
 
+import ch.qscqlmpa.wingtracker.gear.maintenance.MaintainedGear
 import ch.qscqlmpa.wingtracker.sync.FieldDifference
 import ch.qscqlmpa.wingtracker.sync.RecordKind
+import ch.qscqlmpa.wingtracker.sync.RecordSummary
 import ch.qscqlmpa.wingtracker.sync.SyncedRecord
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonArray
@@ -57,6 +59,49 @@ object JsonDataFolder {
             }
         return SyncedRecord(kind, id)
     }
+
+    /**
+     * What names the record stored at [path] for the pilot, read the way its repository reads it. A version this
+     * application cannot read, or a file that names nothing, has none.
+     */
+    fun summary(
+        path: String,
+        version: ByteArray,
+    ): RecordSummary? {
+        val text = version.decodeToString()
+        return try {
+            when (recordAt(path).kind) {
+                RecordKind.Wing -> {
+                    gear(decodeDocument<WingDocument>(text, WingDocument.CURRENT_SCHEMA_VERSION).toDomain())
+                }
+
+                RecordKind.Harness -> {
+                    gear(decodeDocument<HarnessDocument>(text, HarnessDocument.CURRENT_SCHEMA_VERSION).toDomain())
+                }
+
+                RecordKind.Reserve -> {
+                    gear(decodeDocument<ReserveDocument>(text, ReserveDocument.CURRENT_SCHEMA_VERSION).toDomain())
+                }
+
+                RecordKind.Flight -> {
+                    val flight = decodeDocument<FlightDocument>(text, FlightDocument.CURRENT_SCHEMA_VERSION).toDomain()
+                    RecordSummary.Flight(flight.details.date, flight.details.takeOffSite.shown)
+                }
+
+                else -> {
+                    null
+                }
+            }
+        } catch (_: UnsupportedSchemaException) {
+            null
+        } catch (_: IllegalArgumentException) {
+            null
+        } catch (_: IllegalStateException) {
+            null
+        }
+    }
+
+    private fun gear(item: MaintainedGear) = RecordSummary.Gear(item.displayName)
 
     /**
      * The fields that differ between two versions of the file at [path], as stored, with nested fields written

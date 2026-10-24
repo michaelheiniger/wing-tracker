@@ -5,6 +5,7 @@ import ch.qscqlmpa.wingtracker.sync.ConflictChoice
 import ch.qscqlmpa.wingtracker.sync.FieldDifference
 import ch.qscqlmpa.wingtracker.sync.LogbookChange
 import ch.qscqlmpa.wingtracker.sync.RecordKind
+import ch.qscqlmpa.wingtracker.sync.RecordSummary
 import ch.qscqlmpa.wingtracker.sync.SyncException
 import ch.qscqlmpa.wingtracker.sync.SyncProblem
 import ch.qscqlmpa.wingtracker.sync.SyncRemote
@@ -421,6 +422,7 @@ class GitLogbookTest {
                 // then
                 val conflict = conflicts.single()
                 assertThat(conflict.record).isEqualTo(record)
+                assertThat(conflict.summary).isEqualTo(RecordSummary.Gear(path))
                 assertThat(conflict.here.change?.author).isEqualTo(PILOT.name)
                 assertThat(conflict.here.change?.description).isEqualTo("Update flight ${FLIGHT.value}")
                 assertThat(conflict.there.change?.author).isEqualTo(OTHER_DEVICE.name)

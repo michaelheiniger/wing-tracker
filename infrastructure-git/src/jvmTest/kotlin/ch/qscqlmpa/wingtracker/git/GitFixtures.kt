@@ -2,6 +2,7 @@ package ch.qscqlmpa.wingtracker.git
 
 import ch.qscqlmpa.wingtracker.sync.FieldDifference
 import ch.qscqlmpa.wingtracker.sync.RecordKind
+import ch.qscqlmpa.wingtracker.sync.RecordSummary
 import ch.qscqlmpa.wingtracker.sync.SyncAuthor
 import ch.qscqlmpa.wingtracker.sync.SyncRemote
 import ch.qscqlmpa.wingtracker.sync.SyncedRecord
@@ -33,6 +34,11 @@ class TestLayout(
         val kind = if (collection == "flights") RecordKind.Flight else RecordKind.Wing
         return SyncedRecord(kind, file.removeSuffix(".json"))
     }
+
+    override fun summary(
+        path: String,
+        version: ByteArray,
+    ) = RecordSummary.Gear(path)
 
     // The whole file as one field: enough to tell the two versions apart here.
     override fun differences(

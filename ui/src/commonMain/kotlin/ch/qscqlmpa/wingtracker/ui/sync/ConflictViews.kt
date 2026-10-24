@@ -24,6 +24,7 @@ import androidx.compose.ui.window.DialogProperties
 import ch.qscqlmpa.wingtracker.sync.ConflictChoice
 import ch.qscqlmpa.wingtracker.sync.ConflictSide
 import ch.qscqlmpa.wingtracker.sync.RecordKind
+import ch.qscqlmpa.wingtracker.sync.RecordSummary
 import ch.qscqlmpa.wingtracker.sync.SyncConflict
 import ch.qscqlmpa.wingtracker.ui.components.AppAlertDialog
 import ch.qscqlmpa.wingtracker.ui.components.AppCard
@@ -35,6 +36,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.sync_apply
 import ch.qscqlmpa.wingtracker.ui.resources.sync_conflict_change
 import ch.qscqlmpa.wingtracker.ui.resources.sync_conflict_deleted
 import ch.qscqlmpa.wingtracker.ui.resources.sync_conflict_difference
+import ch.qscqlmpa.wingtracker.ui.resources.sync_conflict_flight
 import ch.qscqlmpa.wingtracker.ui.resources.sync_conflict_here
 import ch.qscqlmpa.wingtracker.ui.resources.sync_conflict_missing
 import ch.qscqlmpa.wingtracker.ui.resources.sync_conflict_record
@@ -112,7 +114,7 @@ private fun ConflictCard(
                 stringResource(
                     Res.string.sync_conflict_record,
                     stringResource(conflict.record.kind.label()),
-                    conflict.record.id,
+                    conflict.name(),
                 ),
                 style = MaterialTheme.typography.titleSmall,
             )
@@ -165,6 +167,24 @@ private fun Side(
     val text = if (side.deleted) stringResource(Res.string.sync_conflict_deleted) else change.orEmpty()
     Text("${stringResource(label)}: $text", color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
+
+/** The record's name, or its id when its files do not say. */
+@Composable
+private fun SyncConflict.name(): String =
+    when (val summary = summary) {
+        is RecordSummary.Gear -> {
+            summary.name
+        }
+
+        is RecordSummary.Flight -> {
+            val date = summary.date.toDisplay()
+            summary.takeOffSite?.let { stringResource(Res.string.sync_conflict_flight, date, it) } ?: date
+        }
+
+        null -> {
+            record.id
+        }
+    }
 
 /** What keeping each side means when one of them deleted the record. */
 private fun SyncConflict.choiceLabels(): Pair<StringResource, StringResource> =

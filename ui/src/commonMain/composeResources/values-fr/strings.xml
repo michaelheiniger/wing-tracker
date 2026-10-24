@@ -1020,4 +1020,5 @@
     <string name="sync_kind_settings">Réglages du carnet</string>
     <string name="sync_kind_other">Fichier</string>
     <string name="failure_load_conflicts">Les éléments modifiés sur deux ordinateurs n'ont pas pu être lus : %1$s</string>
+    <string name="sync_conflict_flight">%1$s, %2$s</string>
 </resources>

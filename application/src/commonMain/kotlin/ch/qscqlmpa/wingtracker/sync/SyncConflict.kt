@@ -1,10 +1,13 @@
 package ch.qscqlmpa.wingtracker.sync
 
+import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
 
 /** A record changed on this device and on another since the last sync, as the pilot compares the two versions. */
 data class SyncConflict(
     val record: SyncedRecord,
+    // How the pilot knows the record, from this side's version or, where it was deleted here, the other's.
+    val summary: RecordSummary?,
     val here: ConflictSide,
     val there: ConflictSide,
     // Only what differs, as stored; empty for a file that is not a document, such as an attachment.
@@ -32,3 +35,15 @@ data class FieldDifference(
 )
 
 enum class ConflictChoice { Here, There }
+
+/** What names a record for the pilot; the UI words it in the pilot's language. */
+sealed interface RecordSummary {
+    data class Gear(
+        val name: String,
+    ) : RecordSummary
+
+    data class Flight(
+        val date: LocalDate,
+        val takeOffSite: String?,
+    ) : RecordSummary
+}

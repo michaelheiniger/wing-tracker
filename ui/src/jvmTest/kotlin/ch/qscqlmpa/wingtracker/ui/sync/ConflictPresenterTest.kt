@@ -13,6 +13,7 @@ import ch.qscqlmpa.wingtracker.sync.JoinLogbook
 import ch.qscqlmpa.wingtracker.sync.LogbookSync
 import ch.qscqlmpa.wingtracker.sync.RecordChange
 import ch.qscqlmpa.wingtracker.sync.RecordKind
+import ch.qscqlmpa.wingtracker.sync.RecordSummary
 import ch.qscqlmpa.wingtracker.sync.SaveAutomaticSync
 import ch.qscqlmpa.wingtracker.sync.SaveSyncSettings
 import ch.qscqlmpa.wingtracker.sync.SyncConflict
@@ -51,6 +52,7 @@ private val WING = SyncedRecord(RecordKind.Wing, "w-zeno-2")
 private fun aConflict(record: SyncedRecord) =
     SyncConflict(
         record = record,
+        summary = RecordSummary.Gear("Zeno 2"),
         here = ConflictSide(RecordChange("Michael Heiniger", Instant.parse("2026-10-24T08:15:00Z"), "Update"), false),
         there = ConflictSide(RecordChange("Michael Heiniger", Instant.parse("2026-10-24T07:50:00Z"), "Update"), false),
         differences = listOf(FieldDifference("durationMinutes", "100", "120")),
