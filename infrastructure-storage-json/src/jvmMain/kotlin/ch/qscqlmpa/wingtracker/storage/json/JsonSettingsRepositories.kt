@@ -11,14 +11,11 @@ import java.nio.file.Path
 
 private val logger = KotlinLogging.logger {}
 
-private const val LOGBOOK_FILE = "settings"
-private const val DEVICE_FILE = "device-settings"
-
 /** Settings every device synchronised with this logbook shares (ADR 0033). */
 class JsonLogbookSettingsRepository(
     dataDirectory: Path,
 ) : LogbookSettingsRepository {
-    private val settings = SettingsFile(dataDirectory, LOGBOOK_FILE, "Logbook settings")
+    private val settings = SettingsFile(dataDirectory, LOGBOOK_SETTINGS_FILE, "Logbook settings")
 
     override suspend fun load(): LogbookSettings =
         settings.load(LogbookSettings()) {
@@ -33,7 +30,7 @@ class JsonLogbookSettingsRepository(
 class JsonDeviceSettingsRepository(
     dataDirectory: Path,
 ) : DeviceSettingsRepository {
-    private val settings = SettingsFile(dataDirectory, DEVICE_FILE, "Device settings")
+    private val settings = SettingsFile(dataDirectory, DEVICE_SETTINGS_FILE, "Device settings")
 
     override suspend fun load(): DeviceSettings =
         settings.load(DeviceSettings()) {
@@ -99,7 +96,7 @@ private val splitting = Mutex()
 private suspend fun splitLegacySettings(dataDirectory: Path) =
     splitting.withLock {
         val store = JsonDocumentStore(dataDirectory)
-        val text = store.read(LOGBOOK_FILE) ?: return@withLock
+        val text = store.read(LOGBOOK_SETTINGS_FILE) ?: return@withLock
         val legacy =
             try {
                 // A file without a version predates versioning.
@@ -115,7 +112,11 @@ private suspend fun splitLegacySettings(dataDirectory: Path) =
             } catch (_: IllegalStateException) {
                 return@withLock
             }
-        if (store.read(DEVICE_FILE) == null) store.write(DEVICE_FILE, json.encodeToString(legacy.toDevice()))
-        store.write(LOGBOOK_FILE, json.encodeToString(legacy.toLogbook()))
+        if (store.read(DEVICE_SETTINGS_FILE) ==
+            null
+        ) {
+            store.write(DEVICE_SETTINGS_FILE, json.encodeToString(legacy.toDevice()))
+        }
+        store.write(LOGBOOK_SETTINGS_FILE, json.encodeToString(legacy.toLogbook()))
         logger.info { "Split the settings into logbook and device settings" }
     }

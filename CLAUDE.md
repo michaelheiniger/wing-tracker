@@ -25,12 +25,13 @@ Modules by layer (ADR 0004); dependencies point inwards:
 - `infrastructure-igc`: JVM-only adapter for the `TrackReader` port (igc4j, ADR 0018).
 - `infrastructure-syride`: JVM-only adapter for the `SyrideFlightSource` port; reads public Syride pages (ADR 0021).
 - `infrastructure-airtime`: JVM-only adapter for the `AirtimeAccount` port; exports flights through air-time's API (ADR 0029).
+- `infrastructure-git`: JVM-only adapter for the `LogbookSync` and `LogbookTransactions` ports; synchronises the data folder as a Git repository with JGit (ADR 0033).
 - `infrastructure-s3`: JVM-only adapter for the `CloudStorage` port; uploads backups to S3-compatible storage such as MEGA S4, signing requests itself (ADR 0032).
 - `infrastructure-spreadsheet`: JVM-only adapter for the `SpreadsheetReader` port; reads ODS and XLSX logbooks (ADR 0022).
 - `infrastructure-github-releases`: JVM-only adapter for the `ReleaseSource` port; lists published releases for the built-in updater (ADR 0024).
 - `architecture-test`: Konsist rules enforcing the layering.
 
-Bounded contexts (gear, flights, maintenance, plus the supporting `updates` and `backup`) are packages inside each module. Base package equals the Gradle `group` (ADR 0005). Domain and application never reference Koin, Compose or serialization frameworks.
+Bounded contexts (gear, flights, maintenance, plus the supporting `updates`, `backup` and `sync`) are packages inside each module. Base package equals the Gradle `group` (ADR 0005). Domain and application never reference Koin, Compose or serialization frameworks.
 
 Build logic lives in `build-logic` convention plugins (`wingtracker.kmp-module`, `wingtracker.compose`, `wingtracker.quality`). Dependency versions live only in `gradle/libs.versions.toml`.
 

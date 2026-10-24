@@ -49,11 +49,15 @@ import ch.qscqlmpa.wingtracker.ui.resources.settings_scale_hint
 import ch.qscqlmpa.wingtracker.ui.resources.settings_scale_title
 import ch.qscqlmpa.wingtracker.ui.resources.settings_theme
 import ch.qscqlmpa.wingtracker.ui.resources.settings_title
+import ch.qscqlmpa.wingtracker.ui.resources.sync_hint
+import ch.qscqlmpa.wingtracker.ui.resources.sync_title
 import ch.qscqlmpa.wingtracker.ui.resources.theme_dark
 import ch.qscqlmpa.wingtracker.ui.resources.theme_light
 import ch.qscqlmpa.wingtracker.ui.resources.theme_system
 import ch.qscqlmpa.wingtracker.ui.resources.update_rail_badge
 import ch.qscqlmpa.wingtracker.ui.resources.update_title
+import ch.qscqlmpa.wingtracker.ui.sync.SyncPresenter
+import ch.qscqlmpa.wingtracker.ui.sync.SyncSection
 import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import ch.qscqlmpa.wingtracker.ui.updates.UpdateBadge
@@ -78,6 +82,7 @@ fun SettingsScreen(
     backup: BackupPresenter,
     restore: RestorePresenter,
     cloudStorage: CloudStoragePresenter,
+    sync: SyncPresenter,
     dataLocation: DataLocationPresenter,
     logLocation: LogLocationPresenter,
     updates: UpdatePresenter,
@@ -104,6 +109,7 @@ fun SettingsScreen(
                         SettingsCategory.Appearance -> AppearancePage(themePreference, scalePreference)
                         SettingsCategory.Reminders -> RemindersPage(reminders)
                         SettingsCategory.Backup -> BackupPage(backup, restore, cloudStorage)
+                        SettingsCategory.Sync -> SyncPage(sync)
                         SettingsCategory.Files -> FilesPage(dataLocation, logLocation)
                         SettingsCategory.Updates -> UpdatesPage(updates, installer)
                         SettingsCategory.About -> AboutPage(appVersion, updates)
@@ -222,6 +228,11 @@ private fun BackupPage(
 ) {
     SettingsGroup(Res.string.backup_title, Res.string.backup_hint) { BackupSection(backup, restore) }
     SettingsGroup(Res.string.cloud_title, Res.string.cloud_hint) { CloudStorageSection(cloudStorage) }
+}
+
+@Composable
+private fun SyncPage(sync: SyncPresenter) {
+    SettingsGroup(Res.string.sync_title, Res.string.sync_hint) { SyncSection(sync) }
 }
 
 @Composable

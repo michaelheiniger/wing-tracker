@@ -465,7 +465,7 @@
     </plurals>
     <string name="cloud_keep_all">garde toutes les sauvegardes</string>
     <string name="cloud_saved">Enregistré.</string>
-    <string name="cloud_saved_system">Enregistré. La clé secrète est gardée par le trousseau de ton système.</string>
+    <string name="cloud_saved_system">Enregistré. La clé secrète est gardée par le trousseau de mots de passe de ton système.</string>
     <string name="cloud_saved_session">Enregistré. Ton système n'offre pas de trousseau de mots de passe : la clé secrète n'est conservée que jusqu'à la fermeture de l'application. Sous Linux, installe le paquet libsecret-tools pour la conserver.</string>
     <string name="cloud_connected">Connecté : le bucket est accessible avec ces clés.</string>
     <string name="cloud_removed">Retiré. La clé secrète a été oubliée ; les sauvegardes déjà envoyées restent dans le bucket.</string>
@@ -905,4 +905,79 @@
     <string name="forget_export_title">Oublier l'export vers air-time ?</string>
     <string name="forget_export_body">Le vol du %1$s avec %2$s ne sera plus marqué comme envoyé à air-time. Seul ton carnet de vol change : le vol reste sur air-time. Le prochain export le laisse de côté si air-time l'a encore, et l'envoie sinon.</string>
     <string name="forget_export_confirm">Oublier</string>
+    <string name="settings_category_sync">Synchronisation</string>
+    <string name="sync_title">Synchroniser entre appareils</string>
+    <string name="sync_hint">Garde ce carnet identique sur plusieurs ordinateurs grâce à ton propre dépôt Git, par exemple sur GitHub ou Codeberg. Tout est envoyé tel qu'il est enregistré : quiconque a accès au dépôt peut lire ton carnet.</string>
+    <string name="sync_not_connected">Non synchronisé : ce carnet n'est que sur cet ordinateur.</string>
+    <string name="sync_connect_open">Connecter un dépôt…</string>
+    <string name="sync_connect">Connecter</string>
+    <string name="sync_connect_title">Connecter un dépôt</string>
+    <string name="sync_edit_title">Synchronisation</string>
+    <string name="sync_edit">Modifier…</string>
+    <string name="sync_now">Synchroniser maintenant</string>
+    <string name="sync_in_progress">Synchronisation…</string>
+    <string name="sync_connecting">Connexion…</string>
+    <string name="sync_last">Dernière synchronisation : %1$s</string>
+    <string name="field_sync_repository">Dépôt (https://…)</string>
+    <string name="sync_repository_hint">Un dépôt vide, créé uniquement pour ce carnet.</string>
+    <string name="field_sync_username">Nom d'utilisateur (facultatif)</string>
+    <string name="sync_username_hint">Certains hébergeurs, comme Codeberg, en ont besoin en plus du jeton.</string>
+    <string name="field_sync_token">Jeton d'accès</string>
+    <string name="sync_token_hint">Un jeton qui peut lire et écrire ce dépôt.</string>
+    <string name="field_sync_author_name">Ton nom</string>
+    <string name="sync_author_hint">Tes modifications sont signées de ton nom et de ton adresse e-mail, qui sont enregistrés dans le dépôt.</string>
+    <string name="field_sync_author_email">Ton adresse e-mail</string>
+    <string name="sync_connected_system">Connecté : ton carnet a été envoyé au dépôt. Le jeton est gardé par le trousseau de mots de passe de ton système.</string>
+    <string name="sync_connected_session">Connecté : ton carnet a été envoyé au dépôt. Ton système n'offre pas de trousseau de mots de passe : le jeton n'est conservé que jusqu'à la fermeture de l'application. Sous Linux, installe le paquet libsecret-tools pour le garder.</string>
+    <string name="sync_saved">Enregistré.</string>
+    <string name="sync_saved_system">Enregistré. Le jeton est gardé par le trousseau de mots de passe de ton système.</string>
+    <string name="sync_saved_session">Enregistré. Ton système n'offre pas de trousseau de mots de passe : le jeton n'est conservé que jusqu'à la fermeture de l'application. Sous Linux, installe le paquet libsecret-tools pour le garder.</string>
+    <string name="sync_up_to_date">Synchronisé : rien de nouveau de part et d'autre.</string>
+    <string name="sync_summary_done">Synchronisé : %1$s, %2$s.</string>
+    <string name="sync_conflicts">Rien n'a été échangé : %1$s ont été modifiés ici et sur un autre appareil. Le choix de la version à garder viendra dans une version ultérieure.</string>
+    <string name="error_email">Saisir une adresse e-mail comme nom@example.org</string>
+    <string name="failure_connect_sync">Le carnet n'a pas pu être connecté : %1$s</string>
+    <string name="failure_sync">Le carnet n'a pas pu être synchronisé : %1$s</string>
+    <string name="failure_sync_unreachable">Le dépôt n'a pas répondu. Réessaie plus tard. (%1$s)</string>
+    <string name="failure_sync_credentials">L'hébergeur a refusé le jeton. Vérifie qu'il peut lire et écrire ce dépôt, et le nom d'utilisateur si ton hébergeur en demande un.</string>
+    <string name="failure_sync_no_repository">Ce dépôt n'existe pas. Vérifie son adresse.</string>
+    <string name="failure_sync_not_empty">Ce dépôt n'est pas vide. Connecte-toi à un dépôt vide créé pour ce carnet. Rejoindre le carnet d'un autre appareil viendra dans une version ultérieure.</string>
+    <string name="failure_sync_unexpected">La synchronisation s'est arrêtée : %1$s. Réessaie.</string>
+    <string name="failure_sync_token_missing">Le jeton d'accès n'est plus gardé. Saisis-le à nouveau avec Modifier… et enregistre.</string>
+    <plurals name="sync_received">
+        <item quantity="one">%1$d modification reçue</item>
+        <item quantity="other">%1$d modifications reçues</item>
+    </plurals>
+    <plurals name="sync_sent">
+        <item quantity="one">%1$d modification envoyée</item>
+        <item quantity="other">%1$d modifications envoyées</item>
+    </plurals>
+    <plurals name="sync_record_wing">
+        <item quantity="one">%1$d voile</item>
+        <item quantity="other">%1$d voiles</item>
+    </plurals>
+    <plurals name="sync_record_harness">
+        <item quantity="one">%1$d sellette</item>
+        <item quantity="other">%1$d sellettes</item>
+    </plurals>
+    <plurals name="sync_record_reserve">
+        <item quantity="one">%1$d secours</item>
+        <item quantity="other">%1$d secours</item>
+    </plurals>
+    <plurals name="sync_record_flight">
+        <item quantity="one">%1$d vol</item>
+        <item quantity="other">%1$d vols</item>
+    </plurals>
+    <plurals name="sync_record_attachment">
+        <item quantity="one">%1$d fichier joint</item>
+        <item quantity="other">%1$d fichiers joints</item>
+    </plurals>
+    <plurals name="sync_record_settings">
+        <item quantity="one">les réglages du carnet</item>
+        <item quantity="other">les réglages du carnet</item>
+    </plurals>
+    <plurals name="sync_record_other">
+        <item quantity="one">%1$d autre fichier</item>
+        <item quantity="other">%1$d autres fichiers</item>
+    </plurals>
 </resources>

@@ -5,6 +5,7 @@ import ch.qscqlmpa.wingtracker.settings.DeviceSettings
 import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
 import ch.qscqlmpa.wingtracker.settings.LogbookSettings
 import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
+import ch.qscqlmpa.wingtracker.sync.UnsyncedTransactions
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
@@ -60,7 +61,8 @@ class UploadBackupTest {
                 },
             zone = TimeZone.of("Europe/Zurich"),
         )
-    private val uploadBackup = UploadBackup(archive, storage, logbookSettings, settings, clock, APP_VERSION)
+    private val uploadBackup =
+        UploadBackup(archive, storage, logbookSettings, settings, clock, APP_VERSION, UnsyncedTransactions)
 
     private fun givenBucket(cloud: CloudStorageSettings = BUCKET) {
         coEvery { logbookSettings.load() } returns LogbookSettings(cloudStorage = cloud)

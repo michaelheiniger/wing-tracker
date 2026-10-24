@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Added
+- Synchronise your logbook between computers through a Git repository of your own, for example on GitHub or Codeberg: connect an empty repository in the settings' new "Sync" page with its address, an access token (kept by your system's password store) and the name and email address your changes are signed with. "Sync now" sends your changes and receives those of your other computers. When the same record was changed on two computers, nothing is exchanged and the page says which records; choosing which version to keep, joining the logbook from another computer and syncing at start and close come in later versions.
+
 ## [0.5.0] - 2026-10-18
 
 ### Added

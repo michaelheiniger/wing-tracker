@@ -10,7 +10,7 @@ import java.nio.file.Path
 class JsonFlightRepository(
     dataDirectory: Path,
 ) : FlightRepository {
-    private val store = JsonDocumentStore.forCollection(dataDirectory, "flights")
+    private val store = JsonDocumentStore.forCollection(dataDirectory, FLIGHTS_FOLDER)
 
     override suspend fun findAll(): LoadResult<Flight> = store.loadAll(::decode)
 

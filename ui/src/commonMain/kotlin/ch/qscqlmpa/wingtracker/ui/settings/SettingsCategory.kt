@@ -6,6 +6,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.settings_category_appearance
 import ch.qscqlmpa.wingtracker.ui.resources.settings_category_backup
 import ch.qscqlmpa.wingtracker.ui.resources.settings_category_files
 import ch.qscqlmpa.wingtracker.ui.resources.settings_category_reminders
+import ch.qscqlmpa.wingtracker.ui.resources.settings_category_sync
 import ch.qscqlmpa.wingtracker.ui.resources.settings_category_updates
 import org.jetbrains.compose.resources.StringResource
 
@@ -16,6 +17,7 @@ enum class SettingsCategory(
     Appearance(Res.string.settings_category_appearance),
     Reminders(Res.string.settings_category_reminders),
     Backup(Res.string.settings_category_backup),
+    Sync(Res.string.settings_category_sync),
     Files(Res.string.settings_category_files),
     Updates(Res.string.settings_category_updates),
     About(Res.string.settings_category_about),

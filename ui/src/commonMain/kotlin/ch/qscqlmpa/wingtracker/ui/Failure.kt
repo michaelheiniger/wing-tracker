@@ -50,6 +50,14 @@ enum class FailureKind {
     CloudUnexpected,
     UploadBackup,
     CloudSecretMissing,
+    ConnectSync,
+    Sync,
+    SyncUnreachable,
+    SyncCredentialsRefused,
+    SyncNoSuchRepository,
+    SyncRemoteNotEmpty,
+    SyncUnexpected,
+    SyncTokenMissing,
     SyrideUserNotFound,
     SyrideUnreachable,
     SyridePagesChanged,
@@ -90,6 +98,7 @@ private val WORTH_RETRYING =
         FailureKind.AirtimeUnreachable,
         FailureKind.UpdateUnreachable,
         FailureKind.CloudUnreachable,
+        FailureKind.SyncUnreachable,
     )
 
 /** Whether doing the same again soon may well succeed, so the screen offers to try again. */

@@ -18,7 +18,7 @@ private val logger = KotlinLogging.logger {}
 class FileAttachmentStore(
     dataDirectory: Path,
 ) : AttachmentStore {
-    private val directory = dataDirectory.resolve("attachments")
+    private val directory = dataDirectory.resolve(ATTACHMENTS_FOLDER)
 
     override suspend fun save(
         id: AttachmentId,

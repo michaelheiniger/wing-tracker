@@ -7,6 +7,7 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
 import ch.qscqlmpa.wingtracker.settings.DeviceSettings
 import ch.qscqlmpa.wingtracker.settings.LogbookSettings
 import ch.qscqlmpa.wingtracker.settings.ThemeMode
+import ch.qscqlmpa.wingtracker.sync.SyncSettings
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import org.assertj.core.api.Assertions.assertThat
@@ -48,6 +49,19 @@ private val DEVICE =
         deviceFolder = "/run/media/michael/SYRIDE1",
         lastBackupAt = Instant.parse("2026-10-18T12:30:00Z"),
         backupReminder = BackupReminder(enabled = false, days = 60),
+    )
+
+// Only a device of today has these: the legacy file cannot hold them.
+private val SYNCED_DEVICE =
+    DEVICE.copy(
+        sync =
+            SyncSettings(
+                repository = "https://codeberg.org/michael/logbook.git",
+                username = "michael",
+                authorName = "Michael Heiniger",
+                authorEmail = "michael@example.org",
+            ),
+        lastSyncedAt = Instant.parse("2026-10-20T17:45:00Z"),
     )
 
 // The same values as LOGBOOK and DEVICE, as the last version before the split wrote them.
@@ -185,13 +199,13 @@ class JsonSettingsRepositoriesTest {
         fun `restores everything saved`() =
             runTest {
                 // given
-                deviceSettings.save(DEVICE)
+                deviceSettings.save(SYNCED_DEVICE)
 
                 // when
                 val settings = deviceSettings.load()
 
                 // then
-                assertThat(settings).usingRecursiveComparison().isEqualTo(DEVICE)
+                assertThat(settings).usingRecursiveComparison().isEqualTo(SYNCED_DEVICE)
             }
 
         @Test

@@ -13,7 +13,7 @@ import java.nio.file.Path
 class JsonHarnessRepository(
     dataDirectory: Path,
 ) : HarnessRepository {
-    private val store = JsonDocumentStore.forCollection(dataDirectory, "harnesses")
+    private val store = JsonDocumentStore.forCollection(dataDirectory, HARNESSES_FOLDER)
 
     override suspend fun findAll(): LoadResult<Harness> = store.loadAll(::decode)
 
@@ -33,7 +33,7 @@ class JsonHarnessRepository(
 class JsonReserveRepository(
     dataDirectory: Path,
 ) : ReserveRepository {
-    private val store = JsonDocumentStore.forCollection(dataDirectory, "reserves")
+    private val store = JsonDocumentStore.forCollection(dataDirectory, RESERVES_FOLDER)
 
     override suspend fun findAll(): LoadResult<Reserve> = store.loadAll(::decode)
 

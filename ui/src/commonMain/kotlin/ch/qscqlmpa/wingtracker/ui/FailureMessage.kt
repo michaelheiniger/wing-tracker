@@ -9,6 +9,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.error_count
 import ch.qscqlmpa.wingtracker.ui.resources.error_currency
 import ch.qscqlmpa.wingtracker.ui.resources.error_date
 import ch.qscqlmpa.wingtracker.ui.resources.error_days
+import ch.qscqlmpa.wingtracker.ui.resources.error_email
 import ch.qscqlmpa.wingtracker.ui.resources.error_endpoint
 import ch.qscqlmpa.wingtracker.ui.resources.error_hours
 import ch.qscqlmpa.wingtracker.ui.resources.error_months
@@ -32,6 +33,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_secret_missing
 import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_unexpected
 import ch.qscqlmpa.wingtracker.ui.resources.failure_cloud_unreachable
 import ch.qscqlmpa.wingtracker.ui.resources.failure_complete_syride_flights
+import ch.qscqlmpa.wingtracker.ui.resources.failure_connect_sync
 import ch.qscqlmpa.wingtracker.ui.resources.failure_create_backup
 import ch.qscqlmpa.wingtracker.ui.resources.failure_data_overlaps
 import ch.qscqlmpa.wingtracker.ui.resources.failure_data_same
@@ -72,6 +74,13 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_save_plan
 import ch.qscqlmpa.wingtracker.ui.resources.failure_save_settings
 import ch.qscqlmpa.wingtracker.ui.resources.failure_spreadsheet_old_format
 import ch.qscqlmpa.wingtracker.ui.resources.failure_spreadsheet_unreadable
+import ch.qscqlmpa.wingtracker.ui.resources.failure_sync
+import ch.qscqlmpa.wingtracker.ui.resources.failure_sync_credentials
+import ch.qscqlmpa.wingtracker.ui.resources.failure_sync_no_repository
+import ch.qscqlmpa.wingtracker.ui.resources.failure_sync_not_empty
+import ch.qscqlmpa.wingtracker.ui.resources.failure_sync_token_missing
+import ch.qscqlmpa.wingtracker.ui.resources.failure_sync_unexpected
+import ch.qscqlmpa.wingtracker.ui.resources.failure_sync_unreachable
 import ch.qscqlmpa.wingtracker.ui.resources.failure_syride_changed
 import ch.qscqlmpa.wingtracker.ui.resources.failure_syride_unreachable
 import ch.qscqlmpa.wingtracker.ui.resources.failure_syride_user
@@ -119,6 +128,14 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.CloudUnexpected to Res.string.failure_cloud_unexpected,
         FailureKind.UploadBackup to Res.string.failure_upload_backup,
         FailureKind.CloudSecretMissing to Res.string.failure_cloud_secret_missing,
+        FailureKind.ConnectSync to Res.string.failure_connect_sync,
+        FailureKind.Sync to Res.string.failure_sync,
+        FailureKind.SyncUnreachable to Res.string.failure_sync_unreachable,
+        FailureKind.SyncCredentialsRefused to Res.string.failure_sync_credentials,
+        FailureKind.SyncNoSuchRepository to Res.string.failure_sync_no_repository,
+        FailureKind.SyncRemoteNotEmpty to Res.string.failure_sync_not_empty,
+        FailureKind.SyncUnexpected to Res.string.failure_sync_unexpected,
+        FailureKind.SyncTokenMissing to Res.string.failure_sync_token_missing,
         FailureKind.SyrideUserNotFound to Res.string.failure_syride_user,
         FailureKind.SyrideUnreachable to Res.string.failure_syride_unreachable,
         FailureKind.SyridePagesChanged to Res.string.failure_syride_changed,
@@ -182,4 +199,5 @@ fun FormError.message(): String =
         FormError.InvalidRegion -> stringResource(Res.string.error_region)
         FormError.InvalidEndpoint -> stringResource(Res.string.error_endpoint)
         FormError.InvalidBackupCount -> stringResource(Res.string.error_backup_count)
+        FormError.InvalidEmail -> stringResource(Res.string.error_email)
     }

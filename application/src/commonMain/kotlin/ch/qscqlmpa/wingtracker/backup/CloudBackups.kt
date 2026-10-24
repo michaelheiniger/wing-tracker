@@ -61,6 +61,7 @@ class UploadBackup(
     private val deviceSettings: DeviceSettingsRepository,
     private val clock: AppClock,
     private val appVersion: String,
+    private val transactions: LogbookTransactions,
 ) {
     suspend operator fun invoke(secretKey: String): UploadedBackup {
         val cloud = checkNotNull(logbookSettings.load().cloudStorage) { "No cloud storage is set up" }
@@ -70,7 +71,14 @@ class UploadBackup(
         val file = archive.temporaryFile(key.substringAfterLast('/'))
         val summary =
             try {
-                archive.create(file, appVersion, now).also { storage.upload(target, key, file) }
+                transactions
+                    .whenIdle {
+                        archive.create(
+                            file,
+                            appVersion,
+                            now,
+                        )
+                    }.also { storage.upload(target, key, file) }
             } finally {
                 // Also when the pilot cancelled, which would otherwise cancel the removal too.
                 withContext(NonCancellable) { archive.discard(file) }

@@ -3,6 +3,7 @@ package ch.qscqlmpa.wingtracker.backup
 import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
 import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
+import ch.qscqlmpa.wingtracker.sync.LogbookTransactions
 import ch.qscqlmpa.wingtracker.updates.AppVersion
 import kotlinx.datetime.LocalDateTime
 
@@ -34,10 +35,11 @@ class CreateBackup(
     private val settings: DeviceSettingsRepository,
     private val clock: AppClock,
     private val appVersion: String,
+    private val transactions: LogbookTransactions,
 ) {
     suspend operator fun invoke(destination: String): BackupSummary {
         val now = clock.now()
-        val summary = archive.create(destination, appVersion, now)
+        val summary = transactions.whenIdle { archive.create(destination, appVersion, now) }
         // Only once the archive is complete: a failed backup must not look like a recent one.
         settings.save(settings.load().copy(lastBackupAt = now))
         return summary

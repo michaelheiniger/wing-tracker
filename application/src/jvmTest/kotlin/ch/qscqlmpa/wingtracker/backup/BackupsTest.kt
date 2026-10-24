@@ -7,6 +7,7 @@ import ch.qscqlmpa.wingtracker.settings.LogbookSettings
 import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import ch.qscqlmpa.wingtracker.sync.LogbookChange
 import ch.qscqlmpa.wingtracker.sync.RecordingTransactions
+import ch.qscqlmpa.wingtracker.sync.UnsyncedTransactions
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -40,7 +41,7 @@ class BackupsTest {
 
     @Nested
     inner class CreateBackupInvoke {
-        private val createBackup = CreateBackup(archive, settings, clock, APP_VERSION)
+        private val createBackup = CreateBackup(archive, settings, clock, APP_VERSION, UnsyncedTransactions)
 
         @Test
         fun `archives the data and remembers when, keeping the other settings`() =

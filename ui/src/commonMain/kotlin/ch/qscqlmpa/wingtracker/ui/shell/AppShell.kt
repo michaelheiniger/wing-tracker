@@ -83,6 +83,9 @@ import ch.qscqlmpa.wingtracker.ui.settings.LogLocationPresenter
 import ch.qscqlmpa.wingtracker.ui.settings.SettingsCategory
 import ch.qscqlmpa.wingtracker.ui.settings.SettingsScreen
 import ch.qscqlmpa.wingtracker.ui.statistics.StatisticsRoute
+import ch.qscqlmpa.wingtracker.ui.sync.SyncPresenter
+import ch.qscqlmpa.wingtracker.ui.sync.SyncSecret
+import ch.qscqlmpa.wingtracker.ui.sync.SyncUseCases
 import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import ch.qscqlmpa.wingtracker.ui.undo.LocalUndo
@@ -118,6 +121,7 @@ fun AppShell(
     backups: BackupUseCases,
     cloudStorageUseCases: CloudStorageUseCases,
     cloudRestoreUseCases: CloudRestoreUseCases,
+    syncUseCases: SyncUseCases,
     updates: UpdateUseCases,
     platform: PlatformServices,
     themePreference: ThemePreference,
@@ -158,6 +162,17 @@ fun AppShell(
             )
         }
     val cloudStorage = remember { CloudStoragePresenter(scope, cloudStorageUseCases, cloudSecret, backup::load) }
+    val sync =
+        remember {
+            SyncPresenter(
+                scope,
+                syncUseCases,
+                SyncSecret(platform.credentialStore),
+                beforeSync = undo::flush,
+                // What other devices sent may need attention; the sections read the rest when opened.
+                onSynced = attentionPresenter::refresh,
+            )
+        }
     val restoreTitles =
         RestoreTitles(stringResource(Res.string.restore_pick_title), stringResource(Res.string.restore_folder_title))
     val restore =
@@ -194,6 +209,7 @@ fun AppShell(
     LaunchedEffect(Unit) { reminderSettings.load() }
     LaunchedEffect(Unit) { backup.load() }
     LaunchedEffect(Unit) { cloudStorage.load() }
+    LaunchedEffect(Unit) { sync.load() }
     // Once per start (ADR 0012 rules out checking in the background).
     LaunchedEffect(Unit) { updatePresenter.start() }
 
@@ -300,6 +316,7 @@ fun AppShell(
                                             backup,
                                             restore,
                                             cloudStorage,
+                                            sync,
                                             dataLocation,
                                             logLocation,
                                             updatePresenter,

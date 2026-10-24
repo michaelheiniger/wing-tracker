@@ -905,4 +905,79 @@
     <string name="forget_export_title">Export nach air-time vergessen?</string>
     <string name="forget_export_body">Der Flug vom %1$s mit %2$s wird nicht mehr als an air-time gesendet markiert. Nur dein Flugbuch ändert sich: Der Flug bleibt auf air-time. Der nächste Export lässt ihn aus, wenn air-time ihn noch hat, und sendet ihn sonst.</string>
     <string name="forget_export_confirm">Vergessen</string>
+    <string name="settings_category_sync">Synchronisation</string>
+    <string name="sync_title">Zwischen Geräten synchronisieren</string>
+    <string name="sync_hint">Halte dieses Flugbuch auf mehreren Computern gleich, über ein eigenes Git-Repository, zum Beispiel bei GitHub oder Codeberg. Alles wird so gesendet, wie es gespeichert ist: Wer Zugriff auf das Repository hat, kann dein Flugbuch lesen.</string>
+    <string name="sync_not_connected">Nicht synchronisiert: Dieses Flugbuch ist nur auf diesem Computer.</string>
+    <string name="sync_connect_open">Repository verbinden…</string>
+    <string name="sync_connect">Verbinden</string>
+    <string name="sync_connect_title">Repository verbinden</string>
+    <string name="sync_edit_title">Synchronisation</string>
+    <string name="sync_edit">Bearbeiten…</string>
+    <string name="sync_now">Jetzt synchronisieren</string>
+    <string name="sync_in_progress">Wird synchronisiert…</string>
+    <string name="sync_connecting">Verbindung wird hergestellt…</string>
+    <string name="sync_last">Zuletzt synchronisiert: %1$s</string>
+    <string name="field_sync_repository">Repository (https://…)</string>
+    <string name="sync_repository_hint">Ein leeres Repository, nur für dieses Flugbuch angelegt.</string>
+    <string name="field_sync_username">Benutzername (optional)</string>
+    <string name="sync_username_hint">Manche Anbieter wie Codeberg brauchen ihn neben dem Token.</string>
+    <string name="field_sync_token">Zugriffstoken</string>
+    <string name="sync_token_hint">Ein Token, das dieses Repository lesen und schreiben darf.</string>
+    <string name="field_sync_author_name">Dein Name</string>
+    <string name="sync_author_hint">Deine Änderungen werden mit deinem Namen und deiner E-Mail-Adresse gezeichnet, die im Repository gespeichert werden.</string>
+    <string name="field_sync_author_email">Deine E-Mail-Adresse</string>
+    <string name="sync_connected_system">Verbunden: Dein Flugbuch wurde ins Repository gesendet. Das Token wird vom Passwortspeicher deines Systems aufbewahrt.</string>
+    <string name="sync_connected_session">Verbunden: Dein Flugbuch wurde ins Repository gesendet. Dein System bietet keinen Passwortspeicher, daher wird das Token nur bis zum Schliessen der App aufbewahrt. Unter Linux das Paket libsecret-tools installieren, um es zu behalten.</string>
+    <string name="sync_saved">Gespeichert.</string>
+    <string name="sync_saved_system">Gespeichert. Das Token wird vom Passwortspeicher deines Systems aufbewahrt.</string>
+    <string name="sync_saved_session">Gespeichert. Dein System bietet keinen Passwortspeicher, daher wird das Token nur bis zum Schliessen der App aufbewahrt. Unter Linux das Paket libsecret-tools installieren, um es zu behalten.</string>
+    <string name="sync_up_to_date">Synchronisiert: Auf keiner Seite gibt es Neues.</string>
+    <string name="sync_summary_done">Synchronisiert: %1$s, %2$s.</string>
+    <string name="sync_conflicts">Nichts wurde ausgetauscht: %1$s wurden hier und auf einem anderen Gerät geändert. Die Wahl, welche Fassung bleibt, kommt in einer späteren Version.</string>
+    <string name="error_email">Eine E-Mail-Adresse wie name@example.org eingeben</string>
+    <string name="failure_connect_sync">Das Flugbuch konnte nicht verbunden werden: %1$s</string>
+    <string name="failure_sync">Das Flugbuch konnte nicht synchronisiert werden: %1$s</string>
+    <string name="failure_sync_unreachable">Das Repository hat nicht geantwortet. Versuche es später erneut. (%1$s)</string>
+    <string name="failure_sync_credentials">Der Anbieter hat das Token abgelehnt. Prüfe, ob es dieses Repository lesen und schreiben darf, und den Benutzernamen, falls dein Anbieter einen braucht.</string>
+    <string name="failure_sync_no_repository">Dieses Repository gibt es nicht. Prüfe die Adresse.</string>
+    <string name="failure_sync_not_empty">Dieses Repository ist nicht leer. Verbinde dich mit einem leeren Repository, das für dieses Flugbuch angelegt wurde. Sich dem Flugbuch eines anderen Geräts anschliessen kommt in einer späteren Version.</string>
+    <string name="failure_sync_unexpected">Die Synchronisation wurde abgebrochen: %1$s. Versuche es erneut.</string>
+    <string name="failure_sync_token_missing">Das Zugriffstoken ist nicht mehr gespeichert. Gib es mit Bearbeiten… erneut ein und speichere.</string>
+    <plurals name="sync_received">
+        <item quantity="one">%1$d Änderung erhalten</item>
+        <item quantity="other">%1$d Änderungen erhalten</item>
+    </plurals>
+    <plurals name="sync_sent">
+        <item quantity="one">%1$d Änderung gesendet</item>
+        <item quantity="other">%1$d Änderungen gesendet</item>
+    </plurals>
+    <plurals name="sync_record_wing">
+        <item quantity="one">%1$d Schirm</item>
+        <item quantity="other">%1$d Schirme</item>
+    </plurals>
+    <plurals name="sync_record_harness">
+        <item quantity="one">%1$d Gurtzeug</item>
+        <item quantity="other">%1$d Gurtzeuge</item>
+    </plurals>
+    <plurals name="sync_record_reserve">
+        <item quantity="one">%1$d Rettung</item>
+        <item quantity="other">%1$d Rettungen</item>
+    </plurals>
+    <plurals name="sync_record_flight">
+        <item quantity="one">%1$d Flug</item>
+        <item quantity="other">%1$d Flüge</item>
+    </plurals>
+    <plurals name="sync_record_attachment">
+        <item quantity="one">%1$d angehängte Datei</item>
+        <item quantity="other">%1$d angehängte Dateien</item>
+    </plurals>
+    <plurals name="sync_record_settings">
+        <item quantity="one">die Einstellungen des Flugbuchs</item>
+        <item quantity="other">die Einstellungen des Flugbuchs</item>
+    </plurals>
+    <plurals name="sync_record_other">
+        <item quantity="one">%1$d weitere Datei</item>
+        <item quantity="other">%1$d weitere Dateien</item>
+    </plurals>
 </resources>

@@ -1,6 +1,7 @@
 package ch.qscqlmpa.wingtracker.settings
 
 import ch.qscqlmpa.wingtracker.backup.BackupReminder
+import ch.qscqlmpa.wingtracker.sync.SyncSettings
 import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
 
@@ -15,6 +16,9 @@ data class DeviceSettings(
     // Remembered so the pilot can see how old this device's last backup is (ADR 0031).
     val lastBackupAt: Instant? = null,
     val backupReminder: BackupReminder = BackupReminder(),
+    // Null until this device synchronises the logbook (ADR 0033).
+    val sync: SyncSettings? = null,
+    val lastSyncedAt: Instant? = null,
 ) {
     init {
         require(interfaceScalePercent == null || interfaceScalePercent in MIN_SCALE_PERCENT..MAX_SCALE_PERCENT) {

@@ -11,7 +11,7 @@ import java.nio.file.Path
 class JsonWingRepository(
     dataDirectory: Path,
 ) : WingRepository {
-    private val store = JsonDocumentStore.forCollection(dataDirectory, "wings")
+    private val store = JsonDocumentStore.forCollection(dataDirectory, WINGS_FOLDER)
 
     override suspend fun findAll(): LoadResult<Wing> = store.loadAll(::decode)
 

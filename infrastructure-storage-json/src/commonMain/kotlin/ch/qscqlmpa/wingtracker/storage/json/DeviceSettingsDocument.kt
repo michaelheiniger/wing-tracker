@@ -2,6 +2,7 @@ package ch.qscqlmpa.wingtracker.storage.json
 
 import ch.qscqlmpa.wingtracker.backup.BackupReminder
 import ch.qscqlmpa.wingtracker.settings.DeviceSettings
+import ch.qscqlmpa.wingtracker.sync.SyncSettings
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
@@ -17,6 +18,9 @@ internal data class DeviceSettingsDocument(
     val lastBackupAt: String? = null,
     val backupReminderEnabled: Boolean = true,
     val backupReminderDays: Int = BackupReminder.DEFAULT_DAYS,
+    // Also schema 1, which no release has used yet: where the logbook is synchronised to (ADR 0033).
+    val sync: SyncSettingsDocument? = null,
+    val lastSyncedAt: String? = null,
 ) {
     fun toDomain(): DeviceSettings =
         DeviceSettings(
@@ -25,6 +29,8 @@ internal data class DeviceSettingsDocument(
             deviceFolder = deviceFolder,
             lastBackupAt = lastBackupAt?.let(Instant::parse),
             backupReminder = BackupReminder(backupReminderEnabled, backupReminderDays),
+            sync = sync?.toDomain(),
+            lastSyncedAt = lastSyncedAt?.let(Instant::parse),
         )
 
     companion object {
@@ -38,6 +44,23 @@ internal data class DeviceSettingsDocument(
                 lastBackupAt = settings.lastBackupAt?.toString(),
                 backupReminderEnabled = settings.backupReminder.enabled,
                 backupReminderDays = settings.backupReminder.days,
+                sync = settings.sync?.let(SyncSettingsDocument::from),
+                lastSyncedAt = settings.lastSyncedAt?.toString(),
             )
+    }
+}
+
+@Serializable
+internal data class SyncSettingsDocument(
+    val repository: String,
+    val username: String? = null,
+    val authorName: String,
+    val authorEmail: String,
+) {
+    fun toDomain() = SyncSettings(repository, username, authorName, authorEmail)
+
+    companion object {
+        fun from(settings: SyncSettings) =
+            SyncSettingsDocument(settings.repository, settings.username, settings.authorName, settings.authorEmail)
     }
 }

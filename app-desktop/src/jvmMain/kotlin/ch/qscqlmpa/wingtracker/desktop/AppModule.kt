@@ -109,8 +109,6 @@ import ch.qscqlmpa.wingtracker.storage.json.JsonReserveRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonUpdatePreferencesRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonWingRepository
 import ch.qscqlmpa.wingtracker.storage.json.ZipBackupArchive
-import ch.qscqlmpa.wingtracker.sync.LogbookTransactions
-import ch.qscqlmpa.wingtracker.sync.UnsyncedTransactions
 import ch.qscqlmpa.wingtracker.syride.SyrideWebFlightSource
 import ch.qscqlmpa.wingtracker.ui.airtime.AirtimeExportUseCases
 import ch.qscqlmpa.wingtracker.ui.airtime.AirtimeToken
@@ -165,6 +163,7 @@ fun appModules(
         maintenanceModule(),
         remindersModule(),
         backupModule(dataDirectory),
+        syncModule(dataDirectory),
         updatesModule(installationDirectory, downloadDirectory, devMode),
         mapsModule(mapTileDirectory),
         uiModule(dataDirectory, devMode),
@@ -189,7 +188,6 @@ private fun storageModule(dataDirectory: Path) =
         single<LogbookSettingsRepository> { JsonLogbookSettingsRepository(dataDirectory) }
         single<DeviceSettingsRepository> { JsonDeviceSettingsRepository(dataDirectory) }
         single<AttachmentStore> { FileAttachmentStore(dataDirectory) }
-        single<LogbookTransactions> { UnsyncedTransactions }
         single<MaintainedGearRepository> { CompositeMaintainedGearRepository(get(), get(), get()) }
     }
 
@@ -317,13 +315,13 @@ private fun backupModule(dataDirectory: Path) =
     module {
         single<BackupArchive> { ZipBackupArchive(dataDirectory) }
         factory { GetBackupStatus(get(), get(), get()) }
-        factory { CreateBackup(get(), get(), get(), BuildInfo.VERSION) }
+        factory { CreateBackup(get(), get(), get(), BuildInfo.VERSION, get()) }
         factory { InspectBackup(get(), get(), BuildInfo.VERSION) }
         factory { RestoreBackup(get()) }
         single<CloudStorage> { S3CloudStorage("wing-tracker/${BuildInfo.VERSION}") }
         factory { SaveCloudStorage(get(), get()) }
         factory { CheckCloudStorage(get()) }
-        factory { UploadBackup(get(), get(), get(), get(), get(), BuildInfo.VERSION) }
+        factory { UploadBackup(get(), get(), get(), get(), get(), BuildInfo.VERSION, get()) }
         single { BackupUseCases(get(), get(), get(), get(), get()) }
         single { CloudStorageUseCases(get(), get(), get()) }
         factory { ListCloudBackups(get(), get(), get()) }

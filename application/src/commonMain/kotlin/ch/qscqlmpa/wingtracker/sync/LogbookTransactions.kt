@@ -10,6 +10,9 @@ interface LogbookTransactions {
         change: LogbookChange,
         block: suspend () -> T,
     ): T
+
+    /** Runs [block] while no transaction nor sync runs, so it never reads half a change (ADR 0031, ADR 0033). */
+    suspend fun <T> whenIdle(block: suspend () -> T): T
 }
 
 /** Until the logbook is synchronised there is nothing to record, so a transaction only runs its block. */
@@ -18,4 +21,6 @@ object UnsyncedTransactions : LogbookTransactions {
         change: LogbookChange,
         block: suspend () -> T,
     ): T = block()
+
+    override suspend fun <T> whenIdle(block: suspend () -> T): T = block()
 }

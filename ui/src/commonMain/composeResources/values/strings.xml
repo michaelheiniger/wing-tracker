@@ -905,4 +905,79 @@
     <string name="forget_export_title">Forget the export to air-time?</string>
     <string name="forget_export_body">The flight on %1$s with %2$s will no longer be marked as sent to air-time. Only your logbook changes: the flight stays on air-time. The next export leaves it out if air-time still has it, and sends it otherwise.</string>
     <string name="forget_export_confirm">Forget</string>
+    <string name="settings_category_sync">Sync</string>
+    <string name="sync_title">Sync between devices</string>
+    <string name="sync_hint">Keep this logbook the same on several computers through a Git repository of your own, for example on GitHub or Codeberg. Everything is sent as it is stored: anyone with access to the repository can read your logbook.</string>
+    <string name="sync_not_connected">Not synchronised: this logbook is only on this computer.</string>
+    <string name="sync_connect_open">Connect a repository…</string>
+    <string name="sync_connect">Connect</string>
+    <string name="sync_connect_title">Connect a repository</string>
+    <string name="sync_edit_title">Sync settings</string>
+    <string name="sync_edit">Edit…</string>
+    <string name="sync_now">Sync now</string>
+    <string name="sync_in_progress">Synchronising…</string>
+    <string name="sync_connecting">Connecting…</string>
+    <string name="sync_last">Last synchronised: %1$s</string>
+    <string name="field_sync_repository">Repository (https://…)</string>
+    <string name="sync_repository_hint">An empty repository, created for this logbook only.</string>
+    <string name="field_sync_username">Username (optional)</string>
+    <string name="sync_username_hint">Some hosts, such as Codeberg, need it next to the token.</string>
+    <string name="field_sync_token">Access token</string>
+    <string name="sync_token_hint">A token that may read and write this repository.</string>
+    <string name="field_sync_author_name">Your name</string>
+    <string name="sync_author_hint">Your changes are signed with your name and email address, which are stored in the repository.</string>
+    <string name="field_sync_author_email">Your email address</string>
+    <string name="sync_connected_system">Connected: your logbook was sent to the repository. The token is kept by your system's password store.</string>
+    <string name="sync_connected_session">Connected: your logbook was sent to the repository. Your system offers no password store, so the token is only kept until the app closes. On Linux, install the libsecret-tools package to keep it.</string>
+    <string name="sync_saved">Saved.</string>
+    <string name="sync_saved_system">Saved. The token is kept by your system's password store.</string>
+    <string name="sync_saved_session">Saved. Your system offers no password store, so the token is only kept until the app closes. On Linux, install the libsecret-tools package to keep it.</string>
+    <string name="sync_up_to_date">Synchronised: nothing new on either side.</string>
+    <string name="sync_summary_done">Synchronised: %1$s, %2$s.</string>
+    <string name="sync_conflicts">Nothing was exchanged: %1$s changed both here and on another device. Choosing which version to keep comes in a later version.</string>
+    <string name="error_email">Enter an email address such as name@example.org</string>
+    <string name="failure_connect_sync">The logbook could not be connected: %1$s</string>
+    <string name="failure_sync">The logbook could not be synchronised: %1$s</string>
+    <string name="failure_sync_unreachable">The repository did not answer. Try again later. (%1$s)</string>
+    <string name="failure_sync_credentials">The host refused the token. Check that it may read and write this repository, and the username if your host needs one.</string>
+    <string name="failure_sync_no_repository">There is no such repository. Check its address.</string>
+    <string name="failure_sync_not_empty">This repository is not empty. Connect to an empty repository created for this logbook. Joining the logbook of another device comes in a later version.</string>
+    <string name="failure_sync_unexpected">Synchronising stopped: %1$s. Try again.</string>
+    <string name="failure_sync_token_missing">The access token is no longer kept. Enter it again with Edit… and save.</string>
+    <plurals name="sync_received">
+        <item quantity="one">%1$d change received</item>
+        <item quantity="other">%1$d changes received</item>
+    </plurals>
+    <plurals name="sync_sent">
+        <item quantity="one">%1$d change sent</item>
+        <item quantity="other">%1$d changes sent</item>
+    </plurals>
+    <plurals name="sync_record_wing">
+        <item quantity="one">%1$d wing</item>
+        <item quantity="other">%1$d wings</item>
+    </plurals>
+    <plurals name="sync_record_harness">
+        <item quantity="one">%1$d harness</item>
+        <item quantity="other">%1$d harnesses</item>
+    </plurals>
+    <plurals name="sync_record_reserve">
+        <item quantity="one">%1$d reserve</item>
+        <item quantity="other">%1$d reserves</item>
+    </plurals>
+    <plurals name="sync_record_flight">
+        <item quantity="one">%1$d flight</item>
+        <item quantity="other">%1$d flights</item>
+    </plurals>
+    <plurals name="sync_record_attachment">
+        <item quantity="one">%1$d attached file</item>
+        <item quantity="other">%1$d attached files</item>
+    </plurals>
+    <plurals name="sync_record_settings">
+        <item quantity="one">the logbook settings</item>
+        <item quantity="other">the logbook settings</item>
+    </plurals>
+    <plurals name="sync_record_other">
+        <item quantity="one">%1$d other file</item>
+        <item quantity="other">%1$d other files</item>
+    </plurals>
 </resources>

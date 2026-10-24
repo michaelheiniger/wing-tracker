@@ -18,4 +18,6 @@ class RecordingTransactions : LogbookTransactions {
             depth--
         }
     }
+
+    override suspend fun <T> whenIdle(block: suspend () -> T): T = block()
 }
