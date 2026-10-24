@@ -11,6 +11,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - A synchronised logbook syncs when Wing Tracker starts, before the logbook shows, and when it closes. "Skip" and "Close without syncing" cut it short, and a host that does not answer is given up on after a while. Without a connection the logbook opens at once, and a notification in the top-right corner says so and goes away on its own (hover over it to keep it); when records changed on two computers or the sync failed, the start says so before the logbook opens. A switch on the "Sync" page turns this off, to sync only with "Sync now".
 - Use your synchronised logbook on another computer: connect the same repository there, and since it already holds a logbook, Wing Tracker offers to copy it into an empty folder you choose, which becomes the data folder after a restart. The logbook that was on that computer stays in its folder; nothing is merged. That computer keeps its own settings, such as the interface size.
 
+### Changed
+- Settings are now kept in two parts: the logbook's own, which synchronised computers share (such as the reminder lead times), and this computer's (such as the interface size and when you last backed up). Your settings are moved over at the first start. An earlier version of Wing Tracker opened afterwards starts with its default settings.
+
 ## [0.5.0] - 2026-10-18
 
 ### Added
