@@ -987,4 +987,5 @@
     <string name="sync_join_copying">Flugbuch wird kopiert…</string>
     <string name="sync_join_restart_body">Das Flugbuch aus dem Repository ist in %1$s. Wing Tracker startet jetzt neu, um es zu verwenden; das Flugbuch dieses Computers bleibt in %2$s.</string>
     <string name="failure_join_logbook">Das Flugbuch konnte nicht kopiert werden: %1$s</string>
+    <string name="failure_sync_not_a_logbook">Dieses Repository enthält kein Flugbuch von Wing Tracker, deshalb wurde nichts kopiert. Prüfe die Adresse, oder verbinde ein leeres Repository, um das Flugbuch dieses Computers zu synchronisieren.</string>
 </resources>

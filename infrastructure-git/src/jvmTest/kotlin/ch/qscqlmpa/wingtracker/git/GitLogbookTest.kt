@@ -123,6 +123,7 @@ class GitLogbookTest {
         fun `copies the logbook the repository holds into the folder, signing this device's changes`() =
             runTest {
                 // given
+                connected()
                 OtherDevice(
                     remote,
                     root.resolve("other"),
@@ -137,7 +138,22 @@ class GitLogbookTest {
                 Git.open(folder.toFile()).use { git ->
                     assertThat(git.repository.config.getString("user", null, "name")).isEqualTo(PILOT.name)
                 }
-                assertThat(logbook.isConnected()).isFalse()
+                assertThat(dataFolder.resolve("flights/f-9.json").exists()).isFalse()
+            }
+
+        @Test
+        fun `refuses a repository that holds something else and leaves the folder empty`() =
+            runTest {
+                // given
+                OtherDevice(remote, root.resolve("other")).commitAndPush("README.md", "# Some project")
+                val folder = Files.createDirectories(root.resolve("joined"))
+
+                // when
+                val failure = runCatching { logbook.join(remote, PILOT, folder.toString()) }.exceptionOrNull()
+
+                // then
+                assertThat((failure as? SyncException)?.problem).isEqualTo(SyncProblem.NotALogbook)
+                assertThat(folder.toFile().list()).isEmpty()
             }
     }
 

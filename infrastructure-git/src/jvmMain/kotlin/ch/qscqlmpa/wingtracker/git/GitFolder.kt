@@ -29,6 +29,10 @@ private const val BRANCH_REF = "${Constants.R_HEADS}$BRANCH"
 private const val FETCHED_PREFIX = "refs/remotes/sync/"
 private const val IGNORE_FILE = ".gitignore"
 
+// Opens the ignore file of every logbook this app synchronises, so a repository holding one can be told from any
+// other. Never reword it: repositories connected before would no longer be recognised.
+private const val LOGBOOK_MARKER = "# Kept on each device, never synchronised."
+
 // Hosts that ignore the username still need one in the request.
 private const val ANY_USERNAME = "wing-tracker"
 
@@ -53,7 +57,10 @@ internal class GitFolder(
                 .call()
         }
 
-    /** Copies the logbook [remote] holds into this folder, which must be empty. */
+    /**
+     * Copies the logbook [remote] holds into this folder, which must be empty. A repository that holds something
+     * else is refused, and what was copied of it is removed again.
+     */
     fun cloneFrom(
         remote: SyncRemote,
         author: SyncAuthor,
@@ -68,6 +75,12 @@ internal class GitFolder(
             .setProgressMonitor(monitor)
             .call()
             .use { it.configure(author) }
+        val ignoreFile = File(folder, IGNORE_FILE)
+        if (!ignoreFile.isFile || ignoreFile.useLines { it.firstOrNull() } != LOGBOOK_MARKER) {
+            // The folder was empty before, so everything in it now is the copy.
+            folder.listFiles()?.forEach { it.deleteRecursively() }
+            throw SyncException(SyncProblem.NotALogbook)
+        }
     }
 
     fun isRemoteEmpty(remote: SyncRemote): Boolean =
@@ -80,7 +93,7 @@ internal class GitFolder(
             .isEmpty()
 
     fun writeIgnoreFile() {
-        val lines = listOf("# Kept on each device, never synchronised.") + layout.deviceOnly
+        val lines = listOf(LOGBOOK_MARKER) + layout.deviceOnly
         val content = lines.joinToString("\n", postfix = "\n")
         val file = File(folder, IGNORE_FILE)
         if (!file.exists() || file.readText() != content) file.writeText(content)

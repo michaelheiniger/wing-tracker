@@ -16,7 +16,7 @@ interface LogbookSync {
 
     /**
      * Copies the logbook [remote] holds into the empty [folder], for this device to use from the next start (ADR 0020).
-     * The current data folder is not touched.
+     * The current data folder is not touched. A repository that holds something else than a logbook is refused.
      */
     suspend fun join(
         remote: SyncRemote,
@@ -73,6 +73,9 @@ enum class SyncProblem {
 
     // Connecting is only possible to an empty repository; one that holds a logbook is joined instead.
     RemoteNotEmpty,
+
+    // Joining is only possible to a repository holding a logbook this application synchronised.
+    NotALogbook,
     Unexpected,
 }
 

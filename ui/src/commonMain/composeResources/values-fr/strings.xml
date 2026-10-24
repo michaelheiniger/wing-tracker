@@ -987,4 +987,5 @@
     <string name="sync_join_copying">Copie du carnet…</string>
     <string name="sync_join_restart_body">Le carnet du dépôt est dans %1$s. Wing Tracker redémarre maintenant pour l'utiliser ; le carnet de cet ordinateur reste dans %2$s.</string>
     <string name="failure_join_logbook">Le carnet n'a pas pu être copié : %1$s</string>
+    <string name="failure_sync_not_a_logbook">Ce dépôt ne contient pas de carnet Wing Tracker, rien n'a donc été copié. Vérifie son adresse, ou connecte un dépôt vide pour synchroniser le carnet de cet ordinateur.</string>
 </resources>

@@ -987,4 +987,5 @@
     <string name="sync_join_copying">Copying the logbook…</string>
     <string name="sync_join_restart_body">The logbook from the repository is in %1$s. Wing Tracker restarts now to use it; the logbook of this computer stays in %2$s.</string>
     <string name="failure_join_logbook">The logbook could not be copied: %1$s</string>
+    <string name="failure_sync_not_a_logbook">This repository holds no Wing Tracker logbook, so nothing was copied. Check its address, or connect an empty repository to start synchronising the logbook of this computer.</string>
 </resources>

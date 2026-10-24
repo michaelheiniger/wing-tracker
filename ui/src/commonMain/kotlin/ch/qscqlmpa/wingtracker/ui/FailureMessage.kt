@@ -78,6 +78,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_spreadsheet_unreadable
 import ch.qscqlmpa.wingtracker.ui.resources.failure_sync
 import ch.qscqlmpa.wingtracker.ui.resources.failure_sync_credentials
 import ch.qscqlmpa.wingtracker.ui.resources.failure_sync_no_repository
+import ch.qscqlmpa.wingtracker.ui.resources.failure_sync_not_a_logbook
 import ch.qscqlmpa.wingtracker.ui.resources.failure_sync_not_empty
 import ch.qscqlmpa.wingtracker.ui.resources.failure_sync_token_missing
 import ch.qscqlmpa.wingtracker.ui.resources.failure_sync_unexpected
@@ -135,6 +136,7 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.SyncCredentialsRefused to Res.string.failure_sync_credentials,
         FailureKind.SyncNoSuchRepository to Res.string.failure_sync_no_repository,
         FailureKind.SyncRemoteNotEmpty to Res.string.failure_sync_not_empty,
+        FailureKind.SyncNotALogbook to Res.string.failure_sync_not_a_logbook,
         FailureKind.SyncUnexpected to Res.string.failure_sync_unexpected,
         FailureKind.SyncTokenMissing to Res.string.failure_sync_token_missing,
         FailureKind.JoinLogbook to Res.string.failure_join_logbook,

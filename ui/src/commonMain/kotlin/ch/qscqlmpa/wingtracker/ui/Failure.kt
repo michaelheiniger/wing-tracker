@@ -56,6 +56,7 @@ enum class FailureKind {
     SyncCredentialsRefused,
     SyncNoSuchRepository,
     SyncRemoteNotEmpty,
+    SyncNotALogbook,
     SyncUnexpected,
     SyncTokenMissing,
     JoinLogbook,

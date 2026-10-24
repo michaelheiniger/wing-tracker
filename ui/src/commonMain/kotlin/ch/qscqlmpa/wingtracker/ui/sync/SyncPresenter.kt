@@ -247,5 +247,6 @@ internal fun SyncProblem.failureKind(): FailureKind =
         SyncProblem.CredentialsRefused -> FailureKind.SyncCredentialsRefused
         SyncProblem.NoSuchRepository -> FailureKind.SyncNoSuchRepository
         SyncProblem.RemoteNotEmpty -> FailureKind.SyncRemoteNotEmpty
+        SyncProblem.NotALogbook -> FailureKind.SyncNotALogbook
         SyncProblem.Unexpected -> FailureKind.SyncUnexpected
     }
