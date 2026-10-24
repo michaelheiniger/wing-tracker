@@ -2,6 +2,7 @@ package ch.qscqlmpa.wingtracker.desktop
 
 import ch.qscqlmpa.wingtracker.reminders.GetStartNotification
 import ch.qscqlmpa.wingtracker.reminders.MarkStartNotificationShown
+import ch.qscqlmpa.wingtracker.ui.platform.SystemNotifier
 import ch.qscqlmpa.wingtracker.ui.reminders.toText
 import java.awt.Color
 import java.awt.Image
@@ -13,9 +14,8 @@ import javax.imageio.ImageIO
 import kotlin.concurrent.schedule
 
 /** Shows a message through the system tray, if the desktop has one. */
-class TrayNotifier {
-    /** Returns whether the message could be handed to the system; it cannot tell whether the user saw it. */
-    fun show(
+class TrayNotifier : SystemNotifier {
+    override fun show(
         title: String,
         message: String,
     ): Boolean {
@@ -62,7 +62,7 @@ class TrayNotifier {
 class StartupReminder(
     private val getStartNotification: GetStartNotification,
     private val markShown: MarkStartNotificationShown,
-    private val notifier: TrayNotifier,
+    private val notifier: SystemNotifier,
 ) {
     suspend operator fun invoke() {
         val notification = getStartNotification() ?: return

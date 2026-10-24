@@ -40,14 +40,14 @@ fun StatusBadge(
     }
 }
 
-private data class BadgeLook(
+internal data class BadgeLook(
     val container: Color,
     val content: Color,
     val icon: ImageVector?,
 )
 
 @Composable
-private fun Severity.look(): BadgeLook {
+internal fun Severity.look(): BadgeLook {
     val scheme = MaterialTheme.colorScheme
     val status = MaterialTheme.extraColors
     return when (this) {

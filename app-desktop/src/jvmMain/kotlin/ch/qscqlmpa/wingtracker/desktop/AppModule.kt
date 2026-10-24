@@ -308,7 +308,7 @@ private fun remindersModule() =
         factory { SaveDeviceFolder(get()) }
         factory { SaveBackupReminder(get()) }
         single { RemindersUseCases(get(), get(), get(), get(), get(), get()) }
-        single { StartupReminder(get(), get(), TrayNotifier()) }
+        single { StartupReminder(get(), get(), get<PlatformServices>().systemNotifier) }
     }
 
 private fun backupModule(dataDirectory: Path) =
@@ -376,6 +376,7 @@ private fun uiModule(
             DesktopLogLocation(DesktopLogging.directory(devMode)),
             DesktopUpdateInstaller(InstallationDirectory.installerKind(), DesktopLogging.directory(devMode)),
             credentialStore(devMode),
+            TrayNotifier(),
             supportsAllFileNames(),
         )
     }

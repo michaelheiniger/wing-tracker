@@ -1021,4 +1021,6 @@
     <string name="sync_kind_other">Fichier</string>
     <string name="failure_load_conflicts">Les éléments modifiés sur deux ordinateurs n'ont pas pu être lus : %1$s</string>
     <string name="sync_conflict_flight">%1$s, %2$s</string>
+    <string name="notification_close">Fermer la notification</string>
+    <string name="sync_start_offline">Non synchronisé : pas de connexion. Tes modifications seront envoyées à la prochaine synchronisation.</string>
 </resources>

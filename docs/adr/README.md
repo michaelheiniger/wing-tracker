@@ -40,6 +40,7 @@ ADRs capture **why** wing-tracker is built the way it is. They use the
 | [0031](0031-backups-are-archives-of-the-data-folder.md) | Backups are archives of the data folder, restored into a new folder | Accepted |
 | [0032](0032-backups-are-uploaded-to-s3-compatible-storage.md) | Backups are uploaded to S3-compatible storage through a port, signed by the application | Accepted |
 | [0033](0033-logbook-sync-through-git.md) | The logbook is synchronised between devices through a Git repository | Accepted |
+| [0034](0034-notifications-in-the-window-and-through-a-port.md) | Notifications show in the window, or in the desktop's notification area through a port | Accepted |
 
 ## Rules
 

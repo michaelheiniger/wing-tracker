@@ -1021,4 +1021,6 @@
     <string name="sync_kind_other">File</string>
     <string name="failure_load_conflicts">The records changed on two computers could not be read: %1$s</string>
     <string name="sync_conflict_flight">%1$s, %2$s</string>
+    <string name="notification_close">Close notification</string>
+    <string name="sync_start_offline">Not synchronised: no connection. Your changes are sent at the next sync.</string>
 </resources>

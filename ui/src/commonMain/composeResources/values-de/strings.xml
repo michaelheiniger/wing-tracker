@@ -1021,4 +1021,6 @@
     <string name="sync_kind_other">Datei</string>
     <string name="failure_load_conflicts">Die auf zwei Computern geänderten Einträge konnten nicht gelesen werden: %1$s</string>
     <string name="sync_conflict_flight">%1$s, %2$s</string>
+    <string name="notification_close">Benachrichtigung schliessen</string>
+    <string name="sync_start_offline">Nicht synchronisiert: keine Verbindung. Deine Änderungen werden bei der nächsten Synchronisation gesendet.</string>
 </resources>

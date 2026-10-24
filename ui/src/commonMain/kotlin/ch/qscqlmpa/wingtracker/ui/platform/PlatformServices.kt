@@ -195,6 +195,15 @@ class CredentialStoreException(
     cause: Throwable? = null,
 ) : Exception(message, cause)
 
+/** Shows a message in the desktop's notification area, where the pilot sees it even with the window hidden. */
+fun interface SystemNotifier {
+    /** Returns whether the system took the message; it cannot tell whether the pilot saw it. */
+    fun show(
+        title: String,
+        message: String,
+    ): Boolean
+}
+
 class PlatformServices(
     val filePicker: FilePicker,
     val fileOpener: FileOpener,
@@ -204,6 +213,7 @@ class PlatformServices(
     val logLocation: LogLocation,
     val updateInstaller: UpdateInstaller,
     val credentialStore: CredentialStore,
+    val systemNotifier: SystemNotifier,
     // False when some file names cannot be opened on this system at all, which the user should hear about up front.
     val supportsAllFileNames: Boolean = true,
 )

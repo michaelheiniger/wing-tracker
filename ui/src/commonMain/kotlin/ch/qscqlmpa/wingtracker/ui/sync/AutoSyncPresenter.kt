@@ -7,6 +7,10 @@ import ch.qscqlmpa.wingtracker.sync.SyncException
 import ch.qscqlmpa.wingtracker.sync.SyncProblem
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
+import ch.qscqlmpa.wingtracker.ui.components.Severity
+import ch.qscqlmpa.wingtracker.ui.notifications.AppNotification
+import ch.qscqlmpa.wingtracker.ui.resources.Res
+import ch.qscqlmpa.wingtracker.ui.resources.sync_start_offline
 import ch.qscqlmpa.wingtracker.ui.toFailure
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +40,8 @@ class AutoSyncPresenter(
     private val secret: SyncSecret,
     // What other devices sent may change what the app shows, e.g. the theme; and the start may now go on.
     private val onStarted: (received: Boolean) -> Unit = {},
+    // No connection at start opens the logbook at once; the pilot only hears in passing that nothing was exchanged.
+    private val onOffline: () -> Unit = {},
 ) {
     var start by mutableStateOf<StartSync>(StartSync.Running)
         private set
@@ -48,11 +54,15 @@ class AutoSyncPresenter(
     // Whether the start received anything, so what was shown before it can be read again.
     private var received = false
 
+    // Whether the last sync found no connection.
+    private var offline = false
+
     fun startUp() {
         running =
             scope.launch {
                 val stopped = syncIfAutomatic()
                 if (stopped == null) finishStart() else start = stopped
+                if (offline) onOffline()
             }
     }
 
@@ -115,9 +125,8 @@ class AutoSyncPresenter(
             throw e
         } catch (e: SyncException) {
             // Normal at a launch site, so not worth stopping for.
-            if (e.problem ==
-                SyncProblem.NoConnection
-            ) {
+            offline = e.problem == SyncProblem.NoConnection
+            if (offline) {
                 null
             } else {
                 StartSync.Stopped(null, Failure(e.problem.failureKind(), e.message))
@@ -129,3 +138,6 @@ class AutoSyncPresenter(
             StartSync.Stopped(null, e.toFailure(FailureKind.Sync))
         }
 }
+
+/** Tells in passing that the start found no connection, so nothing was exchanged (ADR 0034). */
+fun offlineAtStart() = AppNotification(Res.string.sync_start_offline, Severity.Warning)

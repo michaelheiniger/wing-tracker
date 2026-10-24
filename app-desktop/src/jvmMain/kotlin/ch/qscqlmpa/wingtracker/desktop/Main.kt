@@ -1,6 +1,9 @@
 package ch.qscqlmpa.wingtracker.desktop
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -10,7 +13,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.platform.LocalDensity
@@ -39,12 +44,15 @@ import ch.qscqlmpa.wingtracker.ui.errors.unexpectedErrorTitle
 import ch.qscqlmpa.wingtracker.ui.flights.LogbookUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.GearUseCases
 import ch.qscqlmpa.wingtracker.ui.gear.maintenance.MaintenanceUseCases
+import ch.qscqlmpa.wingtracker.ui.notifications.NotificationCenter
+import ch.qscqlmpa.wingtracker.ui.notifications.NotificationStack
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.reminders.RemindersUseCases
 import ch.qscqlmpa.wingtracker.ui.shell.AppShell
 import ch.qscqlmpa.wingtracker.ui.sync.AutoSyncPresenter
 import ch.qscqlmpa.wingtracker.ui.sync.CloseSyncDialog
 import ch.qscqlmpa.wingtracker.ui.sync.ConflictDialog
+import ch.qscqlmpa.wingtracker.ui.sync.ConflictPresenter
 import ch.qscqlmpa.wingtracker.ui.sync.StartSync
 import ch.qscqlmpa.wingtracker.ui.sync.StartSyncScreen
 import ch.qscqlmpa.wingtracker.ui.sync.SyncUseCases
@@ -107,24 +115,9 @@ fun main() {
 
     application {
         var systemDark by remember { mutableStateOf(initialSystemDark) }
-        val autoSync = rememberAutoSync(koin, themePreference)
-        LaunchedEffect(Unit) {
-            // Supervised, so a failure is shown to the pilot instead of ending the app.
-            supervisorScope {
-                launch(errorHandling.coroutineExceptionHandler) {
-                    // After the sync at start, so it tells about what other devices sent too.
-                    snapshotFlow { autoSync.start }.first { it == StartSync.Done }
-                    koin.get<StartupReminder>()()
-                }
-                // Followed live, so switching the desktop between light and dark needs no restart.
-                launch(errorHandling.coroutineExceptionHandler) {
-                    while (true) {
-                        delay(SYSTEM_THEME_POLL_MILLIS)
-                        systemDark = withContext(Dispatchers.IO) { systemTheme.isDark() }
-                    }
-                }
-            }
-        }
+        val notifications = rememberNotifications(koin)
+        val autoSync = rememberAutoSync(koin, themePreference, notifications)
+        BackgroundWork(koin, errorHandling, autoSync, systemTheme) { systemDark = it }
         val themed: @Composable (@Composable () -> Unit) -> Unit = { content ->
             WithInterfaceScale(DesktopScale.factor(scalePreference.percent, detectedScale, jvmScale)) {
                 WingTrackerTheme(themePreference.mode, systemDark ?: isSystemInDarkTheme(), content)
@@ -139,7 +132,16 @@ fun main() {
             CompositionLocalProvider(
                 LocalWindowExceptionHandlerFactory provides errorHandling.windowExceptionHandlerFactory,
             ) {
-                MainWindow(koin, devMode, windowState, themePreference, scalePreference, autoSync, themed)
+                MainWindow(
+                    koin,
+                    devMode,
+                    windowState,
+                    themePreference,
+                    scalePreference,
+                    autoSync,
+                    notifications,
+                    themed,
+                )
             }
         }
         UnexpectedErrorWindow(
@@ -147,6 +149,33 @@ fun main() {
             DesktopScale.factor(scalePreference.percent, detectedScale, jvmScale),
             themed,
         )
+    }
+}
+
+/** What runs beside the window for the whole run; supervised, so a failure is shown instead of ending the app. */
+@Composable
+private fun BackgroundWork(
+    koin: Koin,
+    errorHandling: UnexpectedErrorHandling,
+    autoSync: AutoSyncPresenter,
+    systemTheme: SystemTheme,
+    onSystemDark: (Boolean?) -> Unit,
+) {
+    LaunchedEffect(Unit) {
+        supervisorScope {
+            launch(errorHandling.coroutineExceptionHandler) {
+                // After the sync at start, so it tells about what other devices sent too.
+                snapshotFlow { autoSync.start }.first { it == StartSync.Done }
+                koin.get<StartupReminder>()()
+            }
+            // Followed live, so switching the desktop between light and dark needs no restart.
+            launch(errorHandling.coroutineExceptionHandler) {
+                while (true) {
+                    delay(SYSTEM_THEME_POLL_MILLIS)
+                    onSystemDark(withContext(Dispatchers.IO) { systemTheme.isDark() })
+                }
+            }
+        }
     }
 }
 
@@ -158,6 +187,7 @@ private fun ApplicationScope.MainWindow(
     themePreference: ThemePreference,
     scalePreference: InterfaceScalePreference,
     autoSync: AutoSyncPresenter,
+    notifications: NotificationCenter,
     themed: @Composable (@Composable () -> Unit) -> Unit,
 ) {
     Window(
@@ -183,30 +213,44 @@ private fun ApplicationScope.MainWindow(
             val conflicts = rememberConflicts(koin)
             ConflictDialog(conflicts)
             if (autoSync.closing) CloseSyncDialog(autoSync)
-            if (autoSync.start != StartSync.Done) {
-                StartSyncScreen(autoSync, conflicts)
-                return@themed
+            // Over everything, the start screen included, and clear of the undo message at the bottom.
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (autoSync.start == StartSync.Done) {
+                    MainContent(koin, conflicts, themePreference, scalePreference)
+                } else {
+                    StartSyncScreen(autoSync, conflicts)
+                }
+                NotificationStack(notifications, Modifier.align(Alignment.TopEnd).padding(16.dp))
             }
-            AppShell(
-                logbookUseCases = koin.get<LogbookUseCases>(),
-                getStatistics = koin.get<GetStatistics>(),
-                gearUseCases = koin.get<GearUseCases>(),
-                maintenanceUseCases = koin.get<MaintenanceUseCases>(),
-                reminders = koin.get<RemindersUseCases>(),
-                backups = koin.get<BackupUseCases>(),
-                cloudStorageUseCases = koin.get<CloudStorageUseCases>(),
-                cloudRestoreUseCases = koin.get<CloudRestoreUseCases>(),
-                syncUseCases = koin.get<SyncUseCases>(),
-                conflicts = conflicts,
-                updates = koin.get<UpdateUseCases>(),
-                platform = koin.get<PlatformServices>(),
-                themePreference = themePreference,
-                scalePreference = scalePreference,
-                undo = koin.get<UndoCoordinator>(),
-                appVersion = BuildInfo.VERSION,
-            )
         }
     }
+}
+
+@Composable
+private fun MainContent(
+    koin: Koin,
+    conflicts: ConflictPresenter,
+    themePreference: ThemePreference,
+    scalePreference: InterfaceScalePreference,
+) {
+    AppShell(
+        logbookUseCases = koin.get<LogbookUseCases>(),
+        getStatistics = koin.get<GetStatistics>(),
+        gearUseCases = koin.get<GearUseCases>(),
+        maintenanceUseCases = koin.get<MaintenanceUseCases>(),
+        reminders = koin.get<RemindersUseCases>(),
+        backups = koin.get<BackupUseCases>(),
+        cloudStorageUseCases = koin.get<CloudStorageUseCases>(),
+        cloudRestoreUseCases = koin.get<CloudRestoreUseCases>(),
+        syncUseCases = koin.get<SyncUseCases>(),
+        conflicts = conflicts,
+        updates = koin.get<UpdateUseCases>(),
+        platform = koin.get<PlatformServices>(),
+        themePreference = themePreference,
+        scalePreference = scalePreference,
+        undo = koin.get<UndoCoordinator>(),
+        appVersion = BuildInfo.VERSION,
+    )
 }
 
 /** Its own window, not a dialog of the main one, so it still shows when the main window is what failed. */

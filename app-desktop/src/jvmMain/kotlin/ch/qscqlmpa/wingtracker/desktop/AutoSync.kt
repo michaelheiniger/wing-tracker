@@ -5,11 +5,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import ch.qscqlmpa.wingtracker.settings.GetLogbookSettings
+import ch.qscqlmpa.wingtracker.ui.notifications.NotificationCenter
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.sync.AutoSyncPresenter
 import ch.qscqlmpa.wingtracker.ui.sync.ConflictPresenter
 import ch.qscqlmpa.wingtracker.ui.sync.SyncSecret
 import ch.qscqlmpa.wingtracker.ui.sync.SyncUseCases
+import ch.qscqlmpa.wingtracker.ui.sync.offlineAtStart
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
 import kotlinx.coroutines.launch
 import org.koin.core.Koin
@@ -22,6 +24,7 @@ import org.koin.core.Koin
 fun rememberAutoSync(
     koin: Koin,
     themePreference: ThemePreference,
+    notifications: NotificationCenter,
 ): AutoSyncPresenter {
     val scope = rememberCoroutineScope()
     val autoSync =
@@ -34,10 +37,18 @@ fun rememberAutoSync(
                     // Another device may have changed the theme; the rest is read when it is shown.
                     if (received) scope.launch { themePreference.mode = koin.get<GetLogbookSettings>()().themeMode }
                 },
+                onOffline = { notifications.post(offlineAtStart()) },
             )
         }
     LaunchedEffect(autoSync) { autoSync.startUp() }
     return autoSync
+}
+
+/** One for the whole run, outside the rebuilt window, so a notification outlives a rebuild after an error. */
+@Composable
+fun rememberNotifications(koin: Koin): NotificationCenter {
+    val scope = rememberCoroutineScope()
+    return remember { NotificationCenter(scope, koin.get<PlatformServices>().systemNotifier) }
 }
 
 /** One for the window, since conflicts are resolved from the start screen as well as from the Sync page. */

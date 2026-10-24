@@ -60,6 +60,7 @@ class AutoSyncPresenterTest {
                 TOKEN
         }
     private var started: Boolean? = null
+    private var offline = 0
     private var exited = 0
 
     private fun TestScope.presenter(): AutoSyncPresenter {
@@ -76,7 +77,9 @@ class AutoSyncPresenterTest {
                 GetSyncConflicts(sync),
             ),
             SyncSecret(credentials),
-        ) { received -> started = received }
+            onStarted = { received -> started = received },
+            onOffline = { offline++ },
+        )
     }
 
     @Nested
@@ -128,7 +131,7 @@ class AutoSyncPresenterTest {
             }
 
         @Test
-        fun `goes on without a word when there is no connection`() =
+        fun `goes on at once when there is no connection, telling it in passing`() =
             runTest {
                 // given
                 coEvery { sync.sync(any(), any()) } throws SyncException(SyncProblem.NoConnection)
@@ -139,6 +142,20 @@ class AutoSyncPresenterTest {
 
                 // then
                 assertThat(presenter.start).isEqualTo(StartSync.Done)
+                assertThat(offline).isEqualTo(1)
+            }
+
+        @Test
+        fun `says nothing about the connection after a sync that went through`() =
+            runTest {
+                // given
+                val presenter = presenter()
+
+                // when
+                presenter.startUp()
+
+                // then
+                assertThat(offline).isZero()
             }
 
         @Test
@@ -220,6 +237,21 @@ class AutoSyncPresenterTest {
 
                 // then
                 assertThat(exited).isEqualTo(1)
+            }
+
+        @Test
+        fun `closes without telling about a missing connection`() =
+            runTest {
+                // given
+                coEvery { sync.sync(any(), any()) } throws SyncException(SyncProblem.NoConnection)
+                val presenter = presenter()
+
+                // when
+                presenter.close { exited++ }
+
+                // then
+                assertThat(exited).isEqualTo(1)
+                assertThat(offline).isZero()
             }
 
         @Test
