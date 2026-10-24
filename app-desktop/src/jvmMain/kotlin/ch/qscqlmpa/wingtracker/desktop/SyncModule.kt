@@ -4,6 +4,7 @@ import ch.qscqlmpa.wingtracker.git.GitLogbook
 import ch.qscqlmpa.wingtracker.git.SyncedFolderLayout
 import ch.qscqlmpa.wingtracker.storage.json.JsonDataFolder
 import ch.qscqlmpa.wingtracker.sync.ConnectLogbook
+import ch.qscqlmpa.wingtracker.sync.GetSyncConflicts
 import ch.qscqlmpa.wingtracker.sync.GetSyncStatus
 import ch.qscqlmpa.wingtracker.sync.JoinLogbook
 import ch.qscqlmpa.wingtracker.sync.LogbookSync
@@ -31,7 +32,8 @@ internal fun syncModule(dataDirectory: Path) =
         factory { SyncLogbook(get(), get(), get()) }
         factory { JoinLogbook(get(), get(), get()) }
         factory { SaveAutomaticSync(get()) }
-        single { SyncUseCases(get(), get(), get(), get(), get(), get()) }
+        factory { GetSyncConflicts(get()) }
+        single { SyncUseCases(get(), get(), get(), get(), get(), get(), get()) }
     }
 
 // Hands the storage adapter's layout to the sync adapter, so neither depends on the other.
@@ -42,4 +44,10 @@ private fun syncedFolderLayout(dataDirectory: Path) =
         override fun isQuarantined(path: String) = JsonDataFolder.isQuarantined(dataDirectory, path)
 
         override fun recordAt(path: String) = JsonDataFolder.recordAt(path)
+
+        override fun differences(
+            path: String,
+            here: ByteArray?,
+            there: ByteArray?,
+        ) = JsonDataFolder.differences(path, here, there)
     }

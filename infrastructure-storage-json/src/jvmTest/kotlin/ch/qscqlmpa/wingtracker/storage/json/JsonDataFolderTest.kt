@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.storage.json
 
+import ch.qscqlmpa.wingtracker.sync.FieldDifference
 import ch.qscqlmpa.wingtracker.sync.RecordKind
 import ch.qscqlmpa.wingtracker.sync.SyncedRecord
 import kotlinx.coroutines.test.runTest
@@ -79,6 +80,46 @@ class JsonDataFolderTest {
                 SyncedRecord(RecordKind.LogbookSettings, "settings"),
                 SyncedRecord(RecordKind.Other, ".gitignore"),
             )
+        }
+    }
+
+    @Nested
+    inner class Differences {
+        private val here =
+            """{"schemaVersion": 5, "date": "2026-09-20", "durationMinutes": 95, "sites": ["Niederhorn"]}"""
+        private val there =
+            """{"schemaVersion": 6, "date": "2026-09-20", "durationMinutes": 120, "sites": ["Niederhorn", "Beatenbucht"]}"""
+
+        @Test
+        fun `names each field that differs, nested ones by their path, leaving out the format version`() {
+            // given / when
+            val differences =
+                JsonDataFolder.differences("flights/f-1.json", here.encodeToByteArray(), there.encodeToByteArray())
+
+            // then
+            assertThat(differences).containsExactly(
+                FieldDifference("durationMinutes", "95", "120"),
+                FieldDifference("sites[1]", null, "Beatenbucht"),
+            )
+        }
+
+        @Test
+        fun `shows every field of a version the other side deleted`() {
+            // given / when
+            val differences = JsonDataFolder.differences("flights/f-1.json", here.encodeToByteArray(), null)
+
+            // then
+            assertThat(differences.map { it.field }).containsExactly("date", "durationMinutes", "sites[0]")
+            assertThat(differences.map { it.there }).containsOnlyNulls()
+        }
+
+        @Test
+        fun `has no fields to compare for an attachment`() {
+            // given / when
+            val differences = JsonDataFolder.differences("attachments/a-1", byteArrayOf(1), byteArrayOf(2))
+
+            // then
+            assertThat(differences).isEmpty()
         }
     }
 

@@ -1,13 +1,16 @@
 package ch.qscqlmpa.wingtracker.git
 
+import ch.qscqlmpa.wingtracker.sync.ConflictChoice
 import ch.qscqlmpa.wingtracker.sync.LogbookChange
 import ch.qscqlmpa.wingtracker.sync.LogbookSync
 import ch.qscqlmpa.wingtracker.sync.LogbookTransactions
 import ch.qscqlmpa.wingtracker.sync.SyncAuthor
+import ch.qscqlmpa.wingtracker.sync.SyncConflict
 import ch.qscqlmpa.wingtracker.sync.SyncException
 import ch.qscqlmpa.wingtracker.sync.SyncProblem
 import ch.qscqlmpa.wingtracker.sync.SyncRemote
 import ch.qscqlmpa.wingtracker.sync.SyncReport
+import ch.qscqlmpa.wingtracker.sync.SyncedRecord
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +43,8 @@ class GitLogbook(
     private val timeout: Duration,
 ) : LogbookSync,
     LogbookTransactions {
-    private val folder = GitFolder(dataDirectory.toFile(), layout, timeout.inWholeSeconds.toInt())
+    private val conflicts = GitConflicts(layout)
+    private val folder = GitFolder(dataDirectory.toFile(), layout, conflicts, timeout.inWholeSeconds.toInt())
     private val lock = Mutex()
 
     override suspend fun isConnected(): Boolean = withContext(Dispatchers.IO) { folder.isRepository() }
@@ -84,19 +88,29 @@ class GitLogbook(
         remote: SyncRemote,
         author: SyncAuthor,
         folder: String,
-    ) = online { GitFolder(File(folder), layout, timeout.inWholeSeconds.toInt()).cloneFrom(remote, author, this) }
+    ) = online {
+        GitFolder(File(folder), layout, conflicts, timeout.inWholeSeconds.toInt()).cloneFrom(remote, author, this)
+    }
 
     override suspend fun sync(
         remote: SyncRemote,
         author: SyncAuthor,
+        resolutions: Map<SyncedRecord, ConflictChoice>,
     ): SyncReport =
         lock.withLock {
             online {
                 folder.open().use { git ->
                     git.configure(author)
                     folder.commitChanges(git, STRAY_CHANGES_MESSAGE)
-                    folder.exchange(git, remote, this)
+                    folder.exchange(git, remote, resolutions, this)
                 }
+            }
+        }
+
+    override suspend fun conflicts(): List<SyncConflict> =
+        lock.withLock {
+            withContext(Dispatchers.IO) {
+                if (folder.isRepository()) folder.open().use(conflicts::current) else emptyList()
             }
         }
 

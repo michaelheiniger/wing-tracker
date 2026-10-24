@@ -84,6 +84,7 @@ import ch.qscqlmpa.wingtracker.ui.settings.LogLocationPresenter
 import ch.qscqlmpa.wingtracker.ui.settings.SettingsCategory
 import ch.qscqlmpa.wingtracker.ui.settings.SettingsScreen
 import ch.qscqlmpa.wingtracker.ui.statistics.StatisticsRoute
+import ch.qscqlmpa.wingtracker.ui.sync.ConflictPresenter
 import ch.qscqlmpa.wingtracker.ui.sync.JoinPresenter
 import ch.qscqlmpa.wingtracker.ui.sync.SyncPresenter
 import ch.qscqlmpa.wingtracker.ui.sync.SyncSecret
@@ -124,6 +125,7 @@ fun AppShell(
     cloudStorageUseCases: CloudStorageUseCases,
     cloudRestoreUseCases: CloudRestoreUseCases,
     syncUseCases: SyncUseCases,
+    conflicts: ConflictPresenter,
     updates: UpdateUseCases,
     platform: PlatformServices,
     themePreference: ThemePreference,
@@ -333,6 +335,7 @@ fun AppShell(
                                             cloudStorage,
                                             sync,
                                             join,
+                                            conflicts,
                                             dataLocation,
                                             logLocation,
                                             updatePresenter,

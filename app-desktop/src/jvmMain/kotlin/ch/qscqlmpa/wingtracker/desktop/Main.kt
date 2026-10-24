@@ -44,6 +44,7 @@ import ch.qscqlmpa.wingtracker.ui.reminders.RemindersUseCases
 import ch.qscqlmpa.wingtracker.ui.shell.AppShell
 import ch.qscqlmpa.wingtracker.ui.sync.AutoSyncPresenter
 import ch.qscqlmpa.wingtracker.ui.sync.CloseSyncDialog
+import ch.qscqlmpa.wingtracker.ui.sync.ConflictDialog
 import ch.qscqlmpa.wingtracker.ui.sync.StartSync
 import ch.qscqlmpa.wingtracker.ui.sync.StartSyncScreen
 import ch.qscqlmpa.wingtracker.ui.sync.SyncUseCases
@@ -179,9 +180,11 @@ private fun ApplicationScope.MainWindow(
             snapshotFlow { scalePreference.percent }.drop(1).collect { saveInterfaceScale(it) }
         }
         themed {
+            val conflicts = rememberConflicts(koin)
+            ConflictDialog(conflicts)
             if (autoSync.closing) CloseSyncDialog(autoSync)
             if (autoSync.start != StartSync.Done) {
-                StartSyncScreen(autoSync)
+                StartSyncScreen(autoSync, conflicts)
                 return@themed
             }
             AppShell(
@@ -194,6 +197,7 @@ private fun ApplicationScope.MainWindow(
                 cloudStorageUseCases = koin.get<CloudStorageUseCases>(),
                 cloudRestoreUseCases = koin.get<CloudRestoreUseCases>(),
                 syncUseCases = koin.get<SyncUseCases>(),
+                conflicts = conflicts,
                 updates = koin.get<UpdateUseCases>(),
                 platform = koin.get<PlatformServices>(),
                 themePreference = themePreference,

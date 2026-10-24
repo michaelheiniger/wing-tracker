@@ -1,10 +1,12 @@
 package ch.qscqlmpa.wingtracker.git
 
+import ch.qscqlmpa.wingtracker.sync.ConflictChoice
 import ch.qscqlmpa.wingtracker.sync.SyncAuthor
 import ch.qscqlmpa.wingtracker.sync.SyncException
 import ch.qscqlmpa.wingtracker.sync.SyncProblem
 import ch.qscqlmpa.wingtracker.sync.SyncRemote
 import ch.qscqlmpa.wingtracker.sync.SyncReport
+import ch.qscqlmpa.wingtracker.sync.SyncedRecord
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.MergeCommand
 import org.eclipse.jgit.api.RebaseCommand
@@ -23,10 +25,11 @@ import org.eclipse.jgit.util.io.DisabledOutputStream
 import java.io.File
 
 private const val BRANCH = "main"
-private const val BRANCH_REF = "${Constants.R_HEADS}$BRANCH"
+internal const val BRANCH_REF = "${Constants.R_HEADS}$BRANCH"
 
 // Fetched under a name of its own: the remote's address is a device setting, not a remote configured in Git.
 private const val FETCHED_PREFIX = "refs/remotes/sync/"
+internal const val FETCHED_BRANCH_REF = "$FETCHED_PREFIX$BRANCH"
 private const val IGNORE_FILE = ".gitignore"
 
 // Opens the ignore file of every logbook this app synchronises, so a repository holding one can be told from any
@@ -40,6 +43,7 @@ private const val ANY_USERNAME = "wing-tracker"
 internal class GitFolder(
     private val folder: File,
     private val layout: SyncedFolderLayout,
+    private val conflicts: GitConflicts,
     // How long a host may stay silent before a network call gives up.
     private val timeoutSeconds: Int,
 ) {
@@ -138,6 +142,7 @@ internal class GitFolder(
     fun exchange(
         git: Git,
         remote: SyncRemote,
+        resolutions: Map<SyncedRecord, ConflictChoice>,
         monitor: ProgressMonitor,
     ): SyncReport {
         git
@@ -149,13 +154,13 @@ internal class GitFolder(
             .setProgressMonitor(monitor)
             .call()
         val local = checkNotNull(git.repository.resolve(BRANCH_REF)) { "The logbook has no commit" }
-        val fetched = git.repository.resolve("$FETCHED_PREFIX$BRANCH")
+        val fetched = git.repository.resolve(FETCHED_BRANCH_REF)
         return if (fetched == null) {
             // Emptied since connecting, e.g. recreated by its owner: it gets the whole logbook again.
             push(git, remote, monitor)
             SyncReport(received = 0, sent = git.count(local, until = null))
         } else {
-            joinWith(git, local, fetched, remote, monitor)
+            joinWith(git, Tips(local, fetched), remote, resolutions, monitor)
         }
     }
 
@@ -188,22 +193,35 @@ internal class GitFolder(
 
     private fun joinWith(
         git: Git,
-        local: ObjectId,
-        fetched: ObjectId,
+        tips: Tips,
         remote: SyncRemote,
+        resolutions: Map<SyncedRecord, ConflictChoice>,
         monitor: ProgressMonitor,
     ): SyncReport {
+        val (local, fetched) = tips
         val base =
             git.mergeBase(local, fetched)
                 ?: throw SyncException(SyncProblem.Unexpected, "The repository holds another logbook")
-        // A record changed on both sides is a conflict even when Git could merge its lines (ADR 0033).
-        val conflicts = git.changedPaths(base, local) intersect git.changedPaths(base, fetched)
-        if (conflicts.isNotEmpty()) return SyncReport(0, 0, conflicts.sorted().map(layout::recordAt))
         val received = git.count(fetched, until = base)
-        val sent = git.count(local, until = base)
-        if (received > 0) integrate(git, fetched, rebase = sent > 0)
-        if (sent > 0) push(git, remote, monitor)
-        return SyncReport(received, sent)
+        val colliding = conflicts.paths(git, base, local, fetched)
+        return when {
+            colliding.isEmpty() -> {
+                val sent = git.count(local, until = base)
+                if (received > 0) integrate(git, fetched, rebase = sent > 0)
+                if (sent > 0) push(git, remote, monitor)
+                SyncReport(received, sent)
+            }
+
+            conflicts.resolve(git, local, fetched, colliding, resolutions) -> {
+                push(git, remote, monitor)
+                SyncReport(received, sent = git.count(git.repository.resolve(BRANCH_REF), until = fetched))
+            }
+
+            // Nothing is exchanged until the pilot chose a version of every record changed on both sides.
+            else -> {
+                SyncReport(0, 0, colliding.sorted().map(layout::recordAt))
+            }
+        }
     }
 
     /** Takes the other devices' commits, replaying this device's on top so the history stays a straight line. */
@@ -244,18 +262,7 @@ internal fun Git.configure(author: SyncAuthor) {
 private fun SyncRemote.credentials(): CredentialsProvider =
     UsernamePasswordCredentialsProvider(username?.takeIf { it.isNotBlank() } ?: ANY_USERNAME, token)
 
-private fun Git.mergeBase(
-    a: ObjectId,
-    b: ObjectId,
-): ObjectId? =
-    RevWalk(repository).use { walk ->
-        walk.revFilter = RevFilter.MERGE_BASE
-        walk.markStart(walk.parseCommit(a))
-        walk.markStart(walk.parseCommit(b))
-        walk.next()?.id
-    }
-
-private fun Git.count(
+internal fun Git.count(
     from: ObjectId,
     until: ObjectId?,
 ): Int =
@@ -265,17 +272,8 @@ private fun Git.count(
         walk.count()
     }
 
-private fun Git.changedPaths(
-    from: ObjectId,
-    to: ObjectId,
-): Set<String> =
-    RevWalk(repository).use { walk ->
-        DiffFormatter(DisabledOutputStream.INSTANCE).use { diff ->
-            diff.setRepository(repository)
-            diff
-                .scan(walk.parseCommit(from).tree, walk.parseCommit(to).tree)
-                .flatMap { listOf(it.oldPath, it.newPath) }
-                .filter { it != DiffEntry.DEV_NULL }
-                .toSet()
-        }
-    }
+/** This device's branch and the other devices' one, as last fetched. */
+private data class Tips(
+    val local: ObjectId,
+    val fetched: ObjectId,
+)

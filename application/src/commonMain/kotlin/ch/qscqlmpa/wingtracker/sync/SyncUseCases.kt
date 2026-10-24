@@ -78,9 +78,13 @@ class SyncLogbook(
     private val deviceSettings: DeviceSettingsRepository,
     private val clock: AppClock,
 ) {
-    suspend operator fun invoke(token: String): SyncReport {
+    /** [resolutions] says which version to keep of each record changed on both sides. */
+    suspend operator fun invoke(
+        token: String,
+        resolutions: Map<SyncedRecord, ConflictChoice> = emptyMap(),
+    ): SyncReport {
         val settings = checkNotNull(deviceSettings.load().sync) { "This device is not connected" }
-        val report = sync.sync(settings.remote(token), settings.author)
+        val report = sync.sync(settings.remote(token), settings.author, resolutions)
         // A sync stopped by conflicts exchanged nothing, so the last sync stays the one before.
         if (report.conflicts.isEmpty()) deviceSettings.save(deviceSettings.load().copy(lastSyncedAt = clock.now()))
         return report
@@ -108,4 +112,10 @@ class JoinLogbook(
         val joined = device.copy(sync = settings, lastSyncedAt = clock.now(), lastBackupAt = null)
         deviceSettings.saveFor(folder, joined)
     }
+}
+
+class GetSyncConflicts(
+    private val sync: LogbookSync,
+) {
+    suspend operator fun invoke(): List<SyncConflict> = sync.conflicts()
 }

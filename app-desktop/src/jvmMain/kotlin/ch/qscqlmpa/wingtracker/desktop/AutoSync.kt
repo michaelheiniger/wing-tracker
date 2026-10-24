@@ -7,6 +7,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import ch.qscqlmpa.wingtracker.settings.GetLogbookSettings
 import ch.qscqlmpa.wingtracker.ui.platform.PlatformServices
 import ch.qscqlmpa.wingtracker.ui.sync.AutoSyncPresenter
+import ch.qscqlmpa.wingtracker.ui.sync.ConflictPresenter
 import ch.qscqlmpa.wingtracker.ui.sync.SyncSecret
 import ch.qscqlmpa.wingtracker.ui.sync.SyncUseCases
 import ch.qscqlmpa.wingtracker.ui.theme.ThemePreference
@@ -37,4 +38,13 @@ fun rememberAutoSync(
         }
     LaunchedEffect(autoSync) { autoSync.startUp() }
     return autoSync
+}
+
+/** One for the window, since conflicts are resolved from the start screen as well as from the Sync page. */
+@Composable
+fun rememberConflicts(koin: Koin): ConflictPresenter {
+    val scope = rememberCoroutineScope()
+    return remember {
+        ConflictPresenter(scope, koin.get<SyncUseCases>(), SyncSecret(koin.get<PlatformServices>().credentialStore))
+    }
 }

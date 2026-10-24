@@ -4,6 +4,7 @@ import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.settings.DeviceSettings
 import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
 import ch.qscqlmpa.wingtracker.sync.ConnectLogbook
+import ch.qscqlmpa.wingtracker.sync.GetSyncConflicts
 import ch.qscqlmpa.wingtracker.sync.GetSyncStatus
 import ch.qscqlmpa.wingtracker.sync.JoinLogbook
 import ch.qscqlmpa.wingtracker.sync.LogbookSync
@@ -72,6 +73,7 @@ class AutoSyncPresenterTest {
                 SyncLogbook(sync, deviceSettings, clock),
                 JoinLogbook(sync, deviceSettings, clock),
                 SaveAutomaticSync(deviceSettings),
+                GetSyncConflicts(sync),
             ),
             SyncSecret(credentials),
         ) { received -> started = received }

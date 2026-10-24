@@ -1,7 +1,14 @@
 package ch.qscqlmpa.wingtracker.storage.json
 
+import ch.qscqlmpa.wingtracker.sync.FieldDifference
 import ch.qscqlmpa.wingtracker.sync.RecordKind
 import ch.qscqlmpa.wingtracker.sync.SyncedRecord
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.listDirectoryEntries
@@ -49,6 +56,58 @@ object JsonDataFolder {
                 else -> COLLECTIONS[parts.first()] ?: RecordKind.Other
             }
         return SyncedRecord(kind, id)
+    }
+
+    /**
+     * The fields that differ between two versions of the file at [path], as stored, with nested fields written
+     * like `checks[2].type`. A version is null where that side deleted the file. A file that is no document, such as
+     * an attachment, or one that cannot be read, has no fields to compare.
+     */
+    fun differences(
+        path: String,
+        here: ByteArray?,
+        there: ByteArray?,
+    ): List<FieldDifference> {
+        if (!path.endsWith(".json")) return emptyList()
+        val hereFields = here?.let(::fieldsOf) ?: emptyMap()
+        val thereFields = there?.let(::fieldsOf) ?: emptyMap()
+        return (hereFields.keys + thereFields.keys)
+            .filter { hereFields[it] != thereFields[it] }
+            .map { FieldDifference(it, hereFields[it], thereFields[it]) }
+    }
+
+    // The format version is how a file is stored, not what it says.
+    private fun fieldsOf(bytes: ByteArray): Map<String, String?> =
+        try {
+            buildMap { flatten("", json.parseToJsonElement(bytes.decodeToString())) }
+                .filterKeys { it != "schemaVersion" }
+        } catch (_: SerializationException) {
+            emptyMap()
+        }
+
+    private fun MutableMap<String, String?>.flatten(
+        prefix: String,
+        element: JsonElement,
+    ) {
+        when (element) {
+            is JsonObject -> {
+                element.forEach { (key, value) ->
+                    flatten(if (prefix.isEmpty()) key else "$prefix.$key", value)
+                }
+            }
+
+            is JsonArray -> {
+                element.forEachIndexed { index, value -> flatten("$prefix[$index]", value) }
+            }
+
+            JsonNull -> {
+                put(prefix, null)
+            }
+
+            is JsonPrimitive -> {
+                put(prefix, element.content)
+            }
+        }
     }
 
     private val COLLECTIONS =

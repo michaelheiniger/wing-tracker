@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.git
 
+import ch.qscqlmpa.wingtracker.sync.FieldDifference
 import ch.qscqlmpa.wingtracker.sync.RecordKind
 import ch.qscqlmpa.wingtracker.sync.SyncAuthor
 import ch.qscqlmpa.wingtracker.sync.SyncRemote
@@ -32,6 +33,13 @@ class TestLayout(
         val kind = if (collection == "flights") RecordKind.Flight else RecordKind.Wing
         return SyncedRecord(kind, file.removeSuffix(".json"))
     }
+
+    // The whole file as one field: enough to tell the two versions apart here.
+    override fun differences(
+        path: String,
+        here: ByteArray?,
+        there: ByteArray?,
+    ) = listOf(FieldDifference("content", here?.decodeToString(), there?.decodeToString()))
 }
 
 /** An empty repository on this computer, standing in for the pilot's host. */
@@ -72,6 +80,22 @@ class OtherDevice(
             .setDirectory(directory.toFile())
             .setBranch("main")
             .call()
+
+    fun deleteAndPush(path: String) {
+        directory.resolve(path).toFile().delete()
+        git.rm().addFilepattern(path).call()
+        git
+            .commit()
+            .setMessage("Delete from the other device")
+            .setAuthor(OTHER_DEVICE.name, OTHER_DEVICE.email)
+            .call()
+        git
+            .push()
+            .setRefSpecs(
+                org.eclipse.jgit.transport
+                    .RefSpec("HEAD:refs/heads/main"),
+            ).call()
+    }
 
     fun commitAndPush(
         path: String,

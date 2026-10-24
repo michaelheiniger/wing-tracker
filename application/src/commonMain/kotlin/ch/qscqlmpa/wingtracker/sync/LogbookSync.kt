@@ -26,12 +26,17 @@ interface LogbookSync {
 
     /**
      * Receives the changes of other devices and sends this device's. When a record changed on both sides since the
-     * last sync, nothing is exchanged and the report names the records; resolving them comes later.
+     * last sync, nothing is exchanged and the report names the records, unless [resolutions] says which version of
+     * each to keep.
      */
     suspend fun sync(
         remote: SyncRemote,
         author: SyncAuthor,
+        resolutions: Map<SyncedRecord, ConflictChoice> = emptyMap(),
     ): SyncReport
+
+    /** The records the last sync found changed on both sides, with both versions; needs no connection. */
+    suspend fun conflicts(): List<SyncConflict>
 
     /** Signs this device's next changes with [author]. */
     suspend fun changeAuthor(author: SyncAuthor)

@@ -1,6 +1,8 @@
 package ch.qscqlmpa.wingtracker.git
 
 import ch.qscqlmpa.wingtracker.flights.FlightId
+import ch.qscqlmpa.wingtracker.sync.ConflictChoice
+import ch.qscqlmpa.wingtracker.sync.FieldDifference
 import ch.qscqlmpa.wingtracker.sync.LogbookChange
 import ch.qscqlmpa.wingtracker.sync.RecordKind
 import ch.qscqlmpa.wingtracker.sync.SyncException
@@ -389,6 +391,108 @@ class GitLogbookTest {
                             .authorIdent.name,
                     ).isEqualTo(OTHER_DEVICE.name)
                 }
+            }
+    }
+
+    @Nested
+    inner class ResolvingConflicts {
+        private val path = "flights/${FLIGHT.value}.json"
+        private val record = SyncedRecord(RecordKind.Flight, FLIGHT.value)
+
+        // The same flight changed here and on the other device since the last sync.
+        private suspend fun changedOnBothSides(other: String? = aFlightDocument(duration = 120)) {
+            dataFolder.store(path, aFlightDocument())
+            logbook.connect(remote, PILOT)
+            val device = OtherDevice(remote, root.resolve("other"))
+            if (other != null) device.commitAndPush(path, other) else device.deleteAndPush(path)
+            logbook.run(LogbookChange.FlightUpdated(FLIGHT)) { dataFolder.store(path, aFlightDocument(duration = 100)) }
+            logbook.sync(remote, PILOT)
+        }
+
+        @Test
+        fun `describes both versions, who changed them and what differs`() =
+            runTest {
+                // given
+                changedOnBothSides()
+
+                // when
+                val conflicts = logbook.conflicts()
+
+                // then
+                val conflict = conflicts.single()
+                assertThat(conflict.record).isEqualTo(record)
+                assertThat(conflict.here.change?.author).isEqualTo(PILOT.name)
+                assertThat(conflict.here.change?.description).isEqualTo("Update flight ${FLIGHT.value}")
+                assertThat(conflict.there.change?.author).isEqualTo(OTHER_DEVICE.name)
+                assertThat(conflict.differences)
+                    .containsExactly(
+                        FieldDifference("content", aFlightDocument(duration = 100), aFlightDocument(duration = 120)),
+                    )
+            }
+
+        @Test
+        fun `keeps this device's version, joins both sides in a merge commit and sends it`() =
+            runTest {
+                // given
+                changedOnBothSides()
+                OtherDevice(
+                    remote,
+                    root.resolve("third"),
+                ).commitAndPush("flights/f-9.json", aFlightDocument(site = "Fiesch"))
+
+                // when
+                val report = logbook.sync(remote, PILOT, mapOf(record to ConflictChoice.Here))
+
+                // then
+                assertThat(report.conflicts).isEmpty()
+                assertThat(dataFolder.resolve(path).readText()).isEqualTo(aFlightDocument(duration = 100))
+                assertThat(dataFolder.resolve("flights/f-9.json").exists()).isTrue()
+                val content = remoteContent()
+                assertThat(content.read(path)).isEqualTo(aFlightDocument(duration = 100))
+                assertThat(content.commits().first().parentCount).isEqualTo(2)
+                assertThat(logbook.conflicts()).isEmpty()
+            }
+
+        @Test
+        fun `keeps the other device's version when chosen`() =
+            runTest {
+                // given
+                changedOnBothSides()
+
+                // when
+                logbook.sync(remote, PILOT, mapOf(record to ConflictChoice.There))
+
+                // then
+                assertThat(dataFolder.resolve(path).readText()).isEqualTo(aFlightDocument(duration = 120))
+                assertThat(remoteContent().read(path)).isEqualTo(aFlightDocument(duration = 120))
+            }
+
+        @Test
+        fun `keeps the other device's deletion when chosen`() =
+            runTest {
+                // given
+                changedOnBothSides(other = null)
+
+                // when
+                logbook.sync(remote, PILOT, mapOf(record to ConflictChoice.There))
+
+                // then
+                assertThat(dataFolder.resolve(path).exists()).isFalse()
+                assertThat(remoteContent().files()).doesNotContain(path)
+            }
+
+        @Test
+        fun `exchanges nothing while a record has no choice`() =
+            runTest {
+                // given
+                changedOnBothSides()
+
+                // when
+                val report = logbook.sync(remote, PILOT, emptyMap())
+
+                // then
+                assertThat(report.conflicts).containsExactly(record)
+                assertThat(dataFolder.resolve(path).readText()).isEqualTo(aFlightDocument(duration = 100))
             }
     }
 }

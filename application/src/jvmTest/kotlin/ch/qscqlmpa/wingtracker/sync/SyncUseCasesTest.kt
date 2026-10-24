@@ -169,6 +169,23 @@ class SyncUseCasesTest {
             }
 
         @Test
+        fun `passes on which version of each conflicting record to keep`() =
+            runTest {
+                // given
+                val record = SyncedRecord(RecordKind.Flight, "f-2026-09-20")
+                coEvery { deviceSettings.load() } returns connectedDevice
+                coEvery { sync.sync(any(), any(), any()) } returns SyncReport(received = 2, sent = 2)
+
+                // when
+                syncLogbook(TOKEN, mapOf(record to ConflictChoice.There))
+
+                // then
+                coVerify(exactly = 1) {
+                    sync.sync(SETTINGS.remote(TOKEN), SETTINGS.author, mapOf(record to ConflictChoice.There))
+                }
+            }
+
+        @Test
         fun `keeps the last sync when records changed on both sides stopped it`() =
             runTest {
                 // given

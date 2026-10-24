@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ch.qscqlmpa.wingtracker.sync.ConnectLogbook
+import ch.qscqlmpa.wingtracker.sync.GetSyncConflicts
 import ch.qscqlmpa.wingtracker.sync.GetSyncStatus
 import ch.qscqlmpa.wingtracker.sync.JoinLogbook
 import ch.qscqlmpa.wingtracker.sync.SaveAutomaticSync
@@ -34,6 +35,7 @@ class SyncUseCases(
     val syncLogbook: SyncLogbook,
     val joinLogbook: JoinLogbook,
     val saveAutomaticSync: SaveAutomaticSync,
+    val getSyncConflicts: GetSyncConflicts,
 )
 
 private const val TOKEN_KEY = "sync-token"
@@ -105,6 +107,8 @@ class SyncPresenter(
             status = useCases.getSyncStatus()
             input = storedForm
             tokenStored = secret.current() != null
+            // Read again after conflicts were resolved elsewhere, so their message would be out of date.
+            outcome = null
         }
 
     fun edit() {

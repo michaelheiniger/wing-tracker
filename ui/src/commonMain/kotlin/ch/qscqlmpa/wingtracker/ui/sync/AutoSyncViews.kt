@@ -30,6 +30,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.sync_close_title
 import ch.qscqlmpa.wingtracker.ui.resources.sync_close_without
 import ch.qscqlmpa.wingtracker.ui.resources.sync_continue
 import ch.qscqlmpa.wingtracker.ui.resources.sync_in_progress
+import ch.qscqlmpa.wingtracker.ui.resources.sync_resolve
 import ch.qscqlmpa.wingtracker.ui.resources.sync_skip
 import ch.qscqlmpa.wingtracker.ui.resources.sync_start_running
 import ch.qscqlmpa.wingtracker.ui.resources.sync_start_stopped
@@ -37,7 +38,10 @@ import org.jetbrains.compose.resources.stringResource
 
 /** Stands in for the logbook while the start syncs, so nothing shows that the sync is about to change. */
 @Composable
-fun StartSyncScreen(presenter: AutoSyncPresenter) {
+fun StartSyncScreen(
+    presenter: AutoSyncPresenter,
+    conflicts: ConflictPresenter,
+) {
     Box(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center,
@@ -66,9 +70,17 @@ fun StartSyncScreen(presenter: AutoSyncPresenter) {
                         )
                         start.outcome?.let { Text(it.text()) }
                         start.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
-                        Button(
-                            onClick = presenter::continueAfterStop,
-                        ) { Text(stringResource(Res.string.sync_continue)) }
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            if (start.outcome != null) {
+                                // Once resolved, the start goes on with what was exchanged.
+                                Button(onClick = { conflicts.open { presenter.continueAfterStop() } }) {
+                                    Text(stringResource(Res.string.sync_resolve))
+                                }
+                            }
+                            TextButton(onClick = presenter::continueAfterStop) {
+                                Text(stringResource(Res.string.sync_continue))
+                            }
+                        }
                     }
                 }
             }

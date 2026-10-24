@@ -1,5 +1,6 @@
 package ch.qscqlmpa.wingtracker.git
 
+import ch.qscqlmpa.wingtracker.sync.FieldDifference
 import ch.qscqlmpa.wingtracker.sync.SyncedRecord
 
 /**
@@ -15,4 +16,11 @@ interface SyncedFolderLayout {
     fun isQuarantined(path: String): Boolean
 
     fun recordAt(path: String): SyncedRecord
+
+    /** The fields that differ between two versions of the file at [path]; a version is null where it was deleted. */
+    fun differences(
+        path: String,
+        here: ByteArray?,
+        there: ByteArray?,
+    ): List<FieldDifference>
 }

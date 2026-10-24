@@ -65,6 +65,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.sync_record_reserve
 import ch.qscqlmpa.wingtracker.ui.resources.sync_record_settings
 import ch.qscqlmpa.wingtracker.ui.resources.sync_record_wing
 import ch.qscqlmpa.wingtracker.ui.resources.sync_repository_hint
+import ch.qscqlmpa.wingtracker.ui.resources.sync_resolve
 import ch.qscqlmpa.wingtracker.ui.resources.sync_saved
 import ch.qscqlmpa.wingtracker.ui.resources.sync_saved_session
 import ch.qscqlmpa.wingtracker.ui.resources.sync_saved_system
@@ -85,6 +86,7 @@ import org.jetbrains.compose.resources.stringResource
 fun SyncSection(
     presenter: SyncPresenter,
     join: JoinPresenter,
+    conflicts: ConflictPresenter,
 ) {
     val status = presenter.status ?: return
     val settings = status.settings
@@ -106,6 +108,12 @@ fun SyncSection(
     }
     // While the dialog is open, it shows them itself.
     if (!presenter.editing) Outcome(presenter)
+    if (!presenter.editing && presenter.outcome is SyncOutcome.Conflicts) {
+        // Read again once resolved, so the summary shows the new last sync.
+        OutlinedButton(
+            onClick = { conflicts.open { presenter.load() } },
+        ) { Text(stringResource(Res.string.sync_resolve)) }
+    }
     if (presenter.editing) SyncDialog(presenter)
     JoinDialogs(join)
 }

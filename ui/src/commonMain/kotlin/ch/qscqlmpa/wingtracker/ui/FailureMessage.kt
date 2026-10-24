@@ -52,6 +52,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.failure_install_update
 import ch.qscqlmpa.wingtracker.ui.resources.failure_join_logbook
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_attention
+import ch.qscqlmpa.wingtracker.ui.resources.failure_load_conflicts
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_logbook
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_maintenance
 import ch.qscqlmpa.wingtracker.ui.resources.failure_load_settings
@@ -140,6 +141,7 @@ private val FAILURE_TEXTS: Map<FailureKind, StringResource> =
         FailureKind.SyncUnexpected to Res.string.failure_sync_unexpected,
         FailureKind.SyncTokenMissing to Res.string.failure_sync_token_missing,
         FailureKind.JoinLogbook to Res.string.failure_join_logbook,
+        FailureKind.LoadConflicts to Res.string.failure_load_conflicts,
         FailureKind.SyrideUserNotFound to Res.string.failure_syride_user,
         FailureKind.SyrideUnreachable to Res.string.failure_syride_unreachable,
         FailureKind.SyridePagesChanged to Res.string.failure_syride_changed,
