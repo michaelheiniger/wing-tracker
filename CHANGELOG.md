@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-24
+
 ### Added
 - Synchronise your logbook between computers through a Git repository of your own, for example on GitHub or Codeberg: connect an empty repository in the settings' new "Sync" page with its address, an access token (kept by your system's password store) and the name and email address your changes are signed with. "Sync now" sends your changes and receives those of your other computers. When the same record was changed on two computers, nothing is exchanged until you choose which version to keep: "Resolve…", on the start screen or the "Sync" page, lists each such record by its name (a flight by its date and take-off site) with who changed it when on each computer and the fields that differ, and "Apply and sync" keeps your choices. The other version stays in the repository's history.
 - A synchronised logbook syncs when Wing Tracker starts, before the logbook shows, and when it closes. "Skip" and "Close without syncing" cut it short, and a host that does not answer is given up on after a while. Without a connection the logbook opens at once, and a notification in the top-right corner says so and goes away on its own (hover over it to keep it); when records changed on two computers or the sync failed, the start says so before the logbook opens. A switch on the "Sync" page turns this off, to sync only with "Sync now".
