@@ -5,6 +5,7 @@ import ch.qscqlmpa.wingtracker.settings.DeviceSettings
 import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
 import ch.qscqlmpa.wingtracker.sync.ConnectLogbook
 import ch.qscqlmpa.wingtracker.sync.GetSyncStatus
+import ch.qscqlmpa.wingtracker.sync.JoinLogbook
 import ch.qscqlmpa.wingtracker.sync.LogbookSync
 import ch.qscqlmpa.wingtracker.sync.RecordKind
 import ch.qscqlmpa.wingtracker.sync.SaveSyncSettings
@@ -74,6 +75,7 @@ class SyncPresenterTest {
         }
     private var flushed = 0
     private var synced = 0
+    private var offered: Pair<SyncSettings, String>? = null
 
     private fun TestScope.presenter() =
         SyncPresenter(
@@ -83,10 +85,12 @@ class SyncPresenterTest {
                 ConnectLogbook(sync, deviceSettings, clock),
                 SaveSyncSettings(sync, deviceSettings),
                 SyncLogbook(sync, deviceSettings, clock),
+                JoinLogbook(sync, deviceSettings, clock),
             ),
             SyncSecret(credentials),
             beforeSync = { flushed++ },
             onSynced = { synced++ },
+            onRemoteHoldsLogbook = { settings, token -> offered = settings to token },
         )
 
     private fun givenConnected(token: String? = TOKEN) {
@@ -126,7 +130,7 @@ class SyncPresenterTest {
             }
 
         @Test
-        fun `keeps the form open and says why when the repository is not empty`() =
+        fun `offers to join the logbook a repository already holds, instead of failing`() =
             runTest {
                 // given
                 givenNotConnected()
@@ -139,10 +143,30 @@ class SyncPresenterTest {
                 presenter.save()
 
                 // then
-                assertThat(presenter.failure?.kind).isEqualTo(FailureKind.SyncRemoteNotEmpty)
-                assertThat(presenter.editing).isTrue()
+                assertThat(offered).isEqualTo(SETTINGS to TOKEN)
+                assertThat(presenter.failure).isNull()
+                assertThat(presenter.editing).isFalse()
                 assertThat(presenter.connected).isFalse()
                 coVerify(exactly = 0) { credentials.write(any(), any()) }
+            }
+
+        @Test
+        fun `keeps the form open and says why when the token is refused`() =
+            runTest {
+                // given
+                givenNotConnected()
+                coEvery { sync.connect(any(), any()) } throws SyncException(SyncProblem.CredentialsRefused)
+                val presenter = presenter().also { it.load() }
+                presenter.edit()
+                presenter.change { FILLED_IN }
+
+                // when
+                presenter.save()
+
+                // then
+                assertThat(presenter.failure?.kind).isEqualTo(FailureKind.SyncCredentialsRefused)
+                assertThat(presenter.editing).isTrue()
+                assertThat(offered).isNull()
             }
 
         @Test

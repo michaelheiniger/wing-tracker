@@ -919,7 +919,7 @@
     <string name="sync_connecting">Verbindung wird hergestellt…</string>
     <string name="sync_last">Zuletzt synchronisiert: %1$s</string>
     <string name="field_sync_repository">Repository (https://…)</string>
-    <string name="sync_repository_hint">Ein leeres Repository, nur für dieses Flugbuch angelegt.</string>
+    <string name="sync_repository_hint">Ein leeres Repository für dieses Flugbuch oder jenes, das dein anderer Computer schon verwendet.</string>
     <string name="field_sync_username">Benutzername (optional)</string>
     <string name="sync_username_hint">Manche Anbieter wie Codeberg brauchen ihn neben dem Token.</string>
     <string name="field_sync_token">Zugriffstoken</string>
@@ -941,7 +941,7 @@
     <string name="failure_sync_unreachable">Das Repository hat nicht geantwortet. Versuche es später erneut. (%1$s)</string>
     <string name="failure_sync_credentials">Der Anbieter hat das Token abgelehnt. Prüfe, ob es dieses Repository lesen und schreiben darf, und den Benutzernamen, falls dein Anbieter einen braucht.</string>
     <string name="failure_sync_no_repository">Dieses Repository gibt es nicht. Prüfe die Adresse.</string>
-    <string name="failure_sync_not_empty">Dieses Repository ist nicht leer. Verbinde dich mit einem leeren Repository, das für dieses Flugbuch angelegt wurde. Sich dem Flugbuch eines anderen Geräts anschliessen kommt in einer späteren Version.</string>
+    <string name="failure_sync_not_empty">Dieses Repository ist nicht leer. Verbinde dich mit einem leeren Repository oder mit einem, das ein Flugbuch enthält, um es auf diesem Computer zu verwenden.</string>
     <string name="failure_sync_unexpected">Die Synchronisation wurde abgebrochen: %1$s. Versuche es erneut.</string>
     <string name="failure_sync_token_missing">Das Zugriffstoken ist nicht mehr gespeichert. Gib es mit Bearbeiten… erneut ein und speichere.</string>
     <plurals name="sync_received">
@@ -980,4 +980,11 @@
         <item quantity="one">%1$d weitere Datei</item>
         <item quantity="other">%1$d weitere Dateien</item>
     </plurals>
+    <string name="sync_join_title">Dieses Repository enthält ein Flugbuch</string>
+    <string name="sync_join_body">Auf diesem Computer verwenden? Es wird in einen leeren Ordner deiner Wahl kopiert, der nach einem Neustart der Datenordner wird. Das Flugbuch, das jetzt auf diesem Computer ist, bleibt in %1$s; nichts wird zusammengeführt.</string>
+    <string name="sync_join_choose">Ordner wählen…</string>
+    <string name="sync_join_folder_title">Einen leeren Ordner für das Flugbuch aus dem Repository wählen</string>
+    <string name="sync_join_copying">Flugbuch wird kopiert…</string>
+    <string name="sync_join_restart_body">Das Flugbuch aus dem Repository ist in %1$s. Wing Tracker startet jetzt neu, um es zu verwenden; das Flugbuch dieses Computers bleibt in %2$s.</string>
+    <string name="failure_join_logbook">Das Flugbuch konnte nicht kopiert werden: %1$s</string>
 </resources>

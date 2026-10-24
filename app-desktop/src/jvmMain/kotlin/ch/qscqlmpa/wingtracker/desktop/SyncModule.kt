@@ -5,6 +5,7 @@ import ch.qscqlmpa.wingtracker.git.SyncedFolderLayout
 import ch.qscqlmpa.wingtracker.storage.json.JsonDataFolder
 import ch.qscqlmpa.wingtracker.sync.ConnectLogbook
 import ch.qscqlmpa.wingtracker.sync.GetSyncStatus
+import ch.qscqlmpa.wingtracker.sync.JoinLogbook
 import ch.qscqlmpa.wingtracker.sync.LogbookSync
 import ch.qscqlmpa.wingtracker.sync.LogbookTransactions
 import ch.qscqlmpa.wingtracker.sync.SaveSyncSettings
@@ -23,7 +24,8 @@ internal fun syncModule(dataDirectory: Path) =
         factory { ConnectLogbook(get(), get(), get()) }
         factory { SaveSyncSettings(get(), get()) }
         factory { SyncLogbook(get(), get(), get()) }
-        single { SyncUseCases(get(), get(), get(), get()) }
+        factory { JoinLogbook(get(), get(), get()) }
+        single { SyncUseCases(get(), get(), get(), get(), get()) }
     }
 
 // Hands the storage adapter's layout to the sync adapter, so neither depends on the other.

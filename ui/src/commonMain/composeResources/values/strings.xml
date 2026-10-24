@@ -919,7 +919,7 @@
     <string name="sync_connecting">Connecting…</string>
     <string name="sync_last">Last synchronised: %1$s</string>
     <string name="field_sync_repository">Repository (https://…)</string>
-    <string name="sync_repository_hint">An empty repository, created for this logbook only.</string>
+    <string name="sync_repository_hint">An empty repository for this logbook, or the one your other computer already uses.</string>
     <string name="field_sync_username">Username (optional)</string>
     <string name="sync_username_hint">Some hosts, such as Codeberg, need it next to the token.</string>
     <string name="field_sync_token">Access token</string>
@@ -941,7 +941,7 @@
     <string name="failure_sync_unreachable">The repository did not answer. Try again later. (%1$s)</string>
     <string name="failure_sync_credentials">The host refused the token. Check that it may read and write this repository, and the username if your host needs one.</string>
     <string name="failure_sync_no_repository">There is no such repository. Check its address.</string>
-    <string name="failure_sync_not_empty">This repository is not empty. Connect to an empty repository created for this logbook. Joining the logbook of another device comes in a later version.</string>
+    <string name="failure_sync_not_empty">This repository is not empty. Connect to an empty repository, or to one holding a logbook to use it on this computer.</string>
     <string name="failure_sync_unexpected">Synchronising stopped: %1$s. Try again.</string>
     <string name="failure_sync_token_missing">The access token is no longer kept. Enter it again with Edit… and save.</string>
     <plurals name="sync_received">
@@ -980,4 +980,11 @@
         <item quantity="one">%1$d other file</item>
         <item quantity="other">%1$d other files</item>
     </plurals>
+    <string name="sync_join_title">This repository holds a logbook</string>
+    <string name="sync_join_body">Use it on this computer? It is copied into an empty folder you choose, which becomes the data folder after a restart. The logbook now on this computer stays in %1$s; nothing is merged.</string>
+    <string name="sync_join_choose">Choose a folder…</string>
+    <string name="sync_join_folder_title">Choose an empty folder for the logbook from the repository</string>
+    <string name="sync_join_copying">Copying the logbook…</string>
+    <string name="sync_join_restart_body">The logbook from the repository is in %1$s. Wing Tracker restarts now to use it; the logbook of this computer stays in %2$s.</string>
+    <string name="failure_join_logbook">The logbook could not be copied: %1$s</string>
 </resources>

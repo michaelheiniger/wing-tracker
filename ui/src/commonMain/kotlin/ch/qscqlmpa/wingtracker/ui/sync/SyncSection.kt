@@ -48,6 +48,11 @@ import ch.qscqlmpa.wingtracker.ui.resources.sync_connecting
 import ch.qscqlmpa.wingtracker.ui.resources.sync_edit
 import ch.qscqlmpa.wingtracker.ui.resources.sync_edit_title
 import ch.qscqlmpa.wingtracker.ui.resources.sync_in_progress
+import ch.qscqlmpa.wingtracker.ui.resources.sync_join_body
+import ch.qscqlmpa.wingtracker.ui.resources.sync_join_choose
+import ch.qscqlmpa.wingtracker.ui.resources.sync_join_copying
+import ch.qscqlmpa.wingtracker.ui.resources.sync_join_restart_body
+import ch.qscqlmpa.wingtracker.ui.resources.sync_join_title
 import ch.qscqlmpa.wingtracker.ui.resources.sync_last
 import ch.qscqlmpa.wingtracker.ui.resources.sync_not_connected
 import ch.qscqlmpa.wingtracker.ui.resources.sync_now
@@ -68,6 +73,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.sync_summary_done
 import ch.qscqlmpa.wingtracker.ui.resources.sync_token_hint
 import ch.qscqlmpa.wingtracker.ui.resources.sync_up_to_date
 import ch.qscqlmpa.wingtracker.ui.resources.sync_username_hint
+import ch.qscqlmpa.wingtracker.ui.settings.RestartDialog
 import ch.qscqlmpa.wingtracker.ui.toDisplay
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
@@ -76,7 +82,10 @@ import org.jetbrains.compose.resources.stringResource
 
 /** The repository the logbook is synchronised to, and a sync by hand; the form opens in a dialog (ADR 0033). */
 @Composable
-fun SyncSection(presenter: SyncPresenter) {
+fun SyncSection(
+    presenter: SyncPresenter,
+    join: JoinPresenter,
+) {
     val status = presenter.status ?: return
     val settings = status.settings
     if (settings == null) {
@@ -97,6 +106,57 @@ fun SyncSection(presenter: SyncPresenter) {
     // While the dialog is open, it shows them itself.
     if (!presenter.editing) Outcome(presenter)
     if (presenter.editing) SyncDialog(presenter)
+    JoinDialogs(join)
+}
+
+/** Offers the logbook a repository already holds, copies it into a folder the pilot chooses, then restarts. */
+@Composable
+private fun JoinDialogs(join: JoinPresenter) {
+    when (val step = join.step) {
+        null -> {}
+
+        is JoinStep.Joined -> {
+            RestartDialog(
+                stringResource(Res.string.sync_join_restart_body, step.folder, join.currentFolder),
+                join::restart,
+            )
+        }
+
+        else -> {
+            val copying = step is JoinStep.Copying
+            AppAlertDialog(
+                onDismissRequest = join::cancel,
+                properties = DialogProperties(dismissOnClickOutside = false),
+                title = { Text(stringResource(Res.string.sync_join_title)) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(stringResource(Res.string.sync_join_body, join.currentFolder))
+                        if (copying) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                Text(stringResource(Res.string.sync_join_copying))
+                            }
+                        }
+                        join.failure?.let { Text(it.message(), color = MaterialTheme.colorScheme.error) }
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = join::chooseFolder, enabled = !copying) {
+                        Text(stringResource(Res.string.sync_join_choose))
+                    }
+                },
+                // Also stops a copy still running.
+                dismissButton = {
+                    TextButton(
+                        onClick = join::cancel,
+                    ) { Text(stringResource(Res.string.action_cancel)) }
+                },
+            )
+        }
+    }
 }
 
 @Composable

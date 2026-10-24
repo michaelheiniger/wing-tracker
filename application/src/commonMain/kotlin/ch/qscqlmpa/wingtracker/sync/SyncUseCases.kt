@@ -70,3 +70,26 @@ class SyncLogbook(
         return report
     }
 }
+
+/**
+ * Uses on this device the logbook a repository already holds: it is copied into the empty [folder] given to
+ * [invoke], which becomes the data folder after a restart (ADR 0020). This device's settings go along, so it looks
+ * the same afterwards.
+ */
+class JoinLogbook(
+    private val sync: LogbookSync,
+    private val deviceSettings: DeviceSettingsRepository,
+    private val clock: AppClock,
+) {
+    suspend operator fun invoke(
+        settings: SyncSettings,
+        token: String,
+        folder: String,
+    ) {
+        sync.join(settings.remote(token), settings.author, folder)
+        val device = deviceSettings.load()
+        // The last backup was of the logbook left behind, so the joined one has none yet.
+        val joined = device.copy(sync = settings, lastSyncedAt = clock.now(), lastBackupAt = null)
+        deviceSettings.saveFor(folder, joined)
+    }
+}

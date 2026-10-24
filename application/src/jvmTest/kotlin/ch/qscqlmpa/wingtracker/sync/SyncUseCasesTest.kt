@@ -108,6 +108,31 @@ class SyncUseCasesTest {
     }
 
     @Nested
+    inner class Joining {
+        @Test
+        fun `copies the logbook, then gives the new folder this device's settings without the old logbook's backup`() =
+            runTest {
+                // given
+                val folder = "/home/michael/Flugbuch"
+                coEvery { deviceSettings.load() } returns
+                    DeviceSettings(interfaceScalePercent = 125, lastBackupAt = Instant.parse("2026-10-18T12:30:00Z"))
+
+                // when
+                JoinLogbook(sync, deviceSettings, clock)(SETTINGS, TOKEN, folder)
+
+                // then
+                coVerify(exactly = 1) { sync.join(SETTINGS.remote(TOKEN), SETTINGS.author, folder) }
+                coVerify(exactly = 1) {
+                    deviceSettings.saveFor(
+                        folder,
+                        DeviceSettings(interfaceScalePercent = 125, sync = SETTINGS, lastSyncedAt = NOW),
+                    )
+                }
+                coVerify(exactly = 0) { deviceSettings.save(any()) }
+            }
+    }
+
+    @Nested
     inner class Synchronising {
         private val syncLogbook = SyncLogbook(sync, deviceSettings, clock)
 

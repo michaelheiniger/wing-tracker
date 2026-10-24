@@ -5,10 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ch.qscqlmpa.wingtracker.sync.ConnectLogbook
 import ch.qscqlmpa.wingtracker.sync.GetSyncStatus
+import ch.qscqlmpa.wingtracker.sync.JoinLogbook
 import ch.qscqlmpa.wingtracker.sync.SaveSyncSettings
 import ch.qscqlmpa.wingtracker.sync.SyncException
 import ch.qscqlmpa.wingtracker.sync.SyncLogbook
 import ch.qscqlmpa.wingtracker.sync.SyncProblem
+import ch.qscqlmpa.wingtracker.sync.SyncSettings
 import ch.qscqlmpa.wingtracker.sync.SyncStatus
 import ch.qscqlmpa.wingtracker.sync.SyncedRecord
 import ch.qscqlmpa.wingtracker.ui.Failure
@@ -29,6 +31,7 @@ class SyncUseCases(
     val connectLogbook: ConnectLogbook,
     val saveSyncSettings: SaveSyncSettings,
     val syncLogbook: SyncLogbook,
+    val joinLogbook: JoinLogbook,
 )
 
 private const val TOKEN_KEY = "sync-token"
@@ -68,6 +71,8 @@ class SyncPresenter(
     private val beforeSync: suspend () -> Unit = {},
     // Lets the rest of the app show what other devices sent.
     private val onSynced: () -> Unit = {},
+    // A repository that already holds a logbook is joined instead (ADR 0033).
+    private val onRemoteHoldsLogbook: (SyncSettings, String) -> Unit = { _, _ -> },
 ) {
     /** Null until loaded. */
     var status by mutableStateOf<SyncStatus?>(null)
@@ -165,7 +170,14 @@ class SyncPresenter(
                 try {
                     val token = checkNotNull(valid.token) { "Connecting needs a token" }
                     beforeSync()
-                    useCases.connectLogbook(valid.settings, token)
+                    try {
+                        useCases.connectLogbook(valid.settings, token)
+                    } catch (e: SyncException) {
+                        if (e.problem != SyncProblem.RemoteNotEmpty) throw e
+                        editing = false
+                        onRemoteHoldsLogbook(valid.settings, token)
+                        return@attempt
+                    }
                     val keeping = secret.keep(token)
                     status = useCases.getSyncStatus()
                     tokenStored = true

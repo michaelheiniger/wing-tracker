@@ -56,6 +56,7 @@ import ch.qscqlmpa.wingtracker.ui.resources.theme_light
 import ch.qscqlmpa.wingtracker.ui.resources.theme_system
 import ch.qscqlmpa.wingtracker.ui.resources.update_rail_badge
 import ch.qscqlmpa.wingtracker.ui.resources.update_title
+import ch.qscqlmpa.wingtracker.ui.sync.JoinPresenter
 import ch.qscqlmpa.wingtracker.ui.sync.SyncPresenter
 import ch.qscqlmpa.wingtracker.ui.sync.SyncSection
 import ch.qscqlmpa.wingtracker.ui.theme.InterfaceScalePreference
@@ -83,6 +84,7 @@ fun SettingsScreen(
     restore: RestorePresenter,
     cloudStorage: CloudStoragePresenter,
     sync: SyncPresenter,
+    join: JoinPresenter,
     dataLocation: DataLocationPresenter,
     logLocation: LogLocationPresenter,
     updates: UpdatePresenter,
@@ -109,7 +111,7 @@ fun SettingsScreen(
                         SettingsCategory.Appearance -> AppearancePage(themePreference, scalePreference)
                         SettingsCategory.Reminders -> RemindersPage(reminders)
                         SettingsCategory.Backup -> BackupPage(backup, restore, cloudStorage)
-                        SettingsCategory.Sync -> SyncPage(sync)
+                        SettingsCategory.Sync -> SyncPage(sync, join)
                         SettingsCategory.Files -> FilesPage(dataLocation, logLocation)
                         SettingsCategory.Updates -> UpdatesPage(updates, installer)
                         SettingsCategory.About -> AboutPage(appVersion, updates)
@@ -231,8 +233,11 @@ private fun BackupPage(
 }
 
 @Composable
-private fun SyncPage(sync: SyncPresenter) {
-    SettingsGroup(Res.string.sync_title, Res.string.sync_hint) { SyncSection(sync) }
+private fun SyncPage(
+    sync: SyncPresenter,
+    join: JoinPresenter,
+) {
+    SettingsGroup(Res.string.sync_title, Res.string.sync_hint) { SyncSection(sync, join) }
 }
 
 @Composable

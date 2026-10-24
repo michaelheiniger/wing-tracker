@@ -20,6 +20,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.eclipse.jgit.lib.EmptyProgressMonitor
 import org.eclipse.jgit.lib.ProgressMonitor
+import java.io.File
 import java.nio.file.Path
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
@@ -33,7 +34,7 @@ private val logger = KotlinLogging.logger {}
  */
 class GitLogbook(
     dataDirectory: Path,
-    layout: SyncedFolderLayout,
+    private val layout: SyncedFolderLayout,
 ) : LogbookSync,
     LogbookTransactions {
     private val folder = GitFolder(dataDirectory.toFile(), layout)
@@ -67,13 +68,20 @@ class GitLogbook(
         online {
             if (!folder.isRemoteEmpty(remote)) throw SyncException(SyncProblem.RemoteNotEmpty)
             folder.openOrCreate().use { git ->
-                folder.configure(git, author)
+                git.configure(author)
                 folder.writeIgnoreFile()
                 folder.commitChanges(git, FIRST_COMMIT_MESSAGE)
                 folder.push(git, remote, this)
             }
         }
     }
+
+    // Writes to another folder only, so it runs beside transactions and syncs of the current one.
+    override suspend fun join(
+        remote: SyncRemote,
+        author: SyncAuthor,
+        folder: String,
+    ) = online { GitFolder(File(folder), layout).cloneFrom(remote, author, this) }
 
     override suspend fun sync(
         remote: SyncRemote,
@@ -82,7 +90,7 @@ class GitLogbook(
         lock.withLock {
             online {
                 folder.open().use { git ->
-                    folder.configure(git, author)
+                    git.configure(author)
                     folder.commitChanges(git, STRAY_CHANGES_MESSAGE)
                     folder.exchange(git, remote, this)
                 }
@@ -92,7 +100,7 @@ class GitLogbook(
     override suspend fun changeAuthor(author: SyncAuthor) =
         lock.withLock {
             withContext(Dispatchers.IO) {
-                if (folder.isRepository()) folder.open().use { folder.configure(it, author) }
+                if (folder.isRepository()) folder.open().use { it.configure(author) }
             }
         }
 

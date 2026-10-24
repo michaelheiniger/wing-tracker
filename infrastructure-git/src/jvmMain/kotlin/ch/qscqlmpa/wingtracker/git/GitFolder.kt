@@ -53,6 +53,23 @@ internal class GitFolder(
                 .call()
         }
 
+    /** Copies the logbook [remote] holds into this folder, which must be empty. */
+    fun cloneFrom(
+        remote: SyncRemote,
+        author: SyncAuthor,
+        monitor: ProgressMonitor,
+    ) {
+        Git
+            .cloneRepository()
+            .setURI(remote.url)
+            .setDirectory(folder)
+            .setBranch(BRANCH)
+            .setCredentialsProvider(remote.credentials())
+            .setProgressMonitor(monitor)
+            .call()
+            .use { it.configure(author) }
+    }
+
     fun isRemoteEmpty(remote: SyncRemote): Boolean =
         Git
             .lsRemoteRepository()
@@ -61,19 +78,6 @@ internal class GitFolder(
             .setHeads(true)
             .call()
             .isEmpty()
-
-    fun configure(
-        git: Git,
-        author: SyncAuthor,
-    ) {
-        git.repository.config.apply {
-            setString("user", null, "name", author.name)
-            setString("user", null, "email", author.email)
-            // Files are committed byte for byte, so every device reads them exactly as they were written.
-            setBoolean("core", null, "autocrlf", false)
-            save()
-        }
-    }
 
     fun writeIgnoreFile() {
         val lines = listOf("# Kept on each device, never synchronised.") + layout.deviceOnly
@@ -205,6 +209,16 @@ internal class GitFolder(
             git.rebase().setOperation(RebaseCommand.Operation.ABORT).call()
             throw SyncException(SyncProblem.Unexpected, "Rebase stopped: ${result.status}")
         }
+    }
+}
+
+internal fun Git.configure(author: SyncAuthor) {
+    repository.config.apply {
+        setString("user", null, "name", author.name)
+        setString("user", null, "email", author.email)
+        // Files are committed byte for byte, so every device reads them exactly as they were written.
+        setBoolean("core", null, "autocrlf", false)
+        save()
     }
 }
 

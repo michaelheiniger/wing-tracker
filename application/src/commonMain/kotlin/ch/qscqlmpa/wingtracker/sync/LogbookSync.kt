@@ -15,6 +15,16 @@ interface LogbookSync {
     )
 
     /**
+     * Copies the logbook [remote] holds into the empty [folder], for this device to use from the next start (ADR 0020).
+     * The current data folder is not touched.
+     */
+    suspend fun join(
+        remote: SyncRemote,
+        author: SyncAuthor,
+        folder: String,
+    )
+
+    /**
      * Receives the changes of other devices and sends this device's. When a record changed on both sides since the
      * last sync, nothing is exchanged and the report names the records; resolving them comes later.
      */
@@ -61,7 +71,7 @@ enum class SyncProblem {
     CredentialsRefused,
     NoSuchRepository,
 
-    // Connecting is only possible to an empty repository.
+    // Connecting is only possible to an empty repository; one that holds a logbook is joined instead.
     RemoteNotEmpty,
     Unexpected,
 }

@@ -85,7 +85,13 @@ class OtherDevice(
             .setMessage(message)
             .setAuthor(OTHER_DEVICE.name, OTHER_DEVICE.email)
             .call()
-        git.push().call()
+        // A clone of an empty repository starts on JGit's default branch, so the branch is named.
+        git
+            .push()
+            .setRefSpecs(
+                org.eclipse.jgit.transport
+                    .RefSpec("HEAD:refs/heads/main"),
+            ).call()
     }
 }
 

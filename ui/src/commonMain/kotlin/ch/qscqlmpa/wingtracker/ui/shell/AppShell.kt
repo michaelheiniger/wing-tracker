@@ -77,12 +77,14 @@ import ch.qscqlmpa.wingtracker.ui.resources.nav_statistics
 import ch.qscqlmpa.wingtracker.ui.resources.restore_folder_title
 import ch.qscqlmpa.wingtracker.ui.resources.restore_pick_title
 import ch.qscqlmpa.wingtracker.ui.resources.settings_data_choose_title
+import ch.qscqlmpa.wingtracker.ui.resources.sync_join_folder_title
 import ch.qscqlmpa.wingtracker.ui.resources.update_rail_badge
 import ch.qscqlmpa.wingtracker.ui.settings.DataLocationPresenter
 import ch.qscqlmpa.wingtracker.ui.settings.LogLocationPresenter
 import ch.qscqlmpa.wingtracker.ui.settings.SettingsCategory
 import ch.qscqlmpa.wingtracker.ui.settings.SettingsScreen
 import ch.qscqlmpa.wingtracker.ui.statistics.StatisticsRoute
+import ch.qscqlmpa.wingtracker.ui.sync.JoinPresenter
 import ch.qscqlmpa.wingtracker.ui.sync.SyncPresenter
 import ch.qscqlmpa.wingtracker.ui.sync.SyncSecret
 import ch.qscqlmpa.wingtracker.ui.sync.SyncUseCases
@@ -162,6 +164,18 @@ fun AppShell(
             )
         }
     val cloudStorage = remember { CloudStoragePresenter(scope, cloudStorageUseCases, cloudSecret, backup::load) }
+    val joinFolderTitle = stringResource(Res.string.sync_join_folder_title)
+    val join =
+        remember {
+            JoinPresenter(
+                scope,
+                syncUseCases.joinLogbook,
+                platform.dataLocation,
+                SyncSecret(platform.credentialStore),
+                joinFolderTitle,
+                beforeJoin = undo::flush,
+            )
+        }
     val sync =
         remember {
             SyncPresenter(
@@ -171,6 +185,7 @@ fun AppShell(
                 beforeSync = undo::flush,
                 // What other devices sent may need attention; the sections read the rest when opened.
                 onSynced = attentionPresenter::refresh,
+                onRemoteHoldsLogbook = join::offer,
             )
         }
     val restoreTitles =
@@ -317,6 +332,7 @@ fun AppShell(
                                             restore,
                                             cloudStorage,
                                             sync,
+                                            join,
                                             dataLocation,
                                             logLocation,
                                             updatePresenter,

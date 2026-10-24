@@ -39,6 +39,11 @@ class JsonDeviceSettingsRepository(
 
     override suspend fun save(settings: DeviceSettings) =
         this.settings.save(json.encodeToString(DeviceSettingsDocument.from(settings)))
+
+    override suspend fun saveFor(
+        folder: String,
+        settings: DeviceSettings,
+    ) = JsonDeviceSettingsRepository(Path.of(folder)).save(settings)
 }
 
 /**

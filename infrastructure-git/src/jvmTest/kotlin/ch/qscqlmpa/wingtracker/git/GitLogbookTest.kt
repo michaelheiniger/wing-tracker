@@ -118,6 +118,30 @@ class GitLogbookTest {
     }
 
     @Nested
+    inner class Joining {
+        @Test
+        fun `copies the logbook the repository holds into the folder, signing this device's changes`() =
+            runTest {
+                // given
+                OtherDevice(
+                    remote,
+                    root.resolve("other"),
+                ).commitAndPush("flights/f-9.json", aFlightDocument(site = "Fiesch"))
+                val folder = Files.createDirectories(root.resolve("joined"))
+
+                // when
+                logbook.join(remote, PILOT, folder.toString())
+
+                // then
+                assertThat(folder.resolve("flights/f-9.json").readText()).isEqualTo(aFlightDocument(site = "Fiesch"))
+                Git.open(folder.toFile()).use { git ->
+                    assertThat(git.repository.config.getString("user", null, "name")).isEqualTo(PILOT.name)
+                }
+                assertThat(logbook.isConnected()).isFalse()
+            }
+    }
+
+    @Nested
     inner class Transactions {
         @Test
         fun `commits the writes of a transaction as one commit named after its change`() =

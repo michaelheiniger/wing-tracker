@@ -256,6 +256,25 @@ class JsonSettingsRepositoriesTest {
     }
 
     @Nested
+    inner class DeviceSettingsSaveFor {
+        @Test
+        fun `writes the settings of another data folder, leaving this one alone`() =
+            runTest {
+                // given
+                val other = dataDirectory.resolve("joined").also { it.toFile().mkdirs() }
+
+                // when
+                deviceSettings.saveFor(other.toString(), SYNCED_DEVICE)
+
+                // then
+                assertThat(
+                    JsonDeviceSettingsRepository(other).load(),
+                ).usingRecursiveComparison().isEqualTo(SYNCED_DEVICE)
+                assertThat(dataDirectory.resolve(DEVICE_FILE).exists()).isFalse()
+            }
+    }
+
+    @Nested
     inner class SplittingSettingsFromBeforeTheSplit {
         @Test
         fun `moves each setting to the logbook or the device`() =

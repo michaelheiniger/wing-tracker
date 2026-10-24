@@ -133,7 +133,7 @@ class RestorePresenter(
         val confirm = step as? RestoreStep.Confirm ?: return
         attempt {
             val folder = location.chooseFolder(titles.chooseFolder) ?: return@attempt
-            folderProblem(location.inspect(folder))?.let {
+            location.inspect(folder).freeFolderProblem()?.let {
                 failure = Failure(it, folder)
                 return@attempt
             }
@@ -167,15 +167,6 @@ class RestorePresenter(
 
     fun restart() = location.restart()
 
-    private fun folderProblem(check: FolderCheck): FailureKind? =
-        when (check) {
-            FolderCheck.Empty -> null
-            FolderCheck.HasData -> FailureKind.RestoreFolderNotEmpty
-            FolderCheck.Same -> FailureKind.DataFolderSame
-            FolderCheck.Unusable -> FailureKind.DataFolderUnusable
-            FolderCheck.Overlaps -> FailureKind.DataFolderOverlaps
-        }
-
     private fun attempt(action: suspend () -> Unit): Job =
         scope.launch {
             try {
@@ -205,4 +196,14 @@ internal fun BackupProblem.failureKind(): FailureKind =
         BackupProblem.Damaged -> FailureKind.BackupDamaged
         BackupProblem.NewerFormat -> FailureKind.BackupNewerFormat
         BackupProblem.FolderNotEmpty -> FailureKind.RestoreFolderNotEmpty
+    }
+
+/** Why a folder cannot receive a logbook of its own (a restored backup, a joined repository); null when it can. */
+internal fun FolderCheck.freeFolderProblem(): FailureKind? =
+    when (this) {
+        FolderCheck.Empty -> null
+        FolderCheck.HasData -> FailureKind.RestoreFolderNotEmpty
+        FolderCheck.Same -> FailureKind.DataFolderSame
+        FolderCheck.Unusable -> FailureKind.DataFolderUnusable
+        FolderCheck.Overlaps -> FailureKind.DataFolderOverlaps
     }

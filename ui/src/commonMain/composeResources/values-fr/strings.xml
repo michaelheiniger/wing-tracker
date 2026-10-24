@@ -919,7 +919,7 @@
     <string name="sync_connecting">Connexion…</string>
     <string name="sync_last">Dernière synchronisation : %1$s</string>
     <string name="field_sync_repository">Dépôt (https://…)</string>
-    <string name="sync_repository_hint">Un dépôt vide, créé uniquement pour ce carnet.</string>
+    <string name="sync_repository_hint">Un dépôt vide pour ce carnet, ou celui que ton autre ordinateur utilise déjà.</string>
     <string name="field_sync_username">Nom d'utilisateur (facultatif)</string>
     <string name="sync_username_hint">Certains hébergeurs, comme Codeberg, en ont besoin en plus du jeton.</string>
     <string name="field_sync_token">Jeton d'accès</string>
@@ -941,7 +941,7 @@
     <string name="failure_sync_unreachable">Le dépôt n'a pas répondu. Réessaie plus tard. (%1$s)</string>
     <string name="failure_sync_credentials">L'hébergeur a refusé le jeton. Vérifie qu'il peut lire et écrire ce dépôt, et le nom d'utilisateur si ton hébergeur en demande un.</string>
     <string name="failure_sync_no_repository">Ce dépôt n'existe pas. Vérifie son adresse.</string>
-    <string name="failure_sync_not_empty">Ce dépôt n'est pas vide. Connecte-toi à un dépôt vide créé pour ce carnet. Rejoindre le carnet d'un autre appareil viendra dans une version ultérieure.</string>
+    <string name="failure_sync_not_empty">Ce dépôt n'est pas vide. Connecte-toi à un dépôt vide, ou à un dépôt contenant un carnet pour l'utiliser sur cet ordinateur.</string>
     <string name="failure_sync_unexpected">La synchronisation s'est arrêtée : %1$s. Réessaie.</string>
     <string name="failure_sync_token_missing">Le jeton d'accès n'est plus gardé. Saisis-le à nouveau avec Modifier… et enregistre.</string>
     <plurals name="sync_received">
@@ -980,4 +980,11 @@
         <item quantity="one">%1$d autre fichier</item>
         <item quantity="other">%1$d autres fichiers</item>
     </plurals>
+    <string name="sync_join_title">Ce dépôt contient un carnet</string>
+    <string name="sync_join_body">L'utiliser sur cet ordinateur ? Il est copié dans un dossier vide de ton choix, qui devient le dossier de données après un redémarrage. Le carnet qui est maintenant sur cet ordinateur reste dans %1$s ; rien n'est fusionné.</string>
+    <string name="sync_join_choose">Choisir un dossier…</string>
+    <string name="sync_join_folder_title">Choisir un dossier vide pour le carnet du dépôt</string>
+    <string name="sync_join_copying">Copie du carnet…</string>
+    <string name="sync_join_restart_body">Le carnet du dépôt est dans %1$s. Wing Tracker redémarre maintenant pour l'utiliser ; le carnet de cet ordinateur reste dans %2$s.</string>
+    <string name="failure_join_logbook">Le carnet n'a pas pu être copié : %1$s</string>
 </resources>

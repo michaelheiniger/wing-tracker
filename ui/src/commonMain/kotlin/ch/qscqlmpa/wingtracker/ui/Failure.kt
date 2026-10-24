@@ -58,6 +58,7 @@ enum class FailureKind {
     SyncRemoteNotEmpty,
     SyncUnexpected,
     SyncTokenMissing,
+    JoinLogbook,
     SyrideUserNotFound,
     SyrideUnreachable,
     SyridePagesChanged,
