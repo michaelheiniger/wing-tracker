@@ -4,6 +4,8 @@ import ch.qscqlmpa.wingtracker.gear.GearStatus
 import ch.qscqlmpa.wingtracker.gear.maintenance.aStoredCheck
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.RecordingTransactions
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -14,16 +16,30 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class WingUseCasesTest {
+    private val transactions = RecordingTransactions()
     private val wings = mockk<WingRepository>(relaxUnitFun = true)
 
     @Nested
     inner class RegisterWingUseCase {
         @Test
+        fun `records the registration as one change to the logbook`() =
+            runTest {
+                // given
+                val registerWing = RegisterWing(wings, transactions) { WingId("new-wing-1") }
+
+                // when
+                val wing = registerWing(aWingDetails())
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.GearRegistered(wing.ref))
+            }
+
+        @Test
         fun `saves a new active wing with the generated id`() =
             runTest {
                 // given
                 val details = aWingDetails()
-                val registerWing = RegisterWing(wings) { WingId("new-wing-1") }
+                val registerWing = RegisterWing(wings, transactions) { WingId("new-wing-1") }
 
                 // when
                 val wing = registerWing(details)
@@ -38,6 +54,20 @@ class WingUseCasesTest {
     @Nested
     inner class UpdateWingDetailsUseCase {
         @Test
+        fun `records the update as one change to the logbook`() =
+            runTest {
+                // given
+                val existing = aWing()
+                coEvery { wings.findById(existing.id) } returns existing
+
+                // when
+                UpdateWingDetails(wings, transactions)(existing.id, aWingDetails(name = "Cloud Surfer"))
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.GearDetailsUpdated(existing.ref))
+            }
+
+        @Test
         fun `saves the wing with the new details`() =
             runTest {
                 // given
@@ -46,7 +76,7 @@ class WingUseCasesTest {
                 coEvery { wings.findById(existing.id) } returns existing
 
                 // when
-                val updated = UpdateWingDetails(wings)(existing.id, newDetails)
+                val updated = UpdateWingDetails(wings, transactions)(existing.id, newDetails)
 
                 // then
                 assertThat(updated.details.name).isEqualTo("Cloud Surfer")
@@ -61,7 +91,13 @@ class WingUseCasesTest {
                 coEvery { wings.findById(id) } returns null
 
                 // when / then
-                val failure = runCatching { UpdateWingDetails(wings)(id, aWingDetails()) }.exceptionOrNull()
+                val failure =
+                    runCatching {
+                        UpdateWingDetails(
+                            wings,
+                            transactions,
+                        )(id, aWingDetails())
+                    }.exceptionOrNull()
                 assertThat(failure).isInstanceOf(WingNotFoundException::class.java)
                 coVerify(exactly = 0) { wings.save(any()) }
             }
@@ -70,6 +106,20 @@ class WingUseCasesTest {
     @Nested
     inner class RetireWingUseCase {
         @Test
+        fun `records the retirement as one change to the logbook`() =
+            runTest {
+                // given
+                val existing = aWing()
+                coEvery { wings.findById(existing.id) } returns existing
+
+                // when
+                RetireWing(wings, transactions)(existing.id, LocalDate(2026, 9, 30), "Sold")
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.GearRetired(existing.ref))
+            }
+
+        @Test
         fun `saves the wing as retired`() =
             runTest {
                 // given
@@ -77,7 +127,7 @@ class WingUseCasesTest {
                 coEvery { wings.findById(existing.id) } returns existing
 
                 // when
-                val retired = RetireWing(wings)(existing.id, LocalDate(2026, 9, 30), "Sold")
+                val retired = RetireWing(wings, transactions)(existing.id, LocalDate(2026, 9, 30), "Sold")
 
                 // then
                 assertThat(retired.status).isEqualTo(GearStatus.Retired(LocalDate(2026, 9, 30), "Sold"))
@@ -92,13 +142,33 @@ class WingUseCasesTest {
                 coEvery { wings.findById(id) } returns null
 
                 // when / then
-                val failure = runCatching { RetireWing(wings)(id, LocalDate(2026, 9, 30), null) }.exceptionOrNull()
+                val failure =
+                    runCatching {
+                        RetireWing(
+                            wings,
+                            transactions,
+                        )(id, LocalDate(2026, 9, 30), null)
+                    }.exceptionOrNull()
                 assertThat(failure).isInstanceOf(WingNotFoundException::class.java)
             }
     }
 
     @Nested
     inner class DeleteWingUseCase {
+        @Test
+        fun `records the deletion as one change to the logbook`() =
+            runTest {
+                // given
+                val existing = aWing()
+                coEvery { wings.findById(existing.id) } returns existing
+
+                // when
+                DeleteWing(wings, { false }, transactions)(existing.id)
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.GearDeleted(existing.ref))
+            }
+
         @Test
         fun `deletes a wing without flights`() =
             runTest {
@@ -107,7 +177,7 @@ class WingUseCasesTest {
                 coEvery { wings.findById(existing.id) } returns existing
 
                 // when
-                DeleteWing(wings) { false }(existing.id)
+                DeleteWing(wings, { false }, transactions)(existing.id)
 
                 // then
                 coVerify(exactly = 1) { wings.delete(existing.id) }
@@ -121,7 +191,7 @@ class WingUseCasesTest {
                 coEvery { wings.findById(existing.id) } returns existing
 
                 // when
-                val failure = runCatching { DeleteWing(wings) { true }(existing.id) }.exceptionOrNull()
+                val failure = runCatching { DeleteWing(wings, { true }, transactions)(existing.id) }.exceptionOrNull()
 
                 // then
                 assertThat(failure).isInstanceOf(WingInUseException::class.java)
@@ -136,7 +206,7 @@ class WingUseCasesTest {
                 coEvery { wings.findById(existing.id) } returns existing
 
                 // when
-                val failure = runCatching { DeleteWing(wings) { false }(existing.id) }.exceptionOrNull()
+                val failure = runCatching { DeleteWing(wings, { false }, transactions)(existing.id) }.exceptionOrNull()
 
                 // then
                 assertThat(failure).isInstanceOf(WingInUseException::class.java)
@@ -151,7 +221,7 @@ class WingUseCasesTest {
                 coEvery { wings.findById(id) } returns null
 
                 // when
-                val failure = runCatching { DeleteWing(wings) { false }(id) }.exceptionOrNull()
+                val failure = runCatching { DeleteWing(wings, { false }, transactions)(id) }.exceptionOrNull()
 
                 // then
                 assertThat(failure).isInstanceOf(WingNotFoundException::class.java)

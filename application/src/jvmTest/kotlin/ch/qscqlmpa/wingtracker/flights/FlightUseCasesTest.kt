@@ -4,6 +4,8 @@ import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.WingNotFoundException
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.RecordingTransactions
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class FlightUseCasesTest {
+    private val transactions = RecordingTransactions()
     private val flights = mockk<FlightRepository>(relaxUnitFun = true)
     private val wings = mockk<WingRepository>()
     private val attachments = mockk<AttachmentStore>(relaxUnitFun = true)
@@ -26,7 +29,20 @@ class FlightUseCasesTest {
 
     @Nested
     inner class LogFlightUseCase {
-        private val logFlight = LogFlight(flights, wings, aFixedClock()) { FlightId("new-flight") }
+        private val logFlight = LogFlight(flights, wings, aFixedClock(), transactions) { FlightId("new-flight") }
+
+        @Test
+        fun `records the flight as one change to the logbook`() =
+            runTest {
+                // given
+                givenTheWingExists()
+
+                // when
+                logFlight(aFlightDetails())
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.FlightLogged(FlightId("new-flight")))
+            }
 
         @Test
         fun `saves the flight with a generated id and the time it was logged`() =
@@ -121,7 +137,22 @@ class FlightUseCasesTest {
 
     @Nested
     inner class UpdateFlightUseCase {
-        private val updateFlight = UpdateFlight(flights, wings, aFixedClock())
+        private val updateFlight = UpdateFlight(flights, wings, aFixedClock(), transactions)
+
+        @Test
+        fun `records the update as one change to the logbook`() =
+            runTest {
+                // given
+                givenTheWingExists()
+                val existing = aFlight()
+                coEvery { flights.findById(existing.id) } returns existing
+
+                // when
+                updateFlight(existing.id, aFlightDetails(date = LocalDate(2026, 9, 21)))
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.FlightUpdated(existing.id))
+            }
 
         @Test
         fun `replaces the details and keeps the id and the logging time`() =
@@ -180,6 +211,20 @@ class FlightUseCasesTest {
     @Nested
     inner class DeleteFlightUseCase {
         @Test
+        fun `records the deletion as one change to the logbook`() =
+            runTest {
+                // given
+                val existing = aFlight()
+                coEvery { flights.findById(existing.id) } returns existing
+
+                // when
+                DeleteFlight(flights, attachments, transactions)(existing.id)
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.FlightDeleted(existing.id))
+            }
+
+        @Test
         fun `deletes an existing flight`() =
             runTest {
                 // given
@@ -187,7 +232,7 @@ class FlightUseCasesTest {
                 coEvery { flights.findById(existing.id) } returns existing
 
                 // when
-                DeleteFlight(flights, attachments)(existing.id)
+                DeleteFlight(flights, attachments, transactions)(existing.id)
 
                 // then
                 coVerify(exactly = 1) { flights.delete(existing.id) }
@@ -201,7 +246,7 @@ class FlightUseCasesTest {
                 coEvery { flights.findById(id) } returns null
 
                 // when
-                val failure = runCatching { DeleteFlight(flights, attachments)(id) }.exceptionOrNull()
+                val failure = runCatching { DeleteFlight(flights, attachments, transactions)(id) }.exceptionOrNull()
 
                 // then
                 assertThat(failure).isInstanceOf(FlightNotFoundException::class.java)
@@ -224,7 +269,7 @@ class FlightUseCasesTest {
                 coEvery { flights.findById(imported.id) } returns imported
 
                 // when
-                DeleteFlight(flights, attachments)(imported.id)
+                DeleteFlight(flights, attachments, transactions)(imported.id)
 
                 // then
                 coVerifyOrder {
@@ -241,7 +286,7 @@ class FlightUseCasesTest {
                 coEvery { flights.findById(manual.id) } returns manual
 
                 // when
-                DeleteFlight(flights, attachments)(manual.id)
+                DeleteFlight(flights, attachments, transactions)(manual.id)
 
                 // then
                 coVerify(exactly = 0) { attachments.delete(any()) }

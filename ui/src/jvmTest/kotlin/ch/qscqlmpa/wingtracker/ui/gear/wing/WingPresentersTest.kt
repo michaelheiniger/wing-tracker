@@ -20,6 +20,7 @@ import ch.qscqlmpa.wingtracker.settings.LogbookSettings
 import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
+import ch.qscqlmpa.wingtracker.sync.UnsyncedTransactions
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.undo.TEXT
@@ -67,8 +68,8 @@ class WingPresentersTest {
         WingListPresenter(
             scope = TestScope(UnconfinedTestDispatcher(testScheduler)),
             listWings = ListWings(wings),
-            retireWing = RetireWing(wings),
-            deleteWing = DeleteWing(wings) { hasFlights },
+            retireWing = RetireWing(wings, UnsyncedTransactions),
+            deleteWing = DeleteWing(wings, { hasFlights }, UnsyncedTransactions),
             getMaintenanceStatuses =
                 GetMaintenanceStatuses(
                     CompositeMaintainedGearRepository(wings, mockk(relaxed = true), mockk(relaxed = true)),
@@ -209,8 +210,8 @@ class WingPresentersTest {
         private fun TestScope.formPresenter(editing: Wing? = null) =
             WingFormPresenter(
                 scope = TestScope(UnconfinedTestDispatcher(testScheduler)),
-                registerWing = RegisterWing(wings) { WingId("new-wing") },
-                updateWingDetails = UpdateWingDetails(wings),
+                registerWing = RegisterWing(wings, UnsyncedTransactions) { WingId("new-wing") },
+                updateWingDetails = UpdateWingDetails(wings, UnsyncedTransactions),
                 editing = editing,
             )
 

@@ -2,11 +2,14 @@ package ch.qscqlmpa.wingtracker.settings
 
 import ch.qscqlmpa.wingtracker.backup.BackupReminder
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.RecordingTransactions
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
@@ -14,6 +17,7 @@ import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.hours
 
 class SettingsUseCasesTest {
+    private val transactions = RecordingTransactions()
     private val logbookSettings = mockk<LogbookSettingsRepository>(relaxUnitFun = true)
     private val deviceSettings = mockk<DeviceSettingsRepository>(relaxUnitFun = true)
     private val storedLogbook =
@@ -31,13 +35,26 @@ class SettingsUseCasesTest {
     @Nested
     inner class SavingTheTheme {
         @Test
+        fun `records the setting as one change to the logbook`() =
+            runTest {
+                // given
+                coEvery { logbookSettings.load() } returns storedLogbook
+
+                // when
+                SaveThemeMode(logbookSettings, transactions)(ThemeMode.Light)
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.ThemeModeChanged)
+            }
+
+        @Test
         fun `changes the theme and keeps the reminder settings`() =
             runTest {
                 // given
                 coEvery { logbookSettings.load() } returns storedLogbook
 
                 // when
-                SaveThemeMode(logbookSettings)(ThemeMode.Light)
+                SaveThemeMode(logbookSettings, transactions)(ThemeMode.Light)
 
                 // then
                 coVerify(exactly = 1) { logbookSettings.save(storedLogbook.copy(themeMode = ThemeMode.Light)) }
@@ -47,6 +64,19 @@ class SettingsUseCasesTest {
     @Nested
     inner class SavingTheLeadTimes {
         @Test
+        fun `records the setting as one change to the logbook`() =
+            runTest {
+                // given
+                coEvery { logbookSettings.load() } returns storedLogbook
+
+                // when
+                SaveReminderLeadTimes(logbookSettings, transactions)(ReminderLeadTimes(days = 45, hours = 20.hours))
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.ReminderLeadTimesChanged)
+            }
+
+        @Test
         fun `changes the lead times and keeps the theme`() =
             runTest {
                 // given
@@ -54,7 +84,7 @@ class SettingsUseCasesTest {
                 val newLeadTimes = ReminderLeadTimes(days = 45, hours = 20.hours)
 
                 // when
-                SaveReminderLeadTimes(logbookSettings)(newLeadTimes)
+                SaveReminderLeadTimes(logbookSettings, transactions)(newLeadTimes)
 
                 // then
                 coVerify(exactly = 1) { logbookSettings.save(storedLogbook.copy(reminderLeadTimes = newLeadTimes)) }
@@ -64,13 +94,26 @@ class SettingsUseCasesTest {
     @Nested
     inner class SavingTheAirtimeNick {
         @Test
+        fun `records the setting as one change to the logbook`() =
+            runTest {
+                // given
+                coEvery { logbookSettings.load() } returns storedLogbook
+
+                // when
+                SaveAirtimeNick(logbookSettings, transactions)("qscqlmpa")
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.AirtimeNickChanged)
+            }
+
+        @Test
         fun `keeps the nick without surrounding spaces and the other settings`() =
             runTest {
                 // given
                 coEvery { logbookSettings.load() } returns storedLogbook
 
                 // when
-                SaveAirtimeNick(logbookSettings)("  qscqlmpa ")
+                SaveAirtimeNick(logbookSettings, transactions)("  qscqlmpa ")
 
                 // then
                 coVerify(exactly = 1) { logbookSettings.save(storedLogbook.copy(airtimeNick = "qscqlmpa")) }
@@ -83,7 +126,7 @@ class SettingsUseCasesTest {
                 coEvery { logbookSettings.load() } returns storedLogbook.copy(airtimeNick = "qscqlmpa")
 
                 // when
-                SaveAirtimeNick(logbookSettings)("  ")
+                SaveAirtimeNick(logbookSettings, transactions)("  ")
 
                 // then
                 coVerify(exactly = 1) { logbookSettings.save(storedLogbook.copy(airtimeNick = null)) }
@@ -93,13 +136,26 @@ class SettingsUseCasesTest {
     @Nested
     inner class SavingTheSyrideUsername {
         @Test
+        fun `records the setting as one change to the logbook`() =
+            runTest {
+                // given
+                coEvery { logbookSettings.load() } returns storedLogbook
+
+                // when
+                SaveSyrideUsername(logbookSettings, transactions)("michael")
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.SyrideUsernameChanged)
+            }
+
+        @Test
         fun `keeps the username without surrounding spaces and the other settings`() =
             runTest {
                 // given
                 coEvery { logbookSettings.load() } returns storedLogbook
 
                 // when
-                SaveSyrideUsername(logbookSettings)(" michael ")
+                SaveSyrideUsername(logbookSettings, transactions)(" michael ")
 
                 // then
                 coVerify(exactly = 1) { logbookSettings.save(storedLogbook.copy(syrideUsername = "michael")) }

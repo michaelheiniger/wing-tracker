@@ -13,6 +13,8 @@ import ch.qscqlmpa.wingtracker.flights.IgcFile
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import ch.qscqlmpa.wingtracker.gear.maintenance.withStoredFiles
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.LogbookTransactions
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlin.time.Duration
@@ -83,6 +85,7 @@ class ImportIgcFlight(
     wings: WingRepository,
     private val attachments: AttachmentStore,
     private val clock: AppClock,
+    private val transactions: LogbookTransactions,
     // Injectable so tests get deterministic ids.
     private val newId: () -> FlightId = { FlightId(Uuid.random().toString()) },
 ) {
@@ -93,9 +96,12 @@ class ImportIgcFlight(
         file: NewAttachment,
         checksum: String,
     ): Flight {
-        rules.ensureAllowed(details)
-        return withStoredFiles(attachments, listOf(file)) { stored ->
-            Flight(newId(), details, clock.now(), IgcFile(stored.single(), checksum)).also { flights.save(it) }
+        val id = newId()
+        return transactions.run(LogbookChange.FlightImportedFromTrack(id)) {
+            rules.ensureAllowed(details)
+            withStoredFiles(attachments, listOf(file)) { stored ->
+                Flight(id, details, clock.now(), IgcFile(stored.single(), checksum)).also { flights.save(it) }
+            }
         }
     }
 }
@@ -104,6 +110,7 @@ class ImportIgcFlight(
 class AttachIgcTrack(
     private val flights: FlightRepository,
     private val attachments: AttachmentStore,
+    private val transactions: LogbookTransactions,
 ) {
     /**
      * @throws FlightNotFoundException when the flight was deleted meanwhile.
@@ -113,11 +120,12 @@ class AttachIgcTrack(
         flightId: FlightId,
         file: NewAttachment,
         checksum: String,
-    ): Flight {
-        val flight = flights.findById(flightId) ?: throw FlightNotFoundException(flightId)
-        if (flight.igcFile != null) throw FlightHasTrackException(flightId)
-        return withStoredFiles(attachments, listOf(file)) { stored ->
-            flight.attachTrack(IgcFile(stored.single(), checksum)).also { flights.save(it) }
+    ): Flight =
+        transactions.run(LogbookChange.TrackAttached(flightId)) {
+            val flight = flights.findById(flightId) ?: throw FlightNotFoundException(flightId)
+            if (flight.igcFile != null) throw FlightHasTrackException(flightId)
+            withStoredFiles(attachments, listOf(file)) { stored ->
+                flight.attachTrack(IgcFile(stored.single(), checksum)).also { flights.save(it) }
+            }
         }
-    }
 }

@@ -17,6 +17,8 @@ import ch.qscqlmpa.wingtracker.gear.wing.RegisterWing
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.shared.LoadResult
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.RecordingTransactions
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -27,6 +29,7 @@ import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.minutes
 
 class SpreadsheetImportTest {
+    private val transactions = RecordingTransactions()
     private val flights = mockk<FlightRepository>(relaxUnitFun = true)
     private val wings = InMemoryWings()
     private val saved = mutableListOf<Flight>()
@@ -195,8 +198,29 @@ class SpreadsheetImportTest {
     inner class Importing {
         private var next = 0
         private val import get() =
-            ImportSpreadsheetFlights(flights, wings, aFixedClock(), RegisterWing(wings) { WingId("new-${next++}") }) {
+            ImportSpreadsheetFlights(
+                flights,
+                wings,
+                aFixedClock(),
+                RegisterWing(wings, transactions) {
+                    WingId("new-${next++}")
+                },
+                transactions,
+            ) {
                 FlightId("imported-${next++}")
+            }
+
+        @Test
+        fun `records the whole import as one change to the logbook`() =
+            runTest {
+                // given
+                givenStored()
+
+                // when
+                import(listOf(aSpreadsheetFlight() to WingTarget.Existing(birdy.id)), emptyMap())
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.FlightsImportedFromSpreadsheet)
             }
 
         @Test

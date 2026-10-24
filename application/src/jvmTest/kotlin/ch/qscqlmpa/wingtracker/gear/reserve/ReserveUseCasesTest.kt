@@ -9,6 +9,8 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceCheck
 import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceInterval
 import ch.qscqlmpa.wingtracker.gear.wing.GearInUseException
 import ch.qscqlmpa.wingtracker.shared.LoadResult
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.RecordingTransactions
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -39,15 +41,29 @@ private fun aReserve(
 ) = Reserve(ReserveId(id), aDetails(name), status, checks)
 
 class ReserveUseCasesTest {
+    private val transactions = RecordingTransactions()
     private val reservees = mockk<ReserveRepository>(relaxUnitFun = true)
 
     @Nested
     inner class Registering {
         @Test
+        fun `records the registration as one change to the logbook`() =
+            runTest {
+                // given
+                val registerReserve = RegisterReserve(reservees, transactions) { ReserveId("new-reserve") }
+
+                // when
+                val reserve = registerReserve(aDetails())
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.GearRegistered(reserve.ref))
+            }
+
+        @Test
         fun `saves a new active reserve with the generated id`() =
             runTest {
                 // given
-                val registerReserve = RegisterReserve(reservees) { ReserveId("new-reserve") }
+                val registerReserve = RegisterReserve(reservees, transactions) { ReserveId("new-reserve") }
 
                 // when
                 val reserve = registerReserve(aDetails())
@@ -62,6 +78,20 @@ class ReserveUseCasesTest {
     @Nested
     inner class Updating {
         @Test
+        fun `records the update as one change to the logbook`() =
+            runTest {
+                // given
+                val existing = aReserve()
+                coEvery { reservees.findById(existing.id) } returns existing
+
+                // when
+                UpdateReserveDetails(reservees, transactions)(existing.id, aDetails("Pod"))
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.GearDetailsUpdated(existing.ref))
+            }
+
+        @Test
         fun `saves the reserve with the new details`() =
             runTest {
                 // given
@@ -69,7 +99,7 @@ class ReserveUseCasesTest {
                 coEvery { reservees.findById(existing.id) } returns existing
 
                 // when
-                val updated = UpdateReserveDetails(reservees)(existing.id, aDetails("Backup"))
+                val updated = UpdateReserveDetails(reservees, transactions)(existing.id, aDetails("Backup"))
 
                 // then
                 assertThat(updated.details.name).isEqualTo("Backup")
@@ -87,6 +117,7 @@ class ReserveUseCasesTest {
                     runCatching {
                         UpdateReserveDetails(
                             reservees,
+                            transactions,
                         )(ReserveId("missing"), aDetails())
                     }.exceptionOrNull()
 
@@ -98,6 +129,20 @@ class ReserveUseCasesTest {
     @Nested
     inner class Retiring {
         @Test
+        fun `records the retirement as one change to the logbook`() =
+            runTest {
+                // given
+                val existing = aReserve()
+                coEvery { reservees.findById(existing.id) } returns existing
+
+                // when
+                RetireReserve(reservees, transactions)(existing.id, LocalDate(2026, 9, 30), "Replaced")
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.GearRetired(existing.ref))
+            }
+
+        @Test
         fun `saves the reserve as retired`() =
             runTest {
                 // given
@@ -105,7 +150,7 @@ class ReserveUseCasesTest {
                 coEvery { reservees.findById(existing.id) } returns existing
 
                 // when
-                val retired = RetireReserve(reservees)(existing.id, LocalDate(2026, 9, 30), "Sold")
+                val retired = RetireReserve(reservees, transactions)(existing.id, LocalDate(2026, 9, 30), "Sold")
 
                 // then
                 assertThat(retired.status).isEqualTo(GearStatus.Retired(LocalDate(2026, 9, 30), "Sold"))
@@ -116,6 +161,20 @@ class ReserveUseCasesTest {
     @Nested
     inner class Deleting {
         @Test
+        fun `records the deletion as one change to the logbook`() =
+            runTest {
+                // given
+                val existing = aReserve()
+                coEvery { reservees.findById(existing.id) } returns existing
+
+                // when
+                DeleteReserve(reservees, transactions)(existing.id)
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.GearDeleted(existing.ref))
+            }
+
+        @Test
         fun `deletes a reserve without maintenance history`() =
             runTest {
                 // given
@@ -123,7 +182,7 @@ class ReserveUseCasesTest {
                 coEvery { reservees.findById(existing.id) } returns existing
 
                 // when
-                DeleteReserve(reservees)(existing.id)
+                DeleteReserve(reservees, transactions)(existing.id)
 
                 // then
                 coVerify(exactly = 1) { reservees.delete(existing.id) }
@@ -138,7 +197,7 @@ class ReserveUseCasesTest {
                 coEvery { reservees.findById(existing.id) } returns existing
 
                 // when
-                val failure = runCatching { DeleteReserve(reservees)(existing.id) }.exceptionOrNull()
+                val failure = runCatching { DeleteReserve(reservees, transactions)(existing.id) }.exceptionOrNull()
 
                 // then
                 assertThat(failure).isInstanceOf(GearInUseException::class.java)

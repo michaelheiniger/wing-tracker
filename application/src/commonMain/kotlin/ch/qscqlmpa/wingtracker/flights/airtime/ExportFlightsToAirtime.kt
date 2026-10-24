@@ -6,6 +6,8 @@ import ch.qscqlmpa.wingtracker.flights.Flight
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.LogbookTransactions
 import kotlinx.datetime.LocalDateTime
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
@@ -29,6 +31,7 @@ class ExportFlightsToAirtime(
     private val flights: FlightRepository,
     private val attachments: AttachmentStore,
     private val clock: AppClock,
+    private val transactions: LogbookTransactions,
     // Injectable so tests get deterministic ids.
     private val newGliderId: () -> String = { Uuid.random().toString() },
 ) {
@@ -42,6 +45,17 @@ class ExportFlightsToAirtime(
         chosen: Set<FlightId>,
         colours: Map<WingId, String>,
         onProgress: (done: Int, total: Int) -> Unit = { _, _ -> },
+    ): AirtimeExportResult =
+        transactions.run(LogbookChange.FlightsExportedToAirtime) {
+            export(token, draft, chosen, colours, onProgress)
+        }
+
+    private suspend fun export(
+        token: String,
+        draft: AirtimeExportDraft,
+        chosen: Set<FlightId>,
+        colours: Map<WingId, String>,
+        onProgress: (done: Int, total: Int) -> Unit,
     ): AirtimeExportResult {
         val selection = draft.candidates.filter { it.flight.id in chosen }
         // Only the gliders the chosen flights need; the others stay uncreated.

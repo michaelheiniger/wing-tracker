@@ -20,6 +20,8 @@ import ch.qscqlmpa.wingtracker.flights.aWingInService
 import ch.qscqlmpa.wingtracker.gear.maintenance.NewAttachment
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
 import ch.qscqlmpa.wingtracker.shared.LoadResult
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.RecordingTransactions
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -38,6 +40,7 @@ private val FILE = NewAttachment("2026-09-20-niederhorn.igc", byteArrayOf(65, 88
 private const val CHECKSUM = "3b7e72f0c1d9"
 
 class IgcImportTest {
+    private val transactions = RecordingTransactions()
     private val flights = mockk<FlightRepository>(relaxUnitFun = true)
     private val wings = mockk<WingRepository>()
     private val attachments = mockk<AttachmentStore>(relaxUnitFun = true)
@@ -202,7 +205,23 @@ class IgcImportTest {
 
     @Nested
     inner class Importing {
-        private val import = ImportIgcFlight(flights, wings, attachments, aFixedClock()) { FlightId("imported") }
+        private val import =
+            ImportIgcFlight(flights, wings, attachments, aFixedClock(), transactions) { FlightId("imported") }
+
+        @Test
+        fun `records the flight and its track as one change to the logbook`() =
+            runTest {
+                // given
+                coEvery { wings.findById(wing.id) } returns wing
+
+                // when
+                import(aFlightDetails(), FILE, CHECKSUM)
+
+                // then
+                assertThat(
+                    transactions.changes,
+                ).containsExactly(LogbookChange.FlightImportedFromTrack(FlightId("imported")))
+            }
 
         @Test
         fun `saves the flight with the original track attached`() =
@@ -263,10 +282,23 @@ class IgcImportTest {
 
     @Nested
     inner class Attaching {
-        private val attach = AttachIgcTrack(flights, attachments)
+        private val attach = AttachIgcTrack(flights, attachments, transactions)
         private val syride =
             aFlight("flight-1", aFlightDetails(takeOffTime = LocalTime(9, 0)))
                 .copy(importedFrom = ExternalReference("syride", "flight:3720061"))
+
+        @Test
+        fun `records the track as one change to the logbook`() =
+            runTest {
+                // given
+                coEvery { flights.findById(syride.id) } returns syride
+
+                // when
+                attach(syride.id, FILE, CHECKSUM)
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.TrackAttached(syride.id))
+            }
 
         @Test
         fun `stores the track and adds it to the flight, keeping its details`() =

@@ -25,6 +25,7 @@ import ch.qscqlmpa.wingtracker.gear.reserve.ReserveRepository
 import ch.qscqlmpa.wingtracker.gear.reserve.RetireReserve
 import ch.qscqlmpa.wingtracker.gear.reserve.UpdateReserveDetails
 import ch.qscqlmpa.wingtracker.shared.LoadResult
+import ch.qscqlmpa.wingtracker.sync.UnsyncedTransactions
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -53,18 +54,18 @@ class GearOpsTest {
     private val harnessOps =
         HarnessOps(
             ListHarnesses(harnesses),
-            RegisterHarness(harnesses) { HarnessId("new-harness") },
-            UpdateHarnessDetails(harnesses),
-            RetireHarness(harnesses),
-            DeleteHarness(harnesses),
+            RegisterHarness(harnesses, UnsyncedTransactions) { HarnessId("new-harness") },
+            UpdateHarnessDetails(harnesses, UnsyncedTransactions),
+            RetireHarness(harnesses, UnsyncedTransactions),
+            DeleteHarness(harnesses, UnsyncedTransactions),
         )
     private val reserveOps =
         ReserveOps(
             ListReserves(reserves),
-            RegisterReserve(reserves) { ReserveId("new-reserve") },
-            UpdateReserveDetails(reserves),
-            RetireReserve(reserves),
-            DeleteReserve(reserves),
+            RegisterReserve(reserves, UnsyncedTransactions) { ReserveId("new-reserve") },
+            UpdateReserveDetails(reserves, UnsyncedTransactions),
+            RetireReserve(reserves, UnsyncedTransactions),
+            DeleteReserve(reserves, UnsyncedTransactions),
         )
 
     @Nested

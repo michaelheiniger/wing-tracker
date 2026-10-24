@@ -1,5 +1,7 @@
 package ch.qscqlmpa.wingtracker.flights
 
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.RecordingTransactions
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -13,12 +15,28 @@ import kotlin.time.Instant
 private val SENT = FlightExport("airtime", Instant.parse("2026-10-17T20:12:04Z"), "986")
 
 class ForgetFlightExportTest {
+    private val transactions = RecordingTransactions()
     private val flights = mockk<FlightRepository>(relaxUnitFun = true)
-    private val forget = ForgetFlightExport(flights)
+    private val forget = ForgetFlightExport(flights, transactions)
     private val exported = aFlight().copy(exports = listOf(SENT))
 
     @Nested
     inner class Invoke {
+        @Test
+        fun `records forgetting the export as one change to the logbook`() =
+            runTest {
+                // given
+                coEvery { flights.findById(exported.id) } returns exported
+
+                // when
+                forget(exported.id, "airtime")
+
+                // then
+                assertThat(
+                    transactions.changes,
+                ).containsExactly(LogbookChange.FlightExportForgotten(exported.id, "airtime"))
+            }
+
         @Test
         fun `saves the flight without the record and returns it`() =
             runTest {
@@ -50,6 +68,21 @@ class ForgetFlightExportTest {
 
     @Nested
     inner class Restore {
+        @Test
+        fun `records putting the export back as one change to the logbook`() =
+            runTest {
+                // given
+                coEvery { flights.findById(exported.id) } returns exported.copy(exports = emptyList())
+
+                // when
+                forget.restore(exported.id, SENT)
+
+                // then
+                assertThat(
+                    transactions.changes,
+                ).containsExactly(LogbookChange.FlightExportRestored(exported.id, SENT.system))
+            }
+
         @Test
         fun `puts the record back on the flight as it is now`() =
             runTest {

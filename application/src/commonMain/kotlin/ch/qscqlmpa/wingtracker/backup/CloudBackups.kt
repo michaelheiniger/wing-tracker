@@ -3,6 +3,8 @@ package ch.qscqlmpa.wingtracker.backup
 import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
 import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.LogbookTransactions
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDateTime
@@ -10,10 +12,12 @@ import kotlinx.datetime.LocalDateTime
 /** Remembers where backups are uploaded to, or forgets it with null; the secret key is the caller's to keep. */
 class SaveCloudStorage(
     private val settings: LogbookSettingsRepository,
+    private val transactions: LogbookTransactions,
 ) {
-    suspend operator fun invoke(cloud: CloudStorageSettings?) {
-        settings.save(settings.load().copy(cloudStorage = cloud))
-    }
+    suspend operator fun invoke(cloud: CloudStorageSettings?) =
+        transactions.run(LogbookChange.CloudStorageChanged) {
+            settings.save(settings.load().copy(cloudStorage = cloud))
+        }
 }
 
 /** Tries the bucket with these keys before anything is uploaded, so a typo shows at once (ADR 0032). */

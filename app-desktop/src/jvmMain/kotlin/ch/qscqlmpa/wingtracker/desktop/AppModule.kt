@@ -109,6 +109,8 @@ import ch.qscqlmpa.wingtracker.storage.json.JsonReserveRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonUpdatePreferencesRepository
 import ch.qscqlmpa.wingtracker.storage.json.JsonWingRepository
 import ch.qscqlmpa.wingtracker.storage.json.ZipBackupArchive
+import ch.qscqlmpa.wingtracker.sync.LogbookTransactions
+import ch.qscqlmpa.wingtracker.sync.UnsyncedTransactions
 import ch.qscqlmpa.wingtracker.syride.SyrideWebFlightSource
 import ch.qscqlmpa.wingtracker.ui.airtime.AirtimeExportUseCases
 import ch.qscqlmpa.wingtracker.ui.airtime.AirtimeToken
@@ -187,33 +189,34 @@ private fun storageModule(dataDirectory: Path) =
         single<LogbookSettingsRepository> { JsonLogbookSettingsRepository(dataDirectory) }
         single<DeviceSettingsRepository> { JsonDeviceSettingsRepository(dataDirectory) }
         single<AttachmentStore> { FileAttachmentStore(dataDirectory) }
+        single<LogbookTransactions> { UnsyncedTransactions }
         single<MaintainedGearRepository> { CompositeMaintainedGearRepository(get(), get(), get()) }
     }
 
 private fun gearModule() =
     module {
         factory { ListWings(get()) }
-        factory { RegisterWing(get()) }
-        factory { UpdateWingDetails(get()) }
-        factory { RetireWing(get()) }
+        factory { RegisterWing(get(), get()) }
+        factory { UpdateWingDetails(get(), get()) }
+        factory { RetireWing(get(), get()) }
         single<WingFlightLookup> { FlightsOfWing(get()) }
-        factory { DeleteWing(get(), get()) }
+        factory { DeleteWing(get(), get(), get()) }
         factory {
             HarnessOps(
                 ListHarnesses(get()),
-                RegisterHarness(get()),
-                UpdateHarnessDetails(get()),
-                RetireHarness(get()),
-                DeleteHarness(get()),
+                RegisterHarness(get(), get()),
+                UpdateHarnessDetails(get(), get()),
+                RetireHarness(get(), get()),
+                DeleteHarness(get(), get()),
             )
         }
         factory {
             ReserveOps(
                 ListReserves(get()),
-                RegisterReserve(get()),
-                UpdateReserveDetails(get()),
-                RetireReserve(get()),
-                DeleteReserve(get()),
+                RegisterReserve(get(), get()),
+                UpdateReserveDetails(get(), get()),
+                RetireReserve(get(), get()),
+                DeleteReserve(get(), get()),
             )
         }
         single { GearUseCases(get(), get(), get(), get(), get(), get(), get<HarnessOps>(), get<ReserveOps>()) }
@@ -221,29 +224,29 @@ private fun gearModule() =
 
 private fun flightsModule() =
     module {
-        factory { LogFlight(get(), get(), get()) }
-        factory { UpdateFlight(get(), get(), get()) }
-        factory { DeleteFlight(get(), get()) }
+        factory { LogFlight(get(), get(), get(), get()) }
+        factory { UpdateFlight(get(), get(), get(), get()) }
+        factory { DeleteFlight(get(), get(), get()) }
         factory { PrepareIgcImport(get(), get(), get()) }
-        factory { AttachIgcTrack(get(), get()) }
+        factory { AttachIgcTrack(get(), get(), get()) }
         factory { ReadFlightTrack(get(), get(), get()) }
-        factory { ImportIgcFlight(get(), get(), get(), get()) }
+        factory { ImportIgcFlight(get(), get(), get(), get(), get()) }
         factory { GetLogbook(get(), get()) }
         factory { PrepareSyrideImport(get(), get(), get()) }
-        factory { ImportSyrideFlights(get(), get(), get(), RegisterWing(get())) }
-        factory { UpdateSyrideTakeOffTimes(get()) }
+        factory { ImportSyrideFlights(get(), get(), get(), RegisterWing(get(), get()), get()) }
+        factory { UpdateSyrideTakeOffTimes(get(), get()) }
         factory { CountSyrideFlightsWithoutTrack(get()) }
         factory { GetSyrideFlightPage(get(), get()) }
         factory { GetSyrideSitePage(get()) }
-        factory { CompleteSyrideFlights(get()) }
+        factory { CompleteSyrideFlights(get(), get()) }
         factory { PrepareAirtimeExport(get(), get(), get(), get(), get(), get()) }
-        factory { ExportFlightsToAirtime(get(), get(), get(), get()) }
+        factory { ExportFlightsToAirtime(get(), get(), get(), get(), get()) }
         factory { GetAirtimePages(get()) }
-        factory { SaveAirtimeNick(get()) }
-        factory { ForgetFlightExport(get()) }
+        factory { SaveAirtimeNick(get(), get()) }
+        factory { ForgetFlightExport(get(), get()) }
         factory { OpenSpreadsheet(get()) }
         factory { PrepareSpreadsheetImport(get(), get()) }
-        factory { ImportSpreadsheetFlights(get(), get(), get(), RegisterWing(get())) }
+        factory { ImportSpreadsheetFlights(get(), get(), get(), RegisterWing(get(), get()), get()) }
         single {
             LogbookUseCases(
                 get(),
@@ -282,12 +285,12 @@ private fun maintenanceModule() =
     module {
         factory { GetMaintenanceStatuses(get(), get(), get(), get()) }
         factory { GetGearMaintenance(get(), get(), get(), get()) }
-        factory { RecordCheck(get(), get(), get()) }
-        factory { UpdateCheck(get(), get(), get()) }
-        factory { DeleteCheck(get(), get()) }
-        factory { PlanCheck(get(), get()) }
-        factory { UpdatePlannedCheck(get(), get()) }
-        factory { CancelPlannedCheck(get()) }
+        factory { RecordCheck(get(), get(), get(), get()) }
+        factory { UpdateCheck(get(), get(), get(), get()) }
+        factory { DeleteCheck(get(), get(), get()) }
+        factory { PlanCheck(get(), get(), get()) }
+        factory { UpdatePlannedCheck(get(), get(), get()) }
+        factory { CancelPlannedCheck(get(), get()) }
         factory { ReadAttachment(get()) }
         single { MaintenanceUseCases(get(), get(), get(), get(), get(), get(), get(), get()) }
     }
@@ -300,10 +303,10 @@ private fun remindersModule() =
         factory { GetCalendarEntries(get(), get(), get()) }
         factory { GetLogbookSettings(get()) }
         factory { GetDeviceSettings(get()) }
-        factory { SaveReminderLeadTimes(get()) }
-        factory { SaveThemeMode(get()) }
+        factory { SaveReminderLeadTimes(get(), get()) }
+        factory { SaveThemeMode(get(), get()) }
         factory { SaveInterfaceScale(get()) }
-        factory { SaveSyrideUsername(get()) }
+        factory { SaveSyrideUsername(get(), get()) }
         factory { SaveDeviceFolder(get()) }
         factory { SaveBackupReminder(get()) }
         single { RemindersUseCases(get(), get(), get(), get(), get(), get()) }
@@ -318,7 +321,7 @@ private fun backupModule(dataDirectory: Path) =
         factory { InspectBackup(get(), get(), BuildInfo.VERSION) }
         factory { RestoreBackup(get()) }
         single<CloudStorage> { S3CloudStorage("wing-tracker/${BuildInfo.VERSION}") }
-        factory { SaveCloudStorage(get()) }
+        factory { SaveCloudStorage(get(), get()) }
         factory { CheckCloudStorage(get()) }
         factory { UploadBackup(get(), get(), get(), get(), get(), BuildInfo.VERSION) }
         single { BackupUseCases(get(), get(), get(), get(), get()) }

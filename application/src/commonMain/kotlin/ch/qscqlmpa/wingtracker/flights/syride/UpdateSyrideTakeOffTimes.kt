@@ -2,6 +2,8 @@ package ch.qscqlmpa.wingtracker.flights.syride
 
 import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.LogbookTransactions
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
@@ -19,14 +21,17 @@ data class TakeOffTimeUpdate(
  */
 class UpdateSyrideTakeOffTimes(
     private val flights: FlightRepository,
+    private val transactions: LogbookTransactions,
 ) {
     /** Returns how many flights were updated. */
     suspend operator fun invoke(updates: List<TakeOffTimeUpdate>): Int =
-        updates.count { update ->
-            val flight = flights.findById(update.flightId) ?: return@count false
-            // The pilot agreed to replace the time they were shown; one changed since then is left alone.
-            if (flight.details.takeOffTime != update.stored) return@count false
-            flights.save(flight.withDetails(flight.details.copy(takeOffTime = update.fromSyride)))
-            true
+        transactions.run(LogbookChange.SyrideTakeOffTimesUpdated) {
+            updates.count { update ->
+                val flight = flights.findById(update.flightId) ?: return@count false
+                // The pilot agreed to replace the time they were shown; one changed since then is left alone.
+                if (flight.details.takeOffTime != update.stored) return@count false
+                flights.save(flight.withDetails(flight.details.copy(takeOffTime = update.fromSyride)))
+                true
+            }
         }
 }

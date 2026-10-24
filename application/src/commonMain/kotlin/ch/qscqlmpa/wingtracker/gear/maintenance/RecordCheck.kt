@@ -4,6 +4,8 @@ import ch.qscqlmpa.wingtracker.AppClock
 import ch.qscqlmpa.wingtracker.attachments.Attachment
 import ch.qscqlmpa.wingtracker.attachments.AttachmentId
 import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.LogbookTransactions
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import kotlin.uuid.ExperimentalUuidApi
@@ -42,6 +44,7 @@ class RecordCheck(
     private val gear: MaintainedGearRepository,
     private val attachments: AttachmentStore,
     private val clock: AppClock,
+    private val transactions: LogbookTransactions,
     // Injectable so tests get deterministic ids.
     private val newId: () -> CheckId = { CheckId(Uuid.random().toString()) },
 ) {
@@ -52,22 +55,25 @@ class RecordCheck(
         files: List<NewAttachment> = emptyList(),
         completes: PlannedCheckId? = null,
     ): MaintainedGear {
-        val item = gear.require(ref)
-        if (details.date > clock.today()) throw CheckDateInFutureException()
-        return withStoredFiles(attachments, files) { reports ->
-            val check =
-                MaintenanceCheck(
-                    id = newId(),
-                    date = details.date,
-                    type = details.type,
-                    company = details.company.cleaned(),
-                    notes = details.notes.cleaned(),
-                    restartsInterval = details.restartsInterval,
-                    reports = reports,
-                )
-            val withCheck = item.history.withCheck(check)
-            val history = if (completes == null) withCheck else withCheck.withoutPlannedCheck(completes)
-            item.withHistory(history).also { gear.save(it) }
+        val id = newId()
+        return transactions.run(LogbookChange.CheckRecorded(ref, id, completes)) {
+            val item = gear.require(ref)
+            if (details.date > clock.today()) throw CheckDateInFutureException()
+            withStoredFiles(attachments, files) { reports ->
+                val check =
+                    MaintenanceCheck(
+                        id = id,
+                        date = details.date,
+                        type = details.type,
+                        company = details.company.cleaned(),
+                        notes = details.notes.cleaned(),
+                        restartsInterval = details.restartsInterval,
+                        reports = reports,
+                    )
+                val withCheck = item.history.withCheck(check)
+                val history = if (completes == null) withCheck else withCheck.withoutPlannedCheck(completes)
+                item.withHistory(history).also { gear.save(it) }
+            }
         }
     }
 }

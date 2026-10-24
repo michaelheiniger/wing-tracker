@@ -21,6 +21,8 @@ import ch.qscqlmpa.wingtracker.flights.igc.TrackReader
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.shared.LoadResult
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.RecordingTransactions
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -72,6 +74,7 @@ private fun aManualFlight(
 ) = aFlight(id, aFlightDetails(date = LocalDate(2026, 9, 21), takeOffTime = takeOffTime, wingId = wingId))
 
 class AirtimeExportTest {
+    private val transactions = RecordingTransactions()
     private val account = mockk<AirtimeAccount>(relaxUnitFun = true)
     private val flights = mockk<FlightRepository>(relaxUnitFun = true)
     private val wings = InMemoryWings()
@@ -279,7 +282,22 @@ class AirtimeExportTest {
                 flights,
                 attachments,
                 aFixedClock(),
+                transactions,
             ) { NEW_GLIDER_ID }
+
+        @Test
+        fun `records the whole export as one change to the logbook`() =
+            runTest {
+                // given
+                givenStored(listOf(aTrackedFlight()))
+                val draft = prepare()
+
+                // when
+                export(TOKEN, draft, setOf(FlightId("flight-1")), emptyMap())
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.FlightsExportedToAirtime)
+            }
 
         @Test
         fun `uploads a flight's track with its glider and marks it exported`() =

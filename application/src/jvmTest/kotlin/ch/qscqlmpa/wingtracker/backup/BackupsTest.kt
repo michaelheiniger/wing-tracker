@@ -5,6 +5,8 @@ import ch.qscqlmpa.wingtracker.settings.DeviceSettings
 import ch.qscqlmpa.wingtracker.settings.DeviceSettingsRepository
 import ch.qscqlmpa.wingtracker.settings.LogbookSettings
 import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.RecordingTransactions
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -108,6 +110,49 @@ class BackupsTest {
 
                 // then
                 assertThat(status.lastMadeAt).isNull()
+            }
+    }
+
+    @Nested
+    inner class SaveCloudStorageInvoke {
+        private val settings = mockk<LogbookSettingsRepository>(relaxUnitFun = true)
+        private val transactions = RecordingTransactions()
+        private val bucket =
+            CloudStorageSettings(
+                provider = CloudProvider.MegaS4,
+                region = "eu-amsterdam-1",
+                endpoint = null,
+                bucket = "wing-tracker-backups",
+                accessKeyId = "AKIAMEGAS4EXAMPLE",
+                keepLast = 10,
+            )
+
+        @Test
+        fun `remembers the bucket and keeps the other logbook settings`() =
+            runTest {
+                // given
+                coEvery { settings.load() } returns LogbookSettings(syrideUsername = "michael.heiniger")
+
+                // when
+                SaveCloudStorage(settings, transactions)(bucket)
+
+                // then
+                coVerify(exactly = 1) {
+                    settings.save(LogbookSettings(syrideUsername = "michael.heiniger", cloudStorage = bucket))
+                }
+            }
+
+        @Test
+        fun `records the bucket as one change to the logbook`() =
+            runTest {
+                // given
+                coEvery { settings.load() } returns LogbookSettings()
+
+                // when
+                SaveCloudStorage(settings, transactions)(bucket)
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.CloudStorageChanged)
             }
     }
 

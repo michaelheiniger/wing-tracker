@@ -28,6 +28,7 @@ import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.settings.LogbookSettings
 import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import ch.qscqlmpa.wingtracker.shared.LoadResult
+import ch.qscqlmpa.wingtracker.sync.UnsyncedTransactions
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
@@ -95,12 +96,12 @@ class MaintenancePresentersTest {
     private fun TestScope.useCases() =
         MaintenanceUseCases(
             getGearMaintenance = GetGearMaintenance(wings, flights, settings, clock),
-            recordCheck = RecordCheck(wings, attachments, clock) { CheckId("new-check") },
-            updateCheck = UpdateCheck(wings, attachments, clock),
-            deleteCheck = DeleteCheck(wings, attachments),
-            planCheck = PlanCheck(wings, clock) { PlannedCheckId("new-plan") },
-            updatePlannedCheck = UpdatePlannedCheck(wings, clock),
-            cancelPlannedCheck = CancelPlannedCheck(wings),
+            recordCheck = RecordCheck(wings, attachments, clock, UnsyncedTransactions) { CheckId("new-check") },
+            updateCheck = UpdateCheck(wings, attachments, clock, UnsyncedTransactions),
+            deleteCheck = DeleteCheck(wings, attachments, UnsyncedTransactions),
+            planCheck = PlanCheck(wings, clock, UnsyncedTransactions) { PlannedCheckId("new-plan") },
+            updatePlannedCheck = UpdatePlannedCheck(wings, clock, UnsyncedTransactions),
+            cancelPlannedCheck = CancelPlannedCheck(wings, UnsyncedTransactions),
             readAttachment = ReadAttachment(attachments),
         )
 

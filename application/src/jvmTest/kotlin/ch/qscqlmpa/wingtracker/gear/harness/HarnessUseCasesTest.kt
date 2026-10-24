@@ -9,6 +9,8 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceCheck
 import ch.qscqlmpa.wingtracker.gear.maintenance.MaintenanceInterval
 import ch.qscqlmpa.wingtracker.gear.wing.GearInUseException
 import ch.qscqlmpa.wingtracker.shared.LoadResult
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.RecordingTransactions
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -38,15 +40,29 @@ private fun aHarness(
 ) = Harness(HarnessId(id), aDetails(name), status, checks)
 
 class HarnessUseCasesTest {
+    private val transactions = RecordingTransactions()
     private val harnesses = mockk<HarnessRepository>(relaxUnitFun = true)
 
     @Nested
     inner class Registering {
         @Test
+        fun `records the registration as one change to the logbook`() =
+            runTest {
+                // given
+                val registerHarness = RegisterHarness(harnesses, transactions) { HarnessId("new-harness") }
+
+                // when
+                val harness = registerHarness(aDetails())
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.GearRegistered(harness.ref))
+            }
+
+        @Test
         fun `saves a new active harness with the generated id`() =
             runTest {
                 // given
-                val registerHarness = RegisterHarness(harnesses) { HarnessId("new-harness") }
+                val registerHarness = RegisterHarness(harnesses, transactions) { HarnessId("new-harness") }
 
                 // when
                 val harness = registerHarness(aDetails())
@@ -61,6 +77,20 @@ class HarnessUseCasesTest {
     @Nested
     inner class Updating {
         @Test
+        fun `records the update as one change to the logbook`() =
+            runTest {
+                // given
+                val existing = aHarness()
+                coEvery { harnesses.findById(existing.id) } returns existing
+
+                // when
+                UpdateHarnessDetails(harnesses, transactions)(existing.id, aDetails("Pod"))
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.GearDetailsUpdated(existing.ref))
+            }
+
+        @Test
         fun `saves the harness with the new details`() =
             runTest {
                 // given
@@ -68,7 +98,7 @@ class HarnessUseCasesTest {
                 coEvery { harnesses.findById(existing.id) } returns existing
 
                 // when
-                val updated = UpdateHarnessDetails(harnesses)(existing.id, aDetails("Pod"))
+                val updated = UpdateHarnessDetails(harnesses, transactions)(existing.id, aDetails("Pod"))
 
                 // then
                 assertThat(updated.details.name).isEqualTo("Pod")
@@ -86,6 +116,7 @@ class HarnessUseCasesTest {
                     runCatching {
                         UpdateHarnessDetails(
                             harnesses,
+                            transactions,
                         )(HarnessId("missing"), aDetails())
                     }.exceptionOrNull()
 
@@ -97,6 +128,20 @@ class HarnessUseCasesTest {
     @Nested
     inner class Retiring {
         @Test
+        fun `records the retirement as one change to the logbook`() =
+            runTest {
+                // given
+                val existing = aHarness()
+                coEvery { harnesses.findById(existing.id) } returns existing
+
+                // when
+                RetireHarness(harnesses, transactions)(existing.id, LocalDate(2026, 9, 30), "Replaced")
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.GearRetired(existing.ref))
+            }
+
+        @Test
         fun `saves the harness as retired`() =
             runTest {
                 // given
@@ -104,7 +149,7 @@ class HarnessUseCasesTest {
                 coEvery { harnesses.findById(existing.id) } returns existing
 
                 // when
-                val retired = RetireHarness(harnesses)(existing.id, LocalDate(2026, 9, 30), "Replaced")
+                val retired = RetireHarness(harnesses, transactions)(existing.id, LocalDate(2026, 9, 30), "Replaced")
 
                 // then
                 assertThat(retired.status).isEqualTo(GearStatus.Retired(LocalDate(2026, 9, 30), "Replaced"))
@@ -115,6 +160,20 @@ class HarnessUseCasesTest {
     @Nested
     inner class Deleting {
         @Test
+        fun `records the deletion as one change to the logbook`() =
+            runTest {
+                // given
+                val existing = aHarness()
+                coEvery { harnesses.findById(existing.id) } returns existing
+
+                // when
+                DeleteHarness(harnesses, transactions)(existing.id)
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.GearDeleted(existing.ref))
+            }
+
+        @Test
         fun `deletes a harness without maintenance history`() =
             runTest {
                 // given
@@ -122,7 +181,7 @@ class HarnessUseCasesTest {
                 coEvery { harnesses.findById(existing.id) } returns existing
 
                 // when
-                DeleteHarness(harnesses)(existing.id)
+                DeleteHarness(harnesses, transactions)(existing.id)
 
                 // then
                 coVerify(exactly = 1) { harnesses.delete(existing.id) }
@@ -137,7 +196,7 @@ class HarnessUseCasesTest {
                 coEvery { harnesses.findById(existing.id) } returns existing
 
                 // when
-                val failure = runCatching { DeleteHarness(harnesses)(existing.id) }.exceptionOrNull()
+                val failure = runCatching { DeleteHarness(harnesses, transactions)(existing.id) }.exceptionOrNull()
 
                 // then
                 assertThat(failure).isInstanceOf(GearInUseException::class.java)

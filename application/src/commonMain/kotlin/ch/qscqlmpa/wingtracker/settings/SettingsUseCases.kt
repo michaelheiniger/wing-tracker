@@ -2,6 +2,8 @@ package ch.qscqlmpa.wingtracker.settings
 
 import ch.qscqlmpa.wingtracker.backup.BackupReminder
 import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.LogbookTransactions
 
 /**
  * Each use case changes one setting on top of what is stored, so saving the theme can never reset the
@@ -9,17 +11,21 @@ import ch.qscqlmpa.wingtracker.gear.maintenance.ReminderLeadTimes
  */
 class SaveThemeMode(
     private val settings: LogbookSettingsRepository,
+    private val transactions: LogbookTransactions,
 ) {
     suspend operator fun invoke(mode: ThemeMode) {
-        settings.save(settings.load().copy(themeMode = mode))
+        transactions.run(LogbookChange.ThemeModeChanged) { settings.save(settings.load().copy(themeMode = mode)) }
     }
 }
 
 class SaveReminderLeadTimes(
     private val settings: LogbookSettingsRepository,
+    private val transactions: LogbookTransactions,
 ) {
     suspend operator fun invoke(leadTimes: ReminderLeadTimes) {
-        settings.save(settings.load().copy(reminderLeadTimes = leadTimes))
+        transactions.run(LogbookChange.ReminderLeadTimesChanged) {
+            settings.save(settings.load().copy(reminderLeadTimes = leadTimes))
+        }
     }
 }
 
@@ -50,16 +56,22 @@ class SaveDeviceFolder(
 
 class SaveAirtimeNick(
     private val settings: LogbookSettingsRepository,
+    private val transactions: LogbookTransactions,
 ) {
     suspend operator fun invoke(nick: String) {
-        settings.save(settings.load().copy(airtimeNick = nick.trim().ifEmpty { null }))
+        transactions.run(LogbookChange.AirtimeNickChanged) {
+            settings.save(settings.load().copy(airtimeNick = nick.trim().ifEmpty { null }))
+        }
     }
 }
 
 class SaveSyrideUsername(
     private val settings: LogbookSettingsRepository,
+    private val transactions: LogbookTransactions,
 ) {
     suspend operator fun invoke(username: String) {
-        settings.save(settings.load().copy(syrideUsername = username.trim().ifEmpty { null }))
+        transactions.run(LogbookChange.SyrideUsernameChanged) {
+            settings.save(settings.load().copy(syrideUsername = username.trim().ifEmpty { null }))
+        }
     }
 }

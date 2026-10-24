@@ -58,11 +58,12 @@ class GearSeeder(
 
     suspend fun seedHarnesses() {
         SAMPLE_HARNESSES.forEach { spec ->
-            val harness = RegisterHarness(koin.get<HarnessRepository>())(harnessDetails(spec))
+            val harness = RegisterHarness(koin.get<HarnessRepository>(), koin.get())(harnessDetails(spec))
             record(harness.ref, spec.checks, spec.name)
             spec.retiredMonthsAgo?.let {
                 RetireHarness(
                     koin.get<HarnessRepository>(),
+                    koin.get(),
                 )(harness.id, monthsAgo(it), "Replaced")
             }
         }
@@ -70,12 +71,13 @@ class GearSeeder(
 
     suspend fun seedReserves() {
         SAMPLE_RESERVES.forEach { spec ->
-            val reserve = RegisterReserve(koin.get<ReserveRepository>())(reserveDetails(spec))
+            val reserve = RegisterReserve(koin.get<ReserveRepository>(), koin.get())(reserveDetails(spec))
             record(reserve.ref, spec.checks, spec.name)
             spec.plannedInDays?.let { plan(reserve.ref, it, ch.qscqlmpa.wingtracker.gear.maintenance.CheckType.Repack) }
             spec.retiredMonthsAgo?.let {
                 RetireReserve(
                     koin.get<ReserveRepository>(),
+                    koin.get(),
                 )(reserve.id, monthsAgo(it), "Replaced")
             }
         }

@@ -24,6 +24,8 @@ import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
 import ch.qscqlmpa.wingtracker.shared.LoadResult
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.RecordingTransactions
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -70,6 +72,7 @@ private fun anEarlierSyrideFlight(
 ).copy(importedFrom = ExternalReference(SYRIDE_SYSTEM, syrideId))
 
 class SyrideImportTest {
+    private val transactions = RecordingTransactions()
     private val source = mockk<SyrideFlightSource>()
     private val flights = mockk<FlightRepository>(relaxUnitFun = true)
     private val wings = InMemoryWings()
@@ -245,8 +248,29 @@ class SyrideImportTest {
     inner class Importing {
         private var next = 0
         private val import get() =
-            ImportSyrideFlights(flights, wings, aFixedClock(), RegisterWing(wings) { WingId("new-wing-${next++}") }) {
+            ImportSyrideFlights(
+                flights,
+                wings,
+                aFixedClock(),
+                RegisterWing(wings, transactions) {
+                    WingId("new-wing-${next++}")
+                },
+                transactions,
+            ) {
                 FlightId("imported-${next++}")
+            }
+
+        @Test
+        fun `records the whole import as one change to the logbook`() =
+            runTest {
+                // given
+                givenStored()
+
+                // when
+                import(listOf(aSyrideFlight() to WingTarget.Existing(skyDancer.id)), emptyMap())
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.FlightsImportedFromSyride)
             }
 
         @Test
@@ -424,7 +448,22 @@ class SyrideImportTest {
 
     @Nested
     inner class UpdatingTakeOffTimes {
-        private val update = UpdateSyrideTakeOffTimes(flights)
+        private val update = UpdateSyrideTakeOffTimes(flights, transactions)
+
+        @Test
+        fun `records all updates as one change to the logbook`() =
+            runTest {
+                // given
+                val stored = aFlight("f-1", aFlightDetails(takeOffTime = LocalTime(13, 40)))
+                givenStored(flightList = listOf(stored))
+                coEvery { flights.findById(FlightId("f-1")) } returns stored
+
+                // when
+                update(listOf(TakeOffTimeUpdate(stored.id, stored.details.date, LocalTime(13, 40), LocalTime(13, 43))))
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.SyrideTakeOffTimesUpdated)
+            }
 
         @Test
         fun `replaces the take-off time the pilot was shown with Syride's`() =
@@ -484,9 +523,24 @@ class SyrideImportTest {
 
     @Nested
     inner class CompletingFlights {
-        private val complete = CompleteSyrideFlights(flights)
+        private val complete = CompleteSyrideFlights(flights, transactions)
         private val completion =
             SyrideCompletion(FlightId("f-1"), FlightType.HikeAndFly, "Dent De Jaman", "Dent_De_Jaman")
+
+        @Test
+        fun `records all completions as one change to the logbook`() =
+            runTest {
+                // given
+                val stored = anEarlierSyrideFlight()
+                givenStored(flightList = listOf(stored))
+                coEvery { flights.findById(FlightId("f-1")) } returns stored
+
+                // when
+                complete(listOf(completion))
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.SyrideFlightsCompleted)
+            }
 
         @Test
         fun `fills in the type and the id of Syride's take-off site`() =

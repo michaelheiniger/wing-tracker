@@ -35,6 +35,7 @@ import ch.qscqlmpa.wingtracker.settings.DeviceSettings
 import ch.qscqlmpa.wingtracker.settings.GetDeviceSettings
 import ch.qscqlmpa.wingtracker.settings.SaveDeviceFolder
 import ch.qscqlmpa.wingtracker.shared.LoadResult
+import ch.qscqlmpa.wingtracker.sync.UnsyncedTransactions
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
@@ -317,8 +318,14 @@ class IgcImportPresentersTest {
             IgcBatchPresenter(
                 scope(),
                 PrepareIgcImport(reader, flights, clock),
-                ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported-${counter++}") },
-                AttachIgcTrack(flights, attachments),
+                ImportIgcFlight(
+                    flights,
+                    wings,
+                    attachments,
+                    clock,
+                    UnsyncedTransactions,
+                ) { FlightId("imported-${counter++}") },
+                AttachIgcTrack(flights, attachments, UnsyncedTransactions),
                 WING_ID,
             )
 
@@ -383,8 +390,14 @@ class IgcImportPresentersTest {
                     IgcBatchPresenter(
                         scope(),
                         PrepareIgcImport(reader, flights, clock),
-                        ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported-${counter++}") },
-                        AttachIgcTrack(flights, attachments),
+                        ImportIgcFlight(
+                            flights,
+                            wings,
+                            attachments,
+                            clock,
+                            UnsyncedTransactions,
+                        ) { FlightId("imported-${counter++}") },
+                        AttachIgcTrack(flights, attachments, UnsyncedTransactions),
                         WING_ID,
                         hideAlreadyImported = true,
                     )
@@ -473,8 +486,14 @@ class IgcImportPresentersTest {
             IgcBatchPresenter(
                 scope(),
                 PrepareIgcImport(reader, flights, clock),
-                ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported-${counter++}") },
-                AttachIgcTrack(flights, attachments),
+                ImportIgcFlight(
+                    flights,
+                    wings,
+                    attachments,
+                    clock,
+                    UnsyncedTransactions,
+                ) { FlightId("imported-${counter++}") },
+                AttachIgcTrack(flights, attachments, UnsyncedTransactions),
                 WING_ID,
             )
 
@@ -611,8 +630,8 @@ class IgcImportPresentersTest {
             IgcBatchPresenter(
                 scope(),
                 PrepareIgcImport(reader, flights, clock),
-                ImportIgcFlight(flights, wings, attachments, clock) { FlightId("imported") },
-                AttachIgcTrack(flights, attachments),
+                ImportIgcFlight(flights, wings, attachments, clock, UnsyncedTransactions) { FlightId("imported") },
+                AttachIgcTrack(flights, attachments, UnsyncedTransactions),
                 WING_ID,
             )
 
@@ -801,11 +820,11 @@ class IgcImportPresentersTest {
                         ch.qscqlmpa.wingtracker.flights
                             .GetLogbook(flights, wings),
                         ch.qscqlmpa.wingtracker.flights
-                            .DeleteFlight(flights, attachments),
+                            .DeleteFlight(flights, attachments, UnsyncedTransactions),
                         ReadAttachment(attachments),
                         opener,
                         ch.qscqlmpa.wingtracker.flights
-                            .ForgetFlightExport(flights),
+                            .ForgetFlightExport(flights, UnsyncedTransactions),
                     )
 
                 // when
@@ -834,11 +853,11 @@ class IgcImportPresentersTest {
                         ch.qscqlmpa.wingtracker.flights
                             .GetLogbook(flights, wings),
                         ch.qscqlmpa.wingtracker.flights
-                            .DeleteFlight(flights, attachments),
+                            .DeleteFlight(flights, attachments, UnsyncedTransactions),
                         ReadAttachment(attachments),
                         opener,
                         ch.qscqlmpa.wingtracker.flights
-                            .ForgetFlightExport(flights),
+                            .ForgetFlightExport(flights, UnsyncedTransactions),
                     )
 
                 // when

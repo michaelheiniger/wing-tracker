@@ -5,6 +5,8 @@ import ch.qscqlmpa.wingtracker.flights.FlightId
 import ch.qscqlmpa.wingtracker.flights.FlightRepository
 import ch.qscqlmpa.wingtracker.flights.FlightType
 import ch.qscqlmpa.wingtracker.flights.SiteSource
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.LogbookTransactions
 
 /**
  * What Syride now gives about a flight imported before it was read: its type, and the id of the take-off site that
@@ -36,33 +38,36 @@ internal fun completionOf(
 /** Fills in what Syride now gives on flights imported earlier, once the pilot agreed; nothing already set changes. */
 class CompleteSyrideFlights(
     private val flights: FlightRepository,
+    private val transactions: LogbookTransactions,
 ) {
     /** Returns how many flights were completed. */
     suspend operator fun invoke(completions: List<SyrideCompletion>): Int =
-        completions.count { completion ->
-            val flight = flights.findById(completion.flightId) ?: return@count false
-            val details = flight.details
-            // Checked again: the pilot may have set the type or edited the site since the import was read.
-            val type = completion.type?.takeIf { details.type == null }
-            val site = details.takeOffSite
-            val siteId =
-                completion.siteId?.takeIf {
-                    site.reference(SiteSource.Syride) == null && site[SiteSource.Syride] == completion.siteName
-                }
-            if (type == null && siteId == null) return@count false
-            val completed =
-                details.copy(
-                    type = type ?: details.type,
-                    takeOffSite =
-                        if (siteId ==
-                            null
-                        ) {
-                            site
-                        } else {
-                            site.with(SiteSource.Syride, completion.siteName, siteId)
-                        },
-                )
-            flights.save(flight.withDetails(completed))
-            true
-        }
+        transactions.run(LogbookChange.SyrideFlightsCompleted) { completions.count { complete(it) } }
+
+    private suspend fun complete(completion: SyrideCompletion): Boolean {
+        val flight = flights.findById(completion.flightId) ?: return false
+        val details = flight.details
+        // Checked again: the pilot may have set the type or edited the site since the import was read.
+        val type = completion.type?.takeIf { details.type == null }
+        val site = details.takeOffSite
+        val siteId =
+            completion.siteId?.takeIf {
+                site.reference(SiteSource.Syride) == null && site[SiteSource.Syride] == completion.siteName
+            }
+        if (type == null && siteId == null) return false
+        val completed =
+            details.copy(
+                type = type ?: details.type,
+                takeOffSite =
+                    if (siteId ==
+                        null
+                    ) {
+                        site
+                    } else {
+                        site.with(SiteSource.Syride, completion.siteName, siteId)
+                    },
+            )
+        flights.save(flight.withDetails(completed))
+        return true
+    }
 }

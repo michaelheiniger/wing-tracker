@@ -11,6 +11,7 @@ import ch.qscqlmpa.wingtracker.backup.SaveCloudStorage
 import ch.qscqlmpa.wingtracker.settings.GetLogbookSettings
 import ch.qscqlmpa.wingtracker.settings.LogbookSettings
 import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
+import ch.qscqlmpa.wingtracker.sync.UnsyncedTransactions
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.CredentialStore
@@ -50,7 +51,11 @@ class CloudStoragePresenterTest {
     private fun TestScope.presenter() =
         CloudStoragePresenter(
             TestScope(UnconfinedTestDispatcher(testScheduler)),
-            CloudStorageUseCases(GetLogbookSettings(settings), SaveCloudStorage(settings), CheckCloudStorage(storage)),
+            CloudStorageUseCases(
+                GetLogbookSettings(settings),
+                SaveCloudStorage(settings, UnsyncedTransactions),
+                CheckCloudStorage(storage),
+            ),
             CloudSecret(credentials),
         ) { changed++ }
 

@@ -22,6 +22,7 @@ import ch.qscqlmpa.wingtracker.gear.wing.WingId
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
 import ch.qscqlmpa.wingtracker.shared.LoadResult
 import ch.qscqlmpa.wingtracker.shared.UnreadableRecord
+import ch.qscqlmpa.wingtracker.sync.UnsyncedTransactions
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.FileOpener
@@ -107,10 +108,10 @@ class LogbookPresentersTest {
     ) = LogbookPresenter(
         scope = TestScope(UnconfinedTestDispatcher(testScheduler)),
         getLogbook = GetLogbook(flights, wings),
-        deleteFlight = DeleteFlight(flights, attachments),
+        deleteFlight = DeleteFlight(flights, attachments, UnsyncedTransactions),
         readAttachment = ReadAttachment(attachments),
         fileOpener = opener,
-        forgetFlightExport = ForgetFlightExport(flights),
+        forgetFlightExport = ForgetFlightExport(flights, UnsyncedTransactions),
         initialSearch = initialSearch,
         onSearchChange = onSearchChange,
     )
@@ -544,8 +545,8 @@ class LogbookPresentersTest {
         private fun TestScope.formPresenter(initial: FlightFormInput) =
             FlightFormPresenter(
                 scope = TestScope(UnconfinedTestDispatcher(testScheduler)),
-                logFlight = LogFlight(flights, wings, clock),
-                updateFlight = UpdateFlight(flights, wings, clock),
+                logFlight = LogFlight(flights, wings, clock, UnsyncedTransactions),
+                updateFlight = UpdateFlight(flights, wings, clock, UnsyncedTransactions),
                 initial = initial,
             )
 
@@ -596,8 +597,8 @@ class LogbookPresentersTest {
             editing: Flight? = null,
         ) = FlightFormPresenter(
             scope = TestScope(UnconfinedTestDispatcher(testScheduler)),
-            logFlight = LogFlight(flights, wings, clock) { FlightId("new-flight") },
-            updateFlight = UpdateFlight(flights, wings, clock),
+            logFlight = LogFlight(flights, wings, clock, UnsyncedTransactions) { FlightId("new-flight") },
+            updateFlight = UpdateFlight(flights, wings, clock, UnsyncedTransactions),
             initial = initial,
             editing = editing,
         )

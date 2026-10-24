@@ -9,6 +9,8 @@ import ch.qscqlmpa.wingtracker.flights.importing.NewWingSpec
 import ch.qscqlmpa.wingtracker.flights.importing.WingTarget
 import ch.qscqlmpa.wingtracker.gear.wing.RegisterWing
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.LogbookTransactions
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -22,6 +24,7 @@ class ImportSyrideFlights(
     wings: WingRepository,
     clock: AppClock,
     registerWing: RegisterWing,
+    private val transactions: LogbookTransactions,
     // Injectable so tests get deterministic ids.
     newId: () -> FlightId = { FlightId(Uuid.random().toString()) },
 ) {
@@ -30,13 +33,18 @@ class ImportSyrideFlights(
     suspend operator fun invoke(
         selection: List<Pair<SyrideFlight, WingTarget>>,
         newWings: Map<String, NewWingSpec>,
-    ): ImportResult<SyrideFlight> {
-        val alreadyImported = importedIds()
-        val chosen = selection.filter { (flight, target) -> target != WingTarget.Skip && flight.id !in alreadyImported }
-        // Oldest first: flights of one day are ordered by when they were logged, so this keeps their real order.
-        val ordered = chosen.sortedWith(compareBy({ it.first.date }, { it.first.startTime }))
-        return importer.import(ordered, newWings, skipped = selection.size - chosen.size)
-    }
+    ): ImportResult<SyrideFlight> =
+        transactions.run(LogbookChange.FlightsImportedFromSyride) {
+            val alreadyImported = importedIds()
+            val chosen =
+                selection.filter { (flight, target) ->
+                    target != WingTarget.Skip &&
+                        flight.id !in alreadyImported
+                }
+            // Oldest first: flights of one day are ordered by when they were logged, so this keeps their real order.
+            val ordered = chosen.sortedWith(compareBy({ it.first.date }, { it.first.startTime }))
+            importer.import(ordered, newWings, skipped = selection.size - chosen.size)
+        }
 
     private suspend fun importedIds(): Set<String> =
         flights

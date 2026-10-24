@@ -13,6 +13,8 @@ import ch.qscqlmpa.wingtracker.flights.importing.suggestWing
 import ch.qscqlmpa.wingtracker.gear.wing.RegisterWing
 import ch.qscqlmpa.wingtracker.gear.wing.Wing
 import ch.qscqlmpa.wingtracker.gear.wing.WingRepository
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.LogbookTransactions
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -90,6 +92,7 @@ class ImportSpreadsheetFlights(
     wings: WingRepository,
     clock: AppClock,
     registerWing: RegisterWing,
+    private val transactions: LogbookTransactions,
     // Injectable so tests get deterministic ids.
     newId: () -> FlightId = { FlightId(Uuid.random().toString()) },
 ) {
@@ -98,21 +101,22 @@ class ImportSpreadsheetFlights(
     suspend operator fun invoke(
         selection: List<Pair<SpreadsheetFlight, WingTarget>>,
         newWings: Map<String, NewWingSpec>,
-    ): ImportResult<SpreadsheetFlight> {
-        val chosen = selection.filter { it.second != WingTarget.Skip }
-        val onExisting =
-            chosen.mapNotNull { (flight, target) ->
-                (target as? WingTarget.Existing)?.let {
-                    flight to
-                        it.wingId
+    ): ImportResult<SpreadsheetFlight> =
+        transactions.run(LogbookChange.FlightsImportedFromSpreadsheet) {
+            val chosen = selection.filter { it.second != WingTarget.Skip }
+            val onExisting =
+                chosen.mapNotNull { (flight, target) ->
+                    (target as? WingTarget.Existing)?.let {
+                        flight to
+                            it.wingId
+                    }
                 }
-            }
-        val present = LogbookContent(flights.findAll().items).alreadyPresent(onExisting)
-        // In the order of the sheet within a day, which is the order the pilot wrote them down.
-        val ordered =
-            chosen.filter { it.first !in present }.sortedWith(
-                compareBy({ it.first.date }, { it.first.rowNumber }),
-            )
-        return importer.import(ordered, newWings, skipped = selection.size - ordered.size)
-    }
+            val present = LogbookContent(flights.findAll().items).alreadyPresent(onExisting)
+            // In the order of the sheet within a day, which is the order the pilot wrote them down.
+            val ordered =
+                chosen.filter { it.first !in present }.sortedWith(
+                    compareBy({ it.first.date }, { it.first.rowNumber }),
+                )
+            importer.import(ordered, newWings, skipped = selection.size - ordered.size)
+        }
 }

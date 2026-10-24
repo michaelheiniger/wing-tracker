@@ -4,6 +4,8 @@ import ch.qscqlmpa.wingtracker.attachments.AttachmentId
 import ch.qscqlmpa.wingtracker.attachments.AttachmentStore
 import ch.qscqlmpa.wingtracker.flights.aFixedClock
 import ch.qscqlmpa.wingtracker.gear.wing.aWing
+import ch.qscqlmpa.wingtracker.sync.LogbookChange
+import ch.qscqlmpa.wingtracker.sync.RecordingTransactions
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test
 import java.io.IOException
 
 class MaintenanceUseCasesTest {
+    private val transactions = RecordingTransactions()
     private val gear = mockk<MaintainedGearRepository>(relaxUnitFun = true)
     private val attachments = mockk<AttachmentStore>(relaxUnitFun = true)
     private val clock = aFixedClock()
@@ -26,7 +29,22 @@ class MaintenanceUseCasesTest {
 
     @Nested
     inner class RecordCheckUseCase {
-        private val recordCheck = RecordCheck(gear, attachments, clock) { CheckId("new-check") }
+        private val recordCheck = RecordCheck(gear, attachments, clock, transactions) { CheckId("new-check") }
+
+        @Test
+        fun `records the check as one change to the logbook`() =
+            runTest {
+                // given
+                givenTheWing()
+
+                // when
+                recordCheck(wing.ref, aCheckDetails())
+
+                // then
+                assertThat(
+                    transactions.changes,
+                ).containsExactly(LogbookChange.CheckRecorded(wing.ref, CheckId("new-check"), null))
+            }
 
         @Test
         fun `adds the check to the history and saves the wing`() =
@@ -177,7 +195,7 @@ class MaintenanceUseCasesTest {
             runTest {
                 // given
                 coEvery { gear.find(harness.ref) } returns harness
-                val recordCheck = RecordCheck(gear, attachments, clock) { CheckId("new-check") }
+                val recordCheck = RecordCheck(gear, attachments, clock, transactions) { CheckId("new-check") }
 
                 // when
                 val updated = recordCheck(harness.ref, aCheckDetails(type = CheckType.Check))
@@ -196,7 +214,7 @@ class MaintenanceUseCasesTest {
             runTest {
                 // given
                 coEvery { gear.find(harness.ref) } returns harness
-                val recordCheck = RecordCheck(gear, attachments, clock) { CheckId("new-check") }
+                val recordCheck = RecordCheck(gear, attachments, clock, transactions) { CheckId("new-check") }
 
                 // when
                 val failure =
@@ -217,7 +235,21 @@ class MaintenanceUseCasesTest {
 
     @Nested
     inner class UpdateCheckUseCase {
-        private val updateCheck = UpdateCheck(gear, attachments, clock)
+        private val updateCheck = UpdateCheck(gear, attachments, clock, transactions)
+
+        @Test
+        fun `records the update as one change to the logbook`() =
+            runTest {
+                // given
+                val check = aStoredCheck()
+                givenTheWing(aWing(checks = listOf(check)))
+
+                // when
+                updateCheck(wing.ref, check.id, aCheckDetails(type = CheckType.Partial))
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.CheckUpdated(wing.ref, check.id))
+            }
 
         @Test
         fun `changes the details of the check`() =
@@ -311,6 +343,20 @@ class MaintenanceUseCasesTest {
     @Nested
     inner class DeleteCheckUseCase {
         @Test
+        fun `records the deletion with its files as one change to the logbook`() =
+            runTest {
+                // given
+                val check = aStoredCheck()
+                givenTheWing(aWing(checks = listOf(check)))
+
+                // when
+                DeleteCheck(gear, attachments, transactions)(wing.ref, check.id)
+
+                // then
+                assertThat(transactions.changes).containsExactly(LogbookChange.CheckDeleted(wing.ref, check.id))
+            }
+
+        @Test
         fun `removes the check and then its files`() =
             runTest {
                 // given
@@ -318,7 +364,7 @@ class MaintenanceUseCasesTest {
                 givenTheWing(aWing(checks = listOf(check)))
 
                 // when
-                val updated = DeleteCheck(gear, attachments)(wing.ref, check.id)
+                val updated = DeleteCheck(gear, attachments, transactions)(wing.ref, check.id)
 
                 // then
                 assertThat(updated.history.checks).isEmpty()
@@ -332,11 +378,27 @@ class MaintenanceUseCasesTest {
     @Nested
     inner class PlannedChecks {
         @Test
+        fun `records planning a check as one change to the logbook`() =
+            runTest {
+                // given
+                givenTheWing()
+                val planCheck = PlanCheck(gear, clock, transactions) { PlannedCheckId("new-plan") }
+
+                // when
+                planCheck(wing.ref, PlannedCheckDetails(LocalDate(2026, 10, 11), CheckType.Full))
+
+                // then
+                assertThat(
+                    transactions.changes,
+                ).containsExactly(LogbookChange.CheckPlanned(wing.ref, PlannedCheckId("new-plan")))
+            }
+
+        @Test
         fun `plans a check for today or later`() =
             runTest {
                 // given
                 givenTheWing()
-                val planCheck = PlanCheck(gear, clock) { PlannedCheckId("new-plan") }
+                val planCheck = PlanCheck(gear, clock, transactions) { PlannedCheckId("new-plan") }
 
                 // when
                 val updated = planCheck(wing.ref, PlannedCheckDetails(LocalDate(2026, 10, 11), CheckType.Full))
@@ -350,7 +412,7 @@ class MaintenanceUseCasesTest {
             runTest {
                 // given
                 givenTheWing()
-                val planCheck = PlanCheck(gear, clock) { PlannedCheckId("new-plan") }
+                val planCheck = PlanCheck(gear, clock, transactions) { PlannedCheckId("new-plan") }
 
                 // when
                 val failure =
@@ -370,7 +432,7 @@ class MaintenanceUseCasesTest {
 
                 // when
                 val updated =
-                    UpdatePlannedCheck(gear, clock)(
+                    UpdatePlannedCheck(gear, clock, transactions)(
                         wing.ref,
                         planned.id,
                         PlannedCheckDetails(LocalDate(2027, 2, 1), CheckType.Full),
@@ -397,7 +459,7 @@ class MaintenanceUseCasesTest {
                 givenTheWing(aWing(plannedChecks = listOf(planned)))
 
                 // when
-                val updated = CancelPlannedCheck(gear)(wing.ref, planned.id)
+                val updated = CancelPlannedCheck(gear, transactions)(wing.ref, planned.id)
 
                 // then
                 assertThat(updated.history.plannedChecks).isEmpty()

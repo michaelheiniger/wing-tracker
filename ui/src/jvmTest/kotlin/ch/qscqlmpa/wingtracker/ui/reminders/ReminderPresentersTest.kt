@@ -23,6 +23,7 @@ import ch.qscqlmpa.wingtracker.settings.LogbookSettingsRepository
 import ch.qscqlmpa.wingtracker.settings.SaveBackupReminder
 import ch.qscqlmpa.wingtracker.settings.SaveReminderLeadTimes
 import ch.qscqlmpa.wingtracker.shared.LoadResult
+import ch.qscqlmpa.wingtracker.sync.UnsyncedTransactions
 import ch.qscqlmpa.wingtracker.ui.Failure
 import ch.qscqlmpa.wingtracker.ui.FailureKind
 import ch.qscqlmpa.wingtracker.ui.platform.FileSaver
@@ -88,7 +89,7 @@ class ReminderPresentersTest {
             getAttention = GetAttention(gear, flights, logbookSettings, deviceSettings, clock),
             getLogbookSettings = GetLogbookSettings(logbookSettings),
             getDeviceSettings = GetDeviceSettings(deviceSettings),
-            saveReminderLeadTimes = SaveReminderLeadTimes(logbookSettings),
+            saveReminderLeadTimes = SaveReminderLeadTimes(logbookSettings, UnsyncedTransactions),
             getCalendarEntries = GetCalendarEntries(gear, logbookSettings, clock),
             saveBackupReminder = SaveBackupReminder(deviceSettings),
         )
